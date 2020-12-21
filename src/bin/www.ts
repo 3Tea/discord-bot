@@ -13,5 +13,5 @@ if (!process.env.BOT_TOKEN) {
     process.exit(1);
 }
 
+import "./commands";
 import "./bot";
-import "../functions/index.function";
