@@ -13,5 +13,6 @@ if (!process.env.BOT_TOKEN) {
     process.exit(1);
 }
 
+import "../connector/mongo/init/index";
 import "./commands";
 import "./bot";

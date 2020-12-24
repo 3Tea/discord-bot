@@ -6,7 +6,7 @@ import { sendMessageEmbedObject } from "../../messages/reply.message";
 export default {
     name: ["avatar", "ava"],
     description: "Get avatar",
-    execute(message: Message, args: any, command: any) {
+    execute(message: Message, args: any, command: any): void {
         console.log(message.author.avatarURL());
 
         if (args?.length === 0) {

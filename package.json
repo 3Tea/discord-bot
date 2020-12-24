@@ -41,6 +41,8 @@
     "@types/dotenv": "^8.2.0",
     "discord.js": "^12.5.1",
     "discordjs-logger": "^2.0.0",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "ioredis": "^4.19.4",
+    "mongoose": "^5.11.8"
   }
 }
