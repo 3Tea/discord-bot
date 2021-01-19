@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 import { MONGO } from "../../../config/service.config";
 
-mongoose.Promise = global.Promise;
+(<any>mongoose).Promise = global.Promise;
 
 mongoose
     .connect(MONGO.DB_URL, {

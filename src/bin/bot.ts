@@ -1,6 +1,6 @@
 import client from "../app";
 
-client.on("message", (message: any) => {
+client.on("message", async (message: any) => {
     let prefix: any = process.env.PREFIX || `?`;
 
     if (!message.content.startsWith(prefix) || message.author.bot) return;
@@ -11,7 +11,7 @@ client.on("message", (message: any) => {
     if (!client.commands.has(command)) message.reply("Command not found");
 
     try {
-        client.commands.get(command)?.execute(message, args, command);
+        await client.commands.get(command)?.execute(message, args, command);
     } catch (error) {
         console.error(error);
         message.reply("there was an error trying to execute that command!");
