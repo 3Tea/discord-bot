@@ -1,11 +1,10 @@
 import client from "../app";
+import { PREFIX } from "../config/service.config";
 
 client.on("message", async (message: any) => {
-    let prefix: any = process.env.PREFIX || `?`;
+    if (!message.content.startsWith(PREFIX) || message.author.bot) return;
 
-    if (!message.content.startsWith(prefix) || message.author.bot) return;
-
-    const args = message.content.slice(prefix.length).trim().split(/ +/);
+    const args = message.content.slice(PREFIX.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
 
     if (!client.commands.has(command)) message.reply("Command not found");

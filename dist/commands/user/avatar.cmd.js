@@ -1,26 +1,18 @@
-import { Message } from "discord.js";
-
-import { ICommand } from "../../interface/commands.interface";
-import { sendMessageEmbedObject } from "../../messages/reply.message";
-
-export default {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const reply_message_1 = require("../../messages/reply.message");
+exports.default = {
     name: ["avatar", "ava"],
     description: "Get avatar",
-    execute(message: Message, args: any, command: any): void {
+    execute(message, args, command) {
         if (args?.length === 0) {
-            message.channel.send(
-                `${message.author.avatarURL({ dynamic: true })}`
-            );
+            message.channel.send(`${message.author.avatarURL({ dynamic: true })}`);
         }
-
         try {
             for (let userId of args) {
                 userId = userId.replace(/[^A-Z0-9]+/gi, "");
-
                 message.client.users.fetch(`${userId}`).then((user) => {
-                    message.channel.send(
-                        `${user.avatarURL({ dynamic: true })}`
-                    );
+                    message.channel.send(`${user.avatarURL({ dynamic: true })}`);
                 });
                 const exampleEmbed = {
                     color: "RANDOM",
@@ -70,11 +62,12 @@ export default {
                         icon_url: "https://i.imgur.com/wSTFkRM.png",
                     },
                 };
-                sendMessageEmbedObject(message, exampleEmbed);
+                reply_message_1.sendMessageEmbedObject(message, exampleEmbed);
             }
-        } catch (error) {
+        }
+        catch (error) {
             console.error(error);
             message.reply("Avatar not found");
         }
     },
-} as ICommand;
+};
