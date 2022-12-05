@@ -1,12 +1,21 @@
-import { Client } from "discord.js";
+import TVC from "discord.js-temporary-channel";
+import dotenv from "dotenv";
+import path from "path";
 
-const client: Client | any = new Client();
+import client from "./client";
 
-const logger = require("discordjs-logger");
-logger.all(client);
+const dotEnvConfigs = {
+    path: path.resolve(process.cwd(), ".env"),
+};
+dotenv.config(dotEnvConfigs);
 
-client.once("ready", () => {
-    console.log(`Logged in as ${client?.user?.tag}!`);
+const VC = new TVC(client, {
+    userLimit: 23,
+    reason: "powered by ds112",
+    nameStartWith: "3AT ",
+    nameStartWithTemporary: "* ",
 });
 
-export default client;
+VC.autoCreateTemporaryVoiceChannel();
+
+client.login(process.env.DISCORD_TOKEN);

@@ -5,9 +5,16 @@
         "es6": true
     },
     "parserOptions": {
-        "ecmaVersion": 2019
+        "ecmaVersion": 2021
     },
     "rules": {
+        "arrow-spacing": [
+            "warn",
+            {
+                "before": true,
+                "after": true
+            }
+        ],
         "brace-style": [
             "error",
             "stroustrup",
@@ -35,6 +42,7 @@
             "error",
             "tab"
         ],
+        "keyword-spacing": "error",
         "max-nested-callbacks": [
             "error",
             {
