@@ -10,10 +10,12 @@ class Reply {
     }
 
     async embed(interaction: CommandInteraction, embed: EmbedBuilder) {
-        embed.setFooter({
-            text: FOOTER.text,
-            iconURL: FOOTER.icon,
-        });
+        if (!embed.data.footer) {
+            embed.setFooter({
+                text: FOOTER.text,
+                iconURL: FOOTER.icon,
+            });
+        }
         return interaction.reply({ embeds: [embed] });
     }
 }

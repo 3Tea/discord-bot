@@ -63,14 +63,23 @@ const rest = new REST({ version: "10" }).setToken(
         const CLIENT_ID = process.env.CLIENT_ID || "";
         const GUILD_ID = process.env.GUILD_ID || "";
 
-        const data: any = await rest.put(
-            Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
-            { body: commands }
-        );
-
-        console.log(
-            `Successfully reloaded ${data.length} application (/) commands.`
-        );
+        if (process.env.ENV == "development") {
+            const data: any = await rest.put(
+                Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+                { body: commands }
+            );
+            console.log(
+                `Successfully reloaded ${data.length} application (/) commands.`
+            );
+        } else {
+            const data: any = await rest.put(
+                Routes.applicationCommands(CLIENT_ID),
+                { body: commands }
+            );
+            console.log(
+                `Successfully reloaded ${data.length} application (/) commands.`
+            );
+        }
     } catch (error) {
         // And of course, make sure you catch and log any errors!
         console.error(error);
