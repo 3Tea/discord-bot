@@ -10,6 +10,7 @@ import {
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { CLIENT_ID, GUILD_ID } from "./configs/config";
 
 const dotEnvConfigs = {
     path: path.resolve(process.cwd(), ".env"),
@@ -60,9 +61,6 @@ const rest = new REST({ version: "10" }).setToken(
         );
 
         // The put method is used to fully refresh all commands in the guild with the current set
-        const CLIENT_ID = process.env.CLIENT_ID || "";
-        const GUILD_ID = process.env.GUILD_ID || "";
-
         console.log(CLIENT_ID, CLIENT_ID);
 
         if (process.env.ENV == "development") {
