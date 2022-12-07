@@ -63,6 +63,8 @@ const rest = new REST({ version: "10" }).setToken(
         const CLIENT_ID = process.env.CLIENT_ID || "";
         const GUILD_ID = process.env.GUILD_ID || "";
 
+        console.log(CLIENT_ID, CLIENT_ID);
+
         if (process.env.ENV == "development") {
             const data: any = await rest.put(
                 Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
