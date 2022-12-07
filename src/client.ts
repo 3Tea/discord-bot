@@ -13,7 +13,7 @@ import path from "path";
 import { CLIENT_ID, GUILD_ID } from "./configs/config";
 
 const dotEnvConfigs = {
-    path: path.resolve(process.cwd(), ".env"),
+    path: path.join(__dirname, ".env"),
 };
 dotenv.config(dotEnvConfigs);
 
