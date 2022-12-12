@@ -6,6 +6,7 @@ import {
     GatewayIntentBits,
     REST,
     Routes,
+    ActivityType,
 } from "discord.js";
 import fs from "fs";
 import path from "path";
@@ -121,5 +122,8 @@ client.on(Events.InteractionCreate, async (interaction: CommandInteraction) => {
         });
     }
 });
+
+client.user.setActivity("activity", { type: ActivityType.Watching });
+client.user.setPresence({ activities: [{ name: "with discord.js" }] });
 
 export default client;
