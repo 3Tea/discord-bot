@@ -28,3 +28,4 @@ jobs:
           cd /root/discord-bot
           sudo npm i
           sudo git pull https://github.com/3Tea/discord-bot.git develop
+          sudo pm2 restart pm2.deploy.json

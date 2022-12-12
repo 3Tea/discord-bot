@@ -4,16 +4,16 @@ import {
     CommandInteraction,
     Events,
     GatewayIntentBits,
+    Interaction,
     REST,
     Routes,
-    ActivityType,
 } from "discord.js";
 import fs from "fs";
 import path from "path";
 
 import { CLIENT_ID, GUILD_ID } from "./util/config/index";
 
-const client: Client | any = new Client({
+const client: any = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -21,10 +21,12 @@ const client: Client | any = new Client({
     ],
 });
 
+client.commands = new Collection();
+
 // TODO: create new var
-Object.assign(client, {
-    commands: new Collection(),
-});
+// Object.assign(client, {
+//     commands: new Collection(),
+// });
 
 const commandsPath = path.join(__dirname, "commands/slash/");
 const commandFiles = fs.readdirSync(commandsPath);
@@ -100,30 +102,30 @@ for (const file of eventFiles) {
     }
 }
 
-client.on(Events.InteractionCreate, async (interaction: CommandInteraction) => {
-    if (!interaction.isChatInputCommand()) return;
+client.on(
+    Events.InteractionCreate,
+    async (interaction: CommandInteraction | Interaction) => {
+        if (!interaction.isChatInputCommand()) return;
 
-    const command = client?.commands.get(interaction.commandName);
+        const command = client?.commands.get(interaction.commandName);
 
-    if (!command) {
-        console.error(
-            `No command matching ${interaction.commandName} was found.`
-        );
-        return;
+        if (!command) {
+            console.error(
+                `No command matching ${interaction.commandName} was found.`
+            );
+            return;
+        }
+
+        try {
+            await command.execute(interaction);
+        } catch (error) {
+            console.error(error);
+            await interaction.reply({
+                content: `There was an error while executing this command! ${interaction.commandName}`,
+                ephemeral: true,
+            });
+        }
     }
-
-    try {
-        await command.execute(interaction);
-    } catch (error) {
-        console.error(error);
-        await interaction.reply({
-            content: `There was an error while executing this command! ${interaction.commandName}`,
-            ephemeral: true,
-        });
-    }
-});
-
-client.user.setActivity("activity", { type: ActivityType.Watching });
-client.user.setPresence({ activities: [{ name: "with discord.js" }] });
+);
 
 export default client;

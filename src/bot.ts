@@ -12,3 +12,4 @@ const VC = new TVC(client, {
 VC.autoCreateTemporaryVoiceChannel();
 
 client.login(process.env.DISCORD_TOKEN);
+
