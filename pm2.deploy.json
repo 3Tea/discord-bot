@@ -1,0 +1,18 @@
+{
+    "apps": [
+        {
+            "name": "discord-bot",
+            "script": "./src/bin/www.ts",
+            "max_memory_restart": "600M",
+            "ignore_watch": [
+                "node_modules",
+                "public/images",
+                "logs"
+            ],
+            "watch_options": {
+                "followSymlinks": false
+            },
+            "exec_mode": "cluster"
+        }
+    ]
+}

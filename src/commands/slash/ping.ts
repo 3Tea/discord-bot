@@ -1,4 +1,4 @@
-import { CommandInteraction, SlashCommandBuilder, bold } from "discord.js";
+import { bold, CommandInteraction, SlashCommandBuilder } from "discord.js";
 
 export default {
     data: new SlashCommandBuilder()

@@ -5,7 +5,7 @@ import {
     bold,
 } from "discord.js";
 
-import Reply from "../../utils/decorator/reply";
+import Reply from "../../util/decorator/reply";
 const weather = require("weather-js");
 
 export default {

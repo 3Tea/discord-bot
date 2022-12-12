@@ -4,7 +4,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 
-import Reply from "../../utils/decorator/reply";
+import Reply from "../../util/decorator/reply";
 
 export default {
     data: new SlashCommandBuilder()

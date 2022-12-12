@@ -1,6 +1,6 @@
 import { CommandInteraction, EmbedBuilder } from "discord.js";
 
-import { FOOTER } from "../../configs/config";
+import { FOOTER } from "../config/index";
 
 class Reply {
     constructor() {}

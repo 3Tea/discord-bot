@@ -1,14 +1,35 @@
-import TVC from "discord.js-temporary-channel";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import express, { Application, NextFunction, Request, Response } from "express";
 
-import client from "./client";
+const app: Application = express();
+/**
+ * todo: setup helmet
+ * Helmet can help protect your app from some well-known web vulnerabilities by setting HTTP headers appropriately.
+ * Helmet is actually just a collection of smaller middleware functions that set security-related HTTP response headers:
+ */
+// app.use(
+//     helmet({
+//         contentSecurityPolicy: false,
+//     })
+// );
 
-const VC = new TVC(client, {
-    userLimit: 23,
-    reason: "powered by ds112",
-    nameStartWith: "3AT ",
-    nameStartWithTemporary: "* ",
-});
+/**
+ * todo: https://www.npmjs.com/package/express-prom-bundle
+ */
 
-VC.autoCreateTemporaryVoiceChannel();
+/**
+ * todo: Use gzip compression
+ */
 
-client.login(process.env.DISCORD_TOKEN);
+// TODO: Setup for get IP, for reverse proxy
+app.set("trust proxy", true);
+
+// TODO: set up cors
+app.use(cors());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+
+export default app;
