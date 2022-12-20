@@ -3,7 +3,7 @@
         {
             "name": "discord-bot",
             "script": "./src/bin/www.ts",
-            "max_memory_restart": "600M",
+            "max_memory_restart": "400M",
             "cron_restart": "0 * * * *",
             "autorestart": true,
             "exp_backoff_restart_delay": 100,
