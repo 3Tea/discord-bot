@@ -1,6 +1,6 @@
 {
   "name": "3at-discord-bot",
-  "version": "3.3.3",
+  "version": "4.1.0",
   "description": "Make 3AT great again :)",
   "main": "www.ts",
   "scripts": {
@@ -30,6 +30,7 @@
     "discord.js-temporary-channel": "^4.0.0",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "ioredis": "^5.2.4",
     "tracer": "^1.1.6",
     "weather-js": "^2.0.0",
     "winston": "^3.8.2"

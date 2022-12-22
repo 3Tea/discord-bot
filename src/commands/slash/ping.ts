@@ -11,11 +11,11 @@ export default {
             fetchReply: true,
         });
         interaction.editReply(
-            bold(
+            `${bold(
                 `Roundtrip latency: ${
                     sent.createdTimestamp - interaction.createdTimestamp
                 }ms`
-            )
+            )}`
         );
     },
 };

@@ -5,7 +5,7 @@ import { FOOTER } from "../config/index";
 class Reply {
     constructor() {}
 
-    async send(interaction: CommandInteraction, payload: string) {
+    async send(interaction: CommandInteraction, payload: any) {
         return interaction.reply(payload);
     }
 
