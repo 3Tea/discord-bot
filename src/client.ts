@@ -102,30 +102,30 @@ for (const file of eventFiles) {
     }
 }
 
-client.on(
-    Events.InteractionCreate,
-    async (interaction: CommandInteraction | Interaction) => {
-        if (!interaction.isChatInputCommand()) return;
+// client.on(
+//     Events.InteractionCreate,
+//     async (interaction: CommandInteraction | Interaction) => {
+//         if (!interaction.isChatInputCommand()) return;
 
-        const command = client?.commands.get(interaction.commandName);
+//         const command = client?.commands.get(interaction.commandName);
 
-        if (!command) {
-            console.error(
-                `No command matching ${interaction.commandName} was found.`
-            );
-            return;
-        }
+//         if (!command) {
+//             console.error(
+//                 `No command matching ${interaction.commandName} was found.`
+//             );
+//             return;
+//         }
 
-        try {
-            await command.execute(interaction);
-        } catch (error) {
-            console.error(error);
-            await interaction.reply({
-                content: `There was an error while executing this command! ${interaction.commandName}`,
-                ephemeral: true,
-            });
-        }
-    }
-);
+//         try {
+//             await command.execute(interaction);
+//         } catch (error) {
+//             console.error(error);
+//             await interaction.reply({
+//                 content: `There was an error while executing this command! ${interaction.commandName}`,
+//                 ephemeral: true,
+//             });
+//         }
+//     }
+// );
 
 export default client;

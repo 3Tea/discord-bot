@@ -17,6 +17,9 @@ export const REDIS = {
 
 export const FE_URL = process.env.FE_URL || `localhost:3000`;
 
+export const SERVER_HD = process.env.SERVER_HD;
+export const SERVER_S = process.env.SERVER_S;
+
 export const FOOTER = {
     icon: process.env.FOOTER_ICON || "",
     text: process.env.FOOTER_TEXT || "",
