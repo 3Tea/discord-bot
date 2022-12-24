@@ -1,10 +1,7 @@
 import {
     Client,
     Collection,
-    CommandInteraction,
-    Events,
     GatewayIntentBits,
-    Interaction,
     REST,
     Routes,
 } from "discord.js";
@@ -21,12 +18,9 @@ const client: any = new Client({
     ],
 });
 
-client.commands = new Collection();
+// TODO: Implement slash commands handle
 
-// TODO: create new var
-// Object.assign(client, {
-//     commands: new Collection(),
-// });
+client.commands = new Collection();
 
 const commandsPath = path.join(__dirname, "commands/slash/");
 const commandFiles = fs.readdirSync(commandsPath);
@@ -46,7 +40,47 @@ for (const file of commandFiles) {
     }
 }
 
-// Construct and prepare an instance of the REST module
+// TODO: Implement events handle
+
+const eventsPath = path.join(__dirname, "events");
+const eventFiles = fs.readdirSync(eventsPath);
+
+for (const file of eventFiles) {
+    const filePath = path.join(eventsPath, file);
+    const event = require(filePath);
+
+    if (event.default.once) {
+        client.once(event.default.name, (...args: any[]) =>
+            event.default.execute(...args)
+        );
+    } else {
+        client.on(event.default.name, (...args: any[]) =>
+            event.default.execute(...args)
+        );
+    }
+}
+
+// TODO: Implement slash commands handle
+
+client.buttons = new Collection();
+
+const buttonsPath = path.join(__dirname, "buttons");
+const buttonFiles = fs.readdirSync(buttonsPath);
+
+for (const file of buttonFiles) {
+    const filePath = path.join(buttonsPath, file);
+    const button = require(filePath);
+    // Set a new item in the Collection with the key as the command name and the value as the exported module
+    if ("id" in button.default && "execute" in button.default) {
+        client.buttons.set(button.default.id, button.default);
+    } else {
+        console.log(
+            `[WARNING] The button at ${filePath} is missing a required "id" or "execute" property.`
+        );
+    }
+}
+
+// TODO: Construct and prepare an instance of the REST module
 const rest = new REST({ version: "10" }).setToken(
     process.env.DISCORD_TOKEN as any
 );
@@ -83,49 +117,5 @@ const rest = new REST({ version: "10" }).setToken(
         console.error(error);
     }
 })();
-
-const eventsPath = path.join(__dirname, "events");
-const eventFiles = fs.readdirSync(eventsPath);
-
-for (const file of eventFiles) {
-    const filePath = path.join(eventsPath, file);
-    const event = require(filePath);
-
-    if (event.default.once) {
-        client.once(event.default.name, (...args: any[]) =>
-            event.default.execute(...args)
-        );
-    } else {
-        client.on(event.default.name, (...args: any[]) =>
-            event.default.execute(...args)
-        );
-    }
-}
-
-// client.on(
-//     Events.InteractionCreate,
-//     async (interaction: CommandInteraction | Interaction) => {
-//         if (!interaction.isChatInputCommand()) return;
-
-//         const command = client?.commands.get(interaction.commandName);
-
-//         if (!command) {
-//             console.error(
-//                 `No command matching ${interaction.commandName} was found.`
-//             );
-//             return;
-//         }
-
-//         try {
-//             await command.execute(interaction);
-//         } catch (error) {
-//             console.error(error);
-//             await interaction.reply({
-//                 content: `There was an error while executing this command! ${interaction.commandName}`,
-//                 ephemeral: true,
-//             });
-//         }
-//     }
-// );
 
 export default client;

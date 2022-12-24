@@ -1,4 +1,4 @@
-import { Events, ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, Events } from "discord.js";
 import client from "../client";
 
 export default {
@@ -6,10 +6,6 @@ export default {
     once: false,
     async execute(interaction: ChatInputCommandInteraction) {
         if (!interaction.isChatInputCommand()) return;
-
-        if (interaction.isButton()) {
-            console.log(interaction);
-        }
 
         const command = client?.commands.get(interaction.commandName);
 

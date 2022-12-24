@@ -10,6 +10,9 @@ import {
 
 import redis from "../../connector/redis/index";
 import { FOOTER, SERVER_HD } from "../../util/config";
+import { ButtonId } from "../../util/config/button";
+
+const wait = require("node:timers/promises").setTimeout;
 
 export default {
     data: new SlashCommandBuilder()
@@ -54,8 +57,9 @@ export default {
 
         if (nhentai.data?.data) {
             const result = nhentai.data.data;
-            // console.log(result);
+            console.log(result);
             const nhentaiEmbed = new EmbedBuilder()
+                .setColor("Random")
                 .setTitle(result.title)
                 .setURL(`https://nhentai.net/g/${result.id}`)
                 .setImage(result.image[0])
@@ -81,17 +85,23 @@ export default {
                     },
                     {
                         name: "Group: ",
-                        value: `${result.group}`,
+                        value: `${result.group ? result.group : "update..."}`,
                         inline: true,
                     },
                     {
                         name: "Parodies: ",
-                        value: `${result.parodies}`,
+                        value: `${
+                            result.parodies ? result.parodies : "update..."
+                        }`,
                         inline: true,
                     },
                     {
                         name: "Characters: ",
-                        value: `${result.characters}`,
+                        value: `${
+                            result.characters.length != 0
+                                ? result.characters
+                                : `update...`
+                        }`,
                         inline: true,
                     },
                     {
@@ -100,31 +110,51 @@ export default {
                         inline: true,
                     }
                 )
+                .setDescription(`${result.id}`)
+                .setTimestamp()
                 .setFooter({
                     text: FOOTER.text,
                     iconURL: FOOTER.icon,
                 });
-
-            const row = new ActionRowBuilder<ButtonBuilder>()
-                .addComponents(
+            const row = new ActionRowBuilder<ButtonBuilder>();
+            if (result.total < 50) {
+                row.addComponents(
                     new ButtonBuilder()
-                        .setCustomId(`nhentai_${result.id}`)
+                        .setCustomId(`${ButtonId.nhtaiRead}`)
                         .setLabel("Read")
                         .setStyle(ButtonStyle.Primary)
-                )
-                .addComponents(
-                    new ButtonBuilder()
-                        .setURL(`https://nhentai.net/g/${result.id}`)
-                        .setLabel("Read Online")
-                        .setStyle(ButtonStyle.Link)
                 );
+                await redis.setJson(
+                    `${ButtonId.nhtaiRead}_${result.id}`,
+                    result.image,
+                    60 * 10
+                );
+            } else {
+                row.addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`${ButtonId.nhtaiRead}`)
+                        .setLabel("Please read online, Too many pages")
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(true)
+                );
+            }
 
-            await redis.setJson(`nhentai_${result.id}`, result.image, 60 * 10);
+            row.addComponents(
+                new ButtonBuilder()
+                    .setURL(`https://nhentai.net/g/${result.id}`)
+                    .setLabel("Read Online")
+                    .setStyle(ButtonStyle.Link)
+            );
 
             await interaction.reply({
                 embeds: [nhentaiEmbed],
                 components: [row],
             });
+            await wait(15000);
+            await interaction.editReply({
+                components: [],
+            });
         }
+        return;
     },
 };
