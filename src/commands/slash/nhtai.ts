@@ -28,19 +28,19 @@ export default {
                         .setDescription("The ID you wanna read")
                         .setRequired(true)
                 )
-        )
-        .addSubcommand((subcommand) =>
-            subcommand
-                .setName("search")
-                .setDescription("Search H and D")
-                .addStringOption((option) =>
-                    option
-                        .setName("string")
-                        .setDescription("The name of the H manga and D")
-                        .setMaxLength(200)
-                        .setRequired(true)
-                )
         ),
+    // .addSubcommand((subcommand) =>
+    //     subcommand
+    //         .setName("search")
+    //         .setDescription("Search H and D")
+    //         .addStringOption((option) =>
+    //             option
+    //                 .setName("string")
+    //                 .setDescription("The name of the H manga and D")
+    //                 .setMaxLength(200)
+    //                 .setRequired(true)
+    //         )
+    // ),
     async execute(interaction: ChatInputCommandInteraction | any) {
         if (!interaction.channel?.nsfw) {
             await interaction.reply(`Only NSFW channel`);
