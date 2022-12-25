@@ -1,4 +1,6 @@
-import { Events, Client, ActivityType } from "discord.js";
+import { ActivityType, Client, Events } from "discord.js";
+
+import botInfo from "../../package.json";
 
 export default {
     name: Events.ClientReady,
@@ -8,8 +10,8 @@ export default {
         client.user.setPresence({
             activities: [
                 {
-                    name: `developing...`,
-                    type: ActivityType.Listening,
+                    name: `version: ${botInfo.version} build: ${+new Date()}`,
+                    type: ActivityType.Watching,
                 },
             ],
         });
