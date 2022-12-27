@@ -10,7 +10,7 @@ export default {
         client.user.setPresence({
             activities: [
                 {
-                    name: `version: ${botInfo.version} build: ${+new Date()}`,
+                    name: `/help v${botInfo.version} uptime: 97.72%`,
                     type: ActivityType.Watching,
                 },
             ],
