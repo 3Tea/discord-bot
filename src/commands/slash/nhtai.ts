@@ -28,19 +28,10 @@ export default {
                         .setDescription("The ID you wanna read")
                         .setRequired(true)
                 )
+        )
+        .addSubcommand((subcommand) =>
+            subcommand.setName("random").setDescription("Random H and D")
         ),
-    // .addSubcommand((subcommand) =>
-    //     subcommand
-    //         .setName("search")
-    //         .setDescription("Search H and D")
-    //         .addStringOption((option) =>
-    //             option
-    //                 .setName("string")
-    //                 .setDescription("The name of the H manga and D")
-    //                 .setMaxLength(200)
-    //                 .setRequired(true)
-    //         )
-    // ),
     async execute(interaction: ChatInputCommandInteraction | any) {
         if (!interaction.channel?.nsfw) {
             await interaction.reply(`Only NSFW channel`);
@@ -51,9 +42,17 @@ export default {
             (e: any) => e.name === subcommand
         );
 
-        const nhentai = await axios.get(
-            `${SERVER_HD}nhentai/get?book=${data.options[0].value}`
-        );
+        let nhentai;
+
+        await interaction.deferReply();
+
+        if (subcommand != "random") {
+            nhentai = await axios.get(
+                `${SERVER_HD}nhentai/get?book=${data.options[0].value}`
+            );
+        } else {
+            nhentai = await axios.get(`${SERVER_HD}nhentai/random`);
+        }
 
         if (nhentai.data?.data) {
             const result = nhentai.data.data;
@@ -75,7 +74,7 @@ export default {
                     },
                     {
                         name: "Artist",
-                        value: `${result.artist}`,
+                        value: `${result.artist ? result.artist : "update..."}`,
                         inline: true,
                     },
                     {
@@ -146,7 +145,8 @@ export default {
                     .setStyle(ButtonStyle.Link)
             );
 
-            await interaction.reply({
+            // console.log(interaction);
+            await interaction.editReply({
                 embeds: [nhentaiEmbed],
                 components: [row],
             });
@@ -154,6 +154,7 @@ export default {
             await interaction.editReply({
                 components: [],
             });
+            return;
         }
         return;
     },
