@@ -18,6 +18,16 @@ class Reply {
         }
         return interaction.reply({ embeds: [embed] });
     }
+
+    async embedEdit(interaction: CommandInteraction, embed: EmbedBuilder) {
+        if (!embed.data.footer) {
+            embed.setFooter({
+                text: FOOTER.text,
+                iconURL: FOOTER.icon,
+            });
+        }
+        return interaction.editReply({ embeds: [embed] });
+    }
 }
 
 export default new Reply();

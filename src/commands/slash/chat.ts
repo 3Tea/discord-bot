@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
     bold,
     ChatInputCommandInteraction,
@@ -6,7 +7,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 
-import axios from "axios";
+import { KEY_CHAT } from "../../util/config";
 
 export default {
     data: new SlashCommandBuilder()
@@ -27,10 +28,11 @@ export default {
             method: "GET",
             baseURL: `https://api.simsimi.net/v2/?text=${encodeURI(
                 content
-            )}&lc=vn`,
+            )}&lc=vn&key=${KEY_CHAT}`,
+            headers: { "Accept-Encoding": "gzip,deflate,compress" },
         });
 
-        if (simsimi.data?.success) {
+        if (simsimi && simsimi.data?.success) {
             return interaction.editReply({
                 content: `${bold(`Q: ${content}`)}\n${italic(
                     `A: ${simsimi.data?.success}`

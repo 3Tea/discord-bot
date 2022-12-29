@@ -16,6 +16,10 @@ export default {
             return;
         }
 
+        console.log(
+            `/${interaction.commandName} => username: ${interaction.user.username}#${interaction.user.discriminator} ID: ${interaction.user.id}`
+        );
+
         try {
             await command.execute(interaction);
         } catch (error) {

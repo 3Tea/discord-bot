@@ -25,6 +25,7 @@
   "discussions": "https://github.com/3Tea/discord-bot/discussions",
   "homepage": "https://www.discords.sbs",
   "dependencies": {
+    "@iamtraction/google-translate": "^2.0.1",
     "axios": "^1.2.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

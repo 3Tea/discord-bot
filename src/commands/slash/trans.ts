@@ -1,11 +1,13 @@
-import axios from "axios";
 import {
     bold,
     ChatInputCommandInteraction,
     EmbedBuilder,
-    italic,
     SlashCommandBuilder,
 } from "discord.js";
+
+import translate from "@iamtraction/google-translate";
+
+import Reply from "../../util/decorator/reply";
 
 export default {
     data: new SlashCommandBuilder()
@@ -13,30 +15,26 @@ export default {
         .setDescription("Translate all languages to Vietnamese")
         .addStringOption((option) =>
             option
-                .setName("content")
-                .setDescription("Text you wanna...")
+                .setName("word")
+                .setDescription("word or paragraph")
                 .setRequired(true)
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         interaction.deferReply();
 
-        const content = interaction.options.getString("content");
+        const embed = new EmbedBuilder().setColor("Random").setTimestamp();
 
-        const simsimi = await axios({
-            method: "GET",
-            baseURL: `https://api.simsimi.net/v2/?text=${content}&lc=vn`,
-        });
+        const content = interaction.options.getString("word");
 
-        if (simsimi.data?.success) {
-            return interaction.editReply({
-                content: `${bold(`Q: ${content}`)}\n${italic(
-                    `A: ${simsimi.data?.success}`
-                )}`,
-            });
-        } else {
-            const embed = new EmbedBuilder().setColor("Random").setTimestamp();
-            embed.setTitle(`${content} not found the answer`);
-            return interaction.editReply({ embeds: [embed] });
-        }
+        const translated = await translate(content, { to: "vi" });
+
+        // console.log(translated);
+
+        embed.setTitle(`${content}`);
+        embed.setDescription(`${bold(`${translated.text}`)}`);
+
+        await Reply.embedEdit(interaction, embed);
+
+        return;
     },
 };
