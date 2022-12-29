@@ -1,12 +1,10 @@
 import {
+    bold,
     ChatInputCommandInteraction,
     EmbedBuilder,
-    SlashCommandBuilder,
     italic,
-    bold,
+    SlashCommandBuilder,
 } from "discord.js";
-
-import Reply from "../../util/decorator/reply";
 
 import axios from "axios";
 
@@ -27,7 +25,9 @@ export default {
 
         const simsimi = await axios({
             method: "GET",
-            baseURL: `https://api.simsimi.net/v2/?text=${content}&lc=vn`,
+            baseURL: `https://api.simsimi.net/v2/?text=${encodeURI(
+                content
+            )}&lc=vn`,
         });
 
         if (simsimi.data?.success) {
