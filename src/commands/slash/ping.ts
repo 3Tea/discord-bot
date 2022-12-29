@@ -12,7 +12,7 @@ export default {
         });
         interaction.editReply(
             `${bold(
-                `Roundtrip latency: ${
+                `🧈 Roundtrip latency: ${
                     sent.createdTimestamp - interaction.createdTimestamp
                 }ms`
             )}`

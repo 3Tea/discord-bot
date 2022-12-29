@@ -22,7 +22,7 @@ export default {
     async execute(interaction: ChatInputCommandInteraction) {
         interaction.deferReply();
 
-        const embed = new EmbedBuilder().setColor("Random").setTimestamp();
+        const embed = new EmbedBuilder().setColor("#00ff44").setTimestamp();
 
         const content = interaction.options.getString("word");
 
