@@ -9,4 +9,4 @@ dotenv.config(dotEnvConfigs);
 // import "./server";
 import "../bot";
 // import "../connector/redis";
-// import "../connector/mongo";
+import "../connector/mongo";
