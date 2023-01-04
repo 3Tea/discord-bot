@@ -69,7 +69,9 @@ export default {
                     },
                     {
                         name: "Language: ",
-                        value: `${result.language}`,
+                        value: `${
+                            result.language ? result.language : "update..."
+                        }`,
                         inline: true,
                     },
                     {
@@ -105,7 +107,11 @@ export default {
                     },
                     {
                         name: "Last updated: ",
-                        value: `${result.upload_date}`,
+                        value: `${
+                            result.upload_date
+                                ? result.upload_date
+                                : "update..."
+                        }`,
                         inline: true,
                     }
                 )
