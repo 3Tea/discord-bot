@@ -76,7 +76,11 @@ export default {
                     },
                     {
                         name: "Artist",
-                        value: `${result.artist ? result.artist : "update..."}`,
+                        value: `${
+                            result.artist && result.artist.length != 0
+                                ? result.artist
+                                : "update..."
+                        }`,
                         inline: true,
                     },
                     {
