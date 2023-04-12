@@ -56,7 +56,7 @@ export default {
 
         if (nhentai.data?.data) {
             const result = nhentai.data.data;
-            console.log(result);
+            // console.log(result);
             const nhentaiEmbed = new EmbedBuilder()
                 .setColor("Random")
                 .setTitle(result.title)
@@ -90,19 +90,21 @@ export default {
                     },
                     {
                         name: "Group: ",
-                        value: `${result.group ? result.group : "update..."}`,
+                        value: `G: ${
+                            result.group ? result.group : "update..."
+                        }`,
                         inline: true,
                     },
                     {
                         name: "Parodies: ",
-                        value: `${
+                        value: `P: ${
                             result.parodies ? result.parodies : "update..."
                         }`,
                         inline: true,
                     },
                     {
                         name: "Characters: ",
-                        value: `${
+                        value: `C: ${
                             result.characters.length != 0
                                 ? result.characters
                                 : `update...`
@@ -160,7 +162,7 @@ export default {
                 embeds: [nhentaiEmbed],
                 components: [row],
             });
-            await wait(15000);
+            await wait(20000);
             await interaction.editReply({
                 components: [],
             });
