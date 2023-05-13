@@ -1,4 +1,8 @@
-import { CommandInteraction, EmbedBuilder } from "discord.js";
+import {
+    CommandInteraction,
+    EmbedBuilder,
+    ActionRowComponent,
+} from "discord.js";
 
 import { FOOTER } from "../config/index";
 
@@ -17,6 +21,20 @@ class Reply {
             });
         }
         return interaction.reply({ embeds: [embed] });
+    }
+
+    async embedButtons(
+        interaction: CommandInteraction,
+        embed: EmbedBuilder,
+        row: any
+    ) {
+        if (!embed.data.footer) {
+            embed.setFooter({
+                text: FOOTER.text,
+                iconURL: FOOTER.icon,
+            });
+        }
+        return interaction.reply({ embeds: [embed], components: [row] });
     }
 
     async embedEdit(interaction: CommandInteraction, embed: EmbedBuilder) {
