@@ -10,7 +10,7 @@ export default {
         client.user.setPresence({
             activities: [
                 {
-                    name: `https://discords.sbs/`,
+                    name: `/help v${botInfo.version}`,
                     type: ActivityType.Watching,
                 },
             ],
