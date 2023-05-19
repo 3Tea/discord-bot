@@ -4,4 +4,5 @@ export const BUTTON_ID = {
     threeHentaiRead: `threeHentaiRead`,
     asmHentaiRead: `asmHentaiRead`,
     hentaiFoxRead: `hentaiFoxRead`,
+    pururinRead: `pururinRead`,
 };
