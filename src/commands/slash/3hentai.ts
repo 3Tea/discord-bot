@@ -54,7 +54,7 @@ export default {
                     `${SERVER_HD}3hentai/get?book=${data.options[0].value}`
                 );
             } else {
-                threeHentai = await axios.get(`${SERVER_HD}3hesntai/random`);
+                threeHentai = await axios.get(`${SERVER_HD}3hentai/random`);
             }
 
             console.log(threeHentai);
