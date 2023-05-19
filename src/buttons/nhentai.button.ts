@@ -32,7 +32,9 @@ export default {
             await thread.send(`The system is overloaded`);
             return;
         }
-
+        await thread.send(
+            `Dear <@${interaction.user.id}>,\n\n**Disclaimer: All**\n\nThe service provided by this website may contain content that some users might find objectionable and is intended for mature persons only. By using this service you agree that you are of legal age and that you consent to viewing sexually explicit material. You also agree that you will not hold the website owner or any of its affiliates liable for any damages or losses that may result from accessing or using this service. If you are offended by such content or if it is illegal in your jurisdiction, please do not use this service.\n\nBest regards,\n\n**SBS Team.**`
+        );
         const length = images.length;
 
         for await (const [index, image] of images.entries()) {

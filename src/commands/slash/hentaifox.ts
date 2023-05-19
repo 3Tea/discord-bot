@@ -16,8 +16,8 @@ const wait = require("node:timers/promises").setTimeout;
 
 export default {
     data: new SlashCommandBuilder()
-        .setName("asmhentai")
-        .setDescription("Gets random doujinshi on asmhentai")
+        .setName("hentaifox")
+        .setDescription("Gets random doujinshi on hentaifox")
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("read")
@@ -32,7 +32,7 @@ export default {
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("random")
-                .setDescription("Random H and D from asmhentai")
+                .setDescription("Random H and D from hentaifox")
         ),
     async execute(interaction: ChatInputCommandInteraction | any) {
         try {
@@ -45,27 +45,27 @@ export default {
                 (e: any) => e.name === subcommand
             );
 
-            let asmHentai;
+            let hentaiFox;
 
             await interaction.deferReply();
 
             if (subcommand != "random") {
-                asmHentai = await axios.get(
-                    `${SERVER_HD}asmhentai/get?book=${data.options[0].value}`
+                hentaiFox = await axios.get(
+                    `${SERVER_HD}hentaifox/get?book=${data.options[0].value}`
                 );
             } else {
-                asmHentai = await axios.get(`${SERVER_HD}asmhentai/random`);
+                hentaiFox = await axios.get(`${SERVER_HD}hentaifox/random`);
             }
 
-            console.log(asmHentai);
+            console.log(hentaiFox);
 
-            if (asmHentai.data?.data) {
-                const result = asmHentai.data.data;
+            if (hentaiFox.data?.data) {
+                const result = hentaiFox.data.data;
                 console.log(result);
                 const nhentaiEmbed = new EmbedBuilder()
                     .setColor("Random")
                     .setTitle(result.title)
-                    .setURL(`https://asmhentai.com/g/${result.id}`)
+                    .setURL(`https://hentaifox.com/gallery/${result.id}`)
                     .setImage(result.image[0])
                     .addFields(
                         {
@@ -85,7 +85,7 @@ export default {
                                     : "Update..."
                             }`,
                             inline: true,
-                        }, 
+                        },
                         {
                             name: "Update",
                             value: `${
@@ -107,19 +107,19 @@ export default {
                 if (result.total < 50) {
                     row.addComponents(
                         new ButtonBuilder()
-                            .setCustomId(`${BUTTON_ID.asmHentaiRead}`)
+                            .setCustomId(`${BUTTON_ID.hentaiFoxRead}`)
                             .setLabel("Read")
                             .setStyle(ButtonStyle.Primary)
                     );
                     await redis.setJson(
-                        `${BUTTON_ID.asmHentaiRead}_${result.id}`,
+                        `${BUTTON_ID.hentaiFoxRead}_${result.id}`,
                         result.image,
                         60 * 10
                     );
                 } else {
                     row.addComponents(
                         new ButtonBuilder()
-                            .setCustomId(`${BUTTON_ID.asmHentaiRead}`)
+                            .setCustomId(`${BUTTON_ID.hentaiFoxRead}`)
                             .setLabel(
                                 "Please read it online. There are too many pages."
                             )
@@ -130,7 +130,7 @@ export default {
 
                 row.addComponents(
                     new ButtonBuilder()
-                        .setURL(`https://asmhentai.com/g/${result.id}`)
+                        .setURL(`https://hentaifox.com/gallery/${result.id}`)
                         .setLabel("Read Online")
                         .setStyle(ButtonStyle.Link)
                 );

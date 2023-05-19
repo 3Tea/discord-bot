@@ -80,8 +80,8 @@ export default {
                         {
                             name: "Tags",
                             value: `${
-                                result.tag && result.tag.length != 0
-                                    ? result.tag
+                                result.tags && result.tags.length != 0
+                                    ? result.tags
                                     : "Update..."
                             }`,
                             inline: true,
