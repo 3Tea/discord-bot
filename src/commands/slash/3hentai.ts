@@ -17,11 +17,11 @@ const wait = require("node:timers/promises").setTimeout;
 export default {
     data: new SlashCommandBuilder()
         .setName("3hentai")
-        .setDescription("H manga and D reader")
+        .setDescription("H manga and D from 3hentai")
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("read")
-                .setDescription("Read H manga and D lite")
+                .setDescription("Read H manga and D")
                 .addIntegerOption((option) =>
                     option
                         .setName("id")
@@ -32,7 +32,7 @@ export default {
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("random")
-                .setDescription("Random H and D from lite")
+                .setDescription("Random H and D from 3hentai")
         ),
     async execute(interaction: ChatInputCommandInteraction | any) {
         try {
