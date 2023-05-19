@@ -10,7 +10,7 @@ import {
 
 import redis from "../../connector/redis/index";
 import { FOOTER, SERVER_HD } from "../../util/config";
-import { ButtonId } from "../../util/config/button";
+import { BUTTON_ID } from "../../util/config/button";
 
 const wait = require("node:timers/promises").setTimeout;
 
@@ -93,19 +93,19 @@ export default {
                 if (result.total < 50) {
                     row.addComponents(
                         new ButtonBuilder()
-                            .setCustomId(`${ButtonId.nhentaiToRead}`)
+                            .setCustomId(`${BUTTON_ID.nhentaiToRead}`)
                             .setLabel("Read")
                             .setStyle(ButtonStyle.Primary)
                     );
                     await redis.setJson(
-                        `${ButtonId.nhentaiToRead}_${result.id}`,
+                        `${BUTTON_ID.nhentaiToRead}_${result.id}`,
                         result.image,
                         60 * 10
                     );
                 } else {
                     row.addComponents(
                         new ButtonBuilder()
-                            .setCustomId(`${ButtonId.nhentaiToRead}`)
+                            .setCustomId(`${BUTTON_ID.nhentaiToRead}`)
                             .setLabel(
                                 "Please read it online. There are too many pages."
                             )

@@ -5,7 +5,7 @@ import { FOOTER, SERVER_S } from "../util/config";
 import { BUTTON_ID } from "../util/config/button";
 
 export default {
-    id: BUTTON_ID.threeHentaiRead,
+    id: BUTTON_ID.asmHentaiRead,
     async execute(interaction: ButtonInteraction | any) {
         const thread = await interaction.channel.threads.create({
             name: interaction.message.embeds[0].title,

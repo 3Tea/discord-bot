@@ -16,8 +16,8 @@ const wait = require("node:timers/promises").setTimeout;
 
 export default {
     data: new SlashCommandBuilder()
-        .setName("nhentai")
-        .setDescription("H manga and D reader")
+        .setName("asmhentai")
+        .setDescription("Gets random doujinshi on asmhentai")
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("read")
@@ -30,7 +30,9 @@ export default {
                 )
         )
         .addSubcommand((subcommand) =>
-            subcommand.setName("random").setDescription("Random H and D")
+            subcommand
+                .setName("random")
+                .setDescription("Random H and D from asmhentai")
         ),
     async execute(interaction: ChatInputCommandInteraction | any) {
         try {
@@ -43,46 +45,32 @@ export default {
                 (e: any) => e.name === subcommand
             );
 
-            let nhentai;
+            let asmHentai;
 
             await interaction.deferReply();
 
             if (subcommand != "random") {
-                nhentai = await axios.get(
-                    `${SERVER_HD}nhentai/get?book=${data.options[0].value}`
+                asmHentai = await axios.get(
+                    `${SERVER_HD}asmhentai/get?book=${data.options[0].value}`
                 );
             } else {
-                nhentai = await axios.get(`${SERVER_HD}nhentai/random`);
+                asmHentai = await axios.get(`${SERVER_HD}asmhentai/random`);
             }
 
-            if (nhentai.data?.data) {
-                const result = nhentai.data.data;
-                // console.log(result);
+            console.log(asmHentai);
+
+            if (asmHentai.data?.data) {
+                const result = asmHentai.data.data;
+                console.log(result);
                 const nhentaiEmbed = new EmbedBuilder()
                     .setColor("Random")
                     .setTitle(result.title)
-                    .setURL(`https://nhentai.net/g/${result.id}`)
+                    .setURL(`https://asmhentai.com/g/${result.id}`)
                     .setImage(result.image[0])
                     .addFields(
                         {
                             name: `Title: `,
-                            value: `${result.optional_title.english}\n${result.optional_title.japanese}\n${result.optional_title.pretty}`,
-                        },
-                        {
-                            name: "Language: ",
-                            value: `${
-                                result.language ? result.language : "update..."
-                            }`,
-                            inline: true,
-                        },
-                        {
-                            name: "Artist",
-                            value: `${
-                                result.artist && result.artist.length != 0
-                                    ? result.artist
-                                    : "update..."
-                            }`,
-                            inline: true,
+                            value: `${result.title}`,
                         },
                         {
                             name: "Total of pages",
@@ -90,32 +78,19 @@ export default {
                             inline: true,
                         },
                         {
-                            name: "Group: ",
-                            value: `G: ${
-                                result.group ? result.group : "update..."
-                            }`,
-                            inline: true,
-                        },
-                        {
-                            name: "Parodies: ",
-                            value: `P: ${
-                                result.parodies ? result.parodies : "update..."
-                            }`,
-                            inline: true,
-                        },
-                        {
-                            name: "Characters: ",
-                            value: `C: ${
-                                result.characters.length != 0
-                                    ? result.characters
-                                    : `update...`
-                            }`,
-                            inline: true,
-                        },
-                        {
-                            name: "Last updated: ",
+                            name: "Tags",
                             value: `${
-                                result.upload_date
+                                result.tag && result.tag.length != 0
+                                    ? result.tag
+                                    : "Update..."
+                            }`,
+                            inline: true,
+                        }, 
+                        {
+                            name: "Update",
+                            value: `${
+                                result.upload_date &&
+                                result.upload_date.length != 0
                                     ? result.upload_date
                                     : "update..."
                             }`,
@@ -132,19 +107,19 @@ export default {
                 if (result.total < 50) {
                     row.addComponents(
                         new ButtonBuilder()
-                            .setCustomId(`${BUTTON_ID.nhtaiRead}`)
+                            .setCustomId(`${BUTTON_ID.asmHentaiRead}`)
                             .setLabel("Read")
                             .setStyle(ButtonStyle.Primary)
                     );
                     await redis.setJson(
-                        `${BUTTON_ID.nhtaiRead}_${result.id}`,
+                        `${BUTTON_ID.asmHentaiRead}_${result.id}`,
                         result.image,
                         60 * 10
                     );
                 } else {
                     row.addComponents(
                         new ButtonBuilder()
-                            .setCustomId(`${BUTTON_ID.nhtaiRead}`)
+                            .setCustomId(`${BUTTON_ID.asmHentaiRead}`)
                             .setLabel(
                                 "Please read it online. There are too many pages."
                             )
@@ -155,7 +130,7 @@ export default {
 
                 row.addComponents(
                     new ButtonBuilder()
-                        .setURL(`https://nhentai.net/g/${result.id}`)
+                        .setURL(`https://asmhentai.com/g/${result.id}`)
                         .setLabel("Read Online")
                         .setStyle(ButtonStyle.Link)
                 );

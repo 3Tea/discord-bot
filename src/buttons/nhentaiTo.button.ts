@@ -2,10 +2,10 @@ import { ButtonInteraction, ThreadAutoArchiveDuration } from "discord.js";
 
 import redis from "../connector/redis";
 import { FOOTER, SERVER_S } from "../util/config";
-import { ButtonId } from "../util/config/button";
+import { BUTTON_ID } from "../util/config/button";
 
 export default {
-    id: ButtonId.nhentaiToRead,
+    id: BUTTON_ID.nhentaiToRead,
     async execute(interaction: ButtonInteraction | any) {
         const thread = await interaction.channel.threads.create({
             name: interaction.message.embeds[0].title,
