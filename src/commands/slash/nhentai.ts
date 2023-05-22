@@ -173,6 +173,7 @@ export default {
             }
             return;
         } catch (error) {
+            console.log(error);
             const row = new ActionRowBuilder<ButtonBuilder>();
             row.addComponents(
                 new ButtonBuilder()
