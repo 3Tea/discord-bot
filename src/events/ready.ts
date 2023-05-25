@@ -10,11 +10,15 @@ export default {
 
         // console.log(guilds);
 
-        for (const guild of guilds) {
-            const g = client.guilds.cache.get(guild);
-            console.log("Guilds", g.name);
-        }
-        console.log(guilds.length);
+        // for (const guild of guilds) {
+        //     const g = client.guilds.cache.get(guild);
+        //     console.log("Guilds", g.name);
+        // }
+        console.log("Total guilds:", guilds.length);
+
+        const users = client.users.cache.map((user) => user.id);
+        console.log("Total users:", users.length);
+
         console.log(`Ready! Logged in as ${client.user.tag}`);
         client.user.setPresence({
             activities: [
