@@ -14,6 +14,7 @@ export default {
             const g = client.guilds.cache.get(guild);
             console.log("Guilds", g.name);
         }
+        console.log(guilds.length);
         console.log(`Ready! Logged in as ${client.user.tag}`);
         client.user.setPresence({
             activities: [
