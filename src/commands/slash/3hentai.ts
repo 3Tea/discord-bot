@@ -57,7 +57,7 @@ export default {
                 threeHentai = await axios.get(`${SERVER_HD}3hentai/random`);
             }
 
-            console.log(threeHentai);
+            // console.log(threeHentai);
 
             if (threeHentai.data?.data) {
                 const result = threeHentai.data.data;
