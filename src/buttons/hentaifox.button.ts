@@ -8,7 +8,10 @@ export default {
     id: BUTTON_ID.hentaiFoxRead,
     async execute(interaction: ButtonInteraction | any) {
         const thread = await interaction.channel.threads.create({
-            name: interaction.message.embeds[0].title,
+            name:
+                interaction.message.embeds[0].title.length < 99
+                    ? interaction.message.embeds[0].title
+                    : interaction.message.embeds[0].title.substring(0, 50),
             startMessage: interaction.message,
             autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
             reason: FOOTER.text,
