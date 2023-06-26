@@ -70,7 +70,11 @@ export default {
                     .addFields(
                         {
                             name: `Title: `,
-                            value: `${result.title}`,
+                            value: `${
+                                result.title.length < 99
+                                    ? result.title
+                                    : result.title.substring(0, 90)
+                            }`,
                         },
                         {
                             name: "Total of pages",
