@@ -40,7 +40,7 @@ export default {
             const content = interaction.options.getString("word");
 
             embed.setTitle(`${content}`);
-            embed.setDescription(`${bold(`Error`)}`);
+            embed.setDescription(`${bold(`${error.message}`)}`);
             return Reply.embedEdit(interaction, embed);
         }
     },
