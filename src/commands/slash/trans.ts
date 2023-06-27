@@ -21,20 +21,27 @@ export default {
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         interaction.deferReply();
+        try {
+            const embed = new EmbedBuilder().setColor("#00ff44").setTimestamp();
 
-        const embed = new EmbedBuilder().setColor("#00ff44").setTimestamp();
+            const content = interaction.options.getString("word");
 
-        const content = interaction.options.getString("word");
+            const translated = await translate(content, { to: "vi" });
 
-        const translated = await translate(content, { to: "vi" });
+            // console.log(translated);
 
-        // console.log(translated);
+            embed.setTitle(`${content}`);
+            embed.setDescription(`${bold(`${translated.text}`)}`);
 
-        embed.setTitle(`${content}`);
-        embed.setDescription(`${bold(`${translated.text}`)}`);
+            return Reply.embedEdit(interaction, embed);
+        } catch (error) {
+            const embed = new EmbedBuilder().setColor("#00ff44").setTimestamp();
 
-        await Reply.embedEdit(interaction, embed);
+            const content = interaction.options.getString("word");
 
-        return;
+            embed.setTitle(`${content}`);
+            embed.setDescription(`${bold(`Error`)}`);
+            return Reply.embedEdit(interaction, embed);
+        }
     },
 };
