@@ -57,7 +57,7 @@ export default {
                 hentaiFox = await axios.get(`${SERVER_HD}hentaifox/random`);
             }
 
-            console.log(hentaiFox);
+            // console.log(hentaiFox);
 
             if (hentaiFox.data?.data) {
                 const result = hentaiFox.data.data;

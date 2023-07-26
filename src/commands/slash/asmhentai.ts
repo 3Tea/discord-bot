@@ -57,7 +57,7 @@ export default {
                 asmHentai = await axios.get(`${SERVER_HD}asmhentai/random`);
             }
 
-            console.log(asmHentai);
+            // console.log(asmHentai);
 
             if (asmHentai.data?.data) {
                 const result = asmHentai.data.data;

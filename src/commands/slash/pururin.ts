@@ -57,7 +57,7 @@ export default {
                 pururin = await axios.get(`${SERVER_HD}pururin/random`);
             }
 
-            console.log(pururin);
+            // console.log(pururin);
 
             if (pururin.data?.data) {
                 const result = pururin.data.data;
