@@ -26,7 +26,7 @@
   "homepage": "https://www.discords.sbs",
   "dependencies": {
     "@iamtraction/google-translate": "^2.0.1",
-    "axios": "^1.2.1",
+    "axios": "^1.6.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "discord.js": "^14.9.0",
