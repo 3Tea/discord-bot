@@ -81,7 +81,7 @@ export default {
                     type: ChannelType.GuildVoice,
                     name: `${nameStartWithTemporary}${newState?.member?.user.username}`,
                     bitrate: newState.channel.bitrate || 64000,
-                    topic: reason,
+                    // topic: reason,
                     parent: newState?.channel
                         ?.parent as CategoryChannelResolvable,
                     userLimit: userLimit,
