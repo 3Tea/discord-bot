@@ -1,12 +1,7 @@
-import dotenv from "dotenv";
-import path from "path";
+import dotenv from 'dotenv';
+import path from 'path';
 
-const dotEnvConfigs = {
-    path: path.resolve(process.cwd(), ".env"),
-};
-dotenv.config(dotEnvConfigs);
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
-// import "./server";
-import "../bot";
-// import "../connector/redis";
-import "../connector/mongo";
+import '../bot';
+import '../connector/mongo';

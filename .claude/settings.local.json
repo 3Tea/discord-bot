@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git rm:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node -e \"const Redis = require\\(''ioredis''\\); const r = new Redis.__proto__; console.log\\(typeof Redis.prototype.on\\);\")",
+      "Bash(node -e:*)"
+    ]
+  }
+}

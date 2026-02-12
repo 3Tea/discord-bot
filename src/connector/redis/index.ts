@@ -1,82 +1,70 @@
-import redis from "ioredis";
+import IORedis from 'ioredis';
 
-import { REDIS } from "../../util/config/index";
-import { logger } from "../../util/log/logger.mixed";
+import { REDIS } from '../../util/config/index';
+import logger from '../../util/log/logger';
 
-interface options {
-    monitor: boolean;
+interface RedisServiceOptions {
+  monitor?: boolean;
 }
 
+// ioredis types don't properly expose EventEmitter methods with strict mode
+type RedisClient = IORedis & { on(event: string, cb: (...args: any[]) => void): any };
+
 export class RedisService {
-    private client;
-    private ttl: number; // second
-    protected options: options;
+  private client: RedisClient;
+  private ttl: number;
 
-    constructor(options?: options) {
-        this.options = options;
-        this.ttl = 120;
-        this.client = new redis(REDIS.REDIS_URL, {
-            retryStrategy(times) {
-                const delay = Math.min(times * 50, 2000);
-                return delay;
-            },
+  constructor(options?: RedisServiceOptions) {
+    this.ttl = 120;
+    this.client = new IORedis(REDIS.REDIS_URL, {
+      retryStrategy(times: number) {
+        return Math.min(times * 50, 2000);
+      },
+    }) as RedisClient;
+
+    this.client.on('error', (err: any) => {
+      logger.error('Connect to Redis fail, you need to install or start redis');
+      logger.error(String(err));
+    });
+
+    this.client.on('connect', () => {
+      logger.debug(
+        `Connect to Redis success: ${this.client.options.host}:${this.client.options.port}`,
+      );
+    });
+
+    if (options?.monitor) {
+      (this.client as any).monitor((err: any, monitor: any) => {
+        if (err || !monitor) return;
+        monitor.on('monitor', (time: any, args: any, source: any, database: any) => {
+          logger.debug(`${time} ${args} ${source} ${database}`);
         });
-
-        this.client.on("error", (err: any) => {
-            logger.error(
-                `Connect to Redis fail, you need install redis or start service redis`
-            );
-            logger.error(err);
-        });
-        this.client.on("connect", () => {
-            logger.debug(
-                `Connect to Redis success: ${this.client.options.host}:${this.client.options.port}`
-            );
-        });
-        this.client.on("ready", () => {
-            // console.log(this.client.mode, this.client.status,this.client.);
-            // logger.log(`========== STATUS REDIS SERVER ==========`);
-            // logger.log("Redis version: " + this.client.serverInfo.redis_version);
-            // logger.log("OS running: " + this.client.serverInfo.os);
-            // logger.log("Uptime: " + this.client.serverInfo.uptime_in_seconds + "s");
-            // logger.info("Time check: " + `${new Date().toLocaleString()}`);
-            // logger.log(`================== END ==================`);
-        });
-        if (this.options?.monitor) {
-            this.client.monitor((err, monitor) => {
-                monitor.on("monitor", (time, args, source, database) => {
-                    logger.debug(time, args, source, database);
-                });
-            });
-        }
+      });
     }
+  }
 
-    async setJson(key: string, value: any, time?: number) {
-        if (!time) {
-            time = this.ttl;
-        }
-        value = JSON.stringify(value);
-        return this.client.set(key, value, "EX", time);
-    }
+  async setJson(key: string, value: any, time?: number): Promise<string> {
+    const ttl = time ?? this.ttl;
+    return this.client.set(key, JSON.stringify(value), 'EX', ttl);
+  }
 
-    async getJson(key: string) {
-        let data: any = await this.client.get(key);
-        if (data) data = JSON.parse(data);
-        return data;
-    }
+  async getJson<T = any>(key: string): Promise<T | null> {
+    const data = await this.client.get(key);
+    if (!data) return null;
+    return JSON.parse(data) as T;
+  }
 
-    async deleteKey(key: string) {
-        return await this.client.del(key);
-    }
+  async deleteKey(key: string): Promise<number> {
+    return this.client.del(key);
+  }
 
-    async flushdb() {
-        return await this.client.flushdb();
-    }
+  async flushdb(): Promise<string> {
+    return this.client.flushdb();
+  }
 
-    async ttlKey(key: string) {
-        let data: any = await this.client.ttl(key);
-        return data;
-    }
+  async ttlKey(key: string): Promise<number> {
+    return this.client.ttl(key);
+  }
 }
 
 export default new RedisService({ monitor: true });

@@ -1,47 +1,38 @@
 import {
-    bold,
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-} from "discord.js";
+  bold,
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  SlashCommandBuilder,
+} from 'discord.js';
 
-import translate from "@iamtraction/google-translate";
-
-import Reply from "../../util/decorator/reply";
+import translate from '@iamtraction/google-translate';
+import Reply from '../../util/decorator/reply';
 
 export default {
-    data: new SlashCommandBuilder()
-        .setName("trans")
-        .setDescription("Translate all languages to Vietnamese")
-        .addStringOption((option) =>
-            option
-                .setName("word")
-                .setDescription("word or paragraph")
-                .setRequired(true)
-        ),
-    async execute(interaction: ChatInputCommandInteraction) {
-        interaction.deferReply();
-        try {
-            const embed = new EmbedBuilder().setColor("#00ff44").setTimestamp();
+  data: new SlashCommandBuilder()
+    .setName('trans')
+    .setDescription('Translate all languages to Vietnamese')
+    .addStringOption((option) =>
+      option
+        .setName('word')
+        .setDescription('word or paragraph')
+        .setRequired(true),
+    ),
 
-            const content = interaction.options.getString("word");
+  async execute(interaction: ChatInputCommandInteraction) {
+    await interaction.deferReply();
+    const content = interaction.options.getString('word', true);
+    const embed = new EmbedBuilder().setColor('#00ff44').setTimestamp();
 
-            const translated = await translate(content, { to: "vi" });
+    try {
+      const translated = await translate(content, { to: 'vi' });
+      embed.setTitle(content);
+      embed.setDescription(bold(translated.text));
+    } catch (error: any) {
+      embed.setTitle(content);
+      embed.setDescription(bold(error.message));
+    }
 
-            // console.log(translated);
-
-            embed.setTitle(`${content}`);
-            embed.setDescription(`${bold(`${translated.text}`)}`);
-
-            return Reply.embedEdit(interaction, embed);
-        } catch (error) {
-            const embed = new EmbedBuilder().setColor("#00ff44").setTimestamp();
-
-            const content = interaction.options.getString("word");
-
-            embed.setTitle(`${content}`);
-            embed.setDescription(`${bold(`${error.message}`)}`);
-            return Reply.embedEdit(interaction, embed);
-        }
-    },
+    return Reply.embedEdit(interaction, embed);
+  },
 };

@@ -1,77 +1,90 @@
 import {
-    CommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-    bold,
-} from "discord.js";
+  CommandInteraction,
+  EmbedBuilder,
+  SlashCommandBuilder,
+  bold,
+} from 'discord.js';
 
-import Reply from "../../util/decorator/reply";
-const weather = require("weather-js");
+import Reply from '../../util/decorator/reply';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const weather = require('weather-js');
+
+function findWeather(
+  options: { search: string; degreeType: string; lang: string },
+): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    weather.find(options, (err: any, result: any) => {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+}
 
 export default {
-    data: new SlashCommandBuilder()
-        .setName("weather")
-        .setDescription("Get weather information.")
-        .addStringOption((option) =>
-            option
-                .setName("location")
-                .setDescription("Your location")
-                .setRequired(true)
-                .setMaxLength(200)
-        ),
-    async execute(interaction: CommandInteraction) {
-        const location = interaction.options.get("location");
-        await weather.find(
-            {
-                search: `${location?.value}`,
-                degreeType: "C",
-                lang: "vi-VN",
-            },
-            async function (err: any, result: any) {
-                if (err || result.length == 0) {
-                    return Reply.send(
-                        interaction,
-                        `${bold(location?.value as any)} not found`
-                    );
-                }
-                // console.log(result);
-                let embed = await new EmbedBuilder()
-                    .setTitle(
-                        `\`${result[0].current.day}\` Ngày: \`${result[0].current.date}\``
-                    )
-                    // Set the color of the embed
-                    .setColor("Random")
-                    .addFields({
-                        name: `**Vị trí || Location** `,
-                        value: `${result[0].location.name} / ${result[0].current.observationpoint}`,
-                        inline: false,
-                    })
-                    .addFields({
-                        name: `**Nhiệt độ || Temperature** `,
-                        value: `${result[0].current.temperature} độ ${result[0].location.degreetype} / ${result[0].current.skytext}`,
-                        inline: true,
-                    })
-                    .addFields({
-                        name: `**Độ ẩm || Humidity** `,
-                        value: `${result[0].current.humidity}%`,
-                        inline: true,
-                    })
-                    .addFields({
-                        name: `**Tốc độ và hướng gió || Wind speed** `,
-                        value: `${result[0].current.winddisplay}`,
-                        inline: false,
-                    })
-                    .addFields({
-                        name: `**Cập nhật lần cuối || observationtime** `,
-                        value: `\`${result[0].current.observationtime}\` h/m/s \`Local time: ${result[0].location.name} / ${result[0].current.observationpoint}\``,
-                        inline: false,
-                    })
-                    // .setImage(`${result[0].current.imageUrl}`)
-                    .setTimestamp(Date.now())
-                    .setThumbnail(`${result[0].current.imageUrl}`);
+  data: new SlashCommandBuilder()
+    .setName('weather')
+    .setDescription('Get weather information.')
+    .addStringOption((option) =>
+      option
+        .setName('location')
+        .setDescription('Your location')
+        .setRequired(true)
+        .setMaxLength(200),
+    ),
 
-                return Reply.embed(interaction, embed);
-            }
-        );
-    },
+  async execute(interaction: CommandInteraction) {
+    const location = interaction.options.get('location');
+    const searchValue = String(location?.value ?? '');
+
+    try {
+      const result = await findWeather({
+        search: searchValue,
+        degreeType: 'C',
+        lang: 'vi-VN',
+      });
+
+      if (!result || result.length === 0) {
+        return Reply.send(interaction, bold(searchValue) + ' not found');
+      }
+
+      const data = result[0];
+      const embed = new EmbedBuilder()
+        .setTitle(`\`${data.current.day}\` Ngày: \`${data.current.date}\``)
+        .setColor('Random')
+        .addFields(
+          {
+            name: '**Vị trí || Location**',
+            value: `${data.location.name} / ${data.current.observationpoint}`,
+            inline: false,
+          },
+          {
+            name: '**Nhiệt độ || Temperature**',
+            value: `${data.current.temperature} độ ${data.location.degreetype} / ${data.current.skytext}`,
+            inline: true,
+          },
+          {
+            name: '**Độ ẩm || Humidity**',
+            value: `${data.current.humidity}%`,
+            inline: true,
+          },
+          {
+            name: '**Tốc độ và hướng gió || Wind speed**',
+            value: `${data.current.winddisplay}`,
+            inline: false,
+          },
+          {
+            name: '**Cập nhật lần cuối || Observation time**',
+            value: `\`${data.current.observationtime}\` h/m/s \`Local time: ${data.location.name} / ${data.current.observationpoint}\``,
+            inline: false,
+          },
+        )
+        .setTimestamp()
+        .setThumbnail(data.current.imageUrl);
+
+      return Reply.embed(interaction, embed);
+    } catch {
+      return Reply.send(interaction, bold(searchValue) + ' not found');
+    }
+  },
 };
