@@ -4,6 +4,7 @@ import type { Client } from "discord.js";
 import { DisTube, Events as DisTubeEvents } from "distube";
 import type { DisTubePlugin } from "distube";
 import { SpotifyPlugin } from "@distube/spotify";
+import { YtDlpPlugin } from "@distube/yt-dlp";
 
 import { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } from "../config/index";
 import log from "../log/logger.mixed";
@@ -20,7 +21,8 @@ export function initMusic(client: Client): void {
         log("[music] ffmpeg-static not found — audio will not work", "error");
     }
 
-    const plugins: DisTubePlugin[] = [];
+    const plugins: DisTubePlugin[] = [new YtDlpPlugin()];
+    log("[music] YouTube (yt-dlp) plugin loaded", "info");
 
     if (SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET) {
         plugins.push(
