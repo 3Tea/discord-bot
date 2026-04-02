@@ -260,7 +260,7 @@ member.voice.channel?.setName("x");
 | Command files | kebab-case | `voice.ts`, `3hentai.ts` |
 | Button files | camelCase + `.button.ts` | `nhentai.button.ts` |
 | Model files | camelCase + `.model.ts` | `guild.model.ts` |
-| Constants | SCREAMING_SNAKE_CASE | `BUTTON_ID`, `CLIENT_ID` |
+| Constants | SCREAMING_SNAKE_CASE | `BUTTON_ID`, `APPLICATION_ID` |
 | Interfaces | PascalCase, `I` prefix for models | `IGuild`, `IUser` |
 
 ### Patterns
@@ -307,7 +307,7 @@ All variables documented in `.env.example`. Critical ones:
 | Variable | Required | Purpose |
 |----------|----------|---------|
 | `DISCORD_TOKEN` | Yes | Bot authentication |
-| `CLIENT_ID` | Yes | Slash command registration |
+| `APPLICATION_ID` | Yes | Slash command registration |
 | `GUILD_ID` | Dev only | Guild-scoped command deployment |
 | `NODE_ENV` | Yes | `development` or `production` |
 | `DB_URL` | Yes | MongoDB connection string |

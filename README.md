@@ -13,7 +13,7 @@
 
 ```bash
 cp .env.example .env
-# Edit .env with your DISCORD_TOKEN, CLIENT_ID, GUILD_ID, DB_URL, REDIS_URL
+# Edit .env with your DISCORD_TOKEN, APPLICATION_ID, GUILD_ID, DB_URL, REDIS_URL
 ```
 
 ### Run Locally

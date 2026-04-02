@@ -5,7 +5,8 @@
       "WebFetch(domain:discord.js.org)",
       "WebFetch(domain:discordjs.guide)",
       "WebSearch",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npm audit:*)"
     ]
   }
 }
