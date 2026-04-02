@@ -30,7 +30,8 @@ export default {
                 await voiceChannel.setName(`* ${name}`, `setVoiceName to ${name} ${FOOTER.text}`);
                 await setCooldown(`setVoiceName:${voiceChannel.id}`, 120);
                 await updatePanel(voiceChannel);
-                await interaction.reply({ content: `Channel renamed to **${name}** ✏️`, flags: MessageFlags.Ephemeral });
+                await interaction.reply({ content: `Channel renamed to **${name}** ✏️` });
+                setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
                 break;
             }
             case BUTTON_ID.VOICE_MODAL_LIMIT: {
@@ -43,7 +44,8 @@ export default {
                 await voiceChannel.setUserLimit(limit, `userLimit to ${limit} ${FOOTER.text}`);
                 await setCooldown(`setUserLimit:${voiceChannel.id}`, 120);
                 await updatePanel(voiceChannel);
-                await interaction.reply({ content: `User limit set to **${limit}** 👥`, flags: MessageFlags.Ephemeral });
+                await interaction.reply({ content: `User limit set to **${limit}** 👥` });
+                setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
                 break;
             }
             default:

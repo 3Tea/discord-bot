@@ -5,7 +5,7 @@ import {
     EmbedBuilder,
     GuildMember,
     MessageFlags,
-    PermissionFlagsBits,
+    MessageType,
     RepliableInteraction,
     VoiceChannel,
 } from "discord.js";
@@ -90,8 +90,11 @@ export async function buildPanelEmbed(channelId: string, ownerId: string): Promi
         .setTitle("Voice Control Panel")
         .setColor("Random")
         .setTimestamp()
-        .setFooter({ text: FOOTER.text, iconURL: FOOTER.icon })
         .setDescription(`**Owner:** <@${ownerId}>\n**Status:** ${statusMap[state] ?? "Unlocked"}`);
+
+    if (FOOTER.text) {
+        embed.setFooter({ text: FOOTER.text, iconURL: FOOTER.icon || undefined });
+    }
 
     if (permitted.length > 0) {
         embed.addFields({
@@ -152,13 +155,27 @@ export async function updatePanel(voiceChannel: VoiceChannel): Promise<void> {
 }
 
 /**
- * Send the control panel to the voice channel text chat and store the message ID.
+ * Send the control panel to the voice channel text chat, mention owner, pin it, and store the message ID.
  */
 export async function sendPanel(voiceChannel: VoiceChannel, ownerId: string): Promise<void> {
     const embed = await buildPanelEmbed(voiceChannel.id, ownerId);
     const rows = buildPanelRows();
-    const message = await voiceChannel.send({ embeds: [embed], components: rows });
+    const message = await voiceChannel.send({
+        content: `<@${ownerId}> — Your voice control panel`,
+        embeds: [embed],
+        components: rows,
+    });
     await redis.setJson(`panel:${voiceChannel.id}`, message.id, TTL_12H);
+
+    // Pin the panel and delete the "pinned a message" system message
+    try {
+        await message.pin();
+        const messages = await voiceChannel.messages.fetch({ limit: 5 });
+        const pinSystemMsg = messages.find((m) => m.type === MessageType.ChannelPinnedMessage);
+        if (pinSystemMsg) await pinSystemMsg.delete();
+    } catch {
+        // Ignore if pin fails (missing permissions)
+    }
 }
 
 /**
