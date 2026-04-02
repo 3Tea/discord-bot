@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
     bold,
     ChatInputCommandInteraction,
@@ -5,9 +6,13 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 
-import translate from "@iamtraction/google-translate";
-
 import Reply from "../../util/decorator/reply";
+
+async function translate(text: string, to: string): Promise<string> {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+    const { data } = await axios.get(url);
+    return (data[0] as [string, string][]).map((s) => s[0]).join("");
+}
 
 export default {
     data: new SlashCommandBuilder()
@@ -22,25 +27,24 @@ export default {
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
         try {
-            const embed = new EmbedBuilder().setColor("#00ff44").setTimestamp();
-
             const content = interaction.options.getString("word", true);
+            const translated = await translate(content, "vi");
 
-            const translated = await translate(content, { to: "vi" });
-
-            // console.log(translated);
-
-            embed.setTitle(`${content}`);
-            embed.setDescription(`${bold(`${translated.text}`)}`);
+            const embed = new EmbedBuilder()
+                .setColor("#00ff44")
+                .setTimestamp()
+                .setTitle(`${content}`)
+                .setDescription(`${bold(translated)}`);
 
             return Reply.embedEdit(interaction, embed);
         } catch (error) {
-            const embed = new EmbedBuilder().setColor("#00ff44").setTimestamp();
-
             const content = interaction.options.getString("word", true);
+            const embed = new EmbedBuilder()
+                .setColor("#00ff44")
+                .setTimestamp()
+                .setTitle(`${content}`)
+                .setDescription(`${bold((error as Error).message)}`);
 
-            embed.setTitle(`${content}`);
-            embed.setDescription(`${bold(`${(error as Error).message}`)}`);
             return Reply.embedEdit(interaction, embed);
         }
     },
