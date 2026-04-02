@@ -1,3 +1,4 @@
+import ffmpegPath from "ffmpeg-static";
 import type { Client } from "discord.js";
 import { DisTube, Events as DisTubeEvents } from "distube";
 import type { DisTubePlugin } from "distube";
@@ -9,6 +10,11 @@ import { sendPanel, updatePanel, setIdlePanel } from "./panel";
 import redis from "../../connector/redis";
 
 export function initMusic(client: Client): void {
+    // Set ffmpeg path from ffmpeg-static before DisTube init
+    if (ffmpegPath) {
+        process.env.FFMPEG_PATH = ffmpegPath;
+    }
+
     const plugins: DisTubePlugin[] = [];
 
     if (SPOTIFY_CLIENT_ID && SPOTIFY_CLIENT_SECRET) {
