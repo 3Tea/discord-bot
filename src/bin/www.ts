@@ -6,5 +6,8 @@ const dotEnvConfigs = {
 };
 dotenv.config(dotEnvConfigs);
 
+import { validateEnv } from "../util/config/validate";
+validateEnv();
+
 import "../bot";
 import "../connector/mongo";
