@@ -10,7 +10,9 @@
     "build": "tsc",
     "build:start": "rm -rf ./dist && tsc && node ./dist/bin/www.js",
     "start": "node ./dist/bin/www.js",
-    "start:dev": "nodemon --exec ts-node ./src/bin/www.ts"
+    "start:dev": "nodemon --exec ts-node ./src/bin/www.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\""
   },
   "repository": {
     "type": "git",
@@ -47,6 +49,7 @@
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "nodemon": "^3.1.9",
+    "prettier": "^3.8.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.0"
   }
