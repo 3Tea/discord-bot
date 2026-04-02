@@ -1,3 +1,4 @@
+import type { DisTube } from "distube";
 import {
     Collection,
     SlashCommandBuilder,
@@ -26,5 +27,6 @@ declare module "discord.js" {
         commands: Collection<string, SlashCommand>;
         buttons: Collection<string, ButtonHandler>;
         selectMenus: Collection<string, SelectMenuHandler>;
+        distube: DisTube;
     }
 }

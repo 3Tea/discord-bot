@@ -6,10 +6,13 @@ import { loadEvents } from "./loaders/events";
 import { loadButtons } from "./loaders/buttons";
 import { loadSelectMenus } from "./loaders/selectMenus";
 import { deployCommands } from "./loaders/deploy";
+import { initMusic } from "./util/music/player";
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildVoiceStates],
 });
+
+initMusic(client);
 
 const commands = loadCommands(client);
 loadEvents(client);
