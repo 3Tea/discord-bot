@@ -3,6 +3,7 @@ import {
     SlashCommandBuilder,
     ChatInputCommandInteraction,
     ButtonInteraction,
+    UserSelectMenuInteraction,
 } from "discord.js";
 
 export interface SlashCommand {
@@ -15,9 +16,15 @@ export interface ButtonHandler {
     execute(interaction: ButtonInteraction): Promise<void>;
 }
 
+export interface SelectMenuHandler {
+    id: string;
+    execute(interaction: UserSelectMenuInteraction): Promise<void>;
+}
+
 declare module "discord.js" {
     export interface Client {
         commands: Collection<string, SlashCommand>;
         buttons: Collection<string, ButtonHandler>;
+        selectMenus: Collection<string, SelectMenuHandler>;
     }
 }
