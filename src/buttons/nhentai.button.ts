@@ -1,4 +1,4 @@
-import { ButtonInteraction, ThreadAutoArchiveDuration } from "discord.js";
+import { ButtonInteraction, TextChannel, ThreadAutoArchiveDuration } from "discord.js";
 
 import redis from "../connector/redis";
 import { FOOTER, SERVER_S } from "../util/config";
@@ -6,12 +6,11 @@ import { BUTTON_ID } from "../util/config/button";
 
 export default {
     id: BUTTON_ID.nhtaiRead,
-    async execute(interaction: ButtonInteraction | any) {
-        const thread = await interaction.channel.threads.create({
-            name:
-                interaction.message.embeds[0].title.length < 99
-                    ? interaction.message.embeds[0].title
-                    : interaction.message.embeds[0].title.substring(0, 50),
+    async execute(interaction: ButtonInteraction) {
+        const channel = interaction.channel as TextChannel;
+        const title = interaction.message.embeds[0]?.title ?? "Thread";
+        const thread = await channel.threads.create({
+            name: title.length < 99 ? title : title.substring(0, 50),
             startMessage: interaction.message,
             autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
             reason: FOOTER.text,

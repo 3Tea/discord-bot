@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/**/*.ts)",
+      "WebFetch(domain:discord.js.org)",
+      "WebFetch(domain:discordjs.guide)",
+      "WebSearch",
+      "Bash(npm install:*)"
+    ]
+  }
+}

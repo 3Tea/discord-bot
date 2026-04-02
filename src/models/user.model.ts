@@ -1,30 +1,39 @@
-import { model, Schema } from "mongoose";
+import { model, Schema, Document } from "mongoose";
+
+export interface IUser extends Document {
+    userID: string;
+    totalPoint: number;
+    totalCoin: number;
+    topAllServer: number;
+    lastActivity: Date;
+    status: boolean;
+}
 
 const userSchema = new Schema(
     {
         userID: {
-            type: Schema.Types.Mixed,
+            type: String,
             required: true,
             default: null,
         },
         totalPoint: {
-            type: Schema.Types.Number,
+            type: Number,
             default: 0,
         },
         totalCoin: {
-            type: Schema.Types.Number,
+            type: Number,
             default: 0,
         },
         topAllServer: {
-            type: Schema.Types.Number,
+            type: Number,
             default: 0,
         },
         lastActivity: {
-            type: Schema.Types.Date,
+            type: Date,
             default: null,
         },
         status: {
-            type: Schema.Types.Boolean,
+            type: Boolean,
             default: true,
         },
     },
@@ -34,63 +43,27 @@ const userSchema = new Schema(
     }
 );
 
-userSchema.pre("save", async function (this, next: any) {
-    try {
-        // TODO: Update time for document
-        if (this.isNew) {
-            Object.assign(this.$locals, { wasNew: this.isNew });
-            // this.$locals.wasNew = this.isNew;
-            // this.createdAt = Date.now();
-            // this.updatedAt = Date.now();
-        } else {
-            // this.updatedAt = Date.now();
-        }
-
-        next();
-    } catch (error: any) {
-        console.error(error);
-        throw new Error(error);
-    }
-});
-
-userSchema.post("save", function (this) {
-    try {
-        // ! This is a document after save
-        if (this?.$locals?.wasNew) {
-            // new document
-        } else {
-            // old document
-        }
-    } catch (error: any) {
-        throw new Error(error);
-    }
-});
-
-// TODO: Log error
 userSchema.post("save", (error: any, doc: any, next: any) => {
     if (process.env.NODE_ENV === "development") {
         console.log(doc);
     }
-    if (error.name === "MongoError" && error.code === 11000)
+    if (error.name === "MongoServerError" && error.code === 11000)
         next(new Error("This document already exists, please try again"));
     else next(error);
 });
 
 userSchema.set("toJSON", {
-    transform: (doc: any, ret: any) => {
-        // ret.user = decrypted(ret.user, ret._id);
+    transform: (_doc: any, ret: any) => {
         delete ret.__v;
     },
 });
 
 userSchema.set("toObject", {
-    transform: (doc: any, ret: any) => {
-        // ret.user = decrypted(ret.user, ret._id);
+    transform: (_doc: any, ret: any) => {
         delete ret.__v;
     },
 });
 
-// Default export
-const UserModel = model("User", userSchema);
+const UserModel = model<IUser>("User", userSchema);
 
 export default UserModel;

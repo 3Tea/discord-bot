@@ -17,7 +17,7 @@ export default {
         }
 
         console.log(
-            `/${interaction.commandName} => username: ${interaction.user.username}#${interaction.user.discriminator} ID: ${interaction.user.id}`
+            `/${interaction.commandName} => username: ${interaction.user.username} ID: ${interaction.user.id}`
         );
 
         try {

@@ -6,13 +6,14 @@ import {
     ChatInputCommandInteraction,
     EmbedBuilder,
     SlashCommandBuilder,
+    TextChannel,
 } from "discord.js";
 
 import redis from "../../connector/redis/index";
 import { FOOTER, SERVER_HD } from "../../util/config";
 import { BUTTON_ID } from "../../util/config/button";
 
-const wait = require("node:timers/promises").setTimeout;
+import { setTimeout as wait } from "node:timers/promises";
 
 export default {
     data: new SlashCommandBuilder()
@@ -34,15 +35,15 @@ export default {
                 .setName("random")
                 .setDescription("Random H and D from 3hentai")
         ),
-    async execute(interaction: ChatInputCommandInteraction | any) {
+    async execute(interaction: ChatInputCommandInteraction) {
         try {
-            if (!interaction.channel?.nsfw) {
+            if (!(interaction.channel as TextChannel)?.nsfw) {
                 await interaction.reply(`Only NSFW channel`);
                 return;
             }
             const subcommand = interaction.options.getSubcommand(true);
             const data = interaction.options.data.find(
-                (e: any) => e.name === subcommand
+                (e) => e.name === subcommand
             );
 
             let threeHentai;
@@ -51,7 +52,7 @@ export default {
 
             if (subcommand != "random") {
                 threeHentai = await axios.get(
-                    `${SERVER_HD}3hentai/get?book=${data.options[0].value}`
+                    `${SERVER_HD}3hentai/get?book=${data!.options![0].value}`
                 );
             } else {
                 threeHentai = await axios.get(`${SERVER_HD}3hentai/random`);

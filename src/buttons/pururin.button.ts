@@ -1,4 +1,4 @@
-import { ButtonInteraction, ThreadAutoArchiveDuration } from "discord.js";
+import { ButtonInteraction, TextChannel, ThreadAutoArchiveDuration } from "discord.js";
 
 import redis from "../connector/redis";
 import { FOOTER, SERVER_S } from "../util/config";
@@ -6,12 +6,11 @@ import { BUTTON_ID } from "../util/config/button";
 
 export default {
     id: BUTTON_ID.pururinRead,
-    async execute(interaction: ButtonInteraction | any) {
-        const thread = await interaction.channel.threads.create({
-            name:
-                interaction.message.embeds[0].title.length < 99
-                    ? interaction.message.embeds[0].title
-                    : interaction.message.embeds[0].title.substring(0, 50),
+    async execute(interaction: ButtonInteraction) {
+        const channel = interaction.channel as TextChannel;
+        const title = interaction.message.embeds[0]?.title ?? "Thread";
+        const thread = await channel.threads.create({
+            name: title.length < 99 ? title : title.substring(0, 50),
             startMessage: interaction.message,
             autoArchiveDuration: ThreadAutoArchiveDuration.OneHour,
             reason: FOOTER.text,
@@ -57,7 +56,6 @@ export default {
         }
 
         await thread.send(`Enjoy it <@${interaction.user.id}> 💖`);
-        // await thread.send(`Dear <@${interaction.user.id}>,\n\n**Disclaimer: All**\n\nThe service provided by this website may contain content that some users might find objectionable and is intended for mature persons only. By using this service you agree that you are of legal age and that you consent to viewing sexually explicit material. You also agree that you will not hold the website owner or any of its affiliates liable for any damages or losses that may result from accessing or using this service. If you are offended by such content or if it is illegal in your jurisdiction, please do not use this service.\n\nBest regards,\n\n**SBS Team.**`);
         return;
     },
 };

@@ -20,8 +20,8 @@ export default {
                 .setRequired(true)
         ),
     async execute(interaction: ChatInputCommandInteraction) {
-        interaction.deferReply();
-        const content = interaction.options.getString("content");
+        await interaction.deferReply();
+        const content = interaction.options.getString("content", true);
 
         try {
             const simsimi = await axios({

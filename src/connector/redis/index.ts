@@ -13,7 +13,7 @@ export class RedisService {
     protected options: options;
 
     constructor(options?: options) {
-        this.options = options;
+        this.options = options ?? { monitor: false };
         this.ttl = 120;
         this.client = new redis(REDIS.REDIS_URL, {
             retryStrategy(times) {
@@ -43,8 +43,8 @@ export class RedisService {
             // logger.log(`================== END ==================`);
         });
         if (this.options?.monitor) {
-            this.client.monitor((err, monitor) => {
-                monitor.on("monitor", (time, args, source, database) => {
+            this.client.monitor().then((monitor) => {
+                monitor.on("monitor", (time: number, args: string[], source: string, database: string) => {
                     logger.debug(time, args, source, database);
                 });
             });

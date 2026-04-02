@@ -1,18 +1,16 @@
-const winston = require("winston");
+import winston from "winston";
+import tracer from "tracer";
+
 const levels = process.env.LOG_LEVEL || "debug";
 const myFormat = winston.format.printf(
     ({
-        levels,
+        level,
         message,
         timestamp,
-    }: {
-        levels: any;
-        message: any;
-        timestamp: any;
-    }) => `${timestamp} ${levels}: ${message}`
+    }) => `${timestamp} ${level}: ${message}`
 );
 
-const winstonLogger: any = winston.createLogger({
+const winstonLogger = winston.createLogger({
     format: winston.format.combine(
         winston.format.timestamp({
             format: "YYYY-MM-DD HH:mm:ss",
@@ -48,35 +46,21 @@ const winstonLogger: any = winston.createLogger({
     ],
 });
 
-// Write log to console when run on mode is not production
 if (process.env.NODE_ENV !== "production") {
     winstonLogger.add(
         new winston.transports.Console({
             level: levels,
-            timestamp: () => {
-                return new Date().toISOString();
-            },
             format: winston.format.simple(),
         })
     );
 }
 
-import tracer from "tracer";
+export const logger = tracer.colorConsole();
 
-export const logger: any = tracer.colorConsole();
-// interface
 type TLog = "log" | "trace" | "debug" | "info" | "warn" | "error";
 
-/**
- *
- * @param text
- * @param type
- */
 const winstonLog = (text: string, type: TLog = "log"): void => {
-    if (type == "log") {
-        winstonLogger.debug(text);
-    }
-    if (type == "debug") {
+    if (type == "log" || type == "debug") {
         winstonLogger.debug(text);
     }
     if (type == "info") {
@@ -90,11 +74,7 @@ const winstonLog = (text: string, type: TLog = "log"): void => {
     }
     winstonLogger.verbose(text);
 };
-/**
- * Log data
- * @param text message
- * @param shop shop domain
- */
+
 const log = (text: string, type: TLog = "log"): void => {
     logger[type](text);
     winstonLog(text, type);

@@ -1,6 +1,7 @@
 import {
     ChatInputCommandInteraction,
     EmbedBuilder,
+    GuildMember,
     SlashCommandBuilder,
 } from "discord.js";
 
@@ -37,30 +38,30 @@ export default {
                         .setRequired(true)
                 )
         ),
-    async execute(interaction: ChatInputCommandInteraction | any) {
+    async execute(interaction: ChatInputCommandInteraction) {
         const embed = new EmbedBuilder().setColor("Random").setTimestamp();
 
-        const isVoiceChannel = interaction?.member?.voice.channelId;
+        const isVoiceChannel = (interaction.member as GuildMember)?.voice.channelId;
         // console.log(isVoiceChannel);
         if (isVoiceChannel) {
             const ownerId = interaction.user.id;
             const userId = await redis.getJson(isVoiceChannel);
 
             const checkUserInVoice =
-                interaction.member.voice.channel.members.find(
-                    (x: any) => x.user.id == ownerId
+                (interaction.member as GuildMember).voice.channel!.members.find(
+                    (x) => x.user.id == ownerId
                 );
 
             const subcommand = interaction.options.getSubcommand(true);
             const data = interaction.options.data.find(
-                (e: any) => e.name === subcommand
+                (e) => e.name === subcommand
             );
 
             console.log(data);
 
             if (!checkUserInVoice) {
                 // TODO: change voice channel
-                switch (data.name) {
+                switch (data!.name) {
                     case "limit":
                         const ttlLimit = await redis.ttlKey(
                             `setUserLimit:${isVoiceChannel}`
@@ -71,9 +72,9 @@ export default {
                             );
                             break;
                         }
-                        setUserLimit(interaction, data.options[0].value);
+                        setUserLimit(interaction, data!.options![0].value as number);
                         embed.setTitle(
-                            `Set user limit to ${data.options[0].value} ✅`
+                            `Set user limit to ${data!.options![0].value} ✅`
                         );
                         await redis.setJson(
                             `setUserLimit:${isVoiceChannel}`,
@@ -91,9 +92,9 @@ export default {
                             );
                             break;
                         }
-                        setVoiceName(interaction, data.options[0].value);
+                        setVoiceName(interaction, data!.options![0].value as string);
                         embed.setTitle(
-                            `Set name to ${data.options[0].value} ✅`
+                            `Set name to ${data!.options![0].value} ✅`
                         );
                         await redis.setJson(
                             `setVoiceName:${isVoiceChannel}`,
@@ -107,7 +108,7 @@ export default {
             } else {
                 if (userId == ownerId) {
                     // TODO: change voice channel
-                    switch (data.name) {
+                    switch (data!.name) {
                         case "limit":
                             const ttlLimit = await redis.ttlKey(
                                 `setUserLimit:${isVoiceChannel}`
@@ -118,9 +119,9 @@ export default {
                                 );
                                 break;
                             }
-                            setUserLimit(interaction, data.options[0].value);
+                            setUserLimit(interaction, data!.options![0].value as number);
                             embed.setTitle(
-                                `Set user limit to ${data.options[0].value} ✅`
+                                `Set user limit to ${data!.options![0].value} ✅`
                             );
                             await redis.setJson(
                                 `setUserLimit:${isVoiceChannel}`,
@@ -138,9 +139,9 @@ export default {
                                 );
                                 break;
                             }
-                            setVoiceName(interaction, data.options[0].value);
+                            setVoiceName(interaction, data!.options![0].value as string);
                             embed.setTitle(
-                                `Set name to ${data.options[0].value} ✅`
+                                `Set name to ${data!.options![0].value} ✅`
                             );
                             await redis.setJson(
                                 `setVoiceName:${isVoiceChannel}`,
@@ -167,20 +168,20 @@ export default {
 };
 
 export function setVoiceName(
-    interaction: ChatInputCommandInteraction | any,
+    interaction: ChatInputCommandInteraction,
     name: string
 ) {
-    return interaction?.member?.voice.channel.setName(
+    return (interaction.member as GuildMember)?.voice.channel?.setName(
         `* ${name}`,
         `setVoiceName to ${name} ${FOOTER.text}`
     );
 }
 
 export function setUserLimit(
-    interaction: ChatInputCommandInteraction | any,
+    interaction: ChatInputCommandInteraction,
     userLimit: number
 ) {
-    return interaction?.member?.voice.channel.setUserLimit(
+    return (interaction.member as GuildMember)?.voice.channel?.setUserLimit(
         userLimit,
         `userLimit to ${userLimit} ${FOOTER.text}`
     );

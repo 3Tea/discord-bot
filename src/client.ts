@@ -5,12 +5,12 @@ import {
     REST,
     Routes,
 } from "discord.js";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 import { CLIENT_ID, GUILD_ID } from "./util/config/index";
 
-const client: any = new Client({
+const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
@@ -18,18 +18,15 @@ const client: any = new Client({
     ],
 });
 
-// TODO: Implement slash commands handle
-
 client.commands = new Collection();
 
 const commandsPath = path.join(__dirname, "commands/slash/");
 const commandFiles = fs.readdirSync(commandsPath);
-const commands = [];
+const commands: object[] = [];
 
 for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file);
     const command = require(filePath);
-    // Set a new item in the Collection with the key as the command name and the value as the exported module
     if ("data" in command.default && "execute" in command.default) {
         client.commands.set(command.default.data.name, command.default);
         commands.push(command.default.data.toJSON());
@@ -40,8 +37,6 @@ for (const file of commandFiles) {
     }
 }
 
-// TODO: Implement events handle
-
 const eventsPath = path.join(__dirname, "events");
 const eventFiles = fs.readdirSync(eventsPath);
 
@@ -50,17 +45,15 @@ for (const file of eventFiles) {
     const event = require(filePath);
 
     if (event.default.once) {
-        client.once(event.default.name, (...args: any[]) =>
+        client.once(event.default.name, (...args: unknown[]) =>
             event.default.execute(...args)
         );
     } else {
-        client.on(event.default.name, (...args: any[]) =>
+        client.on(event.default.name, (...args: unknown[]) =>
             event.default.execute(...args)
         );
     }
 }
-
-// TODO: Implement slash commands handle
 
 client.buttons = new Collection();
 
@@ -70,7 +63,6 @@ const buttonFiles = fs.readdirSync(buttonsPath);
 for (const file of buttonFiles) {
     const filePath = path.join(buttonsPath, file);
     const button = require(filePath);
-    // Set a new item in the Collection with the key as the command name and the value as the exported module
     if ("id" in button.default && "execute" in button.default) {
         client.buttons.set(button.default.id, button.default);
     } else {
@@ -80,40 +72,36 @@ for (const file of buttonFiles) {
     }
 }
 
-// TODO: Construct and prepare an instance of the REST module
-const rest = new REST({ version: "10" }).setToken(
-    process.env.DISCORD_TOKEN as any
-);
+if (!process.env.DISCORD_TOKEN) {
+    throw new Error("DISCORD_TOKEN environment variable is required");
+}
 
-// and deploy your commands!
+const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+
 (async () => {
     try {
         console.log(
             `Started refreshing ${commands.length} application (/) commands.`
         );
 
-        // The put method is used to fully refresh all commands in the guild with the current set
-        console.log(CLIENT_ID, CLIENT_ID);
-
         if (process.env.NODE_ENV == "development") {
-            const data: any = await rest.put(
+            const data = await rest.put(
                 Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
                 { body: commands }
-            );
+            ) as unknown[];
             console.log(
                 `Successfully reloaded ${data.length} application (/) commands.`
             );
         } else {
-            const data: any = await rest.put(
+            const data = await rest.put(
                 Routes.applicationCommands(CLIENT_ID),
                 { body: commands }
-            );
+            ) as unknown[];
             console.log(
                 `Successfully reloaded ${data.length} application (/) commands.`
             );
         }
     } catch (error) {
-        // And of course, make sure you catch and log any errors!
         console.error(error);
     }
 })();

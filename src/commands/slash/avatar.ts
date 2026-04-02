@@ -1,5 +1,5 @@
 import {
-    CommandInteraction,
+    ChatInputCommandInteraction,
     EmbedBuilder,
     SlashCommandBuilder,
 } from "discord.js";
@@ -15,7 +15,7 @@ export default {
         .addUserOption((option) =>
             option.setName("target").setDescription("The user's avatar to show")
         ),
-    async execute(interaction: CommandInteraction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         const user = interaction.options.getUser("target");
         // console.log(FOOTER);
         const embed = new EmbedBuilder().setColor("Random").setTimestamp();

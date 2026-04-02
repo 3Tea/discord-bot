@@ -1,15 +1,15 @@
 import {
+    ActionRowBuilder,
+    ButtonBuilder,
     CommandInteraction,
     EmbedBuilder,
-    ActionRowComponent,
+    InteractionReplyOptions,
 } from "discord.js";
 
 import { FOOTER } from "../config/index";
 
 class Reply {
-    constructor() {}
-
-    async send(interaction: CommandInteraction, payload: any) {
+    async send(interaction: CommandInteraction, payload: string | InteractionReplyOptions) {
         return interaction.reply(payload);
     }
 
@@ -26,7 +26,7 @@ class Reply {
     async embedButtons(
         interaction: CommandInteraction,
         embed: EmbedBuilder,
-        row: any
+        row: ActionRowBuilder<ButtonBuilder>
     ) {
         if (!embed.data.footer) {
             embed.setFooter({

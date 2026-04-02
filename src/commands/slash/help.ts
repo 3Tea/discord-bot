@@ -42,7 +42,7 @@ export default {
             .setURL(`${process.env.URL_REPORT_BUG}`)
             .setStyle(ButtonStyle.Link);
 
-        const row = new ActionRowBuilder().addComponents(
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             homepage,
             discussions,
             reportBug

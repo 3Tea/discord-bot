@@ -17,16 +17,9 @@ export default {
         .addSubcommand((subcommand) =>
             subcommand.setName("bot").setDescription("Information about bot")
         ),
-    // .addSubcommand((subcommand) =>
-    //     subcommand
-    //         .setName("author")
-    //         .setDescription("Information about author")
-    // ),
     async execute(interaction: ChatInputCommandInteraction) {
         const subcommand = interaction.options.getSubcommand(true);
         const embed = new EmbedBuilder().setColor("Random").setTimestamp();
-
-        console.log(subcommand);
 
         switch (subcommand) {
             case "bot":
@@ -44,34 +37,19 @@ export default {
                     },
                     {
                         name: "Language: ",
-                        value: `Typescript: 4.9.4`,
+                        value: `TypeScript`,
                         inline: true,
                     },
                     {
-                        name: "Node.js: ",
-                        value: `Node.js: 18.12.1`,
+                        name: "Runtime: ",
+                        value: `Node.js ${process.version}`,
                         inline: true,
                     },
                     {
                         name: "Discord: ",
-                        value: `Discord.js: 14.7.1`,
+                        value: `Discord.js v14`,
                         inline: true,
                     }
-                    // {
-                    //     name: "Homepage: ",
-                    //     value: `${infoBot.homepage}`,
-                    //     inline: true,
-                    // },
-                    // {
-                    //     name: "Bugs: ",
-                    //     value: `${infoBot.bugs.url}`,
-                    //     inline: true,
-                    // },
-                    // {
-                    //     name: "Discussions: ",
-                    //     value: `${infoBot.discussions}`,
-                    //     inline: true,
-                    // }
                 );
                 break;
 
@@ -94,7 +72,7 @@ export default {
             .setURL(`${process.env.URL_REPORT_BUG}`)
             .setStyle(ButtonStyle.Link);
 
-        const row = new ActionRowBuilder().addComponents(
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             homepage,
             discussions,
             reportBug

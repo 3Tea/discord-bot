@@ -20,11 +20,11 @@ export default {
                 .setRequired(true)
         ),
     async execute(interaction: ChatInputCommandInteraction) {
-        interaction.deferReply();
+        await interaction.deferReply();
         try {
             const embed = new EmbedBuilder().setColor("#00ff44").setTimestamp();
 
-            const content = interaction.options.getString("word");
+            const content = interaction.options.getString("word", true);
 
             const translated = await translate(content, { to: "vi" });
 
@@ -37,10 +37,10 @@ export default {
         } catch (error) {
             const embed = new EmbedBuilder().setColor("#00ff44").setTimestamp();
 
-            const content = interaction.options.getString("word");
+            const content = interaction.options.getString("word", true);
 
             embed.setTitle(`${content}`);
-            embed.setDescription(`${bold(`${error.message}`)}`);
+            embed.setDescription(`${bold(`${(error as Error).message}`)}`);
             return Reply.embedEdit(interaction, embed);
         }
     },
