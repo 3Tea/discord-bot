@@ -11,13 +11,9 @@ export function loadEvents(client: Client): void {
         const event = require(filePath);
 
         if (event.default.once) {
-            client.once(event.default.name, (...args: unknown[]) =>
-                event.default.execute(...args)
-            );
+            client.once(event.default.name, (...args: unknown[]) => event.default.execute(...args));
         } else {
-            client.on(event.default.name, (...args: unknown[]) =>
-                event.default.execute(...args)
-            );
+            client.on(event.default.name, (...args: unknown[]) => event.default.execute(...args));
         }
     }
 

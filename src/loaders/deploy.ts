@@ -25,7 +25,7 @@ export async function deployCommands(commands: object[]): Promise<void> {
         ? Routes.applicationGuildCommands(APPLICATION_ID, GUILD_ID)
         : Routes.applicationCommands(APPLICATION_ID);
 
-    const data = await rest.put(route, { body: commands }) as unknown[];
+    const data = (await rest.put(route, { body: commands })) as unknown[];
 
     console.log(`Successfully deployed ${data.length} commands.`);
 }

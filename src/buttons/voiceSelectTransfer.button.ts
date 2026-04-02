@@ -39,6 +39,9 @@ export default {
 
         await setCooldown(cdKey, 5);
         await updatePanel(voiceChannel);
-        await interaction.reply({ content: `Ownership transferred to <@${targetId}> 🔄`, flags: MessageFlags.Ephemeral });
+        await interaction.reply({
+            content: `Ownership transferred to <@${targetId}> 🔄`,
+            flags: MessageFlags.Ephemeral,
+        });
     },
 };

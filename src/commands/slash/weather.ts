@@ -1,10 +1,5 @@
 import axios from "axios";
-import {
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-    bold,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder, bold } from "discord.js";
 
 import Reply from "../../util/decorator/reply";
 
@@ -91,11 +86,7 @@ export default {
         .setName("weather")
         .setDescription("Get weather information.")
         .addStringOption((option) =>
-            option
-                .setName("location")
-                .setDescription("Your location")
-                .setRequired(true)
-                .setMaxLength(200)
+            option.setName("location").setDescription("Your location").setRequired(true).setMaxLength(200)
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         const location = interaction.options.getString("location", true);

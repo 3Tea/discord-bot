@@ -24,15 +24,10 @@ export default {
                 .setName("read")
                 .setDescription("Read H manga and D")
                 .addIntegerOption((option) =>
-                    option
-                        .setName("id")
-                        .setDescription("The ID you wanna read")
-                        .setRequired(true)
+                    option.setName("id").setDescription("The ID you wanna read").setRequired(true)
                 )
         )
-        .addSubcommand((subcommand) =>
-            subcommand.setName("random").setDescription("Random H and D")
-        ),
+        .addSubcommand((subcommand) => subcommand.setName("random").setDescription("Random H and D")),
     async execute(interaction: ChatInputCommandInteraction) {
         try {
             if (!(interaction.channel as TextChannel)?.nsfw) {
@@ -40,18 +35,14 @@ export default {
                 return;
             }
             const subcommand = interaction.options.getSubcommand(true);
-            const data = interaction.options.data.find(
-                (e) => e.name === subcommand
-            );
+            const data = interaction.options.data.find((e) => e.name === subcommand);
 
             let nhentai;
 
             await interaction.deferReply();
 
             if (subcommand != "random") {
-                nhentai = await axios.get(
-                    `${SERVER_HD}nhentai/get?book=${data!.options![0].value}`
-                );
+                nhentai = await axios.get(`${SERVER_HD}nhentai/get?book=${data!.options![0].value}`);
             } else {
                 nhentai = await axios.get(`${SERVER_HD}nhentai/random`);
             }
@@ -71,18 +62,12 @@ export default {
                         },
                         {
                             name: "Language: ",
-                            value: `${
-                                result.language ? result.language : "update..."
-                            }`,
+                            value: `${result.language ? result.language : "update..."}`,
                             inline: true,
                         },
                         {
                             name: "Artist",
-                            value: `${
-                                result.artist && result.artist.length != 0
-                                    ? result.artist
-                                    : "update..."
-                            }`,
+                            value: `${result.artist && result.artist.length != 0 ? result.artist : "update..."}`,
                             inline: true,
                         },
                         {
@@ -92,34 +77,22 @@ export default {
                         },
                         {
                             name: "Group: ",
-                            value: `G: ${
-                                result.group ? result.group : "update..."
-                            }`,
+                            value: `G: ${result.group ? result.group : "update..."}`,
                             inline: true,
                         },
                         {
                             name: "Parodies: ",
-                            value: `P: ${
-                                result.parodies ? result.parodies : "update..."
-                            }`,
+                            value: `P: ${result.parodies ? result.parodies : "update..."}`,
                             inline: true,
                         },
                         {
                             name: "Characters: ",
-                            value: `C: ${
-                                result.characters.length != 0
-                                    ? result.characters
-                                    : `update...`
-                            }`,
+                            value: `C: ${result.characters.length != 0 ? result.characters : `update...`}`,
                             inline: true,
                         },
                         {
                             name: "Last updated: ",
-                            value: `${
-                                result.upload_date
-                                    ? result.upload_date
-                                    : "update..."
-                            }`,
+                            value: `${result.upload_date ? result.upload_date : "update..."}`,
                             inline: true,
                         }
                     )
@@ -137,18 +110,12 @@ export default {
                             .setLabel("Read")
                             .setStyle(ButtonStyle.Primary)
                     );
-                    await redis.setJson(
-                        `${BUTTON_ID.nhtaiRead}_${result.id}`,
-                        result.image,
-                        60 * 10
-                    );
+                    await redis.setJson(`${BUTTON_ID.nhtaiRead}_${result.id}`, result.image, 60 * 10);
                 } else {
                     row.addComponents(
                         new ButtonBuilder()
                             .setCustomId(`${BUTTON_ID.nhtaiRead}`)
-                            .setLabel(
-                                "Please read it online. There are too many pages."
-                            )
+                            .setLabel("Please read it online. There are too many pages.")
                             .setStyle(ButtonStyle.Primary)
                             .setDisabled(true)
                     );

@@ -45,9 +45,7 @@ export default {
                 files: [
                     {
                         attachment: image,
-                        name: `${SERVER_S}${new Date().toISOString()}_${
-                            index + 1
-                        }/${length}.png`,
+                        name: `${SERVER_S}${new Date().toISOString()}_${index + 1}/${length}.png`,
                     },
                 ],
             });

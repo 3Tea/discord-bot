@@ -10,15 +10,11 @@ export default {
         const command = client?.commands.get(interaction.commandName);
 
         if (!command) {
-            console.error(
-                `No command matching ${interaction.commandName} was found.`
-            );
+            console.error(`No command matching ${interaction.commandName} was found.`);
             return;
         }
 
-        console.log(
-            `/${interaction.commandName} => username: ${interaction.user.username} ID: ${interaction.user.id}`
-        );
+        console.log(`/${interaction.commandName} => username: ${interaction.user.username} ID: ${interaction.user.id}`);
 
         try {
             await command.execute(interaction);

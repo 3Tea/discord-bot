@@ -23,15 +23,11 @@ export class RedisService {
         });
 
         this.client.on("error", (err: any) => {
-            logger.error(
-                `Connect to Redis fail, you need install redis or start service redis`
-            );
+            logger.error(`Connect to Redis fail, you need install redis or start service redis`);
             logger.error(err);
         });
         this.client.on("connect", () => {
-            logger.debug(
-                `Connect to Redis success: ${this.client.options.host}:${this.client.options.port}`
-            );
+            logger.debug(`Connect to Redis success: ${this.client.options.host}:${this.client.options.port}`);
         });
         this.client.on("ready", () => {
             // console.log(this.client.mode, this.client.status,this.client.);

@@ -11,9 +11,7 @@ export default {
         const button = client?.buttons.get(interaction.customId);
 
         if (!button) {
-            console.error(
-                `No button matching ${interaction.customId} was found.`
-            );
+            console.error(`No button matching ${interaction.customId} was found.`);
             return;
         }
 

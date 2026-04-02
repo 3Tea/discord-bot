@@ -39,7 +39,10 @@ export default {
 
         const targetMember = voiceChannel.members.get(targetId);
         if (!targetMember) {
-            await interaction.reply({ content: "That user is not in the voice channel.", flags: MessageFlags.Ephemeral });
+            await interaction.reply({
+                content: "That user is not in the voice channel.",
+                flags: MessageFlags.Ephemeral,
+            });
             return;
         }
 
@@ -47,8 +50,16 @@ export default {
         await redis.setJson(`kick_target:${interaction.user.id}:${voiceChannel.id}`, targetId, 30);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_KICK_ONLY).setLabel("Kick").setEmoji("👢").setStyle(ButtonStyle.Primary),
-            new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_KICK_BLOCK).setLabel("Kick & Block").setEmoji("🚫").setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+                .setCustomId(BUTTON_ID.VOICE_KICK_ONLY)
+                .setLabel("Kick")
+                .setEmoji("👢")
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId(BUTTON_ID.VOICE_KICK_BLOCK)
+                .setLabel("Kick & Block")
+                .setEmoji("🚫")
+                .setStyle(ButtonStyle.Danger)
         );
 
         await interaction.reply({

@@ -20,9 +20,7 @@ const TTL_12H = 60 * 60 * 12;
  * Check if the interaction user is the owner of the voice channel.
  * Returns the voice channel if valid, or null (and replies with error) if not.
  */
-export async function validateOwner(
-    interaction: RepliableInteraction
-): Promise<VoiceChannel | null> {
+export async function validateOwner(interaction: RepliableInteraction): Promise<VoiceChannel | null> {
     const member = interaction.member as GuildMember;
     const voiceChannel = member?.voice.channel as VoiceChannel | null;
 
@@ -50,10 +48,7 @@ export async function validateOwner(
  * Check cooldown for an action. Returns true if action is allowed, false if on cooldown.
  * If on cooldown, replies with ephemeral message.
  */
-export async function checkCooldown(
-    interaction: RepliableInteraction,
-    redisKey: string
-): Promise<boolean> {
+export async function checkCooldown(interaction: RepliableInteraction, redisKey: string): Promise<boolean> {
     const ttl = await redis.ttlKey(redisKey);
     if (ttl > 0) {
         await interaction.reply({
@@ -118,18 +113,54 @@ export async function buildPanelEmbed(channelId: string, ownerId: string): Promi
  */
 export function buildPanelRows(): ActionRowBuilder<ButtonBuilder>[] {
     const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_LOCK).setEmoji("🔒").setLabel("Lock").setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_UNLOCK).setEmoji("🔓").setLabel("Unlock").setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_HIDE).setEmoji("👁️").setLabel("Hide").setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_RENAME).setEmoji("✏️").setLabel("Rename").setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_LIMIT).setEmoji("👥").setLabel("Limit").setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.VOICE_LOCK)
+            .setEmoji("🔒")
+            .setLabel("Lock")
+            .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.VOICE_UNLOCK)
+            .setEmoji("🔓")
+            .setLabel("Unlock")
+            .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.VOICE_HIDE)
+            .setEmoji("👁️")
+            .setLabel("Hide")
+            .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.VOICE_RENAME)
+            .setEmoji("✏️")
+            .setLabel("Rename")
+            .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.VOICE_LIMIT)
+            .setEmoji("👥")
+            .setLabel("Limit")
+            .setStyle(ButtonStyle.Primary)
     );
 
     const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_PERMIT).setEmoji("✅").setLabel("Permit").setStyle(ButtonStyle.Success),
-        new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_BLOCK).setEmoji("🚫").setLabel("Block").setStyle(ButtonStyle.Danger),
-        new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_KICK).setEmoji("👢").setLabel("Kick").setStyle(ButtonStyle.Danger),
-        new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_TRANSFER).setEmoji("🔄").setLabel("Transfer").setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.VOICE_PERMIT)
+            .setEmoji("✅")
+            .setLabel("Permit")
+            .setStyle(ButtonStyle.Success),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.VOICE_BLOCK)
+            .setEmoji("🚫")
+            .setLabel("Block")
+            .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.VOICE_KICK)
+            .setEmoji("👢")
+            .setLabel("Kick")
+            .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.VOICE_TRANSFER)
+            .setEmoji("🔄")
+            .setLabel("Transfer")
+            .setStyle(ButtonStyle.Primary)
     );
 
     return [row1, row2];

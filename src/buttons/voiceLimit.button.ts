@@ -1,10 +1,4 @@
-import {
-    ActionRowBuilder,
-    ButtonInteraction,
-    ModalBuilder,
-    TextInputBuilder,
-    TextInputStyle,
-} from "discord.js";
+import { ActionRowBuilder, ButtonInteraction, ModalBuilder, TextInputBuilder, TextInputStyle } from "discord.js";
 
 import { BUTTON_ID } from "../util/config/button";
 import { validateOwner, checkCooldown } from "../util/voice/helpers";
@@ -18,9 +12,7 @@ export default {
         const cdKey = `setUserLimit:${voiceChannel.id}`;
         if (!(await checkCooldown(interaction, cdKey))) return;
 
-        const modal = new ModalBuilder()
-            .setCustomId(BUTTON_ID.VOICE_MODAL_LIMIT)
-            .setTitle("Set User Limit");
+        const modal = new ModalBuilder().setCustomId(BUTTON_ID.VOICE_MODAL_LIMIT).setTitle("Set User Limit");
 
         const limitInput = new TextInputBuilder()
             .setCustomId("voice_limit_input")

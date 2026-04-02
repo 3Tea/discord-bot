@@ -14,9 +14,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("info")
         .setDescription("Information about bot")
-        .addSubcommand((subcommand) =>
-            subcommand.setName("bot").setDescription("Information about bot")
-        ),
+        .addSubcommand((subcommand) => subcommand.setName("bot").setDescription("Information about bot")),
     async execute(interaction: ChatInputCommandInteraction) {
         const subcommand = interaction.options.getSubcommand(true);
         const embed = new EmbedBuilder().setColor("Random").setTimestamp();
@@ -72,19 +70,12 @@ export default {
             .setURL(`${process.env.URL_REPORT_BUG}`)
             .setStyle(ButtonStyle.Link);
 
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            homepage,
-            discussions,
-            reportBug
-        );
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(homepage, discussions, reportBug);
         await reply.embedButtons(interaction, embed, row);
         return;
     },
 };
 
 export function getInfoBot(interaction: ChatInputCommandInteraction) {
-    return interaction.client.guilds.cache.reduce(
-        (a, g) => a + g.memberCount,
-        0
-    );
+    return interaction.client.guilds.cache.reduce((a, g) => a + g.memberCount, 0);
 }

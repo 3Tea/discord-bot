@@ -21,14 +21,21 @@ export default {
         .setName("voice")
         .setDescription("Voice channel management")
         .addSubcommand((sub) =>
-            sub.setName("limit")
+            sub
+                .setName("limit")
                 .setDescription("Set the user limit for the voice channel")
                 .addIntegerOption((opt) =>
-                    opt.setName("number").setDescription("Number of users (0-99)").setMinValue(0).setMaxValue(99).setRequired(true)
+                    opt
+                        .setName("number")
+                        .setDescription("Number of users (0-99)")
+                        .setMinValue(0)
+                        .setMaxValue(99)
+                        .setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
-            sub.setName("name")
+            sub
+                .setName("name")
                 .setDescription("Change the voice channel name")
                 .addStringOption((opt) =>
                     opt.setName("string").setDescription("New name").setMaxLength(50).setRequired(true)
@@ -38,22 +45,26 @@ export default {
         .addSubcommand((sub) => sub.setName("unlock").setDescription("Unlock the voice channel"))
         .addSubcommand((sub) => sub.setName("hide").setDescription("Hide the voice channel"))
         .addSubcommand((sub) =>
-            sub.setName("permit")
+            sub
+                .setName("permit")
                 .setDescription("Permit a user to join")
                 .addUserOption((opt) => opt.setName("user").setDescription("User to permit").setRequired(true))
         )
         .addSubcommand((sub) =>
-            sub.setName("block")
+            sub
+                .setName("block")
                 .setDescription("Block a user from the channel")
                 .addUserOption((opt) => opt.setName("user").setDescription("User to block").setRequired(true))
         )
         .addSubcommand((sub) =>
-            sub.setName("kick")
+            sub
+                .setName("kick")
                 .setDescription("Kick a user from the voice channel")
                 .addUserOption((opt) => opt.setName("user").setDescription("User to kick").setRequired(true))
         )
         .addSubcommand((sub) =>
-            sub.setName("transfer")
+            sub
+                .setName("transfer")
                 .setDescription("Transfer channel ownership")
                 .addUserOption((opt) => opt.setName("user").setDescription("New owner").setRequired(true))
         ),
@@ -69,7 +80,10 @@ export default {
 
         const ownerId = await redis.getJson(voiceChannel.id);
         if (ownerId !== interaction.user.id) {
-            await interaction.reply({ content: "You are not the owner of this voice channel.", flags: MessageFlags.Ephemeral });
+            await interaction.reply({
+                content: "You are not the owner of this voice channel.",
+                flags: MessageFlags.Ephemeral,
+            });
             return;
         }
 
@@ -83,7 +97,10 @@ export default {
                 await voiceChannel.setUserLimit(limit, `userLimit to ${limit} ${FOOTER.text}`);
                 await setCooldown(cdKey, 120);
                 await updatePanel(voiceChannel);
-                await interaction.reply({ content: `User limit set to **${limit}** 👥`, flags: MessageFlags.Ephemeral });
+                await interaction.reply({
+                    content: `User limit set to **${limit}** 👥`,
+                    flags: MessageFlags.Ephemeral,
+                });
                 break;
             }
             case "name": {
@@ -93,7 +110,10 @@ export default {
                 await voiceChannel.setName(`* ${name}`, `setVoiceName to ${name} ${FOOTER.text}`);
                 await setCooldown(cdKey, 120);
                 await updatePanel(voiceChannel);
-                await interaction.reply({ content: `Channel renamed to **${name}** ✏️`, flags: MessageFlags.Ephemeral });
+                await interaction.reply({
+                    content: `Channel renamed to **${name}** ✏️`,
+                    flags: MessageFlags.Ephemeral,
+                });
                 break;
             }
             case "lock": {
@@ -151,7 +171,10 @@ export default {
                 }
                 await setCooldown(cdKey, 5);
                 await updatePanel(voiceChannel);
-                await interaction.reply({ content: `<@${target.id}> has been permitted ✅`, flags: MessageFlags.Ephemeral });
+                await interaction.reply({
+                    content: `<@${target.id}> has been permitted ✅`,
+                    flags: MessageFlags.Ephemeral,
+                });
                 break;
             }
             case "block": {
@@ -180,7 +203,10 @@ export default {
                 }
                 await setCooldown(cdKey, 5);
                 await updatePanel(voiceChannel);
-                await interaction.reply({ content: `<@${target.id}> has been blocked 🚫`, flags: MessageFlags.Ephemeral });
+                await interaction.reply({
+                    content: `<@${target.id}> has been blocked 🚫`,
+                    flags: MessageFlags.Ephemeral,
+                });
                 break;
             }
             case "kick": {
@@ -193,15 +219,30 @@ export default {
                 }
                 const targetMember = voiceChannel.members.get(target.id);
                 if (!targetMember) {
-                    await interaction.reply({ content: "That user is not in the voice channel.", flags: MessageFlags.Ephemeral });
+                    await interaction.reply({
+                        content: "That user is not in the voice channel.",
+                        flags: MessageFlags.Ephemeral,
+                    });
                     return;
                 }
                 await redis.setJson(`kick_target:${interaction.user.id}:${voiceChannel.id}`, target.id, 30);
                 const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_KICK_ONLY).setLabel("Kick").setEmoji("👢").setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder().setCustomId(BUTTON_ID.VOICE_KICK_BLOCK).setLabel("Kick & Block").setEmoji("🚫").setStyle(ButtonStyle.Danger),
+                    new ButtonBuilder()
+                        .setCustomId(BUTTON_ID.VOICE_KICK_ONLY)
+                        .setLabel("Kick")
+                        .setEmoji("👢")
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId(BUTTON_ID.VOICE_KICK_BLOCK)
+                        .setLabel("Kick & Block")
+                        .setEmoji("🚫")
+                        .setStyle(ButtonStyle.Danger)
                 );
-                await interaction.reply({ content: `Kick <@${target.id}> from the voice channel?`, components: [row], flags: MessageFlags.Ephemeral });
+                await interaction.reply({
+                    content: `Kick <@${target.id}> from the voice channel?`,
+                    components: [row],
+                    flags: MessageFlags.Ephemeral,
+                });
                 break;
             }
             case "transfer": {
@@ -217,7 +258,10 @@ export default {
                 await redis.deleteKey(`blocked:${voiceChannel.id}`);
                 await setCooldown(cdKey, 5);
                 await updatePanel(voiceChannel);
-                await interaction.reply({ content: `Ownership transferred to <@${target.id}> 🔄`, flags: MessageFlags.Ephemeral });
+                await interaction.reply({
+                    content: `Ownership transferred to <@${target.id}> 🔄`,
+                    flags: MessageFlags.Ephemeral,
+                });
                 break;
             }
             default:

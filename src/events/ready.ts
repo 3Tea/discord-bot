@@ -15,10 +15,7 @@ export default {
 
         console.log(`Ready! Logged in as ${client.user.tag}`);
 
-        const numberOfDays = getNumberOfDays(
-            new Date("2019/08/25"),
-            new Date()
-        );
+        const numberOfDays = getNumberOfDays(new Date("2019/08/25"), new Date());
         client.user.setPresence({
             activities: [
                 {

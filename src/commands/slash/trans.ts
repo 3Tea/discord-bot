@@ -1,10 +1,5 @@
 import axios from "axios";
-import {
-    bold,
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-} from "discord.js";
+import { bold, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 
 import Reply from "../../util/decorator/reply";
 
@@ -18,12 +13,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("trans")
         .setDescription("Translate all languages to Vietnamese")
-        .addStringOption((option) =>
-            option
-                .setName("word")
-                .setDescription("word or paragraph")
-                .setRequired(true)
-        ),
+        .addStringOption((option) => option.setName("word").setDescription("word or paragraph").setRequired(true)),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
         try {

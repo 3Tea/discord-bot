@@ -1,16 +1,13 @@
 import {
-    CategoryChannelResolvable,
     ChannelType,
     Events,
     PermissionFlagsBits,
-    StageChannel,
-    VoiceChannel,
     VoiceState,
 } from "discord.js";
 
-import { FOOTER } from "../util/config";
 import redis from "../connector/redis";
-import { sendPanel, cleanupRedisKeys } from "../util/voice/helpers";
+import { FOOTER } from "../util/config";
+import { cleanupRedisKeys, sendPanel } from "../util/voice/helpers";
 
 const TTL_12H = 60 * 60 * 12;
 const NAME_PREFIX_TRIGGER = "3AT ";
@@ -30,7 +27,7 @@ export default {
             if (memberCount === 0 || onlyBots) {
                 const channelId = oldState.channel.id;
                 try {
-                    const channel = await oldState.channel.fetch() as VoiceChannel | StageChannel;
+                    const channel = await oldState.channel.fetch();
                     await channel.delete(`Voice channel ${channel.name} deleted, powered by DS112`);
                 } catch {
                     // Channel may already be deleted
@@ -46,7 +43,7 @@ export default {
                 type: ChannelType.GuildVoice,
                 name: `${NAME_PREFIX_TEMP}${newState.member?.user.username}`,
                 bitrate: newState.channel.bitrate || 64000,
-                parent: newState.channel.parent as CategoryChannelResolvable,
+                parent: newState.channel.parent,
                 userLimit: 23,
                 reason,
                 permissionOverwrites: [
@@ -59,7 +56,7 @@ export default {
 
             await newState.setChannel(voiceChannel);
             await redis.setJson(voiceChannel.id, newState.id, TTL_12H);
-            await sendPanel(voiceChannel as VoiceChannel, newState.id!);
+            await sendPanel(voiceChannel, newState.id!);
         }
     },
 };

@@ -24,17 +24,10 @@ export default {
                 .setName("read")
                 .setDescription("Read H manga and D")
                 .addIntegerOption((option) =>
-                    option
-                        .setName("id")
-                        .setDescription("The ID you wanna read")
-                        .setRequired(true)
+                    option.setName("id").setDescription("The ID you wanna read").setRequired(true)
                 )
         )
-        .addSubcommand((subcommand) =>
-            subcommand
-                .setName("random")
-                .setDescription("Random H and D from pururin")
-        ),
+        .addSubcommand((subcommand) => subcommand.setName("random").setDescription("Random H and D from pururin")),
     async execute(interaction: ChatInputCommandInteraction) {
         try {
             if (!(interaction.channel as TextChannel)?.nsfw) {
@@ -42,18 +35,14 @@ export default {
                 return;
             }
             const subcommand = interaction.options.getSubcommand(true);
-            const data = interaction.options.data.find(
-                (e) => e.name === subcommand
-            );
+            const data = interaction.options.data.find((e) => e.name === subcommand);
 
             let pururin;
 
             await interaction.deferReply();
 
             if (subcommand != "random") {
-                pururin = await axios.get(
-                    `${SERVER_HD}pururin/get?book=${data!.options![0].value}`
-                );
+                pururin = await axios.get(`${SERVER_HD}pururin/get?book=${data!.options![0].value}`);
             } else {
                 pururin = await axios.get(`${SERVER_HD}pururin/random`);
             }
@@ -80,11 +69,7 @@ export default {
                         },
                         {
                             name: "Tags",
-                            value: `${
-                                result.tags && result.tags.length != 0
-                                    ? result.tags
-                                    : "Update..."
-                            }`,
+                            value: `${result.tags && result.tags.length != 0 ? result.tags : "Update..."}`,
                             inline: true,
                         }
                     )
@@ -102,18 +87,12 @@ export default {
                             .setLabel("Read")
                             .setStyle(ButtonStyle.Primary)
                     );
-                    await redis.setJson(
-                        `${BUTTON_ID.pururinRead}_${result.id}`,
-                        result.image,
-                        60 * 10
-                    );
+                    await redis.setJson(`${BUTTON_ID.pururinRead}_${result.id}`, result.image, 60 * 10);
                 } else {
                     row.addComponents(
                         new ButtonBuilder()
                             .setCustomId(`${BUTTON_ID.pururinRead}`)
-                            .setLabel(
-                                "Please read it online. There are too many pages."
-                            )
+                            .setLabel("Please read it online. There are too many pages.")
                             .setStyle(ButtonStyle.Primary)
                             .setDisabled(true)
                     );

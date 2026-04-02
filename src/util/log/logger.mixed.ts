@@ -2,13 +2,7 @@ import winston from "winston";
 import tracer from "tracer";
 
 const levels = process.env.LOG_LEVEL || "debug";
-const myFormat = winston.format.printf(
-    ({
-        level,
-        message,
-        timestamp,
-    }) => `${timestamp} ${level}: ${message}`
-);
+const myFormat = winston.format.printf(({ level, message, timestamp }) => `${timestamp} ${level}: ${message}`);
 
 const winstonLogger = winston.createLogger({
     format: winston.format.combine(

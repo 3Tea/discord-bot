@@ -24,15 +24,10 @@ export default {
                 .setName("read")
                 .setDescription("Read H manga and D lite")
                 .addIntegerOption((option) =>
-                    option
-                        .setName("id")
-                        .setDescription("The ID you wanna read")
-                        .setRequired(true)
+                    option.setName("id").setDescription("The ID you wanna read").setRequired(true)
                 )
         )
-        .addSubcommand((subcommand) =>
-            subcommand.setName("random").setDescription("Random H and D lite")
-        ),
+        .addSubcommand((subcommand) => subcommand.setName("random").setDescription("Random H and D lite")),
     async execute(interaction: ChatInputCommandInteraction) {
         try {
             if (!(interaction.channel as TextChannel)?.nsfw) {
@@ -40,18 +35,14 @@ export default {
                 return;
             }
             const subcommand = interaction.options.getSubcommand(true);
-            const data = interaction.options.data.find(
-                (e) => e.name === subcommand
-            );
+            const data = interaction.options.data.find((e) => e.name === subcommand);
 
             let nhentaiTo;
 
             await interaction.deferReply();
 
             if (subcommand != "random") {
-                nhentaiTo = await axios.get(
-                    `${SERVER_HD}nhentaito/get?book=${data!.options![0].value}`
-                );
+                nhentaiTo = await axios.get(`${SERVER_HD}nhentaito/get?book=${data!.options![0].value}`);
             } else {
                 nhentaiTo = await axios.get(`${SERVER_HD}nhentaito/random`);
             }
@@ -76,11 +67,7 @@ export default {
                         },
                         {
                             name: "Tags",
-                            value: `${
-                                result.tags && result.tags.length != 0
-                                    ? result.tags
-                                    : "Update..."
-                            }`,
+                            value: `${result.tags && result.tags.length != 0 ? result.tags : "Update..."}`,
                             inline: true,
                         }
                     )
@@ -98,18 +85,12 @@ export default {
                             .setLabel("Read")
                             .setStyle(ButtonStyle.Primary)
                     );
-                    await redis.setJson(
-                        `${BUTTON_ID.nhentaiToRead}_${result.id}`,
-                        result.image,
-                        60 * 10
-                    );
+                    await redis.setJson(`${BUTTON_ID.nhentaiToRead}_${result.id}`, result.image, 60 * 10);
                 } else {
                     row.addComponents(
                         new ButtonBuilder()
                             .setCustomId(`${BUTTON_ID.nhentaiToRead}`)
-                            .setLabel(
-                                "Please read it online. There are too many pages."
-                            )
+                            .setLabel("Please read it online. There are too many pages.")
                             .setStyle(ButtonStyle.Primary)
                             .setDisabled(true)
                     );

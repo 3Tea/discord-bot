@@ -20,7 +20,10 @@ export default {
 
         const ownerId = await redis.getJson(voiceChannel.id);
         if (ownerId !== interaction.user.id) {
-            await interaction.reply({ content: "You are not the owner of this voice channel.", flags: MessageFlags.Ephemeral });
+            await interaction.reply({
+                content: "You are not the owner of this voice channel.",
+                flags: MessageFlags.Ephemeral,
+            });
             return;
         }
 
@@ -38,7 +41,10 @@ export default {
                 const raw = interaction.fields.getTextInputValue("voice_limit_input");
                 const limit = parseInt(raw, 10);
                 if (isNaN(limit) || limit < 0 || limit > 99) {
-                    await interaction.reply({ content: "Please enter a number between 0 and 99.", flags: MessageFlags.Ephemeral });
+                    await interaction.reply({
+                        content: "Please enter a number between 0 and 99.",
+                        flags: MessageFlags.Ephemeral,
+                    });
                     return;
                 }
                 await voiceChannel.setUserLimit(limit, `userLimit to ${limit} ${FOOTER.text}`);

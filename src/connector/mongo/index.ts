@@ -13,12 +13,7 @@ mongoose
     })
     .then(
         () => {
-            logger.debug(
-                `[ Database =>] Connection to the database successful. ${MONGO.DB_URL}`
-            );
+            logger.debug(`[ Database =>] Connection to the database successful. ${MONGO.DB_URL}`);
         },
-        (err: Error) =>
-            logger.error(
-                `[ Database =>] The connection to the database failed: ${err}. = ${MONGO.DB_URL}`
-            )
+        (err: Error) => logger.error(`[ Database =>] The connection to the database failed: ${err}. = ${MONGO.DB_URL}`)
     );

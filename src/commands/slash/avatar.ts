@@ -1,20 +1,12 @@
-import {
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 
 import Reply from "../../util/decorator/reply";
 
 export default {
     data: new SlashCommandBuilder()
         .setName("avatar")
-        .setDescription(
-            "Get the avatar URL of the selected user, or your own avatar."
-        )
-        .addUserOption((option) =>
-            option.setName("target").setDescription("The user's avatar to show")
-        ),
+        .setDescription("Get the avatar URL of the selected user, or your own avatar.")
+        .addUserOption((option) => option.setName("target").setDescription("The user's avatar to show")),
     async execute(interaction: ChatInputCommandInteraction) {
         const user = interaction.options.getUser("target");
         // console.log(FOOTER);
