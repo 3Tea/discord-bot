@@ -1,4 +1,5 @@
 import ffmpegPath from "ffmpeg-static";
+import path from "node:path";
 import type { Client } from "discord.js";
 import { DisTube, Events as DisTubeEvents } from "distube";
 import type { DisTubePlugin } from "distube";
@@ -10,9 +11,13 @@ import { sendPanel, updatePanel, setIdlePanel } from "./panel";
 import redis from "../../connector/redis";
 
 export function initMusic(client: Client): void {
-    // Set ffmpeg path from ffmpeg-static before DisTube init
+    // Add ffmpeg-static binary directory to PATH so prism-media/DisTube can find it
     if (ffmpegPath) {
-        process.env.FFMPEG_PATH = ffmpegPath;
+        const ffmpegDir = path.dirname(ffmpegPath);
+        process.env.PATH = `${ffmpegDir}${path.delimiter}${process.env.PATH}`;
+        log(`[music] ffmpeg found at ${ffmpegPath}`, "info");
+    } else {
+        log("[music] ffmpeg-static not found — audio will not work", "error");
     }
 
     const plugins: DisTubePlugin[] = [];
