@@ -1,12 +1,6 @@
 export const BUTTON_ID = {
     // Manga reader
     mangaRead: "mangaRead",
-    nhtaiRead: `nhtaiRead`,
-    nhentaiToRead: `nhentaiToRead`,
-    threeHentaiRead: `threeHentaiRead`,
-    asmHentaiRead: `asmHentaiRead`,
-    hentaiFoxRead: `hentaiFoxRead`,
-    pururinRead: `pururinRead`,
     // Voice control panel buttons
     VOICE_LOCK: "voice_lock",
     VOICE_UNLOCK: "voice_unlock",
