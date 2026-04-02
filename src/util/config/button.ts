@@ -1,4 +1,6 @@
 export const BUTTON_ID = {
+    // Manga reader
+    mangaRead: "mangaRead",
     nhtaiRead: `nhtaiRead`,
     nhentaiToRead: `nhentaiToRead`,
     threeHentaiRead: `threeHentaiRead`,
