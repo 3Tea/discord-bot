@@ -10,93 +10,56 @@ import {
 
 import { FOOTER } from "../util/config";
 import redis from "../connector/redis";
+import { sendPanel, cleanupRedisKeys } from "../util/voice/helpers";
+
+const TTL_12H = 60 * 60 * 12;
+const NAME_PREFIX_TRIGGER = "3AT ";
+const NAME_PREFIX_TEMP = "* ";
 
 export default {
     name: Events.VoiceStateUpdate,
     once: false,
     async execute(oldState: VoiceState, newState: VoiceState) {
-        const userLimit = 23;
-        const nameStartWith = "3AT ";
-        const nameStartWithTemporary = "* ";
         const reason = `Automatic create voice channel ${FOOTER.text}`;
-        // ! leave
-        const isLeave = oldState?.channel != undefined;
-        // todo: check member leave
-        if (isLeave) {
-            if (oldState?.channel?.name.startsWith(nameStartWithTemporary)) {
-                switch (oldState?.channel?.members.size) {
-                    case 0:
-                        if (oldState?.channel) {
-                            oldState?.channel
-                                .fetch()
-                                .then(
-                                    (channel: VoiceChannel | StageChannel) => {
-                                        channel.delete(
-                                            `Voice channel ${channel.name} deleted, powered by DS112`
-                                        );
-                                    }
-                                );
 
-                            await redis.deleteKey(oldState.channel.id);
-                        }
-                        break;
+        // Handle leave: delete empty temporary channels
+        if (oldState.channel?.name.startsWith(NAME_PREFIX_TEMP)) {
+            const memberCount = oldState.channel.members.size;
+            const onlyBots = memberCount === 1 && oldState.channel.members.every((m) => m.user.bot);
 
-                    case 1:
-                        const isBot = oldState?.channel.members.find(
-                            (x: any) => x.user.bot == true
-                        );
-                        if (isBot) {
-                            if (oldState?.channel) {
-                                oldState?.channel
-                                    .fetch()
-                                    .then(
-                                        (
-                                            channel: VoiceChannel | StageChannel
-                                        ) => {
-                                            channel.delete(
-                                                `Voice channel ${channel.name} deleted, powered by DS112`
-                                            );
-                                        }
-                                    );
-
-                                await redis.deleteKey(oldState.channel.id);
-                            }
-                        }
-                        break;
-
-                    default:
-                        break;
+            if (memberCount === 0 || onlyBots) {
+                const channelId = oldState.channel.id;
+                try {
+                    const channel = await oldState.channel.fetch() as VoiceChannel | StageChannel;
+                    await channel.delete(`Voice channel ${channel.name} deleted, powered by DS112`);
+                } catch {
+                    // Channel may already be deleted
                 }
+                await cleanupRedisKeys(channelId);
             }
         }
 
-        // todo create channel
-        if (
-            newState.channel != null &&
-            newState.channel.name.startsWith(nameStartWith)
-        ) {
+        // Handle join: create temporary voice channel
+        if (newState.channel?.name.startsWith(NAME_PREFIX_TRIGGER)) {
             const everyone = newState.guild.roles.everyone;
-            newState.guild.channels
-                .create({
-                    type: ChannelType.GuildVoice,
-                    name: `${nameStartWithTemporary}${newState?.member?.user.username}`,
-                    bitrate: newState.channel.bitrate || 64000,
-                    // topic: reason,
-                    parent: newState?.channel
-                        ?.parent as CategoryChannelResolvable,
-                    userLimit: userLimit,
-                    reason: reason,
-                    permissionOverwrites: [
-                        {
-                            id: everyone.id,
-                            allow: [PermissionFlagsBits.ViewChannel],
-                        },
-                    ],
-                })
-                .then((cloneChannel: any) => {
-                    newState.setChannel(cloneChannel);
-                    redis.setJson(cloneChannel.id, newState.id, 60 * 60 * 12);
-                });
+            const voiceChannel = await newState.guild.channels.create({
+                type: ChannelType.GuildVoice,
+                name: `${NAME_PREFIX_TEMP}${newState.member?.user.username}`,
+                bitrate: newState.channel.bitrate || 64000,
+                parent: newState.channel.parent as CategoryChannelResolvable,
+                userLimit: 23,
+                reason,
+                permissionOverwrites: [
+                    {
+                        id: everyone.id,
+                        allow: [PermissionFlagsBits.ViewChannel],
+                    },
+                ],
+            });
+
+            await newState.setChannel(voiceChannel);
+            await redis.setJson(voiceChannel.id, newState.id, TTL_12H);
+            await sendPanel(voiceChannel as VoiceChannel, newState.id!);
         }
     },
 };
