@@ -2,7 +2,7 @@ import {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
-    CommandInteraction,
+    ChatInputCommandInteraction,
     EmbedBuilder,
     SlashCommandBuilder,
 } from "discord.js";
@@ -14,7 +14,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("help")
         .setDescription("Get the help commands"),
-    async execute(interaction: CommandInteraction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         const embed = new EmbedBuilder().setColor("Random").setTimestamp();
 
         embed.setTitle(`3AT - Endless Paradox 💖 Slash CMD Support`);

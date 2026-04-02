@@ -1,4 +1,4 @@
-import { ButtonInteraction, Events } from "discord.js";
+import { ButtonInteraction, Events, MessageFlags } from "discord.js";
 
 import client from "../client";
 
@@ -23,7 +23,7 @@ export default {
             console.error(error);
             await interaction.reply({
                 content: `There was an error while executing this button! ${interaction.customId}`,
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
     },

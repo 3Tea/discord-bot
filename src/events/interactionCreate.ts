@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Events } from "discord.js";
+import { ChatInputCommandInteraction, Events, MessageFlags } from "discord.js";
 import client from "../client";
 
 export default {
@@ -26,7 +26,7 @@ export default {
             console.error(error);
             await interaction.reply({
                 content: `There was an error while executing this command! ${interaction.commandName}`,
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
     },
