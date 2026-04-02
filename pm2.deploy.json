@@ -2,20 +2,22 @@
     "apps": [
         {
             "name": "discord-bot",
-            "script": "./src/bin/www.ts",
+            "script": "./dist/bin/www.js",
             "max_memory_restart": "400M",
-            "cron_restart": "0 * * * *",
             "autorestart": true,
             "exp_backoff_restart_delay": 100,
             "ignore_watch": [
                 "node_modules",
-                "public/images",
-                "logs"
+                "logs",
+                "dist"
             ],
             "watch_options": {
                 "followSymlinks": false
             },
-            "exec_mode": "cluster"
+            "exec_mode": "fork",
+            "env": {
+                "NODE_ENV": "production"
+            }
         }
     ]
 }

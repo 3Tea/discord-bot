@@ -1,3 +1,4 @@
+/// <reference path="./types/common/discord.d.ts" />
 import { Client, GatewayIntentBits } from "discord.js";
 
 import { loadCommands } from "./loaders/commands";
