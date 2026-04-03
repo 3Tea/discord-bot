@@ -16,7 +16,8 @@
       "Bash(git add:*)",
       "Bash(git commit -m ':*)",
       "Bash(git commit:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(docker compose:*)"
     ]
   }
 }

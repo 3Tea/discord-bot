@@ -25,8 +25,8 @@ export class RedisService {
 
         this.client = new Redis(REDIS.REDIS_URL, {
             retryStrategy(times) {
-                if (times > 5) return null; // stop retrying after 5 attempts
-                return Math.min(times * 50, 2000);
+                if (times > 3) return null;
+                return Math.min(times * 100, 1000);
             },
             maxRetriesPerRequest: 3,
             enableOfflineQueue: false,
@@ -40,6 +40,9 @@ export class RedisService {
             }
             this.connected = false;
         });
+        this.client.on("end", () => {
+            this.connected = false;
+        });
         this.client.on("connect", () => {
             this.errorLogged = false;
             logger.info(`Redis connected: ${this.client.options.host}:${this.client.options.port}`);
@@ -47,17 +50,17 @@ export class RedisService {
         this.client.on("ready", () => {
             this.connected = true;
             logger.info("Redis ready — using Redis as cache backend");
-        });
 
-        if (this.options?.monitor) {
-            this.client.monitor().then((monitor) => {
-                monitor.on("monitor", (time: number, args: string[], source: string, database: string) => {
-                    logger.debug(time, args, source, database);
+            if (this.options?.monitor) {
+                this.client.monitor().then((monitor) => {
+                    monitor.on("monitor", (time: number, args: string[], source: string, database: string) => {
+                        logger.debug(time, args, source, database);
+                    });
+                }).catch(() => {
+                    // silently ignore — monitor is optional
                 });
-            }).catch(() => {
-                // silently ignore — monitor is optional
-            });
-        }
+            }
+        });
     }
 
     async setJson(key: string, value: any, time?: number): Promise<string | null> {
