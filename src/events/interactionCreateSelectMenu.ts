@@ -19,10 +19,16 @@ export default {
             await handler.execute(interaction);
         } catch (error) {
             console.error(error);
-            await interaction.reply({
-                content: `There was an error while executing this select menu! ${interaction.customId}`,
-                flags: MessageFlags.Ephemeral,
-            });
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({
+                    content: `There was an error while executing this select menu! ${interaction.customId}`,
+                    flags: MessageFlags.Ephemeral,
+                }).catch(() => {});
+            } else if (interaction.deferred) {
+                await interaction.editReply({
+                    content: `There was an error while executing this select menu! ${interaction.customId}`,
+                }).catch(() => {});
+            }
         }
     },
 };

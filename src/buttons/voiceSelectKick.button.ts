@@ -10,38 +10,42 @@ import {
 
 import { BUTTON_ID } from "../util/config/button";
 import redis from "../connector/redis";
-import { checkCooldown } from "../util/voice/helpers";
 
 export default {
     id: BUTTON_ID.VOICE_SELECT_KICK,
     async execute(interaction: UserSelectMenuInteraction) {
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
         const member = interaction.member as GuildMember;
         const voiceChannel = member?.voice.channel as VoiceChannel | null;
         if (!voiceChannel) {
-            await interaction.reply({ content: "You are not in a voice channel.", flags: MessageFlags.Ephemeral });
+            await interaction.editReply({ content: "You are not in a voice channel." });
             return;
         }
 
         const ownerId = await redis.getJson(voiceChannel.id);
         if (ownerId !== interaction.user.id) {
-            await interaction.reply({ content: "You are not the owner.", flags: MessageFlags.Ephemeral });
+            await interaction.editReply({ content: "You are not the owner." });
             return;
         }
 
         const cdKey = `cd:kick:${voiceChannel.id}`;
-        if (!(await checkCooldown(interaction, cdKey))) return;
+        const ttl = await redis.ttlKey(cdKey);
+        if (ttl > 0) {
+            await interaction.editReply({ content: `Please try again in ${ttl}s.` });
+            return;
+        }
 
         const targetId = interaction.values[0];
         if (targetId === interaction.user.id) {
-            await interaction.reply({ content: "You cannot kick yourself.", flags: MessageFlags.Ephemeral });
+            await interaction.editReply({ content: "You cannot kick yourself." });
             return;
         }
 
         const targetMember = voiceChannel.members.get(targetId);
         if (!targetMember) {
-            await interaction.reply({
+            await interaction.editReply({
                 content: "That user is not in the voice channel.",
-                flags: MessageFlags.Ephemeral,
             });
             return;
         }
@@ -62,10 +66,9 @@ export default {
                 .setStyle(ButtonStyle.Danger)
         );
 
-        await interaction.reply({
+        await interaction.editReply({
             content: `Kick <@${targetId}> from the voice channel?`,
             components: [row],
-            flags: MessageFlags.Ephemeral,
         });
     },
 };

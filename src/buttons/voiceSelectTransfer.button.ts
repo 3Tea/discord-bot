@@ -2,32 +2,38 @@ import { GuildMember, MessageFlags, UserSelectMenuInteraction, VoiceChannel } fr
 
 import { BUTTON_ID } from "../util/config/button";
 import redis from "../connector/redis";
-import { checkCooldown, setCooldown, updatePanel } from "../util/voice/helpers";
+import { setCooldown, updatePanel } from "../util/voice/helpers";
 
 const TTL_12H = 60 * 60 * 12;
 
 export default {
     id: BUTTON_ID.VOICE_SELECT_TRANSFER,
     async execute(interaction: UserSelectMenuInteraction) {
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
         const member = interaction.member as GuildMember;
         const voiceChannel = member?.voice.channel as VoiceChannel | null;
         if (!voiceChannel) {
-            await interaction.reply({ content: "You are not in a voice channel.", flags: MessageFlags.Ephemeral });
+            await interaction.editReply({ content: "You are not in a voice channel." });
             return;
         }
 
         const ownerId = await redis.getJson(voiceChannel.id);
         if (ownerId !== interaction.user.id) {
-            await interaction.reply({ content: "You are not the owner.", flags: MessageFlags.Ephemeral });
+            await interaction.editReply({ content: "You are not the owner." });
             return;
         }
 
         const cdKey = `cd:transfer:${voiceChannel.id}`;
-        if (!(await checkCooldown(interaction, cdKey))) return;
+        const ttl = await redis.ttlKey(cdKey);
+        if (ttl > 0) {
+            await interaction.editReply({ content: `Please try again in ${ttl}s.` });
+            return;
+        }
 
         const targetId = interaction.values[0];
         if (targetId === interaction.user.id) {
-            await interaction.reply({ content: "You are already the owner.", flags: MessageFlags.Ephemeral });
+            await interaction.editReply({ content: "You are already the owner." });
             return;
         }
 
@@ -39,9 +45,8 @@ export default {
 
         await setCooldown(cdKey, 5);
         await updatePanel(voiceChannel);
-        await interaction.reply({
+        await interaction.editReply({
             content: `Ownership transferred to <@${targetId}> 🔄`,
-            flags: MessageFlags.Ephemeral,
         });
     },
 };
