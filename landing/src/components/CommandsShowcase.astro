@@ -1,0 +1,262 @@
+---
+---
+
+<section id="commands" class="commands-section">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-label">Commands</p>
+      <h2 class="section-title">See it in action</h2>
+      <p class="section-subtitle">
+        Discord-native embed previews of real bot responses.
+      </p>
+    </div>
+
+    <div class="commands-grid reveal-stagger">
+      <!-- /voice lock -->
+      <div class="cmd-preview reveal" style="--i: 0">
+        <div class="cmd-header">
+          <span class="slash-badge">/</span>
+          <span class="cmd-name">voice</span>
+          <span class="cmd-args">lock</span>
+        </div>
+        <div class="cmd-body" style="--bar-color: var(--success)">
+          <div class="embed-bar"></div>
+          <div class="embed-content">
+            <p class="embed-title success">Channel Locked</p>
+            <p class="embed-desc">Your voice channel has been locked. Only permitted users can join.</p>
+            <div class="embed-field">
+              <span class="field-name">Channel</span>
+              <span class="field-value">Hung's Room</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- /nhentai random -->
+      <div class="cmd-preview reveal" style="--i: 1">
+        <div class="cmd-header">
+          <span class="slash-badge">/</span>
+          <span class="cmd-name">nhentai</span>
+          <span class="cmd-args">random</span>
+        </div>
+        <div class="cmd-body" style="--bar-color: var(--accent)">
+          <div class="embed-bar"></div>
+          <div class="embed-content">
+            <p class="embed-title accent">Random Doujin</p>
+            <div class="img-placeholder">
+              <span>📖 Cover Image</span>
+            </div>
+            <div class="embed-buttons">
+              <button class="embed-btn btn-blurple">&#8249; Prev</button>
+              <button class="embed-btn btn-blurple">Next &#8250;</button>
+              <button class="embed-btn btn-danger">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- /trans -->
+      <div class="cmd-preview reveal" style="--i: 2">
+        <div class="cmd-header">
+          <span class="slash-badge">/</span>
+          <span class="cmd-name">trans</span>
+          <span class="cmd-args">text: Hello, world!</span>
+        </div>
+        <div class="cmd-body" style="--bar-color: var(--warning)">
+          <div class="embed-bar"></div>
+          <div class="embed-content">
+            <p class="embed-title warning">Translation Result</p>
+            <div class="embed-field">
+              <span class="field-name">Original</span>
+              <span class="field-value">Hello, world!</span>
+            </div>
+            <div class="embed-field">
+              <span class="field-name">Vietnamese</span>
+              <span class="field-value">Xin chào thế giới!</span>
+            </div>
+            <div class="embed-field">
+              <span class="field-name">Detected</span>
+              <span class="field-value">English → Vietnamese</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="commands-cta">
+      <a href="https://github.com/ds112-dev/discord-bot" target="_blank" rel="noopener noreferrer" class="cta-link">
+        View all commands &rarr;
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .commands-section {
+    padding: var(--section-padding);
+    background: var(--bg-primary);
+  }
+
+  .commands-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .cmd-preview {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cmd-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-tertiary);
+  }
+
+  .slash-badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    line-height: 1.4;
+  }
+
+  .cmd-name {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .cmd-args {
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  .cmd-body {
+    display: flex;
+    flex: 1;
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .embed-bar {
+    width: 3px;
+    border-radius: 2px;
+    background: var(--bar-color);
+    flex-shrink: 0;
+    align-self: stretch;
+  }
+
+  .embed-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .embed-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .embed-title.success { color: var(--success); }
+  .embed-title.accent  { color: var(--accent); }
+  .embed-title.warning { color: var(--warning); }
+
+  .embed-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .embed-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .field-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .field-value {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .img-placeholder {
+    background: var(--bg-tertiary);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .embed-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .embed-btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: default;
+  }
+
+  .btn-blurple {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-danger {
+    background: var(--danger);
+    color: #fff;
+  }
+
+  .commands-cta {
+    text-align: center;
+    margin-top: 32px;
+  }
+
+  .cta-link {
+    color: var(--accent);
+    font-size: 15px;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .cta-link:hover {
+    color: var(--accent-hover);
+  }
+
+  @media (max-width: 900px) {
+    .commands-grid {
+      grid-template-columns: 1fr;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+  }
+</style>
