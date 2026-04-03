@@ -311,7 +311,7 @@ All variables documented in `.env.example`. Critical ones:
 | `GUILD_ID` | Dev only | Guild-scoped command deployment |
 | `NODE_ENV` | Yes | `development` or `production` |
 | `DB_URL` | Yes | MongoDB connection string |
-| `REDIS_URL` | Yes | Redis connection string |
+| `REDIS_URL` | No | Redis connection string (fallback: in-memory cache) |
 
 ## Docker
 

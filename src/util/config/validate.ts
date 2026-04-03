@@ -3,9 +3,9 @@
  * Exits with a clear error message if any are missing.
  */
 
-const REQUIRED_VARS = ["DISCORD_TOKEN", "APPLICATION_ID", "DB_URL", "REDIS_URL"] as const;
+const REQUIRED_VARS = ["DISCORD_TOKEN", "APPLICATION_ID", "DB_URL"] as const;
 
-const OPTIONAL_WARN_VARS = ["SERVER_HD", "SERVER_S"] as const;
+const OPTIONAL_WARN_VARS = ["REDIS_URL", "SERVER_HD", "SERVER_S"] as const;
 
 export function validateEnv(): void {
     const missing: string[] = [];
