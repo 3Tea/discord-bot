@@ -1,0 +1,200 @@
+---
+const inviteUrl =
+  "https://discord.com/api/oauth2/authorize?client_id=615052741911379983&permissions=8&scope=applications.commands%20bot";
+
+const links = [
+  { label: "Add to Server", href: inviteUrl, external: true },
+  { label: "Commands", href: "/commands" },
+  {
+    label: "Support Server",
+    href: "https://github.com/3Tea/discord-bot/discussions",
+    external: true,
+  },
+  {
+    label: "GitHub",
+    href: "https://github.com/3Tea/discord-bot",
+    external: true,
+  },
+];
+
+const resources = [
+  {
+    label: "Documentation",
+    href: "https://github.com/3Tea/discord-bot#readme",
+    external: true,
+  },
+  {
+    label: "Report Bug",
+    href: "https://github.com/3Tea/discord-bot/issues",
+    external: true,
+  },
+  {
+    label: "Discussions",
+    href: "https://github.com/3Tea/discord-bot/discussions",
+    external: true,
+  },
+];
+
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer-inner container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-brand-row">
+          <img src="/maid.gif" alt="3AT" width="28" height="28" class="footer-logo" />
+          <span class="footer-name">3AT - Endless Paradox</span>
+        </div>
+        <p class="footer-desc">
+          Discord bot for voice management, manga reading & more. Running since 2019.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Links</h4>
+        <ul class="footer-list">
+          {links.map((l) => (
+            <li>
+              <a
+                href={l.href}
+                class="footer-link"
+                {...(l.external ? { target: "_blank", rel: "noopener" } : {})}
+              >
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Resources</h4>
+        <ul class="footer-list">
+          {resources.map((r) => (
+            <li>
+              <a href={r.href} class="footer-link" target="_blank" rel="noopener">
+                {r.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copyright">&copy; 2019 - {year} 3AT - Endless Paradox</span>
+      <div class="footer-socials">
+        <a href="https://github.com/3Tea/discord-bot" target="_blank" rel="noopener" aria-label="GitHub">
+          GitHub
+        </a>
+        <a href={inviteUrl} target="_blank" rel="noopener" aria-label="Discord">
+          Discord
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--bg-tertiary);
+    padding: 40px 0 0;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 24px;
+  }
+
+  .footer-brand-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .footer-logo {
+    border-radius: 50%;
+  }
+
+  .footer-name {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .footer-desc {
+    color: var(--text-muted);
+    font-size: 13px;
+    max-width: 250px;
+    line-height: 1.5;
+  }
+
+  .footer-heading {
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .footer-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .footer-link {
+    color: var(--text-secondary);
+    font-size: 13px;
+    transition: color 0.2s;
+  }
+
+  .footer-link:hover {
+    color: var(--text-primary);
+  }
+
+  .footer-bottom {
+    border-top: 1px solid var(--border);
+    padding: 16px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-copyright {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .footer-socials {
+    display: flex;
+    gap: 16px;
+  }
+
+  .footer-socials a {
+    color: var(--text-muted);
+    font-size: 13px;
+    transition: color 0.2s;
+  }
+
+  .footer-socials a:hover {
+    color: var(--text-primary);
+  }
+
+  @media (max-width: 768px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .footer-bottom {
+      flex-direction: column;
+      gap: 12px;
+      text-align: center;
+    }
+  }
+</style>

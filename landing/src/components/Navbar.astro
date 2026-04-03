@@ -1,0 +1,221 @@
+---
+const navLinks = [
+  { href: "/#features", label: "Features" },
+  { href: "/#commands", label: "Commands" },
+  { href: "/#faq", label: "FAQ" },
+  {
+    href: "https://github.com/3Tea/discord-bot/discussions",
+    label: "Support",
+    external: true,
+  },
+];
+
+const inviteUrl =
+  "https://discord.com/api/oauth2/authorize?client_id=615052741911379983&permissions=8&scope=applications.commands%20bot";
+---
+
+<nav class="navbar">
+  <div class="navbar-inner container">
+    <a href="/" class="navbar-brand">
+      <img src="/maid.gif" alt="3AT" class="navbar-logo" width="32" height="32" />
+      <span class="navbar-name">3AT - Endless Paradox</span>
+    </a>
+
+    <button class="navbar-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span class="hamburger"></span>
+    </button>
+
+    <div class="navbar-menu">
+      <ul class="navbar-links">
+        {navLinks.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class="navbar-link"
+              {...(link.external ? { target: "_blank", rel: "noopener" } : {})}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <a href={inviteUrl} target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+        Add to Server
+      </a>
+    </div>
+  </div>
+</nav>
+
+<style>
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(30, 31, 34, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+  }
+
+  .navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    max-width: var(--container-width);
+  }
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .navbar-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+  }
+
+  .navbar-name {
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .navbar-menu {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .navbar-links {
+    display: flex;
+    list-style: none;
+    gap: 4px;
+  }
+
+  .navbar-link {
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .navbar-link:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: inherit;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius-sm);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+  }
+
+  .btn-sm {
+    font-size: 14px;
+    padding: 6px 16px;
+  }
+
+  .navbar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+  }
+
+  .hamburger,
+  .hamburger::before,
+  .hamburger::after {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text-primary);
+    border-radius: 2px;
+    transition: transform 0.3s;
+  }
+
+  .hamburger {
+    position: relative;
+  }
+
+  .hamburger::before,
+  .hamburger::after {
+    content: "";
+    position: absolute;
+    left: 0;
+  }
+
+  .hamburger::before {
+    top: -6px;
+  }
+
+  .hamburger::after {
+    top: 6px;
+  }
+
+  @media (max-width: 768px) {
+    .navbar-toggle {
+      display: block;
+    }
+
+    .navbar-menu {
+      display: none;
+      position: fixed;
+      top: 56px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg-tertiary);
+      flex-direction: column;
+      padding: 24px;
+      gap: 16px;
+    }
+
+    .navbar-menu.open {
+      display: flex;
+    }
+
+    .navbar-links {
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .navbar-link {
+      font-size: 18px;
+      padding: 12px 16px;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector(".navbar-toggle");
+  const menu = document.querySelector(".navbar-menu");
+  toggle?.addEventListener("click", () => {
+    const open = menu?.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", String(open));
+  });
+</script>
