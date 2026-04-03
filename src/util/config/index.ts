@@ -21,8 +21,8 @@ export const SERVER_HD = process.env.SERVER_HD;
 export const SERVER_S = process.env.SERVER_S;
 
 export const FOOTER = {
-    icon: process.env.FOOTER_ICON || "",
-    text: process.env.FOOTER_TEXT || "",
+    icon: process.env.FOOTER_ICON || undefined,
+    text: process.env.FOOTER_TEXT || undefined,
 };
 export const APPLICATION_ID = process.env.APPLICATION_ID || "";
 export const GUILD_ID = process.env.GUILD_ID || "";

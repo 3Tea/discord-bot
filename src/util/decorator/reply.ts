@@ -8,18 +8,22 @@ import {
 
 import { FOOTER } from "../config/index";
 
+function applyFooter(embed: EmbedBuilder): void {
+    if (!embed.data.footer && FOOTER.text) {
+        embed.setFooter({
+            text: FOOTER.text,
+            iconURL: FOOTER.icon,
+        });
+    }
+}
+
 class Reply {
     async send(interaction: ChatInputCommandInteraction, payload: string | InteractionReplyOptions) {
         return interaction.reply(payload);
     }
 
     async embed(interaction: ChatInputCommandInteraction, embed: EmbedBuilder) {
-        if (!embed.data.footer) {
-            embed.setFooter({
-                text: FOOTER.text,
-                iconURL: FOOTER.icon,
-            });
-        }
+        applyFooter(embed);
         return interaction.reply({ embeds: [embed] });
     }
 
@@ -28,22 +32,12 @@ class Reply {
         embed: EmbedBuilder,
         row: ActionRowBuilder<ButtonBuilder>
     ) {
-        if (!embed.data.footer) {
-            embed.setFooter({
-                text: FOOTER.text,
-                iconURL: FOOTER.icon,
-            });
-        }
+        applyFooter(embed);
         return interaction.reply({ embeds: [embed], components: [row] });
     }
 
     async embedEdit(interaction: ChatInputCommandInteraction, embed: EmbedBuilder) {
-        if (!embed.data.footer) {
-            embed.setFooter({
-                text: FOOTER.text,
-                iconURL: FOOTER.icon,
-            });
-        }
+        applyFooter(embed);
         return interaction.editReply({ embeds: [embed] });
     }
 }

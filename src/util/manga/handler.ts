@@ -64,7 +64,7 @@ export function mangaCommand(source: MangaSource) {
                     .addFields(source.fields(result))
                     .setDescription(`${result.id}`)
                     .setTimestamp()
-                    .setFooter({ text: FOOTER.text, iconURL: FOOTER.icon });
+                    .setFooter(FOOTER.text ? { text: FOOTER.text, iconURL: FOOTER.icon } : null);
 
                 const row = new ActionRowBuilder<ButtonBuilder>();
 
