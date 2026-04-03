@@ -24,8 +24,7 @@ export const FOOTER = {
     icon: process.env.FOOTER_ICON || "",
     text: process.env.FOOTER_TEXT || "",
 };
-export const CLIENT_ID = process.env.CLIENT_ID || "";
+export const APPLICATION_ID = process.env.APPLICATION_ID || "";
 export const GUILD_ID = process.env.GUILD_ID || "";
 
-export const SERVER_CHAT = process.env.SERVER_CHAT;
-export const KEY_CHAT = process.env.KEY_CHAT;
+export const URL_REPORT_BUG = process.env.URL_REPORT_BUG || "";

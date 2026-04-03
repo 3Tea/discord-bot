@@ -1,21 +1,17 @@
-import { bold, CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { bold, ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
 export default {
-    data: new SlashCommandBuilder()
-        .setName("ping")
-        .setDescription("Replies with Pong!"),
+    data: new SlashCommandBuilder().setName("ping").setDescription("Replies with Pong!"),
 
-    async execute(interaction: CommandInteraction) {
-        const sent = await interaction.reply({
+    async execute(interaction: ChatInputCommandInteraction) {
+        const { resource: sent } = await interaction.reply({
             content: "Pinging...",
-            fetchReply: true,
+            withResponse: true,
         });
-        interaction.editReply(
-            `${bold(
-                `🧈 Roundtrip latency: ${
-                    sent.createdTimestamp - interaction.createdTimestamp
-                }ms`
-            )}`
-        );
+        if (sent?.message) {
+            await interaction.editReply(
+                `${bold(`🧈 Roundtrip latency: ${sent.message.createdTimestamp - interaction.createdTimestamp}ms`)}`
+            );
+        }
     },
 };

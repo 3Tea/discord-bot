@@ -2,7 +2,7 @@ import {
     ActionRowBuilder,
     ButtonBuilder,
     ButtonStyle,
-    CommandInteraction,
+    ChatInputCommandInteraction,
     EmbedBuilder,
     SlashCommandBuilder,
 } from "discord.js";
@@ -11,10 +11,8 @@ import client from "../../client";
 import Reply from "../../util/decorator/reply";
 
 export default {
-    data: new SlashCommandBuilder()
-        .setName("help")
-        .setDescription("Get the help commands"),
-    async execute(interaction: CommandInteraction) {
+    data: new SlashCommandBuilder().setName("help").setDescription("Get the help commands"),
+    async execute(interaction: ChatInputCommandInteraction) {
         const embed = new EmbedBuilder().setColor("Random").setTimestamp();
 
         embed.setTitle(`3AT - Endless Paradox 💖 Slash CMD Support`);
@@ -42,11 +40,7 @@ export default {
             .setURL(`${process.env.URL_REPORT_BUG}`)
             .setStyle(ButtonStyle.Link);
 
-        const row = new ActionRowBuilder().addComponents(
-            homepage,
-            discussions,
-            reportBug
-        );
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(homepage, discussions, reportBug);
         return Reply.embedButtons(interaction, embed, row);
     },
 };

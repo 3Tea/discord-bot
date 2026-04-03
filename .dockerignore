@@ -1,0 +1,14 @@
+node_modules
+dist
+logs
+*.log
+.env
+.env.*
+.git
+.gitignore
+.eslintrc.json
+.claude
+*.md
+*.tgz
+.npm
+.cache

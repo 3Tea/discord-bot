@@ -104,3 +104,11 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Landing page
+landing/node_modules/
+landing/dist/
+landing/.astro/
+
+# Superpowers brainstorm
+.superpowers/

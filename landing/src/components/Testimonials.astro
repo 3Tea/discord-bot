@@ -1,0 +1,136 @@
+---
+const reviews = [
+  {
+    name: "Admin_01",
+    role: "Server Owner",
+    color: "#5865F2",
+    quote:
+      "The voice channel system is a game-changer. Users create their own rooms, control who joins, and everything cleans up automatically. Zero admin overhead.",
+  },
+  {
+    name: "MangaFan",
+    role: "Community Member",
+    color: "#ED4245",
+    quote:
+      "Having a manga reader right inside Discord is insane. No more switching tabs — just browse, read, and share with the server instantly.",
+  },
+  {
+    name: "TeaMod",
+    role: "Moderator",
+    color: "#3BA55C",
+    quote:
+      "Been using 3AT since 2019. The bot keeps improving, stays online, and the translate command saves me every time international members join.",
+  },
+];
+---
+
+<section class="testimonials-section">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-label">Community</p>
+      <h2 class="section-title">Loved by server admins</h2>
+      <p class="section-subtitle">
+        What people say after using 3AT in their servers.
+      </p>
+    </div>
+
+    <div class="reviews-grid reveal-stagger">
+      {
+        reviews.map((review, i) => (
+          <div class="review-card reveal" style={`--i: ${i}`}>
+            <p class="review-quote">"{review.quote}"</p>
+            <div class="review-author">
+              <div class="avatar" style={`background: ${review.color}`}>
+                {review.name[0]}
+              </div>
+              <div class="author-info">
+                <span class="author-name">{review.name}</span>
+                <span class="author-role">{review.role}</span>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .testimonials-section {
+    padding: var(--section-padding);
+    background: var(--bg-secondary);
+  }
+
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .review-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: border-color 0.2s ease;
+  }
+
+  .review-card:hover {
+    border-color: var(--accent);
+  }
+
+  .review-quote {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    flex: 1;
+    font-style: italic;
+  }
+
+  .review-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .author-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .author-role {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 900px) {
+    .reviews-grid {
+      grid-template-columns: 1fr;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+  }
+</style>

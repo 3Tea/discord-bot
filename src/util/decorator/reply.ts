@@ -1,19 +1,19 @@
 import {
-    CommandInteraction,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ChatInputCommandInteraction,
     EmbedBuilder,
-    ActionRowComponent,
+    InteractionReplyOptions,
 } from "discord.js";
 
 import { FOOTER } from "../config/index";
 
 class Reply {
-    constructor() {}
-
-    async send(interaction: CommandInteraction, payload: any) {
+    async send(interaction: ChatInputCommandInteraction, payload: string | InteractionReplyOptions) {
         return interaction.reply(payload);
     }
 
-    async embed(interaction: CommandInteraction, embed: EmbedBuilder) {
+    async embed(interaction: ChatInputCommandInteraction, embed: EmbedBuilder) {
         if (!embed.data.footer) {
             embed.setFooter({
                 text: FOOTER.text,
@@ -24,9 +24,9 @@ class Reply {
     }
 
     async embedButtons(
-        interaction: CommandInteraction,
+        interaction: ChatInputCommandInteraction,
         embed: EmbedBuilder,
-        row: any
+        row: ActionRowBuilder<ButtonBuilder>
     ) {
         if (!embed.data.footer) {
             embed.setFooter({
@@ -37,7 +37,7 @@ class Reply {
         return interaction.reply({ embeds: [embed], components: [row] });
     }
 
-    async embedEdit(interaction: CommandInteraction, embed: EmbedBuilder) {
+    async embedEdit(interaction: ChatInputCommandInteraction, embed: EmbedBuilder) {
         if (!embed.data.footer) {
             embed.setFooter({
                 text: FOOTER.text,

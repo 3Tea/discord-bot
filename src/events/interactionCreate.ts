@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Events } from "discord.js";
+import { ChatInputCommandInteraction, Events, MessageFlags } from "discord.js";
 import client from "../client";
 
 export default {
@@ -10,15 +10,11 @@ export default {
         const command = client?.commands.get(interaction.commandName);
 
         if (!command) {
-            console.error(
-                `No command matching ${interaction.commandName} was found.`
-            );
+            console.error(`No command matching ${interaction.commandName} was found.`);
             return;
         }
 
-        console.log(
-            `/${interaction.commandName} => username: ${interaction.user.username}#${interaction.user.discriminator} ID: ${interaction.user.id}`
-        );
+        console.log(`/${interaction.commandName} => username: ${interaction.user.username} ID: ${interaction.user.id}`);
 
         try {
             await command.execute(interaction);
@@ -26,7 +22,7 @@ export default {
             console.error(error);
             await interaction.reply({
                 content: `There was an error while executing this command! ${interaction.commandName}`,
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
             });
         }
     },

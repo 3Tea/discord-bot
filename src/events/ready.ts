@@ -8,13 +8,6 @@ export default {
     once: true,
     execute(client: Client<true>) {
         const guilds = client.guilds.cache.map((guild) => guild.id);
-
-        // console.log(guilds);
-
-        // for (const guild of guilds) {
-        //     const g = client.guilds.cache.get(guild);
-        //     console.log("Guilds", g.name);
-        // }
         console.log("Total guilds:", guilds.length);
 
         const users = client.users.cache.map((user) => user.id);
@@ -22,10 +15,7 @@ export default {
 
         console.log(`Ready! Logged in as ${client.user.tag}`);
 
-        const numberOfDays = getNumberOfDays(
-            new Date("2019/08/25"),
-            new Date()
-        );
+        const numberOfDays = getNumberOfDays(new Date("2019/08/25"), new Date());
         client.user.setPresence({
             activities: [
                 {

@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '\\.ts\"?$'; then cd /Users/nguyenhuuhung/Documents/GitHub/discord-bot && npx tsc --noEmit --pretty 2>&1 | head -20; fi"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '\\.env[^.]|.env\"$'; then echo 'BLOCK: Cannot access .env files - use .env.example instead'; exit 2; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

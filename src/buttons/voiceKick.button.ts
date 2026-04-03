@@ -1,0 +1,21 @@
+import { ActionRowBuilder, ButtonInteraction, MessageFlags, UserSelectMenuBuilder } from "discord.js";
+
+import { BUTTON_ID } from "../util/config/button";
+import { validateOwner } from "../util/voice/helpers";
+
+export default {
+    id: BUTTON_ID.VOICE_KICK,
+    async execute(interaction: ButtonInteraction) {
+        const voiceChannel = await validateOwner(interaction);
+        if (!voiceChannel) return;
+
+        const selectMenu = new UserSelectMenuBuilder()
+            .setCustomId(BUTTON_ID.VOICE_SELECT_KICK)
+            .setPlaceholder("Select a user to kick")
+            .setMinValues(1)
+            .setMaxValues(1);
+
+        const row = new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(selectMenu);
+        await interaction.reply({ components: [row], flags: MessageFlags.Ephemeral });
+    },
+};

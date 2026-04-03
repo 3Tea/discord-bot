@@ -27,6 +27,7 @@ jobs:
         script: |
           cd /root/discord-bot
           sudo git pull https://github.com/3Tea/discord-bot.git develop
+          sudo npm run build
           sudo npm i
           sudo pm2 restart pm2.deploy.json
           sudo pm2 flush

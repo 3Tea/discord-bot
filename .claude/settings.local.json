@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/**/*.ts)",
+      "WebFetch(domain:discord.js.org)",
+      "WebFetch(domain:discordjs.guide)",
+      "WebSearch",
+      "Bash(npm install:*)",
+      "Bash(npm audit:*)",
+      "Bash(curl -s \"https://discord.js.org/docs/packages/discord.js/14.26.0/class/VoiceChannel\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/discordjs/discord.js/main/packages/discord.js/src/structures/VoiceChannel.js\")",
+      "Bash(curl -s \"https://discord.js.org/docs/packages/discord.js/14.16.3/class/VoiceChannel\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/discordjs/discord.js/main/packages/discord.js/src/structures/BaseGuildVoiceChannel.js\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/discordjs/discord.js/main/packages/discord.js/src/structures/interfaces/TextBasedChannel.js\")",
+      "Bash(curl -s \"https://raw.githubusercontent.com/discordjs/discord.js/main/packages/discord.js/typings/index.d.ts\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git commit:*)",
+      "Bash(npx tsc:*)",
+      "Bash(docker compose:*)"
+    ]
+  }
+}

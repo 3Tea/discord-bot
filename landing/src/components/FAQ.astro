@@ -1,0 +1,120 @@
+---
+import { faqItems } from "../data/faq";
+---
+
+<section id="faq" class="faq-section">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-label">FAQ</p>
+      <h2 class="section-title">Common questions</h2>
+      <p class="section-subtitle">
+        Quick answers to the questions we hear most often.
+      </p>
+    </div>
+
+    <div class="faq-list reveal-stagger">
+      {
+        faqItems.map((item, i) => (
+          <details class="faq-item reveal" style={`--i: ${i}`} open={i === 0}>
+            <summary class="faq-summary">
+              <span class="faq-question">{item.question}</span>
+              <svg
+                class="faq-chevron"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </summary>
+            <div class="faq-content">
+              <p>{item.answer}</p>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq-section {
+    padding: var(--section-padding);
+    background: var(--bg-primary);
+  }
+
+  .faq-list {
+    max-width: 640px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .faq-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+
+  .faq-item[open] {
+    border-color: var(--accent);
+  }
+
+  .faq-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  .faq-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-question {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .faq-chevron {
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+  }
+
+  details[open] .faq-chevron {
+    transform: rotate(180deg);
+  }
+
+  .faq-content {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    padding: 0 20px;
+  }
+
+  details[open] .faq-content {
+    max-height: 200px;
+    padding: 0 20px 16px;
+  }
+
+  .faq-content p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+</style>
