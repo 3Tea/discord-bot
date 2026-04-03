@@ -52,13 +52,16 @@ export class RedisService {
             logger.info("Redis ready — using Redis as cache backend");
 
             if (this.options?.monitor) {
-                this.client.monitor().then((monitor) => {
-                    monitor.on("monitor", (time: number, args: string[], source: string, database: string) => {
-                        logger.debug(time, args, source, database);
+                this.client
+                    .monitor()
+                    .then((monitor) => {
+                        monitor.on("monitor", (time: number, args: string[], source: string, database: string) => {
+                            logger.debug(time, args, source, database);
+                        });
+                    })
+                    .catch(() => {
+                        // silently ignore — monitor is optional
                     });
-                }).catch(() => {
-                    // silently ignore — monitor is optional
-                });
             }
         });
     }

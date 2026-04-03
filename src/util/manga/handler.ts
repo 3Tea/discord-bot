@@ -33,9 +33,7 @@ export function mangaCommand(source: MangaSource) {
                         opt.setName("id").setDescription("The ID you wanna read").setRequired(true)
                     )
             )
-            .addSubcommand((sub) =>
-                sub.setName("random").setDescription(`Random H and D from ${source.name}`)
-            ),
+            .addSubcommand((sub) => sub.setName("random").setDescription(`Random H and D from ${source.name}`)),
 
         async execute(interaction: ChatInputCommandInteraction): Promise<void> {
             try {
@@ -77,11 +75,7 @@ export function mangaCommand(source: MangaSource) {
                             .setLabel("Read")
                             .setStyle(ButtonStyle.Primary)
                     );
-                    await redis.setJson(
-                        `${BUTTON_ID.mangaRead}_${result.id}`,
-                        result.image,
-                        CACHE_TTL
-                    );
+                    await redis.setJson(`${BUTTON_ID.mangaRead}_${result.id}`, result.image, CACHE_TTL);
                 } else {
                     row.addComponents(
                         new ButtonBuilder()
@@ -103,16 +97,10 @@ export function mangaCommand(source: MangaSource) {
                 await wait(BUTTON_REMOVE_DELAY);
                 await interaction.editReply({ components: [] });
             } catch (error) {
-                log(
-                    `[manga:${source.name}] ${error instanceof Error ? error.message : "Unknown error"}`,
-                    "error"
-                );
+                log(`[manga:${source.name}] ${error instanceof Error ? error.message : "Unknown error"}`, "error");
                 const row = new ActionRowBuilder<ButtonBuilder>();
                 row.addComponents(
-                    new ButtonBuilder()
-                        .setURL(URL_REPORT_BUG)
-                        .setLabel("Report this issue")
-                        .setStyle(ButtonStyle.Link)
+                    new ButtonBuilder().setURL(URL_REPORT_BUG).setLabel("Report this issue").setStyle(ButtonStyle.Link)
                 );
                 await interaction.editReply({
                     content: "Server maintenance",
