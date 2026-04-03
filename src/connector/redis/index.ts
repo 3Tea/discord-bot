@@ -134,6 +134,77 @@ export class RedisService {
         if (!expireTs) return -2;
         return Math.max(0, Math.round((expireTs - Date.now()) / 1000));
     }
+
+    async setKey(key: string, value: string, ttl?: number): Promise<string | null> {
+        if (this.connected) {
+            try {
+                if (ttl) {
+                    return await this.client.set(key, value, "EX", ttl);
+                }
+                return await this.client.set(key, value);
+            } catch {
+                // fall through to in-memory
+            }
+        }
+
+        this.fallback.set(key, value, ttl || 0);
+        return "OK";
+    }
+
+    async getKey(key: string): Promise<string | null> {
+        if (this.connected) {
+            try {
+                return await this.client.get(key);
+            } catch {
+                // fall through to in-memory
+            }
+        }
+
+        return (this.fallback.get(key) as string) ?? null;
+    }
+
+    async addToSet(key: string, ...members: string[]): Promise<number> {
+        if (this.connected) {
+            try {
+                return await this.client.sadd(key, ...members);
+            } catch {
+                // fall through to in-memory
+            }
+        }
+
+        const existing: Set<string> = this.fallback.get(key) || new Set();
+        members.forEach((m) => existing.add(m));
+        this.fallback.set(key, existing, 0);
+        return members.length;
+    }
+
+    async removeFromSet(key: string, ...members: string[]): Promise<number> {
+        if (this.connected) {
+            try {
+                return await this.client.srem(key, ...members);
+            } catch {
+                // fall through to in-memory
+            }
+        }
+
+        const existing: Set<string> = this.fallback.get(key) || new Set();
+        members.forEach((m) => existing.delete(m));
+        this.fallback.set(key, existing, 0);
+        return members.length;
+    }
+
+    async getSetMembers(key: string): Promise<string[]> {
+        if (this.connected) {
+            try {
+                return await this.client.smembers(key);
+            } catch {
+                // fall through to in-memory
+            }
+        }
+
+        const existing: Set<string> = this.fallback.get(key) || new Set();
+        return [...existing];
+    }
 }
 
 export default new RedisService({ monitor: true });
