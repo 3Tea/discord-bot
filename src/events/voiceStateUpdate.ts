@@ -17,7 +17,7 @@ import { logger } from "../util/log/logger.mixed";
 import client from "../client";
 
 const TTL_12H = 60 * 60 * 12;
-const NAME_PREFIX_TRIGGER = "TEST ";
+const NAME_PREFIX_TRIGGER = "3AT ";
 const NAME_PREFIX_TEMP = "* ";
 
 // --- Voice XP ---
