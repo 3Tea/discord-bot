@@ -20,24 +20,26 @@ const TTL_12H = 60 * 60 * 12;
  * Check if the interaction user is the owner of the voice channel.
  * Returns the voice channel if valid, or null (and replies with error) if not.
  */
+async function replyOrEdit(interaction: RepliableInteraction, content: string): Promise<void> {
+    if (interaction.deferred || interaction.replied) {
+        await interaction.editReply({ content });
+    } else {
+        await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+    }
+}
+
 export async function validateOwner(interaction: RepliableInteraction): Promise<VoiceChannel | null> {
     const member = interaction.member as GuildMember;
     const voiceChannel = member?.voice.channel as VoiceChannel | null;
 
     if (!voiceChannel) {
-        await interaction.reply({
-            content: "You are not in a voice channel.",
-            flags: MessageFlags.Ephemeral,
-        });
+        await replyOrEdit(interaction, "You are not in a voice channel.");
         return null;
     }
 
     const ownerId = await redis.getJson(voiceChannel.id);
     if (ownerId !== interaction.user.id) {
-        await interaction.reply({
-            content: "You are not the owner of this voice channel.",
-            flags: MessageFlags.Ephemeral,
-        });
+        await replyOrEdit(interaction, "You are not the owner of this voice channel.");
         return null;
     }
 
@@ -51,10 +53,7 @@ export async function validateOwner(interaction: RepliableInteraction): Promise<
 export async function checkCooldown(interaction: RepliableInteraction, redisKey: string): Promise<boolean> {
     const ttl = await redis.ttlKey(redisKey);
     if (ttl > 0) {
-        await interaction.reply({
-            content: `Please try again in ${ttl}s.`,
-            flags: MessageFlags.Ephemeral,
-        });
+        await replyOrEdit(interaction, `Please try again in ${ttl}s.`);
         return false;
     }
     return true;

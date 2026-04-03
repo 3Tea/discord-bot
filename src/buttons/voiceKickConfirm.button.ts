@@ -6,6 +6,7 @@ import { handleKick } from "../util/voice/kick";
 export default {
     id: BUTTON_ID.VOICE_KICK_ONLY,
     async execute(interaction: ButtonInteraction) {
+        await interaction.deferUpdate();
         await handleKick(interaction, false);
     },
 };

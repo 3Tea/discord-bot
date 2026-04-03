@@ -1,4 +1,4 @@
-import { ButtonInteraction, GuildMember, MessageFlags, VoiceChannel } from "discord.js";
+import { ButtonInteraction, GuildMember, VoiceChannel } from "discord.js";
 
 import redis from "../../connector/redis";
 import { setCooldown, updatePanel } from "./helpers";
@@ -9,13 +9,13 @@ export async function handleKick(interaction: ButtonInteraction, block: boolean)
     const member = interaction.member as GuildMember;
     const voiceChannel = member?.voice.channel as VoiceChannel | null;
     if (!voiceChannel) {
-        await interaction.reply({ content: "You are not in a voice channel.", flags: MessageFlags.Ephemeral });
+        await interaction.editReply({ content: "You are not in a voice channel." });
         return;
     }
 
     const targetId = await redis.getJson(`kick_target:${interaction.user.id}:${voiceChannel.id}`);
     if (!targetId) {
-        await interaction.reply({ content: "Kick request expired. Please try again.", flags: MessageFlags.Ephemeral });
+        await interaction.editReply({ content: "Kick request expired. Please try again." });
         return;
     }
 
@@ -43,5 +43,5 @@ export async function handleKick(interaction: ButtonInteraction, block: boolean)
     await updatePanel(voiceChannel);
 
     const action = block ? "kicked and blocked" : "kicked";
-    await interaction.update({ content: `<@${targetId}> has been ${action}.`, components: [] });
+    await interaction.editReply({ content: `<@${targetId}> has been ${action}.`, components: [] });
 }

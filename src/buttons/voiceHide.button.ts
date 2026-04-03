@@ -8,6 +8,8 @@ const TTL_12H = 60 * 60 * 12;
 export default {
     id: BUTTON_ID.VOICE_HIDE,
     async execute(interaction: ButtonInteraction) {
+        await interaction.deferReply({ ephemeral: true });
+
         const voiceChannel = await validateOwner(interaction);
         if (!voiceChannel) return;
 
@@ -23,7 +25,6 @@ export default {
         await redis.setJson(`state:${voiceChannel.id}`, "hidden", TTL_12H);
         await setCooldown(cdKey, 5);
         await updatePanel(voiceChannel);
-        await interaction.reply({ content: "Channel hidden 👁️" });
-        setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+        await interaction.editReply({ content: "Channel hidden 👁️" });
     },
 };

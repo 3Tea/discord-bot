@@ -19,10 +19,20 @@ export default {
             await button.execute(interaction);
         } catch (error) {
             console.error(error);
-            await interaction.reply({
-                content: `There was an error while executing this button! ${interaction.customId}`,
-                flags: MessageFlags.Ephemeral,
-            });
+            try {
+                if (interaction.replied || interaction.deferred) {
+                    await interaction.editReply({
+                        content: `There was an error while executing this button! ${interaction.customId}`,
+                    });
+                } else {
+                    await interaction.reply({
+                        content: `There was an error while executing this button! ${interaction.customId}`,
+                        flags: MessageFlags.Ephemeral,
+                    });
+                }
+            } catch {
+                // Interaction expired — silently ignore
+            }
         }
     },
 };
