@@ -1,12 +1,6 @@
 export const BUTTON_ID = {
     // Manga reader
     mangaRead: "mangaRead",
-    // Music player buttons
-    MUSIC_PAUSE: "music_pause",
-    MUSIC_SKIP: "music_skip",
-    MUSIC_STOP: "music_stop",
-    MUSIC_LOOP: "music_loop",
-    MUSIC_QUEUE: "music_queue",
     // Voice control panel buttons
     VOICE_LOCK: "voice_lock",
     VOICE_UNLOCK: "voice_unlock",

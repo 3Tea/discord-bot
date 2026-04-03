@@ -31,5 +31,3 @@ export const SERVER_CHAT = process.env.SERVER_CHAT;
 export const KEY_CHAT = process.env.KEY_CHAT;
 export const URL_REPORT_BUG = process.env.URL_REPORT_BUG || "";
 
-export const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || "";
-export const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET || "";
