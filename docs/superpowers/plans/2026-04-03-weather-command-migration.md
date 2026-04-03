@@ -1,3 +1,27 @@
+# Weather Command Migration Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Replace the broken MSN Weather API in `/weather` with Open-Meteo (free, no key, JSON).
+
+**Architecture:** Two sequential HTTP calls — geocoding (city name → coordinates) then forecast (coordinates → weather data). WMO weather codes mapped to vi/en text via a static lookup table. Single file rewrite.
+
+**Tech Stack:** TypeScript, Discord.js v14, axios (existing), Open-Meteo API
+
+**Spec:** `docs/superpowers/specs/2026-04-03-weather-command-migration-design.md`
+
+---
+
+### Task 1: Rewrite weather command with Open-Meteo API
+
+**Files:**
+- Rewrite: `src/commands/slash/weather.ts`
+
+- [ ] **Step 1: Replace interfaces and add WMO weather code map**
+
+Replace the entire content of `src/commands/slash/weather.ts` with the following foundation — types, constants, and helper functions:
+
+```typescript
 import axios from "axios";
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder, bold } from "discord.js";
 
@@ -35,7 +59,6 @@ interface DailyWeather {
 interface ForecastResponse {
     current: CurrentWeather;
     daily: DailyWeather;
-    timezone: string;
 }
 
 // --- WMO Weather Code Map (vi/en) ---
@@ -75,32 +98,6 @@ function getWeatherDescription(code: number, lang: "vi" | "en" = "vi"): string {
     return WMO_CODES[code]?.[lang] ?? (lang === "vi" ? "Không rõ" : "Unknown");
 }
 
-function getWeatherEmoji(code: number): string {
-    if (code === 0) return "☀️";
-    if (code <= 2) return "🌤️";
-    if (code === 3) return "☁️";
-    if (code <= 48) return "🌫️";
-    if (code <= 57) return "🌦️";
-    if (code <= 67) return "🌧️";
-    if (code <= 77) return "🌨️";
-    if (code <= 82) return "🌧️";
-    if (code <= 86) return "🌨️";
-    return "⛈️";
-}
-
-function getWeatherColor(code: number): number {
-    if (code === 0) return 0xffb347;       // sunny orange
-    if (code <= 2) return 0x87ceeb;        // light blue
-    if (code === 3) return 0x708090;       // slate gray
-    if (code <= 48) return 0x9e9e9e;       // fog gray
-    if (code <= 57) return 0x5b9bd5;       // drizzle blue
-    if (code <= 67) return 0x4472c4;       // rain blue
-    if (code <= 77) return 0xb4d7e8;       // snow light blue
-    if (code <= 82) return 0x4472c4;       // rain blue
-    if (code <= 86) return 0xb4d7e8;       // snow light blue
-    return 0x8b0000;                       // storm dark red
-}
-
 // --- Wind direction helper ---
 
 const COMPASS_DIRECTIONS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"] as const;
@@ -116,9 +113,15 @@ const DAY_NAMES_VI = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Th�
 
 function getDayName(dateStr: string): string {
     const date = new Date(dateStr);
-    return DAY_NAMES_VI[date.getUTCDay()];
+    return DAY_NAMES_VI[date.getDay()];
 }
+```
 
+- [ ] **Step 2: Add the geocoding and forecast API functions**
+
+Append after the helper functions, before the `export default`:
+
+```typescript
 const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
 
@@ -142,7 +145,13 @@ async function fetchForecast(lat: number, lon: number): Promise<ForecastResponse
     });
     return data;
 }
+```
 
+- [ ] **Step 3: Add the command export with embed builder**
+
+Append the command export at the end of the file:
+
+```typescript
 export default {
     data: new SlashCommandBuilder()
         .setName("weather")
@@ -152,55 +161,93 @@ export default {
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         const location = interaction.options.getString("location", true);
-        await interaction.deferReply();
 
         try {
             const geo = await geocode(location);
             if (!geo) {
-                return interaction.editReply(`${bold(location)} not found`);
+                return Reply.send(interaction, `${bold(location)} not found`);
             }
 
             const forecast = await fetchForecast(geo.latitude, geo.longitude);
-            const { current, daily, timezone } = forecast;
+            const { current, daily } = forecast;
 
-            // Format time in location's timezone
+            // Parse current time for title
             const currentDate = new Date(current.time);
-            const timeStr = currentDate.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", timeZone: timezone });
-            const dateStr = currentDate.toLocaleDateString("vi-VN", { timeZone: timezone });
             const dayName = DAY_NAMES_VI[currentDate.getDay()];
-            const emoji = getWeatherEmoji(current.weather_code);
-
-            const description = [
-                `${emoji} **${current.temperature_2m}°C** — ${getWeatherDescription(current.weather_code)}`,
-                "",
-                `💧 ${current.relative_humidity_2m}%  ·  💨 ${current.wind_speed_10m} km/h ${getWindDirection(current.wind_direction_10m)}`,
-                "",
-                `🕐 ${timeStr} · ${dayName}, ${dateStr}`,
-                "",
-                "─────────────────",
-            ].join("\n");
+            const dateStr = currentDate.toLocaleDateString("vi-VN");
+            const timeStr = currentDate.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
             const embed = new EmbedBuilder()
-                .setTitle(`${emoji} ${geo.name}, ${geo.country}`)
-                .setDescription(description)
-                .setColor(getWeatherColor(current.weather_code))
+                .setTitle(`\`${dayName}\` Ngày: \`${dateStr}\``)
+                .setColor("Random")
+                .addFields(
+                    {
+                        name: "**Vị trí || Location**",
+                        value: `${geo.name}, ${geo.country}`,
+                        inline: false,
+                    },
+                    {
+                        name: "**Nhiệt độ || Temperature**",
+                        value: `${current.temperature_2m}°C / ${getWeatherDescription(current.weather_code)}`,
+                        inline: true,
+                    },
+                    {
+                        name: "**Độ ẩm || Humidity**",
+                        value: `${current.relative_humidity_2m}%`,
+                        inline: true,
+                    },
+                    {
+                        name: "**Tốc độ và hướng gió || Wind speed**",
+                        value: `${current.wind_speed_10m} km/h ${getWindDirection(current.wind_direction_10m)}`,
+                        inline: false,
+                    },
+                    {
+                        name: "**Cập nhật lần cuối || Observation time**",
+                        value: `\`${timeStr}\` h/m/s \`Local time: ${geo.name}, ${geo.country}\``,
+                        inline: false,
+                    }
+                )
                 .setTimestamp(Date.now());
 
             // Add 2-day forecast (skip index 0 = today)
             for (let i = 1; i <= 2; i++) {
-                const fEmoji = getWeatherEmoji(daily.weather_code[i]);
-                const fDayName = getDayName(daily.time[i]);
-                const fDate = new Date(daily.time[i]).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+                const forecastDayName = getDayName(daily.time[i]);
+                const forecastDate = new Date(daily.time[i]).toLocaleDateString("vi-VN");
                 embed.addFields({
-                    name: `${fEmoji} ${fDayName} ${fDate}`,
-                    value: `${daily.temperature_2m_max[i]}°/${daily.temperature_2m_min[i]}°C — ${getWeatherDescription(daily.weather_code[i])}`,
-                    inline: false,
+                    name: `📅 ${forecastDayName} ${forecastDate}`,
+                    value: `${daily.temperature_2m_max[i]}°/${daily.temperature_2m_min[i]}°C - ${getWeatherDescription(daily.weather_code[i])}`,
+                    inline: true,
                 });
             }
 
-            return Reply.embedEdit(interaction, embed);
+            return Reply.embed(interaction, embed);
         } catch {
-            return interaction.editReply(`${bold(location)} not found`);
+            return Reply.send(interaction, `${bold(location)} not found`);
         }
     },
 };
+```
+
+- [ ] **Step 4: Verify TypeScript compiles**
+
+Run: `npm run build`
+Expected: No errors (or only pre-existing errors unrelated to weather.ts)
+
+- [ ] **Step 5: Manual smoke test**
+
+Run: `npm run start:dev`
+Test in Discord:
+1. `/weather location:Hà Nội` — should show full embed with current weather + 2-day forecast
+2. `/weather location:asdfghjkl` — should show "**asdfghjkl** not found"
+3. `/weather location:London` — should show London, UK weather
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/commands/slash/weather.ts
+git commit -m "feat(weather): migrate from MSN Weather to Open-Meteo API
+
+Replace broken MSN Weather XML API with Open-Meteo (free, no key).
+Adds WMO weather code mapping (vi/en), wind direction compass,
+and 2-day forecast fields to the embed."
+```
