@@ -313,6 +313,10 @@ All variables documented in `.env.example`. Critical ones:
 | `DB_URL` | Yes | MongoDB connection string |
 | `REDIS_URL` | No | Redis connection string (fallback: in-memory cache) |
 
+## Feature Documentation
+
+See [docs/steering/commands.md](docs/steering/commands.md) for full command inventory, button handlers, events, and business rules.
+
 ## Docker
 
 Multi-stage Dockerfile: build stage compiles TS, production stage runs compiled JS as non-root `node` user. Needs `--env-file .env` and external MongoDB/Redis access.
