@@ -25,6 +25,8 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: 22
         script: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
           cd /root/discord-bot
           git stash
           git pull https://github.com/3Tea/discord-bot.git develop
