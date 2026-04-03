@@ -134,11 +134,11 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
             const offsetY = (HEIGHT - scaledH) / 2;
             ctx.drawImage(bgImg, offsetX, offsetY, scaledW, scaledH);
 
-            // Dark overlay for readability
-            const overlay = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
-            overlay.addColorStop(0, "rgba(45, 27, 78, 0.75)");
-            overlay.addColorStop(0.5, "rgba(26, 16, 53, 0.8)");
-            overlay.addColorStop(1, "rgba(13, 10, 26, 0.85)");
+            // Dark overlay — stronger on left for avatar readability
+            const overlay = ctx.createLinearGradient(0, 0, WIDTH, 0);
+            overlay.addColorStop(0, "rgba(13, 10, 26, 0.82)");
+            overlay.addColorStop(0.3, "rgba(26, 16, 53, 0.65)");
+            overlay.addColorStop(1, "rgba(45, 27, 78, 0.5)");
             ctx.fillStyle = overlay;
             ctx.fillRect(0, 0, WIDTH, HEIGHT);
         } catch {
@@ -162,153 +162,184 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
         ctx.restore();
     }
 
-    // --- Avatar ---
-    const avatarX = 40;
-    const avatarY = HEIGHT / 2 - 50;
-    const avatarSize = 100;
-    const avatarRadius = avatarSize / 2;
-
-    // Glow
-    ctx.save();
-    ctx.shadowColor = "rgba(196, 77, 255, 0.4)";
-    ctx.shadowBlur = 15;
-    ctx.beginPath();
-    ctx.arc(avatarX + avatarRadius, avatarY + avatarRadius, avatarRadius, 0, Math.PI * 2);
-    ctx.fillStyle = COLORS.bgMid;
+    // --- Content panel with border ---
+    const panelX = 25;
+    const panelY = 20;
+    const panelW = WIDTH - 50;
+    const panelH = HEIGHT - 40;
+    ctx.fillStyle = "rgba(13, 10, 26, 0.55)";
+    drawRoundedRect(ctx, panelX, panelY, panelW, panelH, 16);
     ctx.fill();
+    ctx.strokeStyle = "rgba(255, 107, 157, 0.15)";
+    ctx.lineWidth = 1;
+    drawRoundedRect(ctx, panelX, panelY, panelW, panelH, 16);
+    ctx.stroke();
+
+    // --- Shadow helpers ---
+    const setShadow = () => { ctx.shadowColor = "rgba(0,0,0,0.5)"; ctx.shadowBlur = 4; ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 1; };
+    const clearShadow = () => { ctx.shadowColor = "transparent"; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0; };
+
+    // --- Avatar (centered vertically in panel, with badge below) ---
+    const avatarSize = 105;
+    const avatarRadius = avatarSize / 2;
+    const badgeH = 28;
+    const avatarX = 50;
+    const avatarY = panelY + (panelH - avatarSize - badgeH - 6) / 2;
+    const avatarCX = avatarX + avatarRadius;
+    const avatarCY = avatarY + avatarRadius;
+
+    // Gradient ring
+    ctx.save();
+    ctx.shadowColor = "rgba(196, 77, 255, 0.5)";
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.arc(avatarCX, avatarCY, avatarRadius + 4, 0, Math.PI * 2);
+    const ringGrad = ctx.createLinearGradient(avatarX, avatarY, avatarX + avatarSize, avatarY + avatarSize);
+    ringGrad.addColorStop(0, COLORS.accentPink);
+    ringGrad.addColorStop(1, COLORS.accentPurple);
+    ctx.strokeStyle = ringGrad;
+    ctx.lineWidth = 4;
+    ctx.stroke();
     ctx.restore();
 
-    // Avatar image or fallback
+    // Avatar image
     ctx.save();
     ctx.beginPath();
-    ctx.arc(avatarX + avatarRadius, avatarY + avatarRadius, avatarRadius, 0, Math.PI * 2);
+    ctx.arc(avatarCX, avatarCY, avatarRadius, 0, Math.PI * 2);
     ctx.closePath();
     ctx.clip();
-
     if (avatarURL) {
         try {
             const { data } = await axios.get(avatarURL, { responseType: "arraybuffer" });
             const img = await loadImage(Buffer.from(data));
             ctx.drawImage(img, avatarX, avatarY, avatarSize, avatarSize);
-        } catch {
-            // Fallback: gradient circle with initial
-            drawAvatarFallback(ctx, avatarX, avatarY, avatarSize, username);
-        }
-    } else {
-        drawAvatarFallback(ctx, avatarX, avatarY, avatarSize, username);
-    }
+        } catch { drawAvatarFallback(ctx, avatarX, avatarY, avatarSize, username); }
+    } else { drawAvatarFallback(ctx, avatarX, avatarY, avatarSize, username); }
     ctx.restore();
 
-    // --- Level badge ---
+    // Level badge (centered below avatar)
     const badgeText = `LV ${level}`;
     ctx.font = '14px "Inter Bold"';
-    const badgeWidth = ctx.measureText(badgeText).width + 16;
-    const badgeX = avatarX + avatarSize - badgeWidth / 2;
-    const badgeY = avatarY + avatarSize - 8;
-
+    const badgeWidth = ctx.measureText(badgeText).width + 22;
+    const badgeX = avatarCX - badgeWidth / 2;
+    const badgeY = avatarY + avatarSize + 6;
     const badgeGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeWidth, badgeY);
     badgeGrad.addColorStop(0, COLORS.accentPink);
     badgeGrad.addColorStop(1, COLORS.accentPurple);
     ctx.fillStyle = badgeGrad;
-    drawRoundedRect(ctx, badgeX, badgeY, badgeWidth, 22, 8);
+    drawRoundedRect(ctx, badgeX, badgeY, badgeWidth, badgeH, 14);
     ctx.fill();
-
     ctx.fillStyle = "#ffffff";
     ctx.font = '14px "Inter Bold"';
-    ctx.fillText(badgeText, badgeX + 8, badgeY + 16);
+    ctx.textAlign = "center";
+    ctx.fillText(badgeText, avatarCX, badgeY + 19);
+    ctx.textAlign = "left";
 
-    // --- Username (gradient text) ---
-    const textX = 180;
-    const nameY = 95;
+    // --- Right content area ---
+    const textX = 185;
+    const contentRight = WIDTH - 50;
+    const contentWidth = contentRight - textX;
+    const maxNameWidth = contentWidth - 110;
 
-    ctx.font = '26px "Inter Bold"';
-    const nameGrad = ctx.createLinearGradient(textX, nameY - 20, textX + 250, nameY);
+    // --- 3 zones evenly spaced in panel ---
+    // Zone 1 (top):    Username + Rank
+    // Zone 2 (middle): XP + Progress bar
+    // Zone 3 (bottom): Stats
+
+    const zone1Y = panelY + 50;
+    const zone2Y = panelY + 120;
+    const statsLabelY = panelY + panelH - 65;
+    const statsValueY = statsLabelY + 25;
+
+    // --- Zone 1: Username + Rank ---
+    setShadow();
+    ctx.font = '30px "Inter Bold"';
+    let displayName = username;
+    while (ctx.measureText(displayName).width > maxNameWidth && displayName.length > 1) {
+        displayName = displayName.slice(0, -1);
+    }
+    if (displayName !== username) displayName += "..";
+    const nameGrad = ctx.createLinearGradient(textX, zone1Y - 20, textX + maxNameWidth, zone1Y);
     nameGrad.addColorStop(0, COLORS.accentPink);
     nameGrad.addColorStop(1, COLORS.accentPurple);
     ctx.fillStyle = nameGrad;
-    ctx.fillText(username, textX, nameY);
+    ctx.fillText(displayName, textX, zone1Y);
+    clearShadow();
 
-    // --- Rank (right side) ---
-    ctx.font = '16px "Inter"';
-    ctx.fillStyle = COLORS.textMuted;
+    // Rank top-right
+    setShadow();
     ctx.textAlign = "right";
-    ctx.fillText("Rank", WIDTH - 60, 90);
-
-    ctx.font = '30px "Inter Bold"';
-    ctx.fillStyle = COLORS.gold;
-    ctx.fillText(`#${rank || "—"}`, WIDTH - 60, 125);
-    ctx.textAlign = "left";
-
-    // --- XP text ---
-    const contentWidth = WIDTH - textX - 80;
-    ctx.font = '14px "Inter"';
+    ctx.font = '12px "Inter Bold"';
     ctx.fillStyle = COLORS.textMuted;
-    ctx.fillText(`${xp.toLocaleString()} / ${xpForNextLevel.toLocaleString()} XP`, textX, 140);
+    ctx.fillText("RANK", contentRight, panelY + 35);
+    ctx.font = '32px "Inter Bold"';
+    ctx.fillStyle = COLORS.gold;
+    ctx.fillText(`#${rank || "—"}`, contentRight, panelY + 65);
+    ctx.textAlign = "left";
+    clearShadow();
 
-    // --- Progress bar ---
-    const barX = textX;
-    const barY = 160;
-    const barWidth = contentWidth;
-    const barHeight = 18;
-    const barRadius = 9;
+    // --- Zone 2: XP + Progress bar ---
+    setShadow();
+    ctx.font = '15px "Inter Bold"';
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(`${xp.toLocaleString()} / ${xpForNextLevel.toLocaleString()} XP`, textX, zone2Y);
+    ctx.textAlign = "right";
+    ctx.fillStyle = COLORS.accentPink;
+    ctx.fillText(`${percentage}%`, textX + contentWidth, zone2Y);
+    ctx.textAlign = "left";
+    clearShadow();
 
-    // Bar background
-    ctx.fillStyle = COLORS.barBg;
-    drawRoundedRect(ctx, barX, barY, barWidth, barHeight, barRadius);
+    const barY = zone2Y + 12;
+    const barHeight = 20;
+    const barRadius = 10;
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+    drawRoundedRect(ctx, textX, barY, contentWidth, barHeight, barRadius);
     ctx.fill();
 
-    // Bar fill (skip if 0%)
     if (percentage > 0) {
-        const fillWidth = Math.max(barRadius * 2, (percentage / 100) * barWidth);
+        const fillWidth = Math.max(barRadius * 2, (percentage / 100) * contentWidth);
         ctx.save();
         ctx.shadowColor = "rgba(255, 107, 157, 0.5)";
         ctx.shadowBlur = 8;
-        const barGrad = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+        const barGrad = ctx.createLinearGradient(textX, barY, textX + contentWidth, barY);
         barGrad.addColorStop(0, COLORS.accentPink);
         barGrad.addColorStop(1, COLORS.accentPurple);
         ctx.fillStyle = barGrad;
-        drawRoundedRect(ctx, barX, barY, fillWidth, barHeight, barRadius);
+        drawRoundedRect(ctx, textX, barY, fillWidth, barHeight, barRadius);
         ctx.fill();
         ctx.restore();
     }
 
-    // Percentage text (right of bar)
-    ctx.font = '13px "Inter Bold"';
-    ctx.fillStyle = COLORS.textMuted;
-    ctx.textAlign = "right";
-    ctx.fillText(`${percentage}%`, barX + barWidth, barY - 5);
-    ctx.textAlign = "left";
+    // --- Divider ---
+    const dividerY = barY + barHeight + 22;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(textX, dividerY);
+    ctx.lineTo(contentRight, dividerY);
+    ctx.stroke();
 
-    // --- Stats line (text labels instead of emoji) ---
-    const statsY = 220;
-    ctx.font = '14px "Inter"';
-    ctx.fillStyle = COLORS.textMuted;
+    // --- Zone 3: Stats (anchored to panel bottom) ---
+    const colW = contentWidth / 3;
 
-    // Messages
-    ctx.fillStyle = COLORS.accentPink;
-    ctx.font = '14px "Inter Bold"';
-    ctx.fillText("MSG", textX, statsY);
-    ctx.fillStyle = COLORS.textMuted;
-    ctx.font = '14px "Inter"';
-    ctx.fillText(messageCount.toLocaleString(), textX + 40, statsY);
+    const drawStat = (label: string, value: string, colIndex: number) => {
+        const cx = textX + colW * colIndex + colW / 2;
+        setShadow();
+        ctx.textAlign = "center";
+        ctx.font = '12px "Inter Bold"';
+        ctx.fillStyle = COLORS.accentPink;
+        ctx.fillText(label, cx, statsLabelY);
+        ctx.font = '22px "Inter Bold"';
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(value, cx, statsValueY);
+        ctx.textAlign = "left";
+        clearShadow();
+    };
 
-    // Voice
-    const voiceX = textX + 140;
-    ctx.fillStyle = COLORS.accentPink;
-    ctx.font = '14px "Inter Bold"';
-    ctx.fillText("VOICE", voiceX, statsY);
-    ctx.fillStyle = COLORS.textMuted;
-    ctx.font = '14px "Inter"';
-    ctx.fillText(formatVoiceTime(voiceMinutes), voiceX + 55, statsY);
-
-    // Reactions
-    const reactX = textX + 310;
-    ctx.fillStyle = COLORS.accentPink;
-    ctx.font = '14px "Inter Bold"';
-    ctx.fillText("REACT", reactX, statsY);
-    ctx.fillStyle = COLORS.textMuted;
-    ctx.font = '14px "Inter"';
-    ctx.fillText(reactionCount.toLocaleString(), reactX + 58, statsY);
+    drawStat("MESSAGES", messageCount.toLocaleString(), 0);
+    drawStat("VOICE", formatVoiceTime(voiceMinutes), 1);
+    drawStat("REACTIONS", reactionCount.toLocaleString(), 2);
 
     // --- Return PNG buffer ---
     return canvas.toBuffer("image/png");
