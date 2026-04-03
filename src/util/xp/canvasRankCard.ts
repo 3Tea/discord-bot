@@ -1,11 +1,32 @@
 import { createCanvas, GlobalFonts, loadImage } from "@napi-rs/canvas";
 import axios from "axios";
+import fs from "node:fs";
 import path from "node:path";
 
 // --- Register fonts on module load ---
 const FONTS_DIR = path.join(process.cwd(), "src/assets/fonts");
 GlobalFonts.registerFromPath(path.join(FONTS_DIR, "Inter-Bold.ttf"), "Inter Bold");
 GlobalFonts.registerFromPath(path.join(FONTS_DIR, "Inter-Regular.ttf"), "Inter");
+
+// --- Load background images on module load ---
+const BG_DIR = path.join(process.cwd(), "src/assets/backgrounds");
+const backgroundFiles: string[] = [];
+
+try {
+    const files = fs.readdirSync(BG_DIR);
+    for (const file of files) {
+        if (/\.(jpg|jpeg|png)$/i.test(file)) {
+            backgroundFiles.push(path.join(BG_DIR, file));
+        }
+    }
+} catch {
+    // Folder doesn't exist or can't be read — use gradient fallback
+}
+
+function getRandomBackground(): string | null {
+    if (backgroundFiles.length === 0) return null;
+    return backgroundFiles[Math.floor(Math.random() * backgroundFiles.length)];
+}
 
 // --- Constants ---
 const WIDTH = 934;
@@ -97,15 +118,36 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
     const canvas = createCanvas(WIDTH, HEIGHT);
     const ctx = canvas.getContext("2d");
 
-    // --- Background gradient ---
-    const bgGrad = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
-    bgGrad.addColorStop(0, COLORS.bgStart);
-    bgGrad.addColorStop(0.5, COLORS.bgMid);
-    bgGrad.addColorStop(1, COLORS.bgEnd);
-    ctx.fillStyle = bgGrad;
+    // --- Background ---
     drawRoundedRect(ctx, 0, 0, WIDTH, HEIGHT, 12);
-    ctx.fill();
     ctx.clip();
+
+    const bgImagePath = getRandomBackground();
+    if (bgImagePath) {
+        // Draw background image (cover fit)
+        try {
+            const bgImg = await loadImage(fs.readFileSync(bgImagePath));
+            const scale = Math.max(WIDTH / bgImg.width, HEIGHT / bgImg.height);
+            const scaledW = bgImg.width * scale;
+            const scaledH = bgImg.height * scale;
+            const offsetX = (WIDTH - scaledW) / 2;
+            const offsetY = (HEIGHT - scaledH) / 2;
+            ctx.drawImage(bgImg, offsetX, offsetY, scaledW, scaledH);
+
+            // Dark overlay for readability
+            const overlay = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
+            overlay.addColorStop(0, "rgba(45, 27, 78, 0.75)");
+            overlay.addColorStop(0.5, "rgba(26, 16, 53, 0.8)");
+            overlay.addColorStop(1, "rgba(13, 10, 26, 0.85)");
+            ctx.fillStyle = overlay;
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        } catch {
+            // Image load failed — fall through to gradient
+            drawGradientBackground(ctx);
+        }
+    } else {
+        drawGradientBackground(ctx);
+    }
 
     // --- Sakura petals ---
     for (const petal of PETALS) {
@@ -121,9 +163,9 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
     }
 
     // --- Avatar ---
-    const avatarX = 60;
-    const avatarY = HEIGHT / 2 - 40;
-    const avatarSize = 80;
+    const avatarX = 40;
+    const avatarY = HEIGHT / 2 - 50;
+    const avatarSize = 100;
     const avatarRadius = avatarSize / 2;
 
     // Glow
@@ -176,11 +218,11 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
     ctx.fillText(badgeText, badgeX + 8, badgeY + 16);
 
     // --- Username (gradient text) ---
-    const textX = 170;
-    const nameY = 100;
+    const textX = 180;
+    const nameY = 95;
 
-    ctx.font = '24px "Inter Bold"';
-    const nameGrad = ctx.createLinearGradient(textX, nameY - 20, textX + 200, nameY);
+    ctx.font = '26px "Inter Bold"';
+    const nameGrad = ctx.createLinearGradient(textX, nameY - 20, textX + 250, nameY);
     nameGrad.addColorStop(0, COLORS.accentPink);
     nameGrad.addColorStop(1, COLORS.accentPurple);
     ctx.fillStyle = nameGrad;
@@ -190,57 +232,95 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
     ctx.font = '16px "Inter"';
     ctx.fillStyle = COLORS.textMuted;
     ctx.textAlign = "right";
-    ctx.fillText("Rank", WIDTH - 80, 90);
+    ctx.fillText("Rank", WIDTH - 60, 90);
 
-    ctx.font = '28px "Inter Bold"';
+    ctx.font = '30px "Inter Bold"';
     ctx.fillStyle = COLORS.gold;
-    ctx.fillText(`#${rank || "—"}`, WIDTH - 80, 122);
+    ctx.fillText(`#${rank || "—"}`, WIDTH - 60, 125);
     ctx.textAlign = "left";
 
     // --- XP text ---
+    const contentWidth = WIDTH - textX - 80;
     ctx.font = '14px "Inter"';
     ctx.fillStyle = COLORS.textMuted;
-    ctx.fillText(`${xp.toLocaleString()} / ${xpForNextLevel.toLocaleString()} XP`, textX, 145);
+    ctx.fillText(`${xp.toLocaleString()} / ${xpForNextLevel.toLocaleString()} XP`, textX, 140);
 
     // --- Progress bar ---
     const barX = textX;
-    const barY = 165;
-    const barWidth = 580;
-    const barHeight = 16;
-    const barRadius = 8;
+    const barY = 160;
+    const barWidth = contentWidth;
+    const barHeight = 18;
+    const barRadius = 9;
 
     // Bar background
     ctx.fillStyle = COLORS.barBg;
     drawRoundedRect(ctx, barX, barY, barWidth, barHeight, barRadius);
     ctx.fill();
 
-    // Bar fill
-    const fillWidth = Math.max(barRadius * 2, (percentage / 100) * barWidth);
-    ctx.save();
-    ctx.shadowColor = "rgba(255, 107, 157, 0.5)";
-    ctx.shadowBlur = 8;
-    const barGrad = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
-    barGrad.addColorStop(0, COLORS.accentPink);
-    barGrad.addColorStop(1, COLORS.accentPurple);
-    ctx.fillStyle = barGrad;
-    drawRoundedRect(ctx, barX, barY, fillWidth, barHeight, barRadius);
-    ctx.fill();
-    ctx.restore();
+    // Bar fill (skip if 0%)
+    if (percentage > 0) {
+        const fillWidth = Math.max(barRadius * 2, (percentage / 100) * barWidth);
+        ctx.save();
+        ctx.shadowColor = "rgba(255, 107, 157, 0.5)";
+        ctx.shadowBlur = 8;
+        const barGrad = ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+        barGrad.addColorStop(0, COLORS.accentPink);
+        barGrad.addColorStop(1, COLORS.accentPurple);
+        ctx.fillStyle = barGrad;
+        drawRoundedRect(ctx, barX, barY, fillWidth, barHeight, barRadius);
+        ctx.fill();
+        ctx.restore();
+    }
 
-    // Percentage text on bar
-    ctx.font = '11px "Inter Bold"';
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(`${percentage}%`, barX + fillWidth - 35, barY + 12);
-
-    // --- Stats line ---
-    const statsY = 240;
-    ctx.font = '15px "Inter"';
+    // Percentage text (right of bar)
+    ctx.font = '13px "Inter Bold"';
     ctx.fillStyle = COLORS.textMuted;
-    const statsText = `💬 ${messageCount.toLocaleString()}    🎤 ${formatVoiceTime(voiceMinutes)}    ❤️ ${reactionCount.toLocaleString()}`;
-    ctx.fillText(statsText, textX, statsY);
+    ctx.textAlign = "right";
+    ctx.fillText(`${percentage}%`, barX + barWidth, barY - 5);
+    ctx.textAlign = "left";
+
+    // --- Stats line (text labels instead of emoji) ---
+    const statsY = 220;
+    ctx.font = '14px "Inter"';
+    ctx.fillStyle = COLORS.textMuted;
+
+    // Messages
+    ctx.fillStyle = COLORS.accentPink;
+    ctx.font = '14px "Inter Bold"';
+    ctx.fillText("MSG", textX, statsY);
+    ctx.fillStyle = COLORS.textMuted;
+    ctx.font = '14px "Inter"';
+    ctx.fillText(messageCount.toLocaleString(), textX + 40, statsY);
+
+    // Voice
+    const voiceX = textX + 140;
+    ctx.fillStyle = COLORS.accentPink;
+    ctx.font = '14px "Inter Bold"';
+    ctx.fillText("VOICE", voiceX, statsY);
+    ctx.fillStyle = COLORS.textMuted;
+    ctx.font = '14px "Inter"';
+    ctx.fillText(formatVoiceTime(voiceMinutes), voiceX + 55, statsY);
+
+    // Reactions
+    const reactX = textX + 310;
+    ctx.fillStyle = COLORS.accentPink;
+    ctx.font = '14px "Inter Bold"';
+    ctx.fillText("REACT", reactX, statsY);
+    ctx.fillStyle = COLORS.textMuted;
+    ctx.font = '14px "Inter"';
+    ctx.fillText(reactionCount.toLocaleString(), reactX + 58, statsY);
 
     // --- Return PNG buffer ---
     return canvas.toBuffer("image/png");
+}
+
+function drawGradientBackground(ctx: CanvasRenderingContext2D): void {
+    const bgGrad = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
+    bgGrad.addColorStop(0, COLORS.bgStart);
+    bgGrad.addColorStop(0.5, COLORS.bgMid);
+    bgGrad.addColorStop(1, COLORS.bgEnd);
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
 }
 
 function drawAvatarFallback(
