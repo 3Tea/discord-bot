@@ -13,6 +13,7 @@ import MemberXPModel from "../models/memberXP.model";
 import GuildXPConfigModel from "../models/guildXPConfig.model";
 import { levelFromXP } from "../util/xp/calculator";
 import { buildLevelUpEmbed } from "../util/xp/rankCard";
+import { syncGlobalXP, getGlobalRank } from "../util/xp/globalXP";
 import { logger } from "../util/log/logger.mixed";
 import client from "../client";
 
@@ -192,6 +193,9 @@ setInterval(async () => {
                     { upsert: true, new: true }
                 );
 
+                // Sync global XP
+                await syncGlobalXP(sUserId, config.xpPerVoiceMinute);
+
                 const newLevel = levelFromXP(updated.xp);
                 if (newLevel > updated.level) {
                     await MemberXPModel.updateOne(
@@ -199,7 +203,8 @@ setInterval(async () => {
                         { $set: { level: newLevel } }
                     );
 
-                    const embed = buildLevelUpEmbed(sUserId, newLevel);
+                    const { rank: globalRank } = await getGlobalRank(sUserId);
+                    const embed = buildLevelUpEmbed(sUserId, newLevel, globalRank);
                     const textChannel = guild.systemChannel;
                     if (textChannel) {
                         await textChannel.send({ embeds: [embed] });

@@ -5,6 +5,7 @@ import GuildXPConfigModel from "../models/guildXPConfig.model";
 import { levelFromXP, randomXP } from "../util/xp/calculator";
 import { checkMessageSpam, hashMessage } from "../util/xp/antiSpam";
 import { buildLevelUpEmbed } from "../util/xp/rankCard";
+import { syncGlobalXP, getGlobalRank } from "../util/xp/globalXP";
 import { logger } from "../util/log/logger.mixed";
 
 export default {
@@ -63,6 +64,9 @@ export default {
                 { upsert: true, new: true }
             );
 
+            // Sync global XP
+            await syncGlobalXP(message.author.id, xpGain);
+
             // Check level up
             const newLevel = levelFromXP(updated.xp);
             if (newLevel > updated.level) {
@@ -71,7 +75,8 @@ export default {
                     { $set: { level: newLevel } }
                 );
 
-                const embed = buildLevelUpEmbed(message.author.id, newLevel);
+                const { rank: globalRank } = await getGlobalRank(message.author.id);
+                const embed = buildLevelUpEmbed(message.author.id, newLevel, globalRank);
                 if (message.channel.isSendable()) {
                     await message.channel.send({ embeds: [embed] });
                 }
