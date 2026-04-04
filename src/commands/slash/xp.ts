@@ -9,6 +9,7 @@ import {
 import MemberXPModel from "../../models/memberXP.model";
 import GuildXPConfigModel from "../../models/guildXPConfig.model";
 import { levelFromXP } from "../../util/xp/calculator";
+import { syncGlobalXP } from "../../util/xp/globalXP";
 
 export default {
     data: new SlashCommandBuilder()
@@ -104,6 +105,10 @@ export default {
                         { upsert: true }
                     );
 
+                    // Sync global XP delta
+                    const delta = amount - oldXP;
+                    await syncGlobalXP(target.id, delta);
+
                     const embed = new EmbedBuilder()
                         .setDescription(
                             `Set XP for <@${target.id}>:\n` +
@@ -137,6 +142,9 @@ export default {
                         await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
                     }
 
+                    // Sync global XP
+                    await syncGlobalXP(target.id, amount);
+
                     const embed = new EmbedBuilder()
                         .setDescription(
                             `Added **${amount.toLocaleString()}** XP to <@${target.id}>\n` +
@@ -168,6 +176,10 @@ export default {
                         },
                         { upsert: true }
                     );
+
+                    // Sync global XP (negative delta, clamped in syncGlobalXP)
+                    const actualRemoved = currentXP - newXP;
+                    await syncGlobalXP(target.id, -actualRemoved);
 
                     const embed = new EmbedBuilder()
                         .setDescription(
