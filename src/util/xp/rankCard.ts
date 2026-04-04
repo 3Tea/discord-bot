@@ -28,11 +28,15 @@ export function buildRankEmbed(
     globalXP: number
 ): EmbedBuilder {
     if (!member) {
+        const globalLine = globalRank
+            ? `🌐 **#${globalRank}** toàn cầu · Tổng XP: **${globalXP.toLocaleString()}**`
+            : "Chưa có xếp hạng";
+
         return new EmbedBuilder()
             .setTitle(`📊 ${username} — Level 0`)
             .setDescription(
                 [
-                    "Chưa có xếp hạng",
+                    globalLine,
                     "",
                     `${buildProgressBar(0)} 0%`,
                     `0 / ${xpForLevel(1)} XP`,
@@ -64,15 +68,9 @@ export function buildRankEmbed(
 
 const MEDALS = ["🥇", "🥈", "🥉"] as const;
 
-export function buildLeaderboardEmbed(
-    members: IMemberXP[],
-    guildName: string
-): EmbedBuilder {
+export function buildLeaderboardEmbed(members: IMemberXP[], guildName: string): EmbedBuilder {
     if (members.length === 0) {
-        return new EmbedBuilder()
-            .setTitle("🏆 Bảng xếp hạng")
-            .setDescription("Chưa có ai có XP!")
-            .setColor(0xf0b132);
+        return new EmbedBuilder().setTitle("🏆 Bảng xếp hạng").setDescription("Chưa có ai có XP!").setColor(0xf0b132);
     }
 
     const lines = members.map((m, i) => {
@@ -95,12 +93,10 @@ export function buildLevelUpEmbed(userId: string, newLevel: number, globalRank?:
         lines.push(`🌐 Global Rank: **#${globalRank}**`);
     }
 
-    return new EmbedBuilder()
-        .setDescription(lines.join("\n"))
-        .setColor(0xf0b132);
+    return new EmbedBuilder().setDescription(lines.join("\n")).setColor(0xf0b132);
 }
 
-export function buildGlobalLeaderboardEmbed(users: IUser[]): EmbedBuilder {
+export function buildGlobalLeaderboardEmbed(users: IUser[], usernames: Map<string, string>): EmbedBuilder {
     if (users.length === 0) {
         return new EmbedBuilder()
             .setTitle("🌐 Bảng xếp hạng toàn cầu")
@@ -112,7 +108,8 @@ export function buildGlobalLeaderboardEmbed(users: IUser[]): EmbedBuilder {
         const medal = i < 3 ? MEDALS[i] : "";
         const prefix = `#${i + 1}  ${medal}`;
         const level = levelFromXP(u.totalPoint);
-        return `${prefix} <@${u.userID}> — Level ${level} (${u.totalPoint.toLocaleString()} XP)`;
+        const name = usernames.get(u.userID) ?? `<@${u.userID}>`;
+        return `${prefix} @${name} — Level ${level} (${u.totalPoint.toLocaleString()} XP)`;
     });
 
     return new EmbedBuilder()
