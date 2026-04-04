@@ -4,6 +4,7 @@ import MemberXPModel from "../../models/memberXP.model";
 import { progressToNextLevel, xpForLevel } from "../../util/xp/calculator";
 import { buildRankEmbed } from "../../util/xp/rankCard";
 import { renderRankCard } from "../../util/xp/canvasRankCard";
+import { getGlobalRank } from "../../util/xp/globalXP";
 
 export default {
     data: new SlashCommandBuilder()
@@ -24,7 +25,7 @@ export default {
                 userId: target.id,
             });
 
-            // Calculate rank position
+            // Calculate guild rank
             let rank = 0;
             if (member) {
                 const higherCount = await MemberXPModel.countDocuments({
@@ -33,6 +34,9 @@ export default {
                 });
                 rank = higherCount + 1;
             }
+
+            // Calculate global rank
+            const { rank: globalRank, totalPoint: globalXP } = await getGlobalRank(target.id);
 
             const progress = progressToNextLevel(member?.xp ?? 0);
 
@@ -44,19 +48,21 @@ export default {
                     avatarURL,
                     level: progress.level,
                     rank,
+                    globalRank,
                     xp: member?.xp ?? 0,
                     xpForNextLevel: xpForLevel(progress.level + 1),
                     percentage: progress.percentage,
                     messageCount: member?.messageCount ?? 0,
                     voiceMinutes: member?.voiceMinutes ?? 0,
                     reactionCount: member?.reactionCount ?? 0,
+                    totalXP: globalXP,
                 });
 
                 const attachment = new AttachmentBuilder(pngBuffer, { name: "rank.png" });
                 await interaction.editReply({ files: [attachment] });
             } catch {
                 // Canvas failed — fallback to embed
-                const embed = buildRankEmbed(member, target.username, rank);
+                const embed = buildRankEmbed(member, target.username, rank, globalRank, globalXP);
                 await interaction.editReply({ embeds: [embed] });
             }
         } catch {
