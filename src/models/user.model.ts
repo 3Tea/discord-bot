@@ -43,6 +43,9 @@ const userSchema = new Schema(
     }
 );
 
+userSchema.index({ userID: 1 }, { unique: true });
+userSchema.index({ totalPoint: -1 });
+
 userSchema.post("save", (error: any, doc: any, next: any) => {
     if (process.env.NODE_ENV === "development") {
         console.log(doc);
