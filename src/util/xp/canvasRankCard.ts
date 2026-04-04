@@ -469,8 +469,13 @@ function drawAvatarFallback(ctx: Ctx2D, cx: number, cy: number, r: number, usern
     ctx.textBaseline = "alphabetic";
 }
 
-function drawRankBadge(ctx: Ctx2D, rank: number, cx: number, topY: number): void {
-    const label = `RANK  #${rank || "—"}`;
+function drawRankBadge(
+    ctx: Ctx2D,
+    label: string,
+    cx: number,
+    topY: number,
+    colors: [string, string]
+): number {
     ctx.font = '16px "Inter Bold"';
     const tw = ctx.measureText(label).width;
     const bw = tw + 28;
@@ -483,18 +488,20 @@ function drawRankBadge(ctx: Ctx2D, rank: number, cx: number, topY: number): void
     ctx.fill();
 
     // Gradient border
-    ctx.strokeStyle = gradientH(ctx, bx, bw, topY, [[0, C.pink], [1, C.purple]]);
+    ctx.strokeStyle = gradientH(ctx, bx, bw, topY, [[0, colors[0]], [1, colors[1]]]);
     ctx.lineWidth = 1.2;
     roundRect(ctx, bx, topY, bw, bh, 15);
     ctx.stroke();
 
     // Text
-    shadow(ctx, "rgba(255,107,157,0.5)", 6);
-    ctx.fillStyle = C.pink;
+    shadow(ctx, `${colors[0]}88`, 6);
+    ctx.fillStyle = colors[0];
     ctx.textAlign = "center";
     ctx.fillText(label, cx, topY + 21);
     ctx.textAlign = "left";
     clearShadow(ctx);
+
+    return bh;
 }
 
 function drawNameBlock(
@@ -676,6 +683,7 @@ export interface RankCardOptions {
     avatarURL: string | null;
     level: number;
     rank: number;
+    globalRank: number;
     xp: number;
     xpForNextLevel: number;
     percentage: number;
@@ -688,7 +696,7 @@ export interface RankCardOptions {
 export async function renderRankCard(options: RankCardOptions): Promise<Buffer> {
     const {
         username, discriminator, avatarURL,
-        level, rank, xp, xpForNextLevel, percentage,
+        level, rank, globalRank, xp, xpForNextLevel, percentage,
         messageCount, voiceMinutes, reactionCount,
         totalXP = xp,
     } = options;
@@ -727,8 +735,12 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
     // --- Avatar ---
     await drawAvatar(ctx, avatarURL, username, AV_CX, AV_CY, AV_R);
 
-    // Rank badge (below avatar)
-    drawRankBadge(ctx, rank, AV_CX, AV_CY + AV_R + 12);
+    // Dual rank badges (below avatar)
+    const badgeStartY = AV_CY + AV_R + 12;
+    const serverLabel = `SERVER  #${rank || "—"}`;
+    const globalLabel = `GLOBAL  #${globalRank || "—"}`;
+    const badgeH = drawRankBadge(ctx, serverLabel, AV_CX, badgeStartY, [C.pink, C.purple]);
+    drawRankBadge(ctx, globalLabel, AV_CX, badgeStartY + badgeH + 6, [C.gold, "#ff8c00"]);
 
     // --- Level box (top right) ---
     drawLevelBox(ctx, level, LV_X, LV_Y, LV_W, LV_H);
