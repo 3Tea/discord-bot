@@ -79,6 +79,9 @@
     "leaderboard.title": "리더보드",
     "leaderboard.global_title": "글로벌 리더보드",
     "leaderboard.empty": "아직 XP를 획득한 사람이 없어요!",
+    "leaderboard.page_footer": "페이지 {{page}}/{{totalPages}}",
+    "leaderboard.prev": "이전",
+    "leaderboard.next": "다음",
 
     "ping.pinging": "핑 확인 중...",
     "ping.result": "왕복 지연 시간: {{latency}}ms",

@@ -79,6 +79,9 @@
     "leaderboard.title": "排行榜",
     "leaderboard.global_title": "全球排行榜",
     "leaderboard.empty": "还没有人获得 XP！",
+    "leaderboard.page_footer": "第 {{page}}/{{totalPages}} 页",
+    "leaderboard.prev": "上一页",
+    "leaderboard.next": "下一页",
 
     "ping.pinging": "正在测速...",
     "ping.result": "往返延迟：{{latency}}ms",

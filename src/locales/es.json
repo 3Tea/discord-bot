@@ -80,6 +80,9 @@
     "leaderboard.title": "Tabla de clasificación",
     "leaderboard.global_title": "Tabla de clasificación global",
     "leaderboard.empty": "¡Nadie tiene XP todavía!",
+    "leaderboard.page_footer": "Página {{page}}/{{totalPages}}",
+    "leaderboard.prev": "Anterior",
+    "leaderboard.next": "Siguiente",
 
     "ping.pinging": "Comprobando...",
     "ping.result": "Latencia de ida y vuelta: {{latency}}ms",

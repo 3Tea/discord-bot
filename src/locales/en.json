@@ -79,6 +79,9 @@
     "leaderboard.title": "Leaderboard",
     "leaderboard.global_title": "Global Leaderboard",
     "leaderboard.empty": "No one has XP yet!",
+    "leaderboard.page_footer": "Page {{page}}/{{totalPages}}",
+    "leaderboard.prev": "Previous",
+    "leaderboard.next": "Next",
 
     "ping.pinging": "Pinging...",
     "ping.result": "Roundtrip latency: {{latency}}ms",

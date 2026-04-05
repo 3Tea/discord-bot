@@ -71,7 +71,13 @@ export function buildRankEmbed(
 
 const MEDALS = ["🥇", "🥈", "🥉"] as const;
 
-export function buildLeaderboardEmbed(members: IMemberXP[], guildName: string, locale: SupportedLocale): EmbedBuilder {
+export function buildLeaderboardEmbed(
+    members: IMemberXP[],
+    guildName: string,
+    locale: SupportedLocale,
+    page = 1,
+    totalPages = 1
+): EmbedBuilder {
     if (members.length === 0) {
         return new EmbedBuilder()
             .setTitle(`🏆 ${t(locale, "leaderboard.title")}`)
@@ -79,9 +85,11 @@ export function buildLeaderboardEmbed(members: IMemberXP[], guildName: string, l
             .setColor(0xf0b132);
     }
 
+    const offset = (page - 1) * 10;
     const lines = members.map((m, i) => {
-        const medal = i < 3 ? MEDALS[i] : "";
-        const prefix = `#${i + 1}  ${medal}`;
+        const rank = offset + i;
+        const medal = rank < 3 ? MEDALS[rank] : "";
+        const prefix = `#${rank + 1}  ${medal}`;
         return `${prefix} <@${m.userId}> — Level ${m.level} (${m.xp.toLocaleString()} XP)`;
     });
 
@@ -89,7 +97,7 @@ export function buildLeaderboardEmbed(members: IMemberXP[], guildName: string, l
         .setTitle(`🏆 ${t(locale, "leaderboard.title")}`)
         .setDescription(lines.join("\n"))
         .setColor(0xf0b132)
-        .setFooter({ text: guildName })
+        .setFooter({ text: `${guildName} · ${t(locale, "leaderboard.page_footer", { page, totalPages })}` })
         .setTimestamp();
 }
 
@@ -110,7 +118,9 @@ export function buildLevelUpEmbed(
 export function buildGlobalLeaderboardEmbed(
     users: IUser[],
     usernames: Map<string, string>,
-    locale: SupportedLocale
+    locale: SupportedLocale,
+    page = 1,
+    totalPages = 1
 ): EmbedBuilder {
     if (users.length === 0) {
         return new EmbedBuilder()
@@ -119,18 +129,20 @@ export function buildGlobalLeaderboardEmbed(
             .setColor(0xf0b132);
     }
 
+    const offset = (page - 1) * 10;
     const lines = users.map((u, i) => {
-        const medal = i < 3 ? MEDALS[i] : "";
-        const prefix = `#${i + 1}  ${medal}`;
+        const rank = offset + i;
+        const medal = rank < 3 ? MEDALS[rank] : "";
+        const prefix = `#${rank + 1}  ${medal}`;
         const level = levelFromXP(u.totalPoint);
-        const name = usernames.get(u.userID) ?? `<@${u.userID}>`;
-        return `${prefix} @${name} — Level ${level} (${u.totalPoint.toLocaleString()} XP)`;
+        const displayName = usernames.has(u.userID) ? `@${usernames.get(u.userID)}` : `<@${u.userID}>`;
+        return `${prefix} ${displayName} — Level ${level} (${u.totalPoint.toLocaleString()} XP)`;
     });
 
     return new EmbedBuilder()
         .setTitle(`🌐 ${t(locale, "leaderboard.global_title")}`)
         .setDescription(lines.join("\n"))
         .setColor(0xf0b132)
-        .setFooter({ text: "Global" })
+        .setFooter({ text: `Global · ${t(locale, "leaderboard.page_footer", { page, totalPages })}` })
         .setTimestamp();
 }

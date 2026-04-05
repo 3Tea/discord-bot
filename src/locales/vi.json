@@ -79,6 +79,9 @@
     "leaderboard.title": "Bảng xếp hạng",
     "leaderboard.global_title": "Bảng xếp hạng toàn cầu",
     "leaderboard.empty": "Chưa có ai có XP!",
+    "leaderboard.page_footer": "Trang {{page}}/{{totalPages}}",
+    "leaderboard.prev": "Trước",
+    "leaderboard.next": "Sau",
 
     "ping.pinging": "Đang ping...",
     "ping.result": "Độ trễ khứ hồi: {{latency}}ms",

@@ -11,7 +11,7 @@ export default {
         const button = client?.buttons.get(interaction.customId);
 
         if (!button) {
-            console.error(`No button matching ${interaction.customId} was found.`);
+            // Unregistered buttons are handled by message component collectors
             return;
         }
 

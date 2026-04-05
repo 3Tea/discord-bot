@@ -79,6 +79,9 @@
     "leaderboard.title": "リーダーボード",
     "leaderboard.global_title": "グローバルリーダーボード",
     "leaderboard.empty": "まだXPを持ってる人がいないよ！",
+    "leaderboard.page_footer": "ページ {{page}}/{{totalPages}}",
+    "leaderboard.prev": "前へ",
+    "leaderboard.next": "次へ",
 
     "ping.pinging": "確認中...",
     "ping.result": "ラウンドトリップ遅延: {{latency}}ms",
