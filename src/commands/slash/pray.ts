@@ -14,9 +14,7 @@ function randomText(texts: string[]): string {
 }
 
 function formatPrayEmbed(interaction: ChatInputCommandInteraction, result: PrayResult): EmbedBuilder {
-    const embed = new EmbedBuilder()
-        .setColor(0xffd700)
-        .setTimestamp();
+    const embed = new EmbedBuilder().setColor(0xffd700).setTimestamp();
 
     const flavorText = randomText(PRAY_TEXTS);
     let description = `**${interaction.user.username}** ${flavorText}\n\n`;
@@ -51,9 +49,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("pray")
         .setDescription("Cầu nguyện để nhận coin")
-        .addUserOption((option) =>
-            option.setName("target").setDescription("Cầu nguyện cho người khác")
-        ),
+        .addUserOption((option) => option.setName("target").setDescription("Cầu nguyện cho người khác")),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
 
@@ -68,7 +64,9 @@ export default {
             }
 
             if (targetUser?.id === userId) {
-                await interaction.editReply("Không thể cầu nguyện cho chính mình bằng target. Dùng `/pray` không có target.");
+                await interaction.editReply(
+                    "Không thể cầu nguyện cho chính mình bằng target. Dùng `/pray` không có target."
+                );
                 return;
             }
 

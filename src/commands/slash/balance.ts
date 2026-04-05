@@ -6,9 +6,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("balance")
         .setDescription("Xem số dư coin và gem")
-        .addUserOption((option) =>
-            option.setName("user").setDescription("Xem số dư của người khác")
-        ),
+        .addUserOption((option) => option.setName("user").setDescription("Xem số dư của người khác")),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
 
@@ -24,7 +22,7 @@ export default {
                 .addFields(
                     { name: "Coin", value: `**${balance.coin.toLocaleString()}**`, inline: true },
                     { name: "Gem", value: `**${balance.gem.toLocaleString()}**`, inline: true },
-                    { name: "Pray Streak", value: `**${balance.prayStreak}** ngày`, inline: true },
+                    { name: "Pray Streak", value: `**${balance.prayStreak}** ngày`, inline: true }
                 )
                 .setTimestamp();
 

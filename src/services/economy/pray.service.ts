@@ -162,10 +162,7 @@ async function curse(userId: string, guildId: string, targetId?: string): Promis
     }
 
     // Update curse cooldown (no streak for curse)
-    await UserEconomyModel.updateOne(
-        { userId, guildId },
-        { $set: { lastCurse: new Date() } }
-    );
+    await UserEconomyModel.updateOne({ userId, guildId }, { $set: { lastCurse: new Date() } });
 
     return { userReward, targetReward, targetId };
 }

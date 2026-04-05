@@ -20,17 +20,13 @@ export default {
             sub
                 .setName("view")
                 .setDescription("Xem danh sách items")
-                .addIntegerOption((opt) =>
-                    opt.setName("page").setDescription("Trang").setMinValue(1)
-                )
+                .addIntegerOption((opt) => opt.setName("page").setDescription("Trang").setMinValue(1))
         )
         .addSubcommand((sub) =>
             sub
                 .setName("buy")
                 .setDescription("Mua item")
-                .addStringOption((opt) =>
-                    opt.setName("item-id").setDescription("ID của item").setRequired(true)
-                )
+                .addStringOption((opt) => opt.setName("item-id").setDescription("ID của item").setRequired(true))
         )
         .addSubcommand((sub) =>
             sub
@@ -56,21 +52,18 @@ export default {
                         .setName("currency")
                         .setDescription("Loại tiền")
                         .setRequired(true)
-                        .addChoices(
-                            { name: "Coin", value: "coin" },
-                            { name: "Gem", value: "gem" }
-                        )
+                        .addChoices({ name: "Coin", value: "coin" }, { name: "Gem", value: "gem" })
                 )
                 .addRoleOption((opt) => opt.setName("role").setDescription("Role (nếu type=role)"))
-                .addIntegerOption((opt) => opt.setName("stock").setDescription("Số lượng (bỏ trống = vô hạn)").setMinValue(1))
+                .addIntegerOption((opt) =>
+                    opt.setName("stock").setDescription("Số lượng (bỏ trống = vô hạn)").setMinValue(1)
+                )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("remove")
                 .setDescription("Xóa item khỏi shop (Admin)")
-                .addStringOption((opt) =>
-                    opt.setName("item-id").setDescription("ID của item").setRequired(true)
-                )
+                .addStringOption((opt) => opt.setName("item-id").setDescription("ID của item").setRequired(true))
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -88,10 +81,7 @@ export default {
                     return;
                 }
 
-                const embed = new EmbedBuilder()
-                    .setTitle("Shop")
-                    .setColor(0xffd700)
-                    .setTimestamp();
+                const embed = new EmbedBuilder().setTitle("Shop").setColor(0xffd700).setTimestamp();
 
                 for (const item of items) {
                     const stockText = item.stock === null ? "Unlimited" : `${item.stock} left`;
@@ -119,7 +109,7 @@ export default {
                     .setColor(0x57f287)
                     .setDescription(
                         `Mua thành công **${result.item.name}**!\n` +
-                        `Đã trả: **${result.coinSpent > 0 ? `${result.coinSpent} coin` : `${result.gemSpent} gem`}**`
+                            `Đã trả: **${result.coinSpent > 0 ? `${result.coinSpent} coin` : `${result.gemSpent} gem`}**`
                     )
                     .setTimestamp();
                 await interaction.editReply({ embeds: [embed] });

@@ -34,12 +34,7 @@ async function getItems(guildId: string, page: number): Promise<{ items: IShopIt
     return { items, totalPages };
 }
 
-async function buyItem(
-    userId: string,
-    guildId: string,
-    itemId: string,
-    guild: Guild
-): Promise<PurchaseResult> {
+async function buyItem(userId: string, guildId: string, itemId: string, guild: Guild): Promise<PurchaseResult> {
     const item = await ShopItemModel.findOne({ guildId, itemId, enabled: true });
     if (!item) {
         throw new Error("ITEM_NOT_FOUND");
@@ -61,8 +56,10 @@ async function buyItem(
             const member = await guild.members.fetch(userId);
             if (member.roles.cache.has(item.roleId)) {
                 // Rollback: refund the currency
-                if (coinCost > 0) await CurrencyService.addCoin(userId, guildId, coinCost, "purchase", { itemId, refund: true });
-                if (gemCost > 0) await CurrencyService.addGem(userId, guildId, gemCost, "purchase", { itemId, refund: true });
+                if (coinCost > 0)
+                    await CurrencyService.addCoin(userId, guildId, coinCost, "purchase", { itemId, refund: true });
+                if (gemCost > 0)
+                    await CurrencyService.addGem(userId, guildId, gemCost, "purchase", { itemId, refund: true });
                 throw new Error("ALREADY_HAS_ROLE");
             }
             await member.roles.add(item.roleId);
@@ -73,7 +70,8 @@ async function buyItem(
             throw error;
         }
         // Rollback on unexpected failure
-        if (coinCost > 0) await CurrencyService.addCoin(userId, guildId, coinCost, "purchase", { itemId, refund: true });
+        if (coinCost > 0)
+            await CurrencyService.addCoin(userId, guildId, coinCost, "purchase", { itemId, refund: true });
         if (gemCost > 0) await CurrencyService.addGem(userId, guildId, gemCost, "purchase", { itemId, refund: true });
         throw new Error("EFFECT_FAILED");
     }
@@ -96,10 +94,7 @@ async function addItem(guildId: string, data: AddItemInput): Promise<IShopItem> 
 }
 
 async function removeItem(guildId: string, itemId: string): Promise<void> {
-    const result = await ShopItemModel.updateOne(
-        { guildId, itemId },
-        { $set: { enabled: false } }
-    );
+    const result = await ShopItemModel.updateOne({ guildId, itemId }, { $set: { enabled: false } });
     if (result.matchedCount === 0) {
         throw new Error("ITEM_NOT_FOUND");
     }

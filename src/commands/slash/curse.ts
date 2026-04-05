@@ -14,9 +14,7 @@ function randomText(texts: string[]): string {
 }
 
 function formatCurseEmbed(interaction: ChatInputCommandInteraction, result: CurseResult): EmbedBuilder {
-    const embed = new EmbedBuilder()
-        .setColor(0x800080)
-        .setTimestamp();
+    const embed = new EmbedBuilder().setColor(0x800080).setTimestamp();
 
     const flavorText = randomText(CURSE_TEXTS);
     let description = `**${interaction.user.username}** ${flavorText}\n\n`;
@@ -35,9 +33,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("curse")
         .setDescription("Nguyền rủa để nhận coin (ít hơn pray)")
-        .addUserOption((option) =>
-            option.setName("target").setDescription("Nguyền rủa ai đó")
-        ),
+        .addUserOption((option) => option.setName("target").setDescription("Nguyền rủa ai đó")),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
 
@@ -52,7 +48,9 @@ export default {
             }
 
             if (targetUser?.id === userId) {
-                await interaction.editReply("Không thể nguyền rủa chính mình bằng target. Dùng `/curse` không có target.");
+                await interaction.editReply(
+                    "Không thể nguyền rủa chính mình bằng target. Dùng `/curse` không có target."
+                );
                 return;
             }
 

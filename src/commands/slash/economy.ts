@@ -26,9 +26,7 @@ export default {
                 .setName("add-coin")
                 .setDescription("Add coin to a user")
                 .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
-                .addIntegerOption((opt) =>
-                    opt.setName("amount").setDescription("Coin to add").setRequired(true)
-                )
+                .addIntegerOption((opt) => opt.setName("amount").setDescription("Coin to add").setRequired(true))
         )
         .addSubcommand((sub) =>
             sub
@@ -44,9 +42,7 @@ export default {
                 .setName("add-gem")
                 .setDescription("Add gem to a user")
                 .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
-                .addIntegerOption((opt) =>
-                    opt.setName("amount").setDescription("Gem to add").setRequired(true)
-                )
+                .addIntegerOption((opt) => opt.setName("amount").setDescription("Gem to add").setRequired(true))
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -69,11 +65,13 @@ export default {
                     break;
                 }
                 case "add-coin": {
-                    const updated = await CurrencyService.addCoin(target.id, guildId, amount, "admin", { action: "add-coin" });
+                    const updated = await CurrencyService.addCoin(target.id, guildId, amount, "admin", {
+                        action: "add-coin",
+                    });
                     embed = new EmbedBuilder()
                         .setDescription(
                             `Added **${amount.toLocaleString()}** coin to <@${target.id}>\n` +
-                            `Total: **${updated.coin.toLocaleString()}** coin`
+                                `Total: **${updated.coin.toLocaleString()}** coin`
                         )
                         .setColor(amount >= 0 ? 0x57f287 : 0xed4245);
                     break;
@@ -86,11 +84,13 @@ export default {
                     break;
                 }
                 case "add-gem": {
-                    const updated = await CurrencyService.addGem(target.id, guildId, amount, "admin", { action: "add-gem" });
+                    const updated = await CurrencyService.addGem(target.id, guildId, amount, "admin", {
+                        action: "add-gem",
+                    });
                     embed = new EmbedBuilder()
                         .setDescription(
                             `Added **${amount.toLocaleString()}** gem to <@${target.id}>\n` +
-                            `Total: **${updated.gem.toLocaleString()}** gem`
+                                `Total: **${updated.gem.toLocaleString()}** gem`
                         )
                         .setColor(amount >= 0 ? 0x57f287 : 0xed4245);
                     break;
