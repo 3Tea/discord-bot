@@ -25,7 +25,15 @@ export default {
                         .setName("locale")
                         .setDescription("Language")
                         .setDescriptionLocalizations({ vi: "Ngôn ngữ" })
-                        .addChoices({ name: "English", value: "en" }, { name: "Tiếng Việt", value: "vi" })
+                        .addChoices(
+                            { name: "English", value: "en" },
+                            { name: "Tiếng Việt", value: "vi" },
+                            { name: "Bahasa Indonesia", value: "id" },
+                            { name: "Español", value: "es" },
+                            { name: "日本語", value: "ja" },
+                            { name: "中文", value: "zh" },
+                            { name: "한국어", value: "ko" }
+                        )
                 )
                 .addBooleanOption((opt) =>
                     opt
@@ -44,7 +52,15 @@ export default {
                         .setName("locale")
                         .setDescription("Language")
                         .setDescriptionLocalizations({ vi: "Ngôn ngữ" })
-                        .addChoices({ name: "English", value: "en" }, { name: "Tiếng Việt", value: "vi" })
+                        .addChoices(
+                            { name: "English", value: "en" },
+                            { name: "Tiếng Việt", value: "vi" },
+                            { name: "Bahasa Indonesia", value: "id" },
+                            { name: "Español", value: "es" },
+                            { name: "日本語", value: "ja" },
+                            { name: "中文", value: "zh" },
+                            { name: "한국어", value: "ko" }
+                        )
                 )
                 .addBooleanOption((opt) =>
                     opt
@@ -56,6 +72,16 @@ export default {
     async execute(interaction: ChatInputCommandInteraction) {
         const subcommand = interaction.options.getSubcommand(true);
         const locale = await resolveLocale(interaction);
+
+        const LANGUAGE_NAMES: Record<string, string> = {
+            en: "English",
+            vi: "Tiếng Việt",
+            id: "Bahasa Indonesia",
+            es: "Español",
+            ja: "日本語",
+            zh: "中文",
+            ko: "한국어",
+        };
 
         if (subcommand === "language") {
             const reset = interaction.options.getBoolean("reset");
@@ -75,7 +101,7 @@ export default {
                 await setUserLocale(interaction.user.id, newLocale);
                 await interaction.reply({
                     content: t(newLocale, "settings.language_set", {
-                        language: newLocale === "vi" ? "Tiếng Việt" : "English",
+                        language: LANGUAGE_NAMES[newLocale] ?? newLocale,
                     }),
                     flags: MessageFlags.Ephemeral,
                 });
@@ -83,7 +109,7 @@ export default {
             }
 
             await interaction.reply({
-                content: t(locale, "settings.language_set", { language: locale === "vi" ? "Tiếng Việt" : "English" }),
+                content: t(locale, "settings.language_set", { language: LANGUAGE_NAMES[locale] ?? locale }),
                 flags: MessageFlags.Ephemeral,
             });
             return;
@@ -117,7 +143,7 @@ export default {
                 await setGuildLocale(guildId, newLocale);
                 await interaction.reply({
                     content: t(newLocale, "settings.server_language_set", {
-                        language: newLocale === "vi" ? "Tiếng Việt" : "English",
+                        language: LANGUAGE_NAMES[newLocale] ?? newLocale,
                     }),
                     flags: MessageFlags.Ephemeral,
                 });
@@ -126,7 +152,7 @@ export default {
 
             await interaction.reply({
                 content: t(locale, "settings.server_language_set", {
-                    language: locale === "vi" ? "Tiếng Việt" : "English",
+                    language: LANGUAGE_NAMES[locale] ?? locale,
                 }),
                 flags: MessageFlags.Ephemeral,
             });

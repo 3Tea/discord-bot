@@ -32,6 +32,11 @@ function isSupportedLocale(value: string): value is SupportedLocale {
 
 function mapDiscordLocale(discordLocale: string): SupportedLocale {
     if (discordLocale === "vi") return "vi";
+    if (discordLocale === "id") return "id";
+    if (discordLocale.startsWith("es")) return "es";
+    if (discordLocale === "ja") return "ja";
+    if (discordLocale.startsWith("zh")) return "zh";
+    if (discordLocale === "ko") return "ko";
     if (discordLocale.startsWith("en")) return "en";
     return DEFAULT_LOCALE;
 }
