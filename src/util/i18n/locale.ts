@@ -76,6 +76,17 @@ export async function resolveLocale(interaction: LocaleInteraction): Promise<Sup
     return mapDiscordLocale(interaction.locale);
 }
 
+/**
+ * Resolve locale for non-interaction contexts (events) using guild preference only.
+ */
+export async function resolveGuildLocale(guildId: string): Promise<SupportedLocale> {
+    const guildLocale = await resolveFromRedisOrDb(`locale:guild:${guildId}`, async () => {
+        const guild = await GuildModel.findOne({ guildID: guildId }).select("locale").lean();
+        return guild?.locale;
+    });
+    return guildLocale ?? DEFAULT_LOCALE;
+}
+
 export async function setUserLocale(userId: string, locale: SupportedLocale): Promise<void> {
     await UserModel.findOneAndUpdate({ userID: userId }, { $set: { locale } }, { upsert: true });
     await redis.setKey(`locale:user:${userId}`, locale, LOCALE_TTL);

@@ -3,6 +3,7 @@ import { ActionRowBuilder, ButtonInteraction, MessageFlags, UserSelectMenuBuilde
 import { BUTTON_ID } from "../util/config/button";
 import { validateOwner } from "../util/voice/helpers";
 import { resolveLocale } from "../util/i18n/locale";
+import { t } from "../util/i18n/t";
 
 export default {
     id: BUTTON_ID.VOICE_TRANSFER,
@@ -13,7 +14,7 @@ export default {
 
         const selectMenu = new UserSelectMenuBuilder()
             .setCustomId(BUTTON_ID.VOICE_SELECT_TRANSFER)
-            .setPlaceholder("Select the new owner")
+            .setPlaceholder(t(locale, "voice.select.transfer_placeholder"))
             .setMinValues(1)
             .setMaxValues(1);
 

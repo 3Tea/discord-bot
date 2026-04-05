@@ -73,7 +73,9 @@ export default {
                 await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
 
                 const { rank: globalRank } = await getGlobalRank(message.author.id);
-                const embed = buildLevelUpEmbed(message.author.id, newLevel, "en", globalRank);
+                const { resolveGuildLocale } = await import("../util/i18n/locale");
+                const locale = await resolveGuildLocale(message.guild.id);
+                const embed = buildLevelUpEmbed(message.author.id, newLevel, locale, globalRank);
                 if (message.channel.isSendable()) {
                     await message.channel.send({ embeds: [embed] });
                 }

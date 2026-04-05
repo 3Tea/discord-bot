@@ -48,7 +48,7 @@ export default {
                 const limit = parseInt(raw, 10);
                 if (isNaN(limit) || limit < 0 || limit > 99) {
                     await interaction.reply({
-                        content: "Please enter a number between 0 and 99.",
+                        content: t(locale, "voice.modal.limit_invalid"),
                         flags: MessageFlags.Ephemeral,
                     });
                     return;

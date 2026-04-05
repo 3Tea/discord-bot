@@ -3,7 +3,7 @@ import { ChannelType, Events, PermissionFlagsBits, VoiceChannel, VoiceState } fr
 import redis from "../connector/redis";
 import { FOOTER } from "../util/config";
 import { cleanupRedisKeys, sendPanel } from "../util/voice/helpers";
-import { DEFAULT_LOCALE } from "../util/i18n/index";
+import { resolveGuildLocale } from "../util/i18n/locale";
 import MemberXPModel from "../models/memberXP.model";
 import GuildXPConfigModel from "../models/guildXPConfig.model";
 import { levelFromXP } from "../util/xp/calculator";
@@ -84,7 +84,8 @@ export default {
 
             await newState.setChannel(voiceChannel);
             await redis.setJson(voiceChannel.id, newState.id, TTL_12H);
-            await sendPanel(voiceChannel, newState.id!, DEFAULT_LOCALE);
+            const panelLocale = await resolveGuildLocale(newState.guild.id);
+            await sendPanel(voiceChannel, newState.id!, panelLocale);
         }
 
         // --- Voice XP Session Tracking ---
@@ -196,7 +197,8 @@ setInterval(async () => {
                     await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
 
                     const { rank: globalRank } = await getGlobalRank(sUserId);
-                    const embed = buildLevelUpEmbed(sUserId, newLevel, "en", globalRank);
+                    const lvlLocale = await resolveGuildLocale(sGuildId);
+                    const embed = buildLevelUpEmbed(sUserId, newLevel, lvlLocale, globalRank);
                     const textChannel = guild.systemChannel;
                     if (textChannel) {
                         await textChannel.send({ embeds: [embed] });

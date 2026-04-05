@@ -132,6 +132,12 @@
     "voice.btn.transfer": "Transfer",
     "voice.modal.rename_title": "Rename Voice Channel",
     "voice.modal.rename_label": "New channel name (max 50 chars)",
+    "voice.modal.limit_invalid": "Please enter a number between 0 and 99.",
+    "voice.select.kick_placeholder": "Select a user to kick",
+    "voice.select.block_placeholder": "Select a user to block",
+    "voice.select.permit_placeholder": "Select a user to permit",
+    "voice.select.transfer_placeholder": "Select the new owner",
+    "rank.global_rank": "Global Rank: **#{{globalRank}}**",
 
     "weather.not_found": "{{location}} not found",
     "weather.day.0": "Sunday",

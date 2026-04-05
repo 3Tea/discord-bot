@@ -101,7 +101,7 @@ export function buildLevelUpEmbed(
 ): EmbedBuilder {
     const lines = [t(locale, "rank.level_up", { userId, level: newLevel })];
     if (globalRank) {
-        lines.push(`🌐 Global Rank: **#${globalRank}**`);
+        lines.push(`🌐 ${t(locale, "rank.global_rank", { globalRank })}`);
     }
 
     return new EmbedBuilder().setDescription(lines.join("\n")).setColor(0xf0b132);

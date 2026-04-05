@@ -1,6 +1,13 @@
-import i18next, { type TOptions } from "i18next";
+import i18next, { type TFunction, type TOptions } from "i18next";
 import type { SupportedLocale } from "./index";
 
+const translators = new Map<string, TFunction>();
+
 export function t(locale: SupportedLocale, key: string, options?: TOptions): string {
-    return i18next.getFixedT(locale)(key, options ?? {});
+    let translator = translators.get(locale);
+    if (!translator) {
+        translator = i18next.getFixedT(locale);
+        translators.set(locale, translator);
+    }
+    return translator(key, options ?? {});
 }

@@ -132,6 +132,12 @@
     "voice.btn.transfer": "Chuyển",
     "voice.modal.rename_title": "Đổi tên kênh Voice",
     "voice.modal.rename_label": "Tên kênh mới (tối đa 50 ký tự)",
+    "voice.modal.limit_invalid": "Vui lòng nhập số từ 0 đến 99.",
+    "voice.select.kick_placeholder": "Chọn người dùng để kick",
+    "voice.select.block_placeholder": "Chọn người dùng để chặn",
+    "voice.select.permit_placeholder": "Chọn người dùng để cấp quyền",
+    "voice.select.transfer_placeholder": "Chọn chủ mới",
+    "rank.global_rank": "Global Rank: **#{{globalRank}}**",
 
     "weather.not_found": "Không tìm thấy {{location}}",
     "weather.day.0": "Chủ nhật",
