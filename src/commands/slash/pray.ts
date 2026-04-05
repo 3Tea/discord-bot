@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import PrayService, { PrayResult } from "../../services/economy/pray.service";
+import Reply from "../../util/decorator/reply";
 
 const PRAY_TEXTS = [
     "cầu nguyện dưới ánh trăng...",
@@ -72,7 +73,7 @@ export default {
 
             const result = await PrayService.pray(userId, guildId, targetUser?.id);
             const embed = formatPrayEmbed(interaction, result);
-            await interaction.editReply({ embeds: [embed] });
+            await Reply.embedEdit(interaction, embed);
         } catch (error) {
             if (error instanceof Error && error.message === "PRAY_COOLDOWN") {
                 await interaction.editReply("Bạn đã cầu nguyện hôm nay rồi. Quay lại vào ngày mai nhé!");

@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import PrayService, { CurseResult } from "../../services/economy/pray.service";
+import Reply from "../../util/decorator/reply";
 
 const CURSE_TEXTS = [
     "thì thầm lời nguyền trong bóng tối...",
@@ -56,7 +57,7 @@ export default {
 
             const result = await PrayService.curse(userId, guildId, targetUser?.id);
             const embed = formatCurseEmbed(interaction, result);
-            await interaction.editReply({ embeds: [embed] });
+            await Reply.embedEdit(interaction, embed);
         } catch (error) {
             if (error instanceof Error && error.message === "CURSE_COOLDOWN") {
                 await interaction.editReply("Bạn đã nguyền rủa hôm nay rồi. Quay lại vào ngày mai nhé!");

@@ -93,22 +93,31 @@ async function deduct(
     reason: TransactionType,
     metadata: Record<string, unknown> = {}
 ): Promise<IUserEconomy> {
-    const eco = await getOrCreate(userId, guildId);
+    // Ensure the record exists first
+    await getOrCreate(userId, guildId);
 
-    if (coinAmount > 0 && eco.coin < coinAmount) {
-        throw new InsufficientFundsError("coin", coinAmount, eco.coin);
-    }
-    if (gemAmount > 0 && eco.gem < gemAmount) {
-        throw new InsufficientFundsError("gem", gemAmount, eco.gem);
-    }
+    // Atomic check + update: only deducts if balance is sufficient
+    const filter: Record<string, unknown> = { userId, guildId };
+    if (coinAmount > 0) filter.coin = { $gte: coinAmount };
+    if (gemAmount > 0) filter.gem = { $gte: gemAmount };
 
     const updated = await UserEconomyModel.findOneAndUpdate(
-        { userId, guildId },
+        filter,
         { $inc: { coin: -coinAmount, gem: -gemAmount } },
         { new: true }
     );
+
+    if (!updated) {
+        // Re-read to provide accurate error message
+        const eco = await UserEconomyModel.findOne({ userId, guildId });
+        if (coinAmount > 0 && (eco?.coin ?? 0) < coinAmount) {
+            throw new InsufficientFundsError("coin", coinAmount, eco?.coin ?? 0);
+        }
+        throw new InsufficientFundsError("gem", gemAmount, eco?.gem ?? 0);
+    }
+
     await logTransaction(userId, guildId, reason, -coinAmount, -gemAmount, metadata);
-    return updated!;
+    return updated;
 }
 
 async function setCoin(userId: string, guildId: string, amount: number): Promise<IUserEconomy> {
@@ -135,11 +144,19 @@ async function setGem(userId: string, guildId: string, amount: number): Promise<
     return updated!;
 }
 
+async function exchange(userId: string, guildId: string, gemAmount: number, ratePerGem: number): Promise<IUserEconomy> {
+    const coinCost = gemAmount * ratePerGem;
+    await deduct(userId, guildId, coinCost, 0, "exchange", { gemAmount, ratePerGem });
+    const updated = await addGem(userId, guildId, gemAmount, "exchange", { coinCost, ratePerGem });
+    return updated;
+}
+
 const CurrencyService = {
     getBalance,
     addCoin,
     addGem,
     deduct,
+    exchange,
     setCoin,
     setGem,
     InsufficientFundsError,
