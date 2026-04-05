@@ -6,6 +6,7 @@ export interface IGuild extends Document {
     topAllGuild: number;
     status: boolean;
     verify: boolean;
+    locale?: string;
 }
 
 const guildSchema = new Schema(
@@ -29,6 +30,10 @@ const guildSchema = new Schema(
         verify: {
             type: Boolean,
             default: true,
+        },
+        locale: {
+            type: String,
+            default: undefined,
         },
     },
     {
