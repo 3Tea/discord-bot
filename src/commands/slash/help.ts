@@ -9,13 +9,19 @@ import {
 
 import client from "../../client";
 import Reply from "../../util/decorator/reply";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
 
 export default {
-    data: new SlashCommandBuilder().setName("help").setDescription("Get the help commands"),
+    data: new SlashCommandBuilder()
+        .setName("help")
+        .setDescription("Get the help commands")
+        .setDescriptionLocalizations({ vi: "Xem danh sách lệnh" }),
     async execute(interaction: ChatInputCommandInteraction) {
+        const locale = await resolveLocale(interaction);
         const embed = new EmbedBuilder().setColor("Random").setTimestamp();
 
-        embed.setTitle(`3AT - Endless Paradox 💖 Slash CMD Support`);
+        embed.setTitle(t(locale, "help.title"));
 
         for (const i of client.commands) {
             const field = i[1].data.toJSON();
@@ -26,17 +32,17 @@ export default {
         }
 
         const homepage = new ButtonBuilder()
-            .setLabel("Homepage")
+            .setLabel(t(locale, "btn.homepage"))
             .setURL(`${process.env.URL_HOMEPAGE}`)
             .setStyle(ButtonStyle.Link);
 
         const discussions = new ButtonBuilder()
-            .setLabel("Discussions")
+            .setLabel(t(locale, "btn.discussions"))
             .setURL(`${process.env.URL_DISCUSSIONS}`)
             .setStyle(ButtonStyle.Link);
 
         const reportBug = new ButtonBuilder()
-            .setLabel("Report bug")
+            .setLabel(t(locale, "btn.report_bug"))
             .setURL(`${process.env.URL_REPORT_BUG}`)
             .setStyle(ButtonStyle.Link);
 

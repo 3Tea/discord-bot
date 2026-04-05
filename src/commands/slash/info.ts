@@ -9,42 +9,51 @@ import {
 
 import infoBot from "../../../package.json";
 import reply from "../../util/decorator/reply";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
 
 export default {
     data: new SlashCommandBuilder()
         .setName("info")
         .setDescription("Information about bot")
-        .addSubcommand((subcommand) => subcommand.setName("bot").setDescription("Information about bot")),
+        .setDescriptionLocalizations({ vi: "Thông tin về bot" })
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName("bot")
+                .setDescription("Information about bot")
+                .setDescriptionLocalizations({ vi: "Thông tin về bot" })
+        ),
     async execute(interaction: ChatInputCommandInteraction) {
+        const locale = await resolveLocale(interaction);
         const subcommand = interaction.options.getSubcommand(true);
         const embed = new EmbedBuilder().setColor("Random").setTimestamp();
 
         switch (subcommand) {
             case "bot":
-                embed.setTitle(`3AT - Endless Paradox`);
+                embed.setTitle(t(locale, "info.title"));
                 embed.addFields(
                     {
-                        name: "Name: ",
+                        name: t(locale, "info.name"),
                         value: `3AT - Endless Paradox`,
                         inline: true,
                     },
                     {
-                        name: "Version: ",
+                        name: t(locale, "info.version"),
                         value: `${infoBot.version}`,
                         inline: true,
                     },
                     {
-                        name: "Language: ",
+                        name: t(locale, "info.language"),
                         value: `TypeScript`,
                         inline: true,
                     },
                     {
-                        name: "Runtime: ",
+                        name: t(locale, "info.runtime"),
                         value: `Node.js ${process.version}`,
                         inline: true,
                     },
                     {
-                        name: "Discord: ",
+                        name: t(locale, "info.discord"),
                         value: `Discord.js v14`,
                         inline: true,
                     }
@@ -56,17 +65,17 @@ export default {
         }
 
         const homepage = new ButtonBuilder()
-            .setLabel("Homepage")
+            .setLabel(t(locale, "btn.homepage"))
             .setURL(`${process.env.URL_HOMEPAGE}`)
             .setStyle(ButtonStyle.Link);
 
         const discussions = new ButtonBuilder()
-            .setLabel("Discussions")
+            .setLabel(t(locale, "btn.discussions"))
             .setURL(`${process.env.URL_DISCUSSIONS}`)
             .setStyle(ButtonStyle.Link);
 
         const reportBug = new ButtonBuilder()
-            .setLabel("Report bug")
+            .setLabel(t(locale, "btn.report_bug"))
             .setURL(`${process.env.URL_REPORT_BUG}`)
             .setStyle(ButtonStyle.Link);
 

@@ -13,7 +13,14 @@ export default {
     data: new SlashCommandBuilder()
         .setName("trans")
         .setDescription("Translate all languages to Vietnamese")
-        .addStringOption((option) => option.setName("word").setDescription("word or paragraph").setRequired(true)),
+        .setDescriptionLocalizations({ vi: "Dịch mọi ngôn ngữ sang Tiếng Việt" })
+        .addStringOption((option) =>
+            option
+                .setName("word")
+                .setDescription("word or paragraph")
+                .setDescriptionLocalizations({ vi: "từ hoặc đoạn văn" })
+                .setRequired(true)
+        ),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
         try {
