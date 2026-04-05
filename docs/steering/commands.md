@@ -13,7 +13,9 @@
 | `info bot` | Bot metadata (version, Node.js, guild count) + link buttons | Subcommand: `bot` |
 | `avatar` | Show user avatar (PNG, 2048px) | `target` (User, optional) |
 | `trans` | Translate any language to Vietnamese via Google Translate API | `word` (String, required) |
-| `weather` | Weather info via MSN Weather API (vi-VN, Celsius) | `location` (String, required, max 200) |
+| `weather` | Weather info via Open-Meteo API (locale-aware) | `location` (String, required, max 200) |
+| `settings language` | Set personal language preference (vi/en) | `locale` (String choice), `reset` (Boolean) |
+| `settings server-language` | Set server default language (requires Manage Guild) | `locale` (String choice), `reset` (Boolean) |
 
 ### Voice Channel Management (`voice`)
 
@@ -125,3 +127,15 @@ Displayed in the voice channel control panel. All validate channel ownership.
 
 - **Join trigger channel** (prefix `TEST `): Creates temp channel with `* ` prefix, inherits bitrate, 23 user limit, owner stored in Redis, sends control panel
 - **Leave temp channel** (prefix `* `): Deletes channel if empty/bots-only, cleans up Redis keys
+
+## i18n (Multi-Language)
+
+All user-facing strings are translated via i18next. Supported: English (`en`, fallback) + Vietnamese (`vi`).
+
+**Locale resolution**: per-user > per-guild > Discord client locale > `"en"` fallback.
+
+**Settings**: Users set language via `/settings language`, guild admins via `/settings server-language` (requires Manage Guild). Preferences cached in Redis (30-day TTL).
+
+**Translation files**: `src/locales/en.json` and `src/locales/vi.json`. All commands, button labels, error messages, embed titles/fields, voice panel, weather descriptions, and manga handler use `t(locale, "key")`.
+
+**What is NOT translated**: Command names, option names, internal logs.

@@ -23,7 +23,7 @@ docker run -d --env-file .env 3at-discord-bot
 
 ```
 src/
-  bin/www.ts              # Entry point: loads .env → imports bot + mongo
+  bin/www.ts              # Entry point: loads .env → initI18n() → imports bot + mongo
   bot.ts                  # client.login()
   client.ts               # Creates Client, runs loaders, deploys commands
   loaders/                # Auto-discovery loaders
@@ -38,10 +38,16 @@ src/
   connector/
     mongo/index.ts        # MongoDB connection
     redis/index.ts        # RedisService singleton class
+  locales/                # i18n translation files
+    en.json               # English (fallback language)
+    vi.json               # Vietnamese
   util/
     config/index.ts       # All env vars as typed constants
     config/button.ts      # Button ID constants (BUTTON_ID)
     decorator/reply.ts    # Reply utility (auto-adds footer to embeds)
+    i18n/index.ts         # i18next initialization
+    i18n/t.ts             # t(locale, key, options) translation helper
+    i18n/locale.ts        # resolveLocale() — locale resolution chain
     log/logger.mixed.ts   # Winston (file) + Tracer (console) logging
     date/day.ts           # getNumberOfDays() helper
   types/common/discord.d.ts  # Client type augmentation (commands, buttons)
@@ -56,14 +62,21 @@ Create `src/commands/slash/{name}.ts` — auto-discovered by loader, no registra
 ```typescript
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Reply from "../../util/decorator/reply";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
 
 export default {
     data: new SlashCommandBuilder()
         .setName("command-name")
-        .setDescription("What it does"),
+        .setDescription("What it does in English")
+        .setDescriptionLocalizations({ vi: "Mô tả bằng Tiếng Việt" }),
     async execute(interaction: ChatInputCommandInteraction) {
-        const embed = new EmbedBuilder().setColor("Random").setTimestamp();
-        // logic
+        const locale = await resolveLocale(interaction);
+        const embed = new EmbedBuilder()
+            .setColor("Random")
+            .setTitle(t(locale, "command.title"))
+            .setTimestamp();
+        // logic — use t(locale, "key", { interpolation }) for all user-facing strings
         return Reply.embed(interaction, embed);
     },
 };
@@ -271,6 +284,7 @@ member.voice.channel?.setName("x");
 - **Redis caching**: Use `redis.setJson(key, value, ttlSeconds)` / `redis.getJson(key)` — default TTL 120s
 - **Rate limiting**: Use `redis.ttlKey(key)` to check cooldown before action
 - **Logging**: Use `logger` from `src/util/log/logger.mixed.ts` for structured logging
+- **i18n**: All user-facing strings must use `t(locale, "key")` — see i18n section below
 
 ### Do NOT
 
@@ -284,6 +298,75 @@ member.voice.channel?.setName("x");
 
 - **Development** (`NODE_ENV=development`): Deploys to `GUILD_ID` — instant update
 - **Production**: Deploys globally — takes up to 1 hour for Discord cache
+
+## i18n (Internationalization)
+
+Uses [i18next](https://www.i18next.com/) with `i18next-fs-backend`. Supported languages: English (`en`, fallback) + Vietnamese (`vi`).
+
+### Locale Resolution Priority
+
+1. **Per-user preference** — Redis `locale:user:{userId}` / User model `locale` field
+2. **Per-guild preference** — Redis `locale:guild:{guildId}` / Guild model `locale` field
+3. **Auto-detect** — `interaction.locale` from Discord client settings
+4. **Fallback** — `"en"`
+
+### How to Use
+
+```typescript
+// In slash commands and button handlers:
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
+
+const locale = await resolveLocale(interaction);
+const text = t(locale, "balance.title", { username: user.username });
+
+// In events (no interaction available):
+import { resolveGuildLocale } from "../util/i18n/locale";
+
+const locale = await resolveGuildLocale(guildId);
+```
+
+### Translation Key Convention
+
+```
+{command/feature}.{context}.{detail}
+```
+
+| Prefix | Usage | Example |
+|--------|-------|---------|
+| `common.*` | Shared strings | `common.error`, `common.no_permission` |
+| `{command}.*` | Command-specific | `balance.title`, `pray.cooldown` |
+| `voice.*` | Voice system | `voice.locked`, `voice.panel.title` |
+| `rank.*` / `leaderboard.*` | XP system | `rank.level_up`, `leaderboard.empty` |
+| `btn.*` | Shared button labels | `btn.homepage`, `btn.report_bug` |
+
+### Rules — MUST follow
+
+- **Never hardcode user-facing strings** — always use `t(locale, "key")`
+- **English is the primary description** in `setDescription()`, Vietnamese goes in `setDescriptionLocalizations({ vi: "..." })`
+- **Add keys to BOTH** `src/locales/en.json` and `src/locales/vi.json` when adding new strings
+- **Use interpolation** for dynamic values: `t(locale, "key", { name: value })` with `{{name}}` in JSON
+- **Error catch blocks**: resolve locale with fallback: `await resolveLocale(interaction).catch(() => "en" as const)`
+- **Event handlers**: use `resolveGuildLocale(guildId)` since there's no interaction
+- **Internal logging stays in English** — only translate user-facing strings
+- **Command/option names stay in English** — only descriptions are localized
+- **Build step**: `npm run build` copies `src/locales/` to `dist/locales/` automatically
+
+### Adding a New Translation Key
+
+1. Add the key to `src/locales/en.json` (English)
+2. Add the same key to `src/locales/vi.json` (Vietnamese)
+3. Use `t(locale, "your.new.key")` in code
+4. Keys must exist in both files — mismatches will show raw keys to users
+
+### Redis Caching
+
+| Key | Value | TTL |
+|-----|-------|-----|
+| `locale:user:{userId}` | `"vi"` / `"en"` / `"none"` | 30 days |
+| `locale:guild:{guildId}` | `"vi"` / `"en"` / `"none"` | 30 days |
+
+`"none"` = negative cache (user/guild has no preference set). Managed via `/settings language` and `/settings server-language` commands.
 
 ## Database
 
