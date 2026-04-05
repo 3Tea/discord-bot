@@ -9,6 +9,7 @@ import {
 import redis from "../connector/redis";
 import { FOOTER } from "../util/config";
 import { cleanupRedisKeys, sendPanel } from "../util/voice/helpers";
+import { DEFAULT_LOCALE } from "../util/i18n/index";
 import MemberXPModel from "../models/memberXP.model";
 import GuildXPConfigModel from "../models/guildXPConfig.model";
 import { levelFromXP } from "../util/xp/calculator";
@@ -89,7 +90,7 @@ export default {
 
             await newState.setChannel(voiceChannel);
             await redis.setJson(voiceChannel.id, newState.id, TTL_12H);
-            await sendPanel(voiceChannel, newState.id!);
+            await sendPanel(voiceChannel, newState.id!, DEFAULT_LOCALE);
         }
 
         // --- Voice XP Session Tracking ---

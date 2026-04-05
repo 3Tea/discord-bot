@@ -1,11 +1,28 @@
-import type { ChatInputCommandInteraction, ButtonInteraction, ModalSubmitInteraction } from "discord.js";
+import type {
+    ChatInputCommandInteraction,
+    ButtonInteraction,
+    ModalSubmitInteraction,
+    UserSelectMenuInteraction,
+    RoleSelectMenuInteraction,
+    StringSelectMenuInteraction,
+    MentionableSelectMenuInteraction,
+    ChannelSelectMenuInteraction,
+} from "discord.js";
 import redis from "../../connector/redis";
 import UserModel from "../../models/user.model";
 import GuildModel from "../../models/guild.model";
 import { SUPPORTED_LOCALES, DEFAULT_LOCALE } from "./index";
 import type { SupportedLocale } from "./index";
 
-type LocaleInteraction = ChatInputCommandInteraction | ButtonInteraction | ModalSubmitInteraction;
+export type LocaleInteraction =
+    | ChatInputCommandInteraction
+    | ButtonInteraction
+    | ModalSubmitInteraction
+    | UserSelectMenuInteraction
+    | RoleSelectMenuInteraction
+    | StringSelectMenuInteraction
+    | MentionableSelectMenuInteraction
+    | ChannelSelectMenuInteraction;
 
 const LOCALE_TTL = 60 * 60 * 24 * 30; // 30 days
 

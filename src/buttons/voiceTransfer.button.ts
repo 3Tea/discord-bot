@@ -2,11 +2,13 @@ import { ActionRowBuilder, ButtonInteraction, MessageFlags, UserSelectMenuBuilde
 
 import { BUTTON_ID } from "../util/config/button";
 import { validateOwner } from "../util/voice/helpers";
+import { resolveLocale } from "../util/i18n/locale";
 
 export default {
     id: BUTTON_ID.VOICE_TRANSFER,
     async execute(interaction: ButtonInteraction) {
-        const voiceChannel = await validateOwner(interaction);
+        const locale = await resolveLocale(interaction);
+        const voiceChannel = await validateOwner(interaction, locale);
         if (!voiceChannel) return;
 
         const selectMenu = new UserSelectMenuBuilder()
