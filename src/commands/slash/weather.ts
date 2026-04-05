@@ -1,7 +1,10 @@
 import axios from "axios";
-import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder, bold } from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 
 import Reply from "../../util/decorator/reply";
+import type { SupportedLocale } from "../../util/i18n/index";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
 
 // --- Open-Meteo API response types ---
 
@@ -38,41 +41,10 @@ interface ForecastResponse {
     timezone: string;
 }
 
-// --- WMO Weather Code Map (vi/en) ---
-
-const WMO_CODES: Record<number, { vi: string; en: string }> = {
-    0: { vi: "Trời quang", en: "Clear sky" },
-    1: { vi: "Gần như quang", en: "Mainly clear" },
-    2: { vi: "Có mây rải rác", en: "Partly cloudy" },
-    3: { vi: "Nhiều mây", en: "Overcast" },
-    45: { vi: "Sương mù", en: "Fog" },
-    48: { vi: "Sương mù", en: "Fog" },
-    51: { vi: "Mưa phùn", en: "Drizzle" },
-    53: { vi: "Mưa phùn", en: "Drizzle" },
-    55: { vi: "Mưa phùn", en: "Drizzle" },
-    56: { vi: "Mưa phùn đóng băng", en: "Freezing drizzle" },
-    57: { vi: "Mưa phùn đóng băng", en: "Freezing drizzle" },
-    61: { vi: "Mưa", en: "Rain" },
-    63: { vi: "Mưa", en: "Rain" },
-    65: { vi: "Mưa", en: "Rain" },
-    66: { vi: "Mưa đóng băng", en: "Freezing rain" },
-    67: { vi: "Mưa đóng băng", en: "Freezing rain" },
-    71: { vi: "Tuyết rơi", en: "Snowfall" },
-    73: { vi: "Tuyết rơi", en: "Snowfall" },
-    75: { vi: "Tuyết rơi", en: "Snowfall" },
-    77: { vi: "Hạt tuyết", en: "Snow grains" },
-    80: { vi: "Mưa rào", en: "Rain showers" },
-    81: { vi: "Mưa rào", en: "Rain showers" },
-    82: { vi: "Mưa rào", en: "Rain showers" },
-    85: { vi: "Mưa tuyết", en: "Snow showers" },
-    86: { vi: "Mưa tuyết", en: "Snow showers" },
-    95: { vi: "Giông bão", en: "Thunderstorm" },
-    96: { vi: "Giông kèm mưa đá", en: "Thunderstorm with hail" },
-    99: { vi: "Giông kèm mưa đá", en: "Thunderstorm with hail" },
-};
-
-function getWeatherDescription(code: number, lang: "vi" | "en" = "vi"): string {
-    return WMO_CODES[code]?.[lang] ?? (lang === "vi" ? "Không rõ" : "Unknown");
+function getWeatherDescription(code: number, locale: SupportedLocale): string {
+    const desc = t(locale, `weather.wmo.${code}`);
+    // i18next returns the key itself if not found, check for that
+    return desc.startsWith("weather.wmo.") ? t(locale, "weather.wmo.unknown") : desc;
 }
 
 function getWeatherEmoji(code: number): string {
@@ -112,19 +84,17 @@ function getWindDirection(degrees: number): string {
 
 // --- Day name helper ---
 
-const DAY_NAMES_VI = ["Chủ nhật", "Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy"] as const;
-
-function getDayName(dateStr: string): string {
+function getDayName(dateStr: string, locale: SupportedLocale): string {
     const date = new Date(dateStr);
-    return DAY_NAMES_VI[date.getUTCDay()];
+    return t(locale, `weather.day.${date.getUTCDay()}`);
 }
 
 const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
 
-async function geocode(query: string): Promise<GeocodingResult | null> {
+async function geocode(query: string, locale: SupportedLocale): Promise<GeocodingResult | null> {
     const { data } = await axios.get<GeocodingResponse>(GEOCODING_URL, {
-        params: { name: query, count: 1, language: "vi" },
+        params: { name: query, count: 1, language: locale === "vi" ? "vi" : "en" },
     });
     return data.results?.[0] ?? null;
 }
@@ -147,31 +117,40 @@ export default {
     data: new SlashCommandBuilder()
         .setName("weather")
         .setDescription("Get weather information.")
+        .setDescriptionLocalizations({ vi: "Xem thông tin thời tiết." })
         .addStringOption((option) =>
-            option.setName("location").setDescription("Your location").setRequired(true).setMaxLength(200)
+            option
+                .setName("location")
+                .setDescription("Your location")
+                .setDescriptionLocalizations({ vi: "Vị trí của bạn" })
+                .setRequired(true)
+                .setMaxLength(200)
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         const location = interaction.options.getString("location", true);
         await interaction.deferReply();
 
+        const locale = await resolveLocale(interaction);
+
         try {
-            const geo = await geocode(location);
+            const geo = await geocode(location, locale);
             if (!geo) {
-                return interaction.editReply(`${bold(location)} not found`);
+                return interaction.editReply(t(locale, "weather.not_found", { location }));
             }
 
             const forecast = await fetchForecast(geo.latitude, geo.longitude);
             const { current, daily, timezone } = forecast;
 
             // Format time in location's timezone
+            const localeStr = locale === "vi" ? "vi-VN" : "en-US";
             const currentDate = new Date(current.time);
-            const timeStr = currentDate.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", timeZone: timezone });
-            const dateStr = currentDate.toLocaleDateString("vi-VN", { timeZone: timezone });
-            const dayName = DAY_NAMES_VI[currentDate.getDay()];
+            const timeStr = currentDate.toLocaleTimeString(localeStr, { hour: "2-digit", minute: "2-digit", timeZone: timezone });
+            const dateStr = currentDate.toLocaleDateString(localeStr, { timeZone: timezone });
+            const dayName = t(locale, `weather.day.${currentDate.getDay()}`);
             const emoji = getWeatherEmoji(current.weather_code);
 
             const description = [
-                `${emoji} **${current.temperature_2m}°C** — ${getWeatherDescription(current.weather_code)}`,
+                `${emoji} **${current.temperature_2m}°C** — ${getWeatherDescription(current.weather_code, locale)}`,
                 "",
                 `💧 ${current.relative_humidity_2m}%  ·  💨 ${current.wind_speed_10m} km/h ${getWindDirection(current.wind_direction_10m)}`,
                 "",
@@ -189,18 +168,18 @@ export default {
             // Add 2-day forecast (skip index 0 = today)
             for (let i = 1; i <= 2; i++) {
                 const fEmoji = getWeatherEmoji(daily.weather_code[i]);
-                const fDayName = getDayName(daily.time[i]);
-                const fDate = new Date(daily.time[i]).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+                const fDayName = getDayName(daily.time[i], locale);
+                const fDate = new Date(daily.time[i]).toLocaleDateString(localeStr, { day: "2-digit", month: "2-digit" });
                 embed.addFields({
                     name: `${fEmoji} ${fDayName} ${fDate}`,
-                    value: `${daily.temperature_2m_max[i]}°/${daily.temperature_2m_min[i]}°C — ${getWeatherDescription(daily.weather_code[i])}`,
+                    value: `${daily.temperature_2m_max[i]}°/${daily.temperature_2m_min[i]}°C — ${getWeatherDescription(daily.weather_code[i], locale)}`,
                     inline: false,
                 });
             }
 
             return Reply.embedEdit(interaction, embed);
         } catch {
-            return interaction.editReply(`${bold(location)} not found`);
+            return interaction.editReply(t(locale, "weather.not_found", { location }));
         }
     },
 };
