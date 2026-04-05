@@ -204,7 +204,7 @@ setInterval(async () => {
                     );
 
                     const { rank: globalRank } = await getGlobalRank(sUserId);
-                    const embed = buildLevelUpEmbed(sUserId, newLevel, globalRank);
+                    const embed = buildLevelUpEmbed(sUserId, newLevel, "en", globalRank);
                     const textChannel = guild.systemChannel;
                     if (textChannel) {
                         await textChannel.send({ embeds: [embed] });

@@ -76,7 +76,7 @@ export default {
                 );
 
                 const { rank: globalRank } = await getGlobalRank(message.author.id);
-                const embed = buildLevelUpEmbed(message.author.id, newLevel, globalRank);
+                const embed = buildLevelUpEmbed(message.author.id, newLevel, "en", globalRank);
                 if (message.channel.isSendable()) {
                     await message.channel.send({ embeds: [embed] });
                 }

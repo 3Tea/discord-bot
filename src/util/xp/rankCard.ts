@@ -2,6 +2,8 @@ import { EmbedBuilder } from "discord.js";
 import type { IMemberXP } from "../../models/memberXP.model";
 import type { IUser } from "../../models/user.model";
 import { levelFromXP, progressToNextLevel, xpForLevel } from "./calculator";
+import { t } from "../i18n/t";
+import type { SupportedLocale } from "../i18n/index";
 
 const PROGRESS_BAR_LENGTH = 20;
 const FILLED = "▓";
@@ -25,12 +27,13 @@ export function buildRankEmbed(
     username: string,
     rank: number,
     globalRank: number,
-    globalXP: number
+    globalXP: number,
+    locale: SupportedLocale
 ): EmbedBuilder {
     if (!member) {
         const globalLine = globalRank
-            ? `🌐 **#${globalRank}** toàn cầu · Tổng XP: **${globalXP.toLocaleString()}**`
-            : "Chưa có xếp hạng";
+            ? `🌐 **#${globalRank}** ${t(locale, "rank.global_line", { globalRank, globalXP: globalXP.toLocaleString() })}`
+            : t(locale, "rank.no_rank");
 
         return new EmbedBuilder()
             .setTitle(`📊 ${username} — Level 0`)
@@ -53,11 +56,11 @@ export function buildRankEmbed(
         .setTitle(`📊 ${username} — Level ${progress.level}`)
         .setDescription(
             [
-                `Rank **#${rank}** trên server · 🌐 **#${globalRank || "—"}** toàn cầu`,
+                `${t(locale, "rank.server_line", { rank, globalRank: globalRank || "—" })}`,
                 "",
                 `${buildProgressBar(progress.percentage)} ${progress.percentage}%`,
                 `${member.xp.toLocaleString()} / ${xpForLevel(progress.level + 1).toLocaleString()} XP`,
-                `🌐 Tổng XP: **${globalXP.toLocaleString()}**`,
+                `🌐 ${t(locale, "rank.total_xp", { globalXP: globalXP.toLocaleString() })}`,
                 "",
                 `💬 ${member.messageCount.toLocaleString()}  ·  🎤 ${formatVoiceTime(member.voiceMinutes)}  ·  ❤️ ${member.reactionCount.toLocaleString()}`,
             ].join("\n")
@@ -68,9 +71,12 @@ export function buildRankEmbed(
 
 const MEDALS = ["🥇", "🥈", "🥉"] as const;
 
-export function buildLeaderboardEmbed(members: IMemberXP[], guildName: string): EmbedBuilder {
+export function buildLeaderboardEmbed(members: IMemberXP[], guildName: string, locale: SupportedLocale): EmbedBuilder {
     if (members.length === 0) {
-        return new EmbedBuilder().setTitle("🏆 Bảng xếp hạng").setDescription("Chưa có ai có XP!").setColor(0xf0b132);
+        return new EmbedBuilder()
+            .setTitle(`🏆 ${t(locale, "leaderboard.title")}`)
+            .setDescription(t(locale, "leaderboard.empty"))
+            .setColor(0xf0b132);
     }
 
     const lines = members.map((m, i) => {
@@ -80,15 +86,15 @@ export function buildLeaderboardEmbed(members: IMemberXP[], guildName: string): 
     });
 
     return new EmbedBuilder()
-        .setTitle("🏆 Bảng xếp hạng")
+        .setTitle(`🏆 ${t(locale, "leaderboard.title")}`)
         .setDescription(lines.join("\n"))
         .setColor(0xf0b132)
         .setFooter({ text: guildName })
         .setTimestamp();
 }
 
-export function buildLevelUpEmbed(userId: string, newLevel: number, globalRank?: number): EmbedBuilder {
-    const lines = [`🎉 <@${userId}> đã đạt **Level ${newLevel}**!`];
+export function buildLevelUpEmbed(userId: string, newLevel: number, locale: SupportedLocale, globalRank?: number): EmbedBuilder {
+    const lines = [t(locale, "rank.level_up", { userId, level: newLevel })];
     if (globalRank) {
         lines.push(`🌐 Global Rank: **#${globalRank}**`);
     }
@@ -96,11 +102,11 @@ export function buildLevelUpEmbed(userId: string, newLevel: number, globalRank?:
     return new EmbedBuilder().setDescription(lines.join("\n")).setColor(0xf0b132);
 }
 
-export function buildGlobalLeaderboardEmbed(users: IUser[], usernames: Map<string, string>): EmbedBuilder {
+export function buildGlobalLeaderboardEmbed(users: IUser[], usernames: Map<string, string>, locale: SupportedLocale): EmbedBuilder {
     if (users.length === 0) {
         return new EmbedBuilder()
-            .setTitle("🌐 Bảng xếp hạng toàn cầu")
-            .setDescription("Chưa có ai có XP!")
+            .setTitle(`🌐 ${t(locale, "leaderboard.global_title")}`)
+            .setDescription(t(locale, "leaderboard.empty"))
             .setColor(0xf0b132);
     }
 
@@ -113,7 +119,7 @@ export function buildGlobalLeaderboardEmbed(users: IUser[], usernames: Map<strin
     });
 
     return new EmbedBuilder()
-        .setTitle("🌐 Bảng xếp hạng toàn cầu")
+        .setTitle(`🌐 ${t(locale, "leaderboard.global_title")}`)
         .setDescription(lines.join("\n"))
         .setColor(0xf0b132)
         .setFooter({ text: "Global" })
