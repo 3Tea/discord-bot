@@ -1,44 +1,45 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import PrayService, { PrayResult } from "../../services/economy/pray.service";
 import Reply from "../../util/decorator/reply";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
+import type { SupportedLocale } from "../../util/i18n/index";
 
-const PRAY_TEXTS = [
-    "cầu nguyện dưới ánh trăng...",
-    "thành tâm khấn vái thần linh...",
-    "gửi lời nguyện lên trời cao...",
-    "thắp nén hương thành kính...",
-    "cầu phước lành từ đất trời...",
-];
-
-function randomText(texts: string[]): string {
-    return texts[Math.floor(Math.random() * texts.length)]!;
+function fallbackLocale(): SupportedLocale {
+    return "en";
 }
 
-function formatPrayEmbed(interaction: ChatInputCommandInteraction, result: PrayResult): EmbedBuilder {
+const PRAY_TEXT_COUNT = 5;
+
+function formatPrayEmbed(
+    interaction: ChatInputCommandInteraction,
+    result: PrayResult,
+    locale: SupportedLocale
+): EmbedBuilder {
     const embed = new EmbedBuilder().setColor(0xffd700).setTimestamp();
 
-    const flavorText = randomText(PRAY_TEXTS);
-    let description = `**${interaction.user.username}** ${flavorText}\n\n`;
+    const flavorText = t(locale, "pray.texts." + Math.floor(Math.random() * PRAY_TEXT_COUNT));
+    let description = t(locale, "pray.flavor", { username: interaction.user.username, text: flavorText }) + "\n\n";
 
-    description += `> +**${result.userReward.coin}** coin`;
+    description += t(locale, "pray.reward_coin", { coin: result.userReward.coin });
     if (result.userReward.gem > 0) {
-        description += ` | +**${result.userReward.gem}** gem`;
+        description += t(locale, "pray.reward_gem", { gem: result.userReward.gem });
     }
     description += "\n";
 
     if (result.targetReward && result.targetId) {
-        description += `> <@${result.targetId}> nhận +**${result.targetReward.coin}** coin\n`;
+        description += t(locale, "pray.target_reward", { targetId: result.targetId, coin: result.targetReward.coin }) + "\n";
     }
 
     if (result.streakInfo.streak > 1) {
-        description += `\nStreak: **${result.streakInfo.streak}** ngày`;
+        description += "\n" + t(locale, "pray.streak", { streak: result.streakInfo.streak });
     }
 
     if (result.streakInfo.milestoneHit) {
         const m = result.streakInfo.milestoneHit;
-        description += `\nMilestone **${m.days} ngày**! Bonus: +**${m.bonusCoin}** coin`;
+        description += "\n" + t(locale, "pray.milestone", { days: m.days, bonusCoin: m.bonusCoin });
         if (m.bonusGem > 0) {
-            description += ` +**${m.bonusGem}** gem`;
+            description += t(locale, "pray.milestone_gem", { bonusGem: m.bonusGem });
         }
     }
 
@@ -49,37 +50,43 @@ function formatPrayEmbed(interaction: ChatInputCommandInteraction, result: PrayR
 export default {
     data: new SlashCommandBuilder()
         .setName("pray")
-        .setDescription("Cầu nguyện để nhận coin")
-        .addUserOption((option) => option.setName("target").setDescription("Cầu nguyện cho người khác")),
+        .setDescription("Pray to receive coin")
+        .setDescriptionLocalizations({ vi: "Cầu nguyện để nhận coin" })
+        .addUserOption((option) =>
+            option
+                .setName("target")
+                .setDescription("Pray for another user")
+                .setDescriptionLocalizations({ vi: "Cầu nguyện cho người khác" })
+        ),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
 
         try {
+            const locale = await resolveLocale(interaction);
             const targetUser = interaction.options.getUser("target");
             const guildId = interaction.guildId!;
             const userId = interaction.user.id;
 
             if (targetUser?.bot) {
-                await interaction.editReply("Không thể cầu nguyện cho bot.");
+                await interaction.editReply(t(locale, "pray.bot_error"));
                 return;
             }
 
             if (targetUser?.id === userId) {
-                await interaction.editReply(
-                    "Không thể cầu nguyện cho chính mình bằng target. Dùng `/pray` không có target."
-                );
+                await interaction.editReply(t(locale, "pray.self_error"));
                 return;
             }
 
             const result = await PrayService.pray(userId, guildId, targetUser?.id);
-            const embed = formatPrayEmbed(interaction, result);
+            const embed = formatPrayEmbed(interaction, result, locale);
             await Reply.embedEdit(interaction, embed);
         } catch (error) {
+            const locale = await resolveLocale(interaction).catch(fallbackLocale);
             if (error instanceof Error && error.message === "PRAY_COOLDOWN") {
-                await interaction.editReply("Bạn đã cầu nguyện hôm nay rồi. Quay lại vào ngày mai nhé!");
+                await interaction.editReply(t(locale, "pray.cooldown"));
                 return;
             }
-            await interaction.editReply("Có lỗi xảy ra. Vui lòng thử lại sau.");
+            await interaction.editReply(t(locale, "common.error"));
         }
     },
 };

@@ -6,49 +6,108 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 import CurrencyService from "../../services/economy/currency.service";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
+import type { SupportedLocale } from "../../util/i18n/index";
+
+function fallbackLocale(): SupportedLocale {
+    return "en";
+}
 
 export default {
     data: new SlashCommandBuilder()
         .setName("economy")
         .setDescription("Economy management (admin)")
+        .setDescriptionLocalizations({ vi: "Quản lý kinh tế (admin)" })
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addSubcommand((sub) =>
             sub
                 .setName("set-coin")
                 .setDescription("Set a user's coin")
-                .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
+                .setDescriptionLocalizations({ vi: "Đặt coin cho người dùng" })
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("Target user")
+                        .setDescriptionLocalizations({ vi: "Người dùng" })
+                        .setRequired(true)
+                )
                 .addIntegerOption((opt) =>
-                    opt.setName("amount").setDescription("Coin amount").setMinValue(0).setRequired(true)
+                    opt
+                        .setName("amount")
+                        .setDescription("Coin amount")
+                        .setDescriptionLocalizations({ vi: "Số coin" })
+                        .setMinValue(0)
+                        .setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("add-coin")
                 .setDescription("Add coin to a user")
-                .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
-                .addIntegerOption((opt) => opt.setName("amount").setDescription("Coin to add").setRequired(true))
+                .setDescriptionLocalizations({ vi: "Thêm coin cho người dùng" })
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("Target user")
+                        .setDescriptionLocalizations({ vi: "Người dùng" })
+                        .setRequired(true)
+                )
+                .addIntegerOption((opt) =>
+                    opt
+                        .setName("amount")
+                        .setDescription("Coin to add")
+                        .setDescriptionLocalizations({ vi: "Số coin thêm" })
+                        .setRequired(true)
+                )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("set-gem")
                 .setDescription("Set a user's gem")
-                .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
+                .setDescriptionLocalizations({ vi: "Đặt gem cho người dùng" })
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("Target user")
+                        .setDescriptionLocalizations({ vi: "Người dùng" })
+                        .setRequired(true)
+                )
                 .addIntegerOption((opt) =>
-                    opt.setName("amount").setDescription("Gem amount").setMinValue(0).setRequired(true)
+                    opt
+                        .setName("amount")
+                        .setDescription("Gem amount")
+                        .setDescriptionLocalizations({ vi: "Số gem" })
+                        .setMinValue(0)
+                        .setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("add-gem")
                 .setDescription("Add gem to a user")
-                .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
-                .addIntegerOption((opt) => opt.setName("amount").setDescription("Gem to add").setRequired(true))
+                .setDescriptionLocalizations({ vi: "Thêm gem cho người dùng" })
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("Target user")
+                        .setDescriptionLocalizations({ vi: "Người dùng" })
+                        .setRequired(true)
+                )
+                .addIntegerOption((opt) =>
+                    opt
+                        .setName("amount")
+                        .setDescription("Gem to add")
+                        .setDescriptionLocalizations({ vi: "Số gem thêm" })
+                        .setRequired(true)
+                )
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         try {
+            const locale = await resolveLocale(interaction);
             const guildId = interaction.guildId!;
             const subcommand = interaction.options.getSubcommand(true);
             const target = interaction.options.getUser("user", true);
@@ -60,7 +119,9 @@ export default {
                 case "set-coin": {
                     const updated = await CurrencyService.setCoin(target.id, guildId, amount);
                     embed = new EmbedBuilder()
-                        .setDescription(`Set coin for <@${target.id}>: **${updated.coin.toLocaleString()}** coin`)
+                        .setDescription(
+                            t(locale, "economy.set_coin", { userId: target.id, amount: updated.coin.toLocaleString() })
+                        )
                         .setColor(0x5865f2);
                     break;
                 }
@@ -70,8 +131,11 @@ export default {
                     });
                     embed = new EmbedBuilder()
                         .setDescription(
-                            `Added **${amount.toLocaleString()}** coin to <@${target.id}>\n` +
-                                `Total: **${updated.coin.toLocaleString()}** coin`
+                            t(locale, "economy.add_coin", {
+                                userId: target.id,
+                                amount: amount.toLocaleString(),
+                                total: updated.coin.toLocaleString(),
+                            })
                         )
                         .setColor(amount >= 0 ? 0x57f287 : 0xed4245);
                     break;
@@ -79,7 +143,9 @@ export default {
                 case "set-gem": {
                     const updated = await CurrencyService.setGem(target.id, guildId, amount);
                     embed = new EmbedBuilder()
-                        .setDescription(`Set gem for <@${target.id}>: **${updated.gem.toLocaleString()}** gem`)
+                        .setDescription(
+                            t(locale, "economy.set_gem", { userId: target.id, amount: updated.gem.toLocaleString() })
+                        )
                         .setColor(0x5865f2);
                     break;
                 }
@@ -89,20 +155,25 @@ export default {
                     });
                     embed = new EmbedBuilder()
                         .setDescription(
-                            `Added **${amount.toLocaleString()}** gem to <@${target.id}>\n` +
-                                `Total: **${updated.gem.toLocaleString()}** gem`
+                            t(locale, "economy.add_gem", {
+                                userId: target.id,
+                                amount: amount.toLocaleString(),
+                                total: updated.gem.toLocaleString(),
+                            })
                         )
                         .setColor(amount >= 0 ? 0x57f287 : 0xed4245);
                     break;
                 }
-                default:
-                    await interaction.editReply("Unknown subcommand.");
+                default: {
+                    await interaction.editReply(t(locale, "common.unknown_subcommand"));
                     return;
+                }
             }
 
             await interaction.editReply({ embeds: [embed] });
         } catch {
-            await interaction.editReply("Có lỗi xảy ra. Vui lòng thử lại sau.");
+            const locale = await resolveLocale(interaction).catch(fallbackLocale);
+            await interaction.editReply(t(locale, "common.error"));
         }
     },
 };
