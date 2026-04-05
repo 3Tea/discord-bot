@@ -9,5 +9,13 @@ dotenv.config(dotEnvConfigs);
 import { validateEnv } from "../util/config/validate";
 validateEnv();
 
-import "../bot";
-import "../connector/mongo";
+import { initI18n } from "../util/i18n/index";
+
+async function main(): Promise<void> {
+    await initI18n();
+
+    await import("../connector/mongo");
+    await import("../bot");
+}
+
+main().catch(console.error);

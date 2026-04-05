@@ -13,6 +13,10 @@ import {
 import redis from "../../connector/redis";
 import { FOOTER } from "../config/index";
 import { BUTTON_ID } from "../config/button";
+import { resolveLocale } from "../i18n/locale";
+import type { LocaleInteraction } from "../i18n/locale";
+import { t } from "../i18n/t";
+import type { SupportedLocale } from "../i18n/index";
 
 const TTL_12H = 60 * 60 * 12;
 
@@ -28,18 +32,22 @@ async function replyOrEdit(interaction: RepliableInteraction, content: string): 
     }
 }
 
-export async function validateOwner(interaction: RepliableInteraction): Promise<VoiceChannel | null> {
+export async function validateOwner(
+    interaction: RepliableInteraction,
+    locale?: SupportedLocale
+): Promise<VoiceChannel | null> {
+    const resolvedLocale = locale ?? (await resolveLocale(interaction as LocaleInteraction));
     const member = interaction.member as GuildMember;
     const voiceChannel = member?.voice.channel as VoiceChannel | null;
 
     if (!voiceChannel) {
-        await replyOrEdit(interaction, "You are not in a voice channel.");
+        await replyOrEdit(interaction, t(resolvedLocale, "voice.not_in_channel"));
         return null;
     }
 
     const ownerId = await redis.getJson(voiceChannel.id);
     if (ownerId !== interaction.user.id) {
-        await replyOrEdit(interaction, "You are not the owner of this voice channel.");
+        await replyOrEdit(interaction, t(resolvedLocale, "voice.not_owner"));
         return null;
     }
 
@@ -50,10 +58,15 @@ export async function validateOwner(interaction: RepliableInteraction): Promise<
  * Check cooldown for an action. Returns true if action is allowed, false if on cooldown.
  * If on cooldown, replies with ephemeral message.
  */
-export async function checkCooldown(interaction: RepliableInteraction, redisKey: string): Promise<boolean> {
+export async function checkCooldown(
+    interaction: RepliableInteraction,
+    redisKey: string,
+    locale?: SupportedLocale
+): Promise<boolean> {
+    const resolvedLocale = locale ?? (await resolveLocale(interaction as LocaleInteraction));
     const ttl = await redis.ttlKey(redisKey);
     if (ttl > 0) {
-        await replyOrEdit(interaction, `Please try again in ${ttl}s.`);
+        await replyOrEdit(interaction, t(resolvedLocale, "voice.cooldown", { seconds: ttl }));
         return false;
     }
     return true;
@@ -69,22 +82,28 @@ export async function setCooldown(redisKey: string, seconds: number): Promise<vo
 /**
  * Build the control panel embed showing owner and status.
  */
-export async function buildPanelEmbed(channelId: string, ownerId: string): Promise<EmbedBuilder> {
+export async function buildPanelEmbed(
+    channelId: string,
+    ownerId: string,
+    locale: SupportedLocale
+): Promise<EmbedBuilder> {
     const state: string = (await redis.getJson(`state:${channelId}`)) || "unlocked";
     const permitted: string[] = (await redis.getJson(`permitted:${channelId}`)) || [];
     const blocked: string[] = (await redis.getJson(`blocked:${channelId}`)) || [];
 
     const statusMap: Record<string, string> = {
-        unlocked: "Unlocked",
-        locked: "Locked",
-        hidden: "Hidden",
+        unlocked: t(locale, "voice.panel.status_unlocked"),
+        locked: t(locale, "voice.panel.status_locked"),
+        hidden: t(locale, "voice.panel.status_hidden"),
     };
 
+    const statusText = statusMap[state] ?? t(locale, "voice.panel.status_unlocked");
+
     const embed = new EmbedBuilder()
-        .setTitle("Voice Control Panel")
+        .setTitle(t(locale, "voice.panel.title"))
         .setColor("Random")
         .setTimestamp()
-        .setDescription(`**Owner:** <@${ownerId}>\n**Status:** ${statusMap[state] ?? "Unlocked"}`);
+        .setDescription(t(locale, "voice.panel.description", { ownerId, status: statusText }));
 
     if (FOOTER.text) {
         embed.setFooter({ text: FOOTER.text, iconURL: FOOTER.icon || undefined });
@@ -92,14 +111,14 @@ export async function buildPanelEmbed(channelId: string, ownerId: string): Promi
 
     if (permitted.length > 0) {
         embed.addFields({
-            name: "Permitted",
+            name: t(locale, "voice.panel.permitted"),
             value: permitted.map((id) => `<@${id}>`).join(", "),
         });
     }
 
     if (blocked.length > 0) {
         embed.addFields({
-            name: "Blocked",
+            name: t(locale, "voice.panel.blocked"),
             value: blocked.map((id) => `<@${id}>`).join(", "),
         });
     }
@@ -110,32 +129,32 @@ export async function buildPanelEmbed(channelId: string, ownerId: string): Promi
 /**
  * Build the button rows for the control panel.
  */
-export function buildPanelRows(): ActionRowBuilder<ButtonBuilder>[] {
+export function buildPanelRows(locale: SupportedLocale): ActionRowBuilder<ButtonBuilder>[] {
     const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.VOICE_LOCK)
             .setEmoji("🔒")
-            .setLabel("Lock")
+            .setLabel(t(locale, "voice.btn.lock"))
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.VOICE_UNLOCK)
             .setEmoji("🔓")
-            .setLabel("Unlock")
+            .setLabel(t(locale, "voice.btn.unlock"))
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.VOICE_HIDE)
             .setEmoji("👁️")
-            .setLabel("Hide")
+            .setLabel(t(locale, "voice.btn.hide"))
             .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.VOICE_RENAME)
             .setEmoji("✏️")
-            .setLabel("Rename")
+            .setLabel(t(locale, "voice.btn.rename"))
             .setStyle(ButtonStyle.Primary),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.VOICE_LIMIT)
             .setEmoji("👥")
-            .setLabel("Limit")
+            .setLabel(t(locale, "voice.btn.limit"))
             .setStyle(ButtonStyle.Primary)
     );
 
@@ -143,22 +162,22 @@ export function buildPanelRows(): ActionRowBuilder<ButtonBuilder>[] {
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.VOICE_PERMIT)
             .setEmoji("✅")
-            .setLabel("Permit")
+            .setLabel(t(locale, "voice.btn.permit"))
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.VOICE_BLOCK)
             .setEmoji("🚫")
-            .setLabel("Block")
+            .setLabel(t(locale, "voice.btn.block"))
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.VOICE_KICK)
             .setEmoji("👢")
-            .setLabel("Kick")
+            .setLabel(t(locale, "voice.btn.kick"))
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.VOICE_TRANSFER)
             .setEmoji("🔄")
-            .setLabel("Transfer")
+            .setLabel(t(locale, "voice.btn.transfer"))
             .setStyle(ButtonStyle.Primary)
     );
 
@@ -168,7 +187,7 @@ export function buildPanelRows(): ActionRowBuilder<ButtonBuilder>[] {
 /**
  * Update the control panel message in the voice channel.
  */
-export async function updatePanel(voiceChannel: VoiceChannel): Promise<void> {
+export async function updatePanel(voiceChannel: VoiceChannel, locale: SupportedLocale): Promise<void> {
     const panelMessageId = await redis.getJson(`panel:${voiceChannel.id}`);
     if (!panelMessageId) return;
 
@@ -177,8 +196,8 @@ export async function updatePanel(voiceChannel: VoiceChannel): Promise<void> {
 
     try {
         const message = await voiceChannel.messages.fetch(panelMessageId);
-        const embed = await buildPanelEmbed(voiceChannel.id, ownerId);
-        await message.edit({ embeds: [embed], components: buildPanelRows() });
+        const embed = await buildPanelEmbed(voiceChannel.id, ownerId, locale);
+        await message.edit({ embeds: [embed], components: buildPanelRows(locale) });
     } catch {
         // Message may have been deleted, ignore
     }
@@ -187,11 +206,11 @@ export async function updatePanel(voiceChannel: VoiceChannel): Promise<void> {
 /**
  * Send the control panel to the voice channel text chat, mention owner, pin it, and store the message ID.
  */
-export async function sendPanel(voiceChannel: VoiceChannel, ownerId: string): Promise<void> {
-    const embed = await buildPanelEmbed(voiceChannel.id, ownerId);
-    const rows = buildPanelRows();
+export async function sendPanel(voiceChannel: VoiceChannel, ownerId: string, locale: SupportedLocale): Promise<void> {
+    const embed = await buildPanelEmbed(voiceChannel.id, ownerId, locale);
+    const rows = buildPanelRows(locale);
     const message = await voiceChannel.send({
-        content: `<@${ownerId}> — Your voice control panel`,
+        content: t(locale, "voice.panel.owner_mention", { ownerId }),
         embeds: [embed],
         components: rows,
     });

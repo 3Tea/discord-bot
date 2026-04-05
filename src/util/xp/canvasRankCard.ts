@@ -15,53 +15,98 @@ const W = 934;
 const H = 360;
 
 const C = {
-    bgDeep:     "#0a0614",
-    bgMid:      "#120b22",
-    bgTop:      "#1a0e2e",
-    pink:       "#ff6b9d",
-    purple:     "#c44dff",
-    gold:       "#ffd700",
-    muted:      "#7a6899",
-    dimmer:     "#5a4878",
-    panelFill:  "rgba(255,255,255,0.04)",
-    panelBorder:"rgba(255,255,255,0.07)",
-    green:      "#3ba55c",
-    greenHi:    "#57d87a",
+    bgDeep: "#0a0614",
+    bgMid: "#120b22",
+    bgTop: "#1a0e2e",
+    pink: "#ff6b9d",
+    purple: "#c44dff",
+    gold: "#ffd700",
+    muted: "#7a6899",
+    dimmer: "#5a4878",
+    panelFill: "rgba(255,255,255,0.04)",
+    panelBorder: "rgba(255,255,255,0.07)",
+    green: "#3ba55c",
+    greenHi: "#57d87a",
 } as const;
 
 // --- Pre-defined anime scene elements ---
 
 // Stars: [x, y, radius, alpha]
 const STARS: readonly [number, number, number, number][] = [
-    [32,24,1.8,0.9], [98,42,1.0,0.6], [185,15,1.4,0.85], [267,58,0.8,0.5],
-    [340,28,1.6,0.88], [410,66,1.0,0.55], [478,12,1.2,0.78], [552,48,0.9,0.5],
-    [615,22,1.5,0.85], [688,55,1.1,0.6], [755,18,1.3,0.8], [830,40,1.0,0.65],
-    [895,30,1.7,0.9], [60,90,0.9,0.45], [145,105,1.2,0.7], [228,85,0.7,0.4],
-    [315,100,1.4,0.75], [395,88,1.0,0.55], [502,110,0.8,0.42], [580,95,1.3,0.7],
-    [665,78,1.1,0.62], [742,105,0.9,0.48], [820,88,1.5,0.82], [905,70,1.0,0.52],
-    [48,145,0.8,0.35], [135,160,1.1,0.58], [290,140,0.7,0.32], [440,155,1.0,0.5],
-    [570,135,0.9,0.42], [710,158,1.2,0.6], [850,142,0.8,0.38], [200,32,2.0,0.95],
-    [530,52,1.8,0.88], [770,38,1.6,0.82], [380,125,0.6,0.3], [650,115,0.7,0.35],
-    [75,68,1.3,0.72], [460,40,0.8,0.45], [810,110,1.0,0.55], [920,52,0.7,0.4],
+    [32, 24, 1.8, 0.9],
+    [98, 42, 1.0, 0.6],
+    [185, 15, 1.4, 0.85],
+    [267, 58, 0.8, 0.5],
+    [340, 28, 1.6, 0.88],
+    [410, 66, 1.0, 0.55],
+    [478, 12, 1.2, 0.78],
+    [552, 48, 0.9, 0.5],
+    [615, 22, 1.5, 0.85],
+    [688, 55, 1.1, 0.6],
+    [755, 18, 1.3, 0.8],
+    [830, 40, 1.0, 0.65],
+    [895, 30, 1.7, 0.9],
+    [60, 90, 0.9, 0.45],
+    [145, 105, 1.2, 0.7],
+    [228, 85, 0.7, 0.4],
+    [315, 100, 1.4, 0.75],
+    [395, 88, 1.0, 0.55],
+    [502, 110, 0.8, 0.42],
+    [580, 95, 1.3, 0.7],
+    [665, 78, 1.1, 0.62],
+    [742, 105, 0.9, 0.48],
+    [820, 88, 1.5, 0.82],
+    [905, 70, 1.0, 0.52],
+    [48, 145, 0.8, 0.35],
+    [135, 160, 1.1, 0.58],
+    [290, 140, 0.7, 0.32],
+    [440, 155, 1.0, 0.5],
+    [570, 135, 0.9, 0.42],
+    [710, 158, 1.2, 0.6],
+    [850, 142, 0.8, 0.38],
+    [200, 32, 2.0, 0.95],
+    [530, 52, 1.8, 0.88],
+    [770, 38, 1.6, 0.82],
+    [380, 125, 0.6, 0.3],
+    [650, 115, 0.7, 0.35],
+    [75, 68, 1.3, 0.72],
+    [460, 40, 0.8, 0.45],
+    [810, 110, 1.0, 0.55],
+    [920, 52, 0.7, 0.4],
 ];
 
 // Bokeh particles: [x, y, radius, alpha]
 const BOKEH: readonly [number, number, number, number][] = [
-    [120,200,10,0.06], [350,145,14,0.04], [580,250,8,0.07],
-    [780,175,12,0.05], [250,300,9,0.05], [650,95,11,0.04],
-    [450,280,13,0.06], [870,220,9,0.05], [50,270,7,0.04],
-    [700,315,12,0.05], [180,125,8,0.06], [520,195,15,0.03],
+    [120, 200, 10, 0.06],
+    [350, 145, 14, 0.04],
+    [580, 250, 8, 0.07],
+    [780, 175, 12, 0.05],
+    [250, 300, 9, 0.05],
+    [650, 95, 11, 0.04],
+    [450, 280, 13, 0.06],
+    [870, 220, 9, 0.05],
+    [50, 270, 7, 0.04],
+    [700, 315, 12, 0.05],
+    [180, 125, 8, 0.06],
+    [520, 195, 15, 0.03],
 ];
 
 // Cherry blossom petals: [x, y, rx, ry, rotation, alpha, colorIdx 0=pink 1=purple]
 const BLOSSOMS: readonly [number, number, number, number, number, number, number][] = [
-    [855,38,6,14,0.44,0.20,0], [800,72,5,11,-0.26,0.15,1],
-    [890,110,5,12,0.70,0.14,0], [825,250,6,13,-0.52,0.16,1],
-    [875,218,4,10,0.35,0.12,0], [55,268,5,11,0.17,0.12,1],
-    [22,202,4,9,-0.35,0.11,0], [760,290,5,11,1.20,0.13,0],
-    [910,280,4,9,0.90,0.11,1], [730,55,4,10,0.60,0.10,0],
-    [680,300,5,12,-0.40,0.14,1], [150,320,4,9,0.25,0.10,0],
-    [420,30,3,8,-0.15,0.08,1], [300,335,5,11,0.80,0.12,0],
+    [855, 38, 6, 14, 0.44, 0.2, 0],
+    [800, 72, 5, 11, -0.26, 0.15, 1],
+    [890, 110, 5, 12, 0.7, 0.14, 0],
+    [825, 250, 6, 13, -0.52, 0.16, 1],
+    [875, 218, 4, 10, 0.35, 0.12, 0],
+    [55, 268, 5, 11, 0.17, 0.12, 1],
+    [22, 202, 4, 9, -0.35, 0.11, 0],
+    [760, 290, 5, 11, 1.2, 0.13, 0],
+    [910, 280, 4, 9, 0.9, 0.11, 1],
+    [730, 55, 4, 10, 0.6, 0.1, 0],
+    [680, 300, 5, 12, -0.4, 0.14, 1],
+    [150, 320, 4, 9, 0.25, 0.1, 0],
+    [420, 30, 3, 8, -0.15, 0.08, 1],
+    [300, 335, 5, 11, 0.8, 0.12, 0],
 ];
 
 // Anime cloud clusters: [cx, cy, scaleX, scaleY, alpha]
@@ -134,13 +179,13 @@ function clampText(ctx: Ctx2D, text: string, maxWidth: number): string {
 
 function drawAnimeSky(ctx: Ctx2D): void {
     const sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0,    "#050210");
+    sky.addColorStop(0, "#050210");
     sky.addColorStop(0.25, "#0d0828");
     sky.addColorStop(0.45, "#1a0e3a");
     sky.addColorStop(0.65, "#2d1254");
     sky.addColorStop(0.82, "#4a1a5e");
     sky.addColorStop(0.92, "#7a2858");
-    sky.addColorStop(1,    "#c44068");
+    sky.addColorStop(1, "#c44068");
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
 
@@ -192,10 +237,16 @@ function drawStarField(ctx: Ctx2D): void {
 }
 
 function drawCrescentMoon(ctx: Ctx2D): void {
-    const mx = 780, my = 52, mr = 28;
+    const mx = 780,
+        my = 52,
+        mr = 28;
 
     // Layered glow rings
-    const glowLayers: [number, number][] = [[60, 0.08], [40, 0.12], [25, 0.18]];
+    const glowLayers: [number, number][] = [
+        [60, 0.08],
+        [40, 0.12],
+        [25, 0.18],
+    ];
     for (const [spread, alpha] of glowLayers) {
         const g = ctx.createRadialGradient(mx, my, mr * 0.5, mx, my, mr + spread);
         g.addColorStop(0, `rgba(255,230,200,${alpha})`);
@@ -234,8 +285,13 @@ function drawAnimeCloud(ctx: Ctx2D, cx: number, cy: number, sx: number, sy: numb
     ctx.scale(sx, sy);
 
     const parts: [number, number, number, number][] = [
-        [0, 0, 50, 25], [-35, -5, 35, 22], [30, -8, 40, 20],
-        [-15, -15, 30, 18], [15, -12, 35, 20], [45, 5, 25, 18], [-50, 5, 28, 16],
+        [0, 0, 50, 25],
+        [-35, -5, 35, 22],
+        [30, -8, 40, 20],
+        [-15, -15, 30, 18],
+        [15, -12, 35, 20],
+        [45, 5, 25, 18],
+        [-50, 5, 28, 16],
     ];
     for (const [px, py, rx, ry] of parts) {
         ctx.beginPath();
@@ -270,29 +326,64 @@ function drawMountainLayer(ctx: Ctx2D, peaks: [number, number][], color: string)
 
 function drawMountains(ctx: Ctx2D): void {
     // Far — lighter, atmospheric purple
-    drawMountainLayer(ctx, [
-        [0, H - 65], [80, H - 95], [180, H - 120], [280, H - 100],
-        [380, H - 135], [480, H - 110], [580, H - 140], [680, H - 115],
-        [780, H - 130], [880, H - 105], [W, H - 80],
-    ], "rgba(30,15,55,0.7)");
+    drawMountainLayer(
+        ctx,
+        [
+            [0, H - 65],
+            [80, H - 95],
+            [180, H - 120],
+            [280, H - 100],
+            [380, H - 135],
+            [480, H - 110],
+            [580, H - 140],
+            [680, H - 115],
+            [780, H - 130],
+            [880, H - 105],
+            [W, H - 80],
+        ],
+        "rgba(30,15,55,0.7)"
+    );
 
     // Mid — darker
-    drawMountainLayer(ctx, [
-        [0, H - 40], [100, H - 72], [200, H - 90], [320, H - 65],
-        [420, H - 95], [540, H - 75], [650, H - 100], [760, H - 80],
-        [870, H - 90], [W, H - 55],
-    ], "rgba(18,8,35,0.8)");
+    drawMountainLayer(
+        ctx,
+        [
+            [0, H - 40],
+            [100, H - 72],
+            [200, H - 90],
+            [320, H - 65],
+            [420, H - 95],
+            [540, H - 75],
+            [650, H - 100],
+            [760, H - 80],
+            [870, H - 90],
+            [W, H - 55],
+        ],
+        "rgba(18,8,35,0.8)"
+    );
 
     // Near — darkest silhouette
-    drawMountainLayer(ctx, [
-        [0, H - 20], [120, H - 50], [250, H - 38], [370, H - 55],
-        [500, H - 42], [620, H - 60], [750, H - 45], [880, H - 55], [W, H - 30],
-    ], "rgba(8,4,18,0.85)");
+    drawMountainLayer(
+        ctx,
+        [
+            [0, H - 20],
+            [120, H - 50],
+            [250, H - 38],
+            [370, H - 55],
+            [500, H - 42],
+            [620, H - 60],
+            [750, H - 45],
+            [880, H - 55],
+            [W, H - 30],
+        ],
+        "rgba(8,4,18,0.85)"
+    );
 }
 
 function drawTorii(ctx: Ctx2D): void {
     // Small torii gate silhouette on the tallest far mountain peak
-    const tx = 580, ty = H - 148;
+    const tx = 580,
+        ty = H - 148;
     ctx.fillStyle = "rgba(15,6,30,0.8)";
 
     // Pillars
@@ -346,11 +437,11 @@ function drawBokehParticles(ctx: Ctx2D): void {
 function drawReadabilityOverlay(ctx: Ctx2D): void {
     // Left-to-right darkening so text stays legible
     const overlay = ctx.createLinearGradient(0, 0, W, 0);
-    overlay.addColorStop(0,    "rgba(5,2,16,0.75)");
+    overlay.addColorStop(0, "rgba(5,2,16,0.75)");
     overlay.addColorStop(0.15, "rgba(8,4,20,0.65)");
     overlay.addColorStop(0.45, "rgba(12,6,28,0.5)");
     overlay.addColorStop(0.75, "rgba(15,8,32,0.35)");
-    overlay.addColorStop(1,    "rgba(20,10,40,0.25)");
+    overlay.addColorStop(1, "rgba(20,10,40,0.25)");
     ctx.fillStyle = overlay;
     ctx.fillRect(0, 0, W, H);
 
@@ -378,7 +469,10 @@ function drawAnimeBackground(ctx: Ctx2D): void {
 // --- UI sub-renderers ---
 
 function drawAccentStripe(ctx: Ctx2D): void {
-    const g = gradientV(ctx, 0, H, 0, [[0, C.pink], [1, C.purple]]);
+    const g = gradientV(ctx, 0, H, 0, [
+        [0, C.pink],
+        [1, C.purple],
+    ]);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, 5, H);
 }
@@ -404,7 +498,10 @@ async function drawAvatar(
 
     // Gradient ring
     shadow(ctx, "rgba(196,77,255,0.45)", 18);
-    ctx.strokeStyle = gradientH(ctx, cx - r, r * 2, cy, [[0, C.pink], [1, C.purple]]);
+    ctx.strokeStyle = gradientH(ctx, cx - r, r * 2, cy, [
+        [0, C.pink],
+        [1, C.purple],
+    ]);
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.arc(cx, cy, r + 3, 0, Math.PI * 2);
@@ -469,13 +566,7 @@ function drawAvatarFallback(ctx: Ctx2D, cx: number, cy: number, r: number, usern
     ctx.textBaseline = "alphabetic";
 }
 
-function drawRankBadge(
-    ctx: Ctx2D,
-    label: string,
-    cx: number,
-    topY: number,
-    colors: [string, string]
-): number {
+function drawRankBadge(ctx: Ctx2D, label: string, cx: number, topY: number, colors: [string, string]): number {
     ctx.font = '16px "Inter Bold"';
     const tw = ctx.measureText(label).width;
     const bw = tw + 28;
@@ -488,7 +579,10 @@ function drawRankBadge(
     ctx.fill();
 
     // Gradient border
-    ctx.strokeStyle = gradientH(ctx, bx, bw, topY, [[0, colors[0]], [1, colors[1]]]);
+    ctx.strokeStyle = gradientH(ctx, bx, bw, topY, [
+        [0, colors[0]],
+        [1, colors[1]],
+    ]);
     ctx.lineWidth = 1.2;
     roundRect(ctx, bx, topY, bw, bh, 15);
     ctx.stroke();
@@ -516,7 +610,10 @@ function drawNameBlock(
     ctx.font = '44px "Inter Bold"';
     const name = clampText(ctx, username, maxW);
     shadow(ctx, "rgba(255,107,157,0.35)", 12);
-    ctx.fillStyle = gradientH(ctx, x, maxW, y, [[0, C.pink], [1, C.purple]]);
+    ctx.fillStyle = gradientH(ctx, x, maxW, y, [
+        [0, C.pink],
+        [1, C.purple],
+    ]);
     ctx.fillText(name, x, y);
     clearShadow(ctx);
 
@@ -528,7 +625,11 @@ function drawNameBlock(
 
     // Thin accent underline
     const nameW = ctx.measureText(name).width;
-    const lineGrad = gradientH(ctx, x, nameW, y + 32, [[0, C.pink], [0.7, C.purple], [1, "rgba(196,77,255,0)"]]);
+    const lineGrad = gradientH(ctx, x, nameW, y + 32, [
+        [0, C.pink],
+        [0.7, C.purple],
+        [1, "rgba(196,77,255,0)"],
+    ]);
     ctx.fillStyle = lineGrad;
     ctx.fillRect(x, y + 32, nameW, 2);
 }
@@ -574,7 +675,10 @@ function drawXPBar(
         roundRect(ctx, x, barY, barW, barH, r);
         ctx.clip();
         shadow(ctx, "rgba(255,107,157,0.55)", 10);
-        ctx.fillStyle = gradientH(ctx, x, barW, barY, [[0, C.pink], [1, C.purple]]);
+        ctx.fillStyle = gradientH(ctx, x, barW, barY, [
+            [0, C.pink],
+            [1, C.purple],
+        ]);
         ctx.fillRect(x, barY, fillW, barH);
         // Shimmer highlight
         ctx.fillStyle = "rgba(255,255,255,0.10)";
@@ -619,7 +723,10 @@ function drawLevelBox(ctx: Ctx2D, level: number, x: number, y: number, w: number
     // Number
     ctx.font = `56px "Inter Bold"`;
     shadow(ctx, "rgba(255,107,157,0.4)", 16);
-    ctx.fillStyle = gradientV(ctx, y + 28, 54, x + w / 2, [[0, C.pink], [1, C.purple]]);
+    ctx.fillStyle = gradientV(ctx, y + 28, 54, x + w / 2, [
+        [0, C.pink],
+        [1, C.purple],
+    ]);
     ctx.fillText(String(level), x + w / 2, y + 76);
     clearShadow(ctx);
 
@@ -648,7 +755,10 @@ function drawStatCard(
     ctx.stroke();
 
     // Left accent bar
-    const barGrad = gradientV(ctx, y, h, x, [[0, accentColor + "cc"], [1, accentColor + "44"]]);
+    const barGrad = gradientV(ctx, y, h, x, [
+        [0, accentColor + "cc"],
+        [1, accentColor + "44"],
+    ]);
     ctx.fillStyle = barGrad;
     roundRect(ctx, x, y, 4, h, 2);
     ctx.fill();
@@ -695,9 +805,18 @@ export interface RankCardOptions {
 
 export async function renderRankCard(options: RankCardOptions): Promise<Buffer> {
     const {
-        username, discriminator, avatarURL,
-        level, rank, globalRank, xp, xpForNextLevel, percentage,
-        messageCount, voiceMinutes, reactionCount,
+        username,
+        discriminator,
+        avatarURL,
+        level,
+        rank,
+        globalRank,
+        xp,
+        xpForNextLevel,
+        percentage,
+        messageCount,
+        voiceMinutes,
+        reactionCount,
         totalXP = xp,
     } = options;
 
@@ -713,11 +832,11 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
     drawAccentStripe(ctx);
 
     // --- Layout constants ---
-    const PAD        = 32;                 // outer padding
-    const AV_R      = 72;                  // avatar radius
-    const AV_CX     = PAD + AV_R + 8;     // avatar center X
-    const AV_CY     = H / 2 - 10;         // avatar center Y
-    const CONTENT_X = AV_CX + AV_R + 28;  // right content start X
+    const PAD = 32; // outer padding
+    const AV_R = 72; // avatar radius
+    const AV_CX = PAD + AV_R + 8; // avatar center X
+    const AV_CY = H / 2 - 10; // avatar center Y
+    const CONTENT_X = AV_CX + AV_R + 28; // right content start X
 
     const LV_W = 118;
     const LV_H = 110;
@@ -726,11 +845,11 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
 
     const CONTENT_W = LV_X - CONTENT_X - 20; // usable width for text/bar
 
-    const STAT_Y  = H - PAD - 78;
-    const STAT_H  = 78;
-    const STAT_N  = 4;                     // Messages, Voice, Reactions, Total XP
+    const STAT_Y = H - PAD - 78;
+    const STAT_H = 78;
+    const STAT_N = 4; // Messages, Voice, Reactions, Total XP
     const STAT_GAP = 12;
-    const STAT_W  = (CONTENT_W - (STAT_N - 1) * STAT_GAP) / STAT_N;
+    const STAT_W = (CONTENT_W - (STAT_N - 1) * STAT_GAP) / STAT_N;
 
     // --- Avatar ---
     await drawAvatar(ctx, avatarURL, username, AV_CX, AV_CY, AV_R);
@@ -758,10 +877,10 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
 
     // --- Stat cards ---
     const statItems: { label: string; value: string; color: string }[] = [
-        { label: "MESSAGES",  value: messageCount.toLocaleString(),   color: C.pink   },
-        { label: "VOICE",     value: formatVoice(voiceMinutes),        color: C.purple },
-        { label: "REACTIONS", value: reactionCount.toLocaleString(),   color: C.pink   },
-        { label: "TOTAL XP",  value: totalXP.toLocaleString(),         color: C.gold   },
+        { label: "MESSAGES", value: messageCount.toLocaleString(), color: C.pink },
+        { label: "VOICE", value: formatVoice(voiceMinutes), color: C.purple },
+        { label: "REACTIONS", value: reactionCount.toLocaleString(), color: C.pink },
+        { label: "TOTAL XP", value: totalXP.toLocaleString(), color: C.gold },
     ];
 
     for (let i = 0; i < statItems.length; i++) {

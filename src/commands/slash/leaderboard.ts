@@ -4,19 +4,25 @@ import client from "../../client";
 import MemberXPModel from "../../models/memberXP.model";
 import UserModel from "../../models/user.model";
 import { buildLeaderboardEmbed, buildGlobalLeaderboardEmbed } from "../../util/xp/rankCard";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
 
 export default {
     data: new SlashCommandBuilder()
         .setName("leaderboard")
         .setDescription("View the XP leaderboard")
+        .setDescriptionLocalizations({ vi: "Xem bảng xếp hạng XP" })
         .addStringOption((option) =>
             option
                 .setName("mode")
                 .setDescription("Leaderboard type")
+                .setDescriptionLocalizations({ vi: "Loại bảng xếp hạng" })
                 .addChoices({ name: "Server", value: "server" }, { name: "Global", value: "global" })
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
+
+        const locale = await resolveLocale(interaction).catch(() => "en" as const);
 
         try {
             const mode = interaction.options.getString("mode") ?? "server";
@@ -47,18 +53,18 @@ export default {
                     })
                 );
 
-                const embed = buildGlobalLeaderboardEmbed(topUsers, usernames);
+                const embed = buildGlobalLeaderboardEmbed(topUsers, usernames, locale);
                 await interaction.editReply({ embeds: [embed] });
             } else {
                 const guildId = interaction.guildId!;
                 const topMembers = await MemberXPModel.find({ guildId }).sort({ xp: -1 }).limit(10);
 
                 const guildName = interaction.guild?.name ?? "Server";
-                const embed = buildLeaderboardEmbed(topMembers, guildName);
+                const embed = buildLeaderboardEmbed(topMembers, guildName, locale);
                 await interaction.editReply({ embeds: [embed] });
             }
         } catch {
-            await interaction.editReply("Không thể tải bảng xếp hạng. Vui lòng thử lại sau.");
+            await interaction.editReply(t(locale, "leaderboard.error"));
         }
     },
 };

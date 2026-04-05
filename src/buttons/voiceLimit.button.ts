@@ -2,15 +2,17 @@ import { ActionRowBuilder, ButtonInteraction, ModalBuilder, TextInputBuilder, Te
 
 import { BUTTON_ID } from "../util/config/button";
 import { validateOwner, checkCooldown } from "../util/voice/helpers";
+import { resolveLocale } from "../util/i18n/locale";
 
 export default {
     id: BUTTON_ID.VOICE_LIMIT,
     async execute(interaction: ButtonInteraction) {
-        const voiceChannel = await validateOwner(interaction);
+        const locale = await resolveLocale(interaction);
+        const voiceChannel = await validateOwner(interaction, locale);
         if (!voiceChannel) return;
 
         const cdKey = `setUserLimit:${voiceChannel.id}`;
-        if (!(await checkCooldown(interaction, cdKey))) return;
+        if (!(await checkCooldown(interaction, cdKey, locale))) return;
 
         const modal = new ModalBuilder().setCustomId(BUTTON_ID.VOICE_MODAL_LIMIT).setTitle("Set User Limit");
 

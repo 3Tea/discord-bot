@@ -27,6 +27,7 @@ RUN npm ci --omit=dev && \
     apk del make g++ gcc
 
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/src/locales ./dist/locales
 
 RUN mkdir -p logs && chown -R node:node logs
 

@@ -5,16 +5,24 @@ import { progressToNextLevel, xpForLevel } from "../../util/xp/calculator";
 import { buildRankEmbed } from "../../util/xp/rankCard";
 import { renderRankCard } from "../../util/xp/canvasRankCard";
 import { getGlobalRank } from "../../util/xp/globalXP";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
 
 export default {
     data: new SlashCommandBuilder()
         .setName("rank")
         .setDescription("View your rank card or another user's")
+        .setDescriptionLocalizations({ vi: "Xem rank card của bạn hoặc người khác" })
         .addUserOption((option) =>
-            option.setName("user").setDescription("User to check rank for")
+            option
+                .setName("user")
+                .setDescription("User to check rank for")
+                .setDescriptionLocalizations({ vi: "Người dùng cần xem rank" })
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
+
+        const locale = await resolveLocale(interaction).catch(() => "en" as const);
 
         try {
             const target = interaction.options.getUser("user") ?? interaction.user;
@@ -62,11 +70,11 @@ export default {
                 await interaction.editReply({ files: [attachment] });
             } catch {
                 // Canvas failed — fallback to embed
-                const embed = buildRankEmbed(member, target.username, rank, globalRank, globalXP);
+                const embed = buildRankEmbed(member, target.username, rank, globalRank, globalXP, locale);
                 await interaction.editReply({ embeds: [embed] });
             }
         } catch {
-            await interaction.editReply("Không thể tải rank card. Vui lòng thử lại sau.");
+            await interaction.editReply(t(locale, "rank.error"));
         }
     },
 };

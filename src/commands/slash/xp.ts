@@ -10,57 +10,108 @@ import MemberXPModel from "../../models/memberXP.model";
 import GuildXPConfigModel from "../../models/guildXPConfig.model";
 import { levelFromXP } from "../../util/xp/calculator";
 import { syncGlobalXP } from "../../util/xp/globalXP";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
+import type { SupportedLocale } from "../../util/i18n/index";
 
 export default {
     data: new SlashCommandBuilder()
         .setName("xp")
         .setDescription("XP management (admin)")
+        .setDescriptionLocalizations({ vi: "Quản lý XP (admin)" })
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
         .addSubcommand((sub) =>
             sub
                 .setName("set")
                 .setDescription("Set a user's XP")
-                .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
+                .setDescriptionLocalizations({ vi: "Đặt XP cho người dùng" })
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("Target user")
+                        .setDescriptionLocalizations({ vi: "Người dùng mục tiêu" })
+                        .setRequired(true)
+                )
                 .addIntegerOption((opt) =>
-                    opt.setName("amount").setDescription("XP amount").setMinValue(0).setRequired(true)
+                    opt
+                        .setName("amount")
+                        .setDescription("XP amount")
+                        .setDescriptionLocalizations({ vi: "Số lượng XP" })
+                        .setMinValue(0)
+                        .setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("add")
                 .setDescription("Add XP to a user")
-                .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
+                .setDescriptionLocalizations({ vi: "Thêm XP cho người dùng" })
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("Target user")
+                        .setDescriptionLocalizations({ vi: "Người dùng mục tiêu" })
+                        .setRequired(true)
+                )
                 .addIntegerOption((opt) =>
-                    opt.setName("amount").setDescription("XP to add").setMinValue(1).setRequired(true)
+                    opt
+                        .setName("amount")
+                        .setDescription("XP to add")
+                        .setDescriptionLocalizations({ vi: "Số XP cần thêm" })
+                        .setMinValue(1)
+                        .setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("remove")
                 .setDescription("Remove XP from a user")
-                .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
+                .setDescriptionLocalizations({ vi: "Xóa XP từ người dùng" })
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("Target user")
+                        .setDescriptionLocalizations({ vi: "Người dùng mục tiêu" })
+                        .setRequired(true)
+                )
                 .addIntegerOption((opt) =>
-                    opt.setName("amount").setDescription("XP to remove").setMinValue(1).setRequired(true)
+                    opt
+                        .setName("amount")
+                        .setDescription("XP to remove")
+                        .setDescriptionLocalizations({ vi: "Số XP cần xóa" })
+                        .setMinValue(1)
+                        .setRequired(true)
                 )
         )
         .addSubcommandGroup((group) =>
             group
                 .setName("channel-blacklist")
                 .setDescription("Manage XP channel blacklist")
+                .setDescriptionLocalizations({ vi: "Quản lý kênh bị chặn XP" })
                 .addSubcommand((sub) =>
                     sub
                         .setName("add")
                         .setDescription("Blacklist a channel from XP")
+                        .setDescriptionLocalizations({ vi: "Chặn kênh khỏi XP" })
                         .addChannelOption((opt) =>
-                            opt.setName("channel").setDescription("Channel to blacklist").setRequired(true)
+                            opt
+                                .setName("channel")
+                                .setDescription("Channel to blacklist")
+                                .setDescriptionLocalizations({ vi: "Kênh cần chặn" })
+                                .setRequired(true)
                         )
                 )
                 .addSubcommand((sub) =>
                     sub
                         .setName("remove")
                         .setDescription("Remove a channel from blacklist")
+                        .setDescriptionLocalizations({ vi: "Xóa kênh khỏi danh sách chặn" })
                         .addChannelOption((opt) =>
-                            opt.setName("channel").setDescription("Channel to remove").setRequired(true)
+                            opt
+                                .setName("channel")
+                                .setDescription("Channel to remove")
+                                .setDescriptionLocalizations({ vi: "Kênh cần xóa" })
+                                .setRequired(true)
                         )
                 )
         ),
@@ -68,13 +119,15 @@ export default {
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
+        const locale = await resolveLocale(interaction).catch(() => "en" as const);
+
         try {
             const guildId = interaction.guildId!;
             const subcommandGroup = interaction.options.getSubcommandGroup();
             const subcommand = interaction.options.getSubcommand(true);
 
             if (subcommandGroup === "channel-blacklist") {
-                await handleChannelBlacklist(interaction, guildId, subcommand);
+                await handleChannelBlacklist(interaction, guildId, subcommand, locale);
                 return;
             }
 
@@ -111,8 +164,13 @@ export default {
 
                     const embed = new EmbedBuilder()
                         .setDescription(
-                            `Set XP for <@${target.id}>:\n` +
-                            `**${oldXP.toLocaleString()}** XP (Level ${oldLevel}) → **${amount.toLocaleString()}** XP (Level ${newLevel})`
+                            t(locale, "xp.set", {
+                                userId: target.id,
+                                oldXP: oldXP.toLocaleString(),
+                                oldLevel,
+                                newXP: amount.toLocaleString(),
+                                newLevel,
+                            })
                         )
                         .setColor(0x5865f2);
                     await interaction.editReply({ embeds: [embed] });
@@ -147,8 +205,12 @@ export default {
 
                     const embed = new EmbedBuilder()
                         .setDescription(
-                            `Added **${amount.toLocaleString()}** XP to <@${target.id}>\n` +
-                            `Total: **${updated.xp.toLocaleString()}** XP (Level ${newLevel})`
+                            t(locale, "xp.add", {
+                                userId: target.id,
+                                amount: amount.toLocaleString(),
+                                total: updated.xp.toLocaleString(),
+                                level: newLevel,
+                            })
                         )
                         .setColor(0x57f287);
                     await interaction.editReply({ embeds: [embed] });
@@ -183,8 +245,12 @@ export default {
 
                     const embed = new EmbedBuilder()
                         .setDescription(
-                            `Removed **${amount.toLocaleString()}** XP from <@${target.id}>\n` +
-                            `Total: **${newXP.toLocaleString()}** XP (Level ${newLevel})`
+                            t(locale, "xp.remove", {
+                                userId: target.id,
+                                amount: amount.toLocaleString(),
+                                total: newXP.toLocaleString(),
+                                level: newLevel,
+                            })
                         )
                         .setColor(0xed4245);
                     await interaction.editReply({ embeds: [embed] });
@@ -192,7 +258,7 @@ export default {
                 }
             }
         } catch {
-            await interaction.editReply("Có lỗi xảy ra. Vui lòng thử lại sau.");
+            await interaction.editReply(t(locale, "common.error"));
         }
     },
 };
@@ -200,7 +266,8 @@ export default {
 async function handleChannelBlacklist(
     interaction: ChatInputCommandInteraction,
     guildId: string,
-    subcommand: string
+    subcommand: string,
+    locale: SupportedLocale
 ): Promise<void> {
     const channel = interaction.options.getChannel("channel", true);
 
@@ -212,7 +279,7 @@ async function handleChannelBlacklist(
 
     if (subcommand === "add") {
         if (config.blacklistedChannels.includes(channel.id)) {
-            await interaction.editReply(`<#${channel.id}> đã có trong blacklist.`);
+            await interaction.editReply(t(locale, "xp.blacklist.already_in", { channelId: channel.id }));
             return;
         }
 
@@ -221,7 +288,7 @@ async function handleChannelBlacklist(
     } else if (subcommand === "remove") {
         const index = config.blacklistedChannels.indexOf(channel.id);
         if (index === -1) {
-            await interaction.editReply(`<#${channel.id}> không có trong blacklist.`);
+            await interaction.editReply(t(locale, "xp.blacklist.not_in", { channelId: channel.id }));
             return;
         }
 
@@ -229,12 +296,13 @@ async function handleChannelBlacklist(
         await config.save();
     }
 
-    const list = config.blacklistedChannels.length > 0
-        ? config.blacklistedChannels.map((id) => `<#${id}>`).join(", ")
-        : "Không có";
+    const list =
+        config.blacklistedChannels.length > 0
+            ? config.blacklistedChannels.map((id) => `<#${id}>`).join(", ")
+            : t(locale, "xp.blacklist.empty");
 
     const embed = new EmbedBuilder()
-        .setTitle("📋 XP Channel Blacklist")
+        .setTitle(`📋 ${t(locale, "xp.blacklist.title")}`)
         .setDescription(list)
         .setColor(0x5865f2);
     await interaction.editReply({ embeds: [embed] });

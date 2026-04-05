@@ -13,6 +13,8 @@ import { setTimeout as wait } from "node:timers/promises";
 import redis from "../../connector/redis/index";
 import { FOOTER, SERVER_HD, URL_REPORT_BUG } from "../../util/config";
 import { BUTTON_ID } from "../../util/config/button";
+import { resolveLocale } from "../i18n/locale";
+import { t } from "../i18n/t";
 import log from "../../util/log/logger.mixed";
 import type { MangaSource } from "./sources";
 
@@ -36,9 +38,11 @@ export function mangaCommand(source: MangaSource) {
             .addSubcommand((sub) => sub.setName("random").setDescription(`Random H and D from ${source.name}`)),
 
         async execute(interaction: ChatInputCommandInteraction): Promise<void> {
+            const locale = await resolveLocale(interaction);
+
             try {
                 if (!(interaction.channel as TextChannel)?.nsfw) {
-                    await interaction.reply({ content: "Only NSFW channel", ephemeral: true });
+                    await interaction.reply({ content: t(locale, "manga.nsfw_only"), ephemeral: true });
                     return;
                 }
 
@@ -72,7 +76,7 @@ export function mangaCommand(source: MangaSource) {
                     row.addComponents(
                         new ButtonBuilder()
                             .setCustomId(BUTTON_ID.mangaRead)
-                            .setLabel("Read")
+                            .setLabel(t(locale, "manga.read"))
                             .setStyle(ButtonStyle.Primary)
                     );
                     await redis.setJson(`${BUTTON_ID.mangaRead}_${result.id}`, result.image, CACHE_TTL);
@@ -80,7 +84,7 @@ export function mangaCommand(source: MangaSource) {
                     row.addComponents(
                         new ButtonBuilder()
                             .setCustomId(BUTTON_ID.mangaRead)
-                            .setLabel("Please read it online. There are too many pages.")
+                            .setLabel(t(locale, "manga.too_many_pages"))
                             .setStyle(ButtonStyle.Primary)
                             .setDisabled(true)
                     );
@@ -89,7 +93,7 @@ export function mangaCommand(source: MangaSource) {
                 row.addComponents(
                     new ButtonBuilder()
                         .setURL(`${source.urlBase}${result.id}`)
-                        .setLabel("Read Online")
+                        .setLabel(t(locale, "manga.read_online"))
                         .setStyle(ButtonStyle.Link)
                 );
 
@@ -100,10 +104,13 @@ export function mangaCommand(source: MangaSource) {
                 log(`[manga:${source.name}] ${error instanceof Error ? error.message : "Unknown error"}`, "error");
                 const row = new ActionRowBuilder<ButtonBuilder>();
                 row.addComponents(
-                    new ButtonBuilder().setURL(URL_REPORT_BUG).setLabel("Report this issue").setStyle(ButtonStyle.Link)
+                    new ButtonBuilder()
+                        .setURL(URL_REPORT_BUG)
+                        .setLabel(t(locale, "manga.report_issue"))
+                        .setStyle(ButtonStyle.Link)
                 );
                 await interaction.editReply({
-                    content: "Server maintenance",
+                    content: t(locale, "manga.maintenance"),
                     components: [row],
                 });
             }

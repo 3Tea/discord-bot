@@ -7,6 +7,7 @@ export interface IUser extends Document {
     topAllServer: number;
     lastActivity: Date;
     status: boolean;
+    locale?: string;
 }
 
 const userSchema = new Schema(
@@ -35,6 +36,10 @@ const userSchema = new Schema(
         status: {
             type: Boolean,
             default: true,
+        },
+        locale: {
+            type: String,
+            default: undefined,
         },
     },
     {

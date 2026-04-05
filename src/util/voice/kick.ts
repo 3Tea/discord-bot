@@ -1,21 +1,24 @@
 import { ButtonInteraction, GuildMember, VoiceChannel } from "discord.js";
 
 import redis from "../../connector/redis";
+import { resolveLocale } from "../i18n/locale";
+import { t } from "../i18n/t";
 import { setCooldown, updatePanel } from "./helpers";
 
 const TTL_12H = 60 * 60 * 12;
 
 export async function handleKick(interaction: ButtonInteraction, block: boolean): Promise<void> {
+    const locale = await resolveLocale(interaction);
     const member = interaction.member as GuildMember;
     const voiceChannel = member?.voice.channel as VoiceChannel | null;
     if (!voiceChannel) {
-        await interaction.editReply({ content: "You are not in a voice channel." });
+        await interaction.editReply({ content: t(locale, "voice.not_in_channel") });
         return;
     }
 
     const targetId = await redis.getJson(`kick_target:${interaction.user.id}:${voiceChannel.id}`);
     if (!targetId) {
-        await interaction.editReply({ content: "Kick request expired. Please try again." });
+        await interaction.editReply({ content: t(locale, "voice.kick_expired") });
         return;
     }
 
@@ -40,8 +43,10 @@ export async function handleKick(interaction: ButtonInteraction, block: boolean)
     }
 
     await setCooldown(`cd:kick:${voiceChannel.id}`, 10);
-    await updatePanel(voiceChannel);
+    await updatePanel(voiceChannel, locale);
 
-    const action = block ? "kicked and blocked" : "kicked";
-    await interaction.editReply({ content: `<@${targetId}> has been ${action}.`, components: [] });
+    const content = block
+        ? t(locale, "voice.kicked_blocked", { userId: targetId })
+        : t(locale, "voice.kicked", { userId: targetId });
+    await interaction.editReply({ content, components: [] });
 }
