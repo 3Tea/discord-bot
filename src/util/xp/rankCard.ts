@@ -93,7 +93,12 @@ export function buildLeaderboardEmbed(members: IMemberXP[], guildName: string, l
         .setTimestamp();
 }
 
-export function buildLevelUpEmbed(userId: string, newLevel: number, locale: SupportedLocale, globalRank?: number): EmbedBuilder {
+export function buildLevelUpEmbed(
+    userId: string,
+    newLevel: number,
+    locale: SupportedLocale,
+    globalRank?: number
+): EmbedBuilder {
     const lines = [t(locale, "rank.level_up", { userId, level: newLevel })];
     if (globalRank) {
         lines.push(`🌐 Global Rank: **#${globalRank}**`);
@@ -102,7 +107,11 @@ export function buildLevelUpEmbed(userId: string, newLevel: number, locale: Supp
     return new EmbedBuilder().setDescription(lines.join("\n")).setColor(0xf0b132);
 }
 
-export function buildGlobalLeaderboardEmbed(users: IUser[], usernames: Map<string, string>, locale: SupportedLocale): EmbedBuilder {
+export function buildGlobalLeaderboardEmbed(
+    users: IUser[],
+    usernames: Map<string, string>,
+    locale: SupportedLocale
+): EmbedBuilder {
     if (users.length === 0) {
         return new EmbedBuilder()
             .setTitle(`🌐 ${t(locale, "leaderboard.global_title")}`)

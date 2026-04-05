@@ -61,16 +61,16 @@ function getWeatherEmoji(code: number): string {
 }
 
 function getWeatherColor(code: number): number {
-    if (code === 0) return 0xffb347;       // sunny orange
-    if (code <= 2) return 0x87ceeb;        // light blue
-    if (code === 3) return 0x708090;       // slate gray
-    if (code <= 48) return 0x9e9e9e;       // fog gray
-    if (code <= 57) return 0x5b9bd5;       // drizzle blue
-    if (code <= 67) return 0x4472c4;       // rain blue
-    if (code <= 77) return 0xb4d7e8;       // snow light blue
-    if (code <= 82) return 0x4472c4;       // rain blue
-    if (code <= 86) return 0xb4d7e8;       // snow light blue
-    return 0x8b0000;                       // storm dark red
+    if (code === 0) return 0xffb347; // sunny orange
+    if (code <= 2) return 0x87ceeb; // light blue
+    if (code === 3) return 0x708090; // slate gray
+    if (code <= 48) return 0x9e9e9e; // fog gray
+    if (code <= 57) return 0x5b9bd5; // drizzle blue
+    if (code <= 67) return 0x4472c4; // rain blue
+    if (code <= 77) return 0xb4d7e8; // snow light blue
+    if (code <= 82) return 0x4472c4; // rain blue
+    if (code <= 86) return 0xb4d7e8; // snow light blue
+    return 0x8b0000; // storm dark red
 }
 
 // --- Wind direction helper ---
@@ -144,7 +144,11 @@ export default {
             // Format time in location's timezone
             const localeStr = locale === "vi" ? "vi-VN" : "en-US";
             const currentDate = new Date(current.time);
-            const timeStr = currentDate.toLocaleTimeString(localeStr, { hour: "2-digit", minute: "2-digit", timeZone: timezone });
+            const timeStr = currentDate.toLocaleTimeString(localeStr, {
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: timezone,
+            });
             const dateStr = currentDate.toLocaleDateString(localeStr, { timeZone: timezone });
             const dayName = t(locale, `weather.day.${currentDate.getDay()}`);
             const emoji = getWeatherEmoji(current.weather_code);
@@ -169,7 +173,10 @@ export default {
             for (let i = 1; i <= 2; i++) {
                 const fEmoji = getWeatherEmoji(daily.weather_code[i]);
                 const fDayName = getDayName(daily.time[i], locale);
-                const fDate = new Date(daily.time[i]).toLocaleDateString(localeStr, { day: "2-digit", month: "2-digit" });
+                const fDate = new Date(daily.time[i]).toLocaleDateString(localeStr, {
+                    day: "2-digit",
+                    month: "2-digit",
+                });
                 embed.addFields({
                     name: `${fEmoji} ${fDayName} ${fDate}`,
                     value: `${daily.temperature_2m_max[i]}°/${daily.temperature_2m_min[i]}°C — ${getWeatherDescription(daily.weather_code[i], locale)}`,

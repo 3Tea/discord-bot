@@ -296,9 +296,10 @@ async function handleChannelBlacklist(
         await config.save();
     }
 
-    const list = config.blacklistedChannels.length > 0
-        ? config.blacklistedChannels.map((id) => `<#${id}>`).join(", ")
-        : t(locale, "xp.blacklist.empty");
+    const list =
+        config.blacklistedChannels.length > 0
+            ? config.blacklistedChannels.map((id) => `<#${id}>`).join(", ")
+            : t(locale, "xp.blacklist.empty");
 
     const embed = new EmbedBuilder()
         .setTitle(`📋 ${t(locale, "xp.blacklist.title")}`)

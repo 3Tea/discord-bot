@@ -1,10 +1,11 @@
+import { ChatInputCommandInteraction, MessageFlags, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import {
-    ChatInputCommandInteraction,
-    MessageFlags,
-    PermissionFlagsBits,
-    SlashCommandBuilder,
-} from "discord.js";
-import { resolveLocale, setUserLocale, resetUserLocale, setGuildLocale, resetGuildLocale } from "../../util/i18n/locale";
+    resolveLocale,
+    setUserLocale,
+    resetUserLocale,
+    setGuildLocale,
+    resetGuildLocale,
+} from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import { SUPPORTED_LOCALES } from "../../util/i18n/index";
 import type { SupportedLocale } from "../../util/i18n/index";
@@ -24,10 +25,7 @@ export default {
                         .setName("locale")
                         .setDescription("Language")
                         .setDescriptionLocalizations({ vi: "Ngôn ngữ" })
-                        .addChoices(
-                            { name: "English", value: "en" },
-                            { name: "Tiếng Việt", value: "vi" }
-                        )
+                        .addChoices({ name: "English", value: "en" }, { name: "Tiếng Việt", value: "vi" })
                 )
                 .addBooleanOption((opt) =>
                     opt
@@ -46,10 +44,7 @@ export default {
                         .setName("locale")
                         .setDescription("Language")
                         .setDescriptionLocalizations({ vi: "Ngôn ngữ" })
-                        .addChoices(
-                            { name: "English", value: "en" },
-                            { name: "Tiếng Việt", value: "vi" }
-                        )
+                        .addChoices({ name: "English", value: "en" }, { name: "Tiếng Việt", value: "vi" })
                 )
                 .addBooleanOption((opt) =>
                     opt
@@ -79,7 +74,9 @@ export default {
             if (newLocale && (SUPPORTED_LOCALES as readonly string[]).includes(newLocale)) {
                 await setUserLocale(interaction.user.id, newLocale);
                 await interaction.reply({
-                    content: t(newLocale, "settings.language_set", { language: newLocale === "vi" ? "Tiếng Việt" : "English" }),
+                    content: t(newLocale, "settings.language_set", {
+                        language: newLocale === "vi" ? "Tiếng Việt" : "English",
+                    }),
                     flags: MessageFlags.Ephemeral,
                 });
                 return;
@@ -119,14 +116,18 @@ export default {
             if (newLocale && (SUPPORTED_LOCALES as readonly string[]).includes(newLocale)) {
                 await setGuildLocale(guildId, newLocale);
                 await interaction.reply({
-                    content: t(newLocale, "settings.server_language_set", { language: newLocale === "vi" ? "Tiếng Việt" : "English" }),
+                    content: t(newLocale, "settings.server_language_set", {
+                        language: newLocale === "vi" ? "Tiếng Việt" : "English",
+                    }),
                     flags: MessageFlags.Ephemeral,
                 });
                 return;
             }
 
             await interaction.reply({
-                content: t(locale, "settings.server_language_set", { language: locale === "vi" ? "Tiếng Việt" : "English" }),
+                content: t(locale, "settings.server_language_set", {
+                    language: locale === "vi" ? "Tiếng Việt" : "English",
+                }),
                 flags: MessageFlags.Ephemeral,
             });
         }

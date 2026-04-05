@@ -104,7 +104,10 @@ export function mangaCommand(source: MangaSource) {
                 log(`[manga:${source.name}] ${error instanceof Error ? error.message : "Unknown error"}`, "error");
                 const row = new ActionRowBuilder<ButtonBuilder>();
                 row.addComponents(
-                    new ButtonBuilder().setURL(URL_REPORT_BUG).setLabel(t(locale, "manga.report_issue")).setStyle(ButtonStyle.Link)
+                    new ButtonBuilder()
+                        .setURL(URL_REPORT_BUG)
+                        .setLabel(t(locale, "manga.report_issue"))
+                        .setStyle(ButtonStyle.Link)
                 );
                 await interaction.editReply({
                     content: t(locale, "manga.maintenance"),

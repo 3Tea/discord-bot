@@ -28,7 +28,8 @@ function formatPrayEmbed(
     description += "\n";
 
     if (result.targetReward && result.targetId) {
-        description += t(locale, "pray.target_reward", { targetId: result.targetId, coin: result.targetReward.coin }) + "\n";
+        description +=
+            t(locale, "pray.target_reward", { targetId: result.targetId, coin: result.targetReward.coin }) + "\n";
     }
 
     if (result.streakInfo.streak > 1) {

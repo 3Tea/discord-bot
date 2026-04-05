@@ -24,7 +24,8 @@ function formatCurseEmbed(
     description += t(locale, "curse.reward_coin", { coin: result.userReward.coin }) + "\n";
 
     if (result.targetReward && result.targetId) {
-        description += t(locale, "curse.target_reward", { targetId: result.targetId, coin: result.targetReward.coin }) + "\n";
+        description +=
+            t(locale, "curse.target_reward", { targetId: result.targetId, coin: result.targetReward.coin }) + "\n";
     }
 
     embed.setDescription(description);

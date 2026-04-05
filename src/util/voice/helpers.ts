@@ -206,11 +206,7 @@ export async function updatePanel(voiceChannel: VoiceChannel, locale: SupportedL
 /**
  * Send the control panel to the voice channel text chat, mention owner, pin it, and store the message ID.
  */
-export async function sendPanel(
-    voiceChannel: VoiceChannel,
-    ownerId: string,
-    locale: SupportedLocale
-): Promise<void> {
+export async function sendPanel(voiceChannel: VoiceChannel, ownerId: string, locale: SupportedLocale): Promise<void> {
     const embed = await buildPanelEmbed(voiceChannel.id, ownerId, locale);
     const rows = buildPanelRows(locale);
     const message = await voiceChannel.send({

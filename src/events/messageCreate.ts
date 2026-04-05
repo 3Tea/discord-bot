@@ -70,10 +70,7 @@ export default {
             // Check level up
             const newLevel = levelFromXP(updated.xp);
             if (newLevel > updated.level) {
-                await MemberXPModel.updateOne(
-                    { _id: updated._id },
-                    { $set: { level: newLevel } }
-                );
+                await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
 
                 const { rank: globalRank } = await getGlobalRank(message.author.id);
                 const embed = buildLevelUpEmbed(message.author.id, newLevel, "en", globalRank);

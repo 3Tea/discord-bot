@@ -59,23 +59,17 @@ export async function resolveLocale(interaction: LocaleInteraction): Promise<Sup
     const userId = interaction.user.id;
     const guildId = interaction.guildId;
 
-    const userLocale = await resolveFromRedisOrDb(
-        `locale:user:${userId}`,
-        async () => {
-            const user = await UserModel.findOne({ userID: userId }).select("locale").lean();
-            return user?.locale;
-        }
-    );
+    const userLocale = await resolveFromRedisOrDb(`locale:user:${userId}`, async () => {
+        const user = await UserModel.findOne({ userID: userId }).select("locale").lean();
+        return user?.locale;
+    });
     if (userLocale) return userLocale;
 
     if (guildId) {
-        const guildLocale = await resolveFromRedisOrDb(
-            `locale:guild:${guildId}`,
-            async () => {
-                const guild = await GuildModel.findOne({ guildID: guildId }).select("locale").lean();
-                return guild?.locale;
-            }
-        );
+        const guildLocale = await resolveFromRedisOrDb(`locale:guild:${guildId}`, async () => {
+            const guild = await GuildModel.findOne({ guildID: guildId }).select("locale").lean();
+            return guild?.locale;
+        });
         if (guildLocale) return guildLocale;
     }
 
@@ -83,35 +77,21 @@ export async function resolveLocale(interaction: LocaleInteraction): Promise<Sup
 }
 
 export async function setUserLocale(userId: string, locale: SupportedLocale): Promise<void> {
-    await UserModel.findOneAndUpdate(
-        { userID: userId },
-        { $set: { locale } },
-        { upsert: true }
-    );
+    await UserModel.findOneAndUpdate({ userID: userId }, { $set: { locale } }, { upsert: true });
     await redis.setKey(`locale:user:${userId}`, locale, LOCALE_TTL);
 }
 
 export async function resetUserLocale(userId: string): Promise<void> {
-    await UserModel.findOneAndUpdate(
-        { userID: userId },
-        { $unset: { locale: 1 } }
-    );
+    await UserModel.findOneAndUpdate({ userID: userId }, { $unset: { locale: 1 } });
     await redis.setKey(`locale:user:${userId}`, "none", LOCALE_TTL);
 }
 
 export async function setGuildLocale(guildId: string, locale: SupportedLocale): Promise<void> {
-    await GuildModel.findOneAndUpdate(
-        { guildID: guildId },
-        { $set: { locale } },
-        { upsert: true }
-    );
+    await GuildModel.findOneAndUpdate({ guildID: guildId }, { $set: { locale } }, { upsert: true });
     await redis.setKey(`locale:guild:${guildId}`, locale, LOCALE_TTL);
 }
 
 export async function resetGuildLocale(guildId: string): Promise<void> {
-    await GuildModel.findOneAndUpdate(
-        { guildID: guildId },
-        { $unset: { locale: 1 } }
-    );
+    await GuildModel.findOneAndUpdate({ guildID: guildId }, { $unset: { locale: 1 } });
     await redis.setKey(`locale:guild:${guildId}`, "none", LOCALE_TTL);
 }

@@ -1,10 +1,4 @@
-import {
-    ChannelType,
-    Events,
-    PermissionFlagsBits,
-    VoiceChannel,
-    VoiceState,
-} from "discord.js";
+import { ChannelType, Events, PermissionFlagsBits, VoiceChannel, VoiceState } from "discord.js";
 
 import redis from "../connector/redis";
 import { FOOTER } from "../util/config";
@@ -199,10 +193,7 @@ setInterval(async () => {
 
                 const newLevel = levelFromXP(updated.xp);
                 if (newLevel > updated.level) {
-                    await MemberXPModel.updateOne(
-                        { _id: updated._id },
-                        { $set: { level: newLevel } }
-                    );
+                    await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
 
                     const { rank: globalRank } = await getGlobalRank(sUserId);
                     const embed = buildLevelUpEmbed(sUserId, newLevel, "en", globalRank);
