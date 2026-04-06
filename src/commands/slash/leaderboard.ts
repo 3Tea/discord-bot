@@ -12,6 +12,7 @@ import MemberXPModel from "../../models/memberXP.model";
 import UserModel from "../../models/user.model";
 import XPSnapshotModel from "../../models/xpSnapshot.model";
 import { BUTTON_ID } from "../../util/config/button";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import {
     buildLeaderboardEmbed,
     buildGlobalLeaderboardEmbed,
@@ -399,12 +400,12 @@ export default {
     data: new SlashCommandBuilder()
         .setName("leaderboard")
         .setDescription("View the XP leaderboard")
-        .setDescriptionLocalizations({ vi: "Xem bảng xếp hạng XP" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.leaderboard.desc"))
         .addStringOption((option) =>
             option
                 .setName("mode")
                 .setDescription("Leaderboard type")
-                .setDescriptionLocalizations({ vi: "Loại bảng xếp hạng" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.leaderboard.mode.desc"))
                 .addChoices(
                     { name: "Server", value: "server" },
                     { name: "Global", value: "global" },

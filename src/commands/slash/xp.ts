@@ -11,6 +11,7 @@ import GuildXPConfigModel from "../../models/guildXPConfig.model";
 import { levelFromXP } from "../../util/xp/calculator";
 import { syncGlobalXP } from "../../util/xp/globalXP";
 import { syncSnapshots } from "../../util/xp/snapshotSync";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
@@ -19,25 +20,25 @@ export default {
     data: new SlashCommandBuilder()
         .setName("xp")
         .setDescription("XP management (admin)")
-        .setDescriptionLocalizations({ vi: "Quản lý XP (admin)" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.xp.desc"))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
         .addSubcommand((sub) =>
             sub
                 .setName("set")
                 .setDescription("Set a user's XP")
-                .setDescriptionLocalizations({ vi: "Đặt XP cho người dùng" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.xp.set.desc"))
                 .addUserOption((opt) =>
                     opt
                         .setName("user")
                         .setDescription("Target user")
-                        .setDescriptionLocalizations({ vi: "Người dùng mục tiêu" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.xp.set.user.desc"))
                         .setRequired(true)
                 )
                 .addIntegerOption((opt) =>
                     opt
                         .setName("amount")
                         .setDescription("XP amount")
-                        .setDescriptionLocalizations({ vi: "Số lượng XP" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.xp.set.amount.desc"))
                         .setMinValue(0)
                         .setRequired(true)
                 )
@@ -46,19 +47,19 @@ export default {
             sub
                 .setName("add")
                 .setDescription("Add XP to a user")
-                .setDescriptionLocalizations({ vi: "Thêm XP cho người dùng" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.xp.add.desc"))
                 .addUserOption((opt) =>
                     opt
                         .setName("user")
                         .setDescription("Target user")
-                        .setDescriptionLocalizations({ vi: "Người dùng mục tiêu" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.xp.add.user.desc"))
                         .setRequired(true)
                 )
                 .addIntegerOption((opt) =>
                     opt
                         .setName("amount")
                         .setDescription("XP to add")
-                        .setDescriptionLocalizations({ vi: "Số XP cần thêm" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.xp.add.amount.desc"))
                         .setMinValue(1)
                         .setRequired(true)
                 )
@@ -67,19 +68,19 @@ export default {
             sub
                 .setName("remove")
                 .setDescription("Remove XP from a user")
-                .setDescriptionLocalizations({ vi: "Xóa XP từ người dùng" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.xp.remove.desc"))
                 .addUserOption((opt) =>
                     opt
                         .setName("user")
                         .setDescription("Target user")
-                        .setDescriptionLocalizations({ vi: "Người dùng mục tiêu" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.xp.remove.user.desc"))
                         .setRequired(true)
                 )
                 .addIntegerOption((opt) =>
                     opt
                         .setName("amount")
                         .setDescription("XP to remove")
-                        .setDescriptionLocalizations({ vi: "Số XP cần xóa" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.xp.remove.amount.desc"))
                         .setMinValue(1)
                         .setRequired(true)
                 )
@@ -88,17 +89,17 @@ export default {
             group
                 .setName("channel-blacklist")
                 .setDescription("Manage XP channel blacklist")
-                .setDescriptionLocalizations({ vi: "Quản lý kênh bị chặn XP" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.xp.channel-blacklist.desc"))
                 .addSubcommand((sub) =>
                     sub
                         .setName("add")
                         .setDescription("Blacklist a channel from XP")
-                        .setDescriptionLocalizations({ vi: "Chặn kênh khỏi XP" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.xp.channel-blacklist.add.desc"))
                         .addChannelOption((opt) =>
                             opt
                                 .setName("channel")
                                 .setDescription("Channel to blacklist")
-                                .setDescriptionLocalizations({ vi: "Kênh cần chặn" })
+                                .setDescriptionLocalizations(descriptionLocales("cmd.xp.channel-blacklist.add.channel.desc"))
                                 .setRequired(true)
                         )
                 )
@@ -106,12 +107,12 @@ export default {
                     sub
                         .setName("remove")
                         .setDescription("Remove a channel from blacklist")
-                        .setDescriptionLocalizations({ vi: "Xóa kênh khỏi danh sách chặn" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.xp.channel-blacklist.remove.desc"))
                         .addChannelOption((opt) =>
                             opt
                                 .setName("channel")
                                 .setDescription("Channel to remove")
-                                .setDescriptionLocalizations({ vi: "Kênh cần xóa" })
+                                .setDescriptionLocalizations(descriptionLocales("cmd.xp.channel-blacklist.remove.channel.desc"))
                                 .setRequired(true)
                         )
                 )

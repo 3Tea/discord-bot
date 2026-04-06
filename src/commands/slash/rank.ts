@@ -5,6 +5,7 @@ import { progressToNextLevel, xpForLevel } from "../../util/xp/calculator";
 import { buildRankEmbed, getPeriodStats } from "../../util/xp/rankCard";
 import { renderRankCard } from "../../util/xp/canvasRankCard";
 import { getGlobalRank } from "../../util/xp/globalXP";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 
@@ -12,12 +13,12 @@ export default {
     data: new SlashCommandBuilder()
         .setName("rank")
         .setDescription("View your rank card or another user's")
-        .setDescriptionLocalizations({ vi: "Xem rank card của bạn hoặc người khác" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.rank.desc"))
         .addUserOption((option) =>
             option
                 .setName("user")
                 .setDescription("User to check rank for")
-                .setDescriptionLocalizations({ vi: "Người dùng cần xem rank" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.rank.user.desc"))
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
