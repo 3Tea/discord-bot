@@ -20,6 +20,11 @@ import type { Period } from "../../util/xp/periodKey";
 import type { SupportedLocale } from "../../util/i18n/index";
 import type { IUser } from "../../models/user.model";
 import type { IMemberXP } from "../../models/memberXP.model";
+import GuildStatsModel from "../../models/guildStats.model";
+import GuildStatsSnapshotModel from "../../models/guildStatsSnapshot.model";
+import { buildServerLeaderboardEmbed, buildServerPeriodLeaderboardEmbed } from "../../util/xp/rankCard";
+import type { IGuildStats } from "../../models/guildStats.model";
+import type { IGuildStatsSnapshot } from "../../models/guildStatsSnapshot.model";
 
 const PAGE_SIZE = 10;
 const MAX_RESULTS = 100;
@@ -93,7 +98,7 @@ function buildPageRow(
 }
 
 function buildTitle(mode: string, period: LeaderboardPeriod, locale: SupportedLocale): string {
-    const modeLabel = mode === "global" ? "🌐 Global" : "🏆 Server";
+    const modeLabel = mode === "global" ? "🌐 Global" : mode === "servers" ? "🏆 Servers" : "🏆 Server";
     if (period === "all") {
         return t(locale, "leaderboard.period_title_all", { mode: modeLabel });
     }
@@ -257,6 +262,113 @@ async function paginateLeaderboard(
     await interaction.editReply({ embeds: [finalEmbed!], components: [disabledPeriodRow, disabledPageRow] }).catch(() => {});
 }
 
+function resolveServerNames(
+    guildIds: string[],
+    cache: Map<string, string>
+): void {
+    for (const guildId of guildIds) {
+        if (cache.has(guildId)) continue;
+        const guild = client.guilds.cache.get(guildId);
+        if (guild) {
+            cache.set(guildId, guild.name);
+        }
+    }
+}
+
+async function paginateServerLeaderboard(
+    interaction: ChatInputCommandInteraction,
+    locale: SupportedLocale
+): Promise<void> {
+    const serverNameCache = new Map<string, string>();
+
+    let currentPeriod: LeaderboardPeriod = "all";
+    let page = 1;
+
+    async function fetchData(): Promise<{ allTimeServers?: IGuildStats[]; periodServers?: IGuildStatsSnapshot[] }> {
+        if (currentPeriod === "all") {
+            const servers = await GuildStatsModel.find().sort({ totalXP: -1 }).limit(MAX_RESULTS);
+            return { allTimeServers: servers };
+        }
+        const periodKeys = getCurrentPeriodKeys();
+        const servers = await GuildStatsSnapshotModel.find({
+            period: currentPeriod,
+            periodKey: periodKeys[currentPeriod],
+        })
+            .sort({ xp: -1 })
+            .limit(MAX_RESULTS);
+        return { periodServers: servers };
+    }
+
+    async function buildEmbed(data: Awaited<ReturnType<typeof fetchData>>, p: number, totalPages: number) {
+        const title = buildTitle("servers", currentPeriod, locale);
+
+        if (currentPeriod === "all" && data.allTimeServers) {
+            const pageData = data.allTimeServers.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
+            resolveServerNames(pageData.map((s) => s.guildId), serverNameCache);
+            return buildServerLeaderboardEmbed(pageData, serverNameCache, locale, p, totalPages);
+        }
+
+        if (data.periodServers) {
+            const pageData = data.periodServers.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
+            resolveServerNames(pageData.map((s) => s.guildId), serverNameCache);
+            return buildServerPeriodLeaderboardEmbed(pageData, title, serverNameCache, locale, p, totalPages);
+        }
+
+        return null;
+    }
+
+    let data = await fetchData();
+    const getTotal = () => {
+        return data.allTimeServers?.length ?? data.periodServers?.length ?? 0;
+    };
+
+    let totalPages = Math.max(1, Math.ceil(getTotal() / PAGE_SIZE));
+    page = 1;
+
+    const embed = await buildEmbed(data, page, totalPages);
+    const periodRow = buildPeriodRow(currentPeriod, locale);
+    const pageRow = buildPageRow(page, totalPages, locale);
+    const message = await interaction.editReply({ embeds: [embed!], components: [periodRow, pageRow] });
+
+    while (true) {
+        try {
+            const i = await message.awaitMessageComponent({
+                componentType: ComponentType.Button,
+                time: IDLE_TIMEOUT,
+                filter: (i) => i.user.id === interaction.user.id,
+            });
+
+            await i.deferUpdate();
+
+            if (i.customId in PERIOD_BUTTON_MAP) {
+                const newPeriod = PERIOD_BUTTON_MAP[i.customId];
+                if (newPeriod !== currentPeriod) {
+                    currentPeriod = newPeriod;
+                    data = await fetchData();
+                    totalPages = Math.max(1, Math.ceil(getTotal() / PAGE_SIZE));
+                    page = 1;
+                }
+            } else if (i.customId === "lb_next") {
+                page = Math.min(page + 1, totalPages);
+            } else if (i.customId === "lb_prev") {
+                page = Math.max(page - 1, 1);
+            }
+
+            const newEmbed = await buildEmbed(data, page, totalPages);
+            const newPeriodRow = buildPeriodRow(currentPeriod, locale);
+            const newPageRow = buildPageRow(page, totalPages, locale);
+            await i.editReply({ embeds: [newEmbed!], components: [newPeriodRow, newPageRow] });
+        } catch {
+            break;
+        }
+    }
+
+    const finalEmbed = await buildEmbed(data, page, totalPages);
+    const disabledPeriodRow = buildPeriodRow(currentPeriod, locale, true);
+    const disabledPageRow = buildPageRow(page, totalPages, locale, true);
+    await interaction.editReply({ embeds: [finalEmbed!], components: [disabledPeriodRow, disabledPageRow] }).catch(() => {});
+}
+
 export default {
     data: new SlashCommandBuilder()
         .setName("leaderboard")
@@ -267,7 +379,11 @@ export default {
                 .setName("mode")
                 .setDescription("Leaderboard type")
                 .setDescriptionLocalizations({ vi: "Loại bảng xếp hạng" })
-                .addChoices({ name: "Server", value: "server" }, { name: "Global", value: "global" })
+                .addChoices(
+                    { name: "Server", value: "server" },
+                    { name: "Global", value: "global" },
+                    { name: "Servers", value: "servers" }
+                )
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
@@ -275,8 +391,12 @@ export default {
         const locale = await resolveLocale(interaction).catch(() => "en" as const);
 
         try {
-            const mode = (interaction.options.getString("mode") ?? "server") as "server" | "global";
-            await paginateLeaderboard(interaction, mode, locale);
+            const mode = (interaction.options.getString("mode") ?? "server") as "server" | "global" | "servers";
+            if (mode === "servers") {
+                await paginateServerLeaderboard(interaction, locale);
+            } else {
+                await paginateLeaderboard(interaction, mode, locale);
+            }
         } catch {
             await interaction.editReply(t(locale, "leaderboard.error"));
         }
