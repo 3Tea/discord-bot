@@ -179,7 +179,7 @@
     "weather.wmo.99": "Badai petir dengan hujan es",
     "weather.wmo.unknown": "Tidak diketahui",
     "manga.nsfw_only": "Hanya channel NSFW",
-    "manga.maintenance": "Server sedang dalam pemeliharaan",
+    "manga.insufficient_funds": "Dana tidak cukup untuk memelihara server ini",
     "manga.report_issue": "Laporkan masalah ini",
     "manga.read": "Baca",
     "manga.read_online": "Baca Online",

@@ -193,7 +193,7 @@
     "weather.wmo.unknown": "Không rõ",
 
     "manga.nsfw_only": "Chỉ dùng trong kênh NSFW",
-    "manga.maintenance": "Server đang bảo trì",
+    "manga.insufficient_funds": "Không đủ tiền để duy trì server này",
     "manga.report_issue": "Báo lỗi",
     "manga.read": "Đọc",
     "manga.read_online": "Đọc Online",

@@ -193,7 +193,7 @@
     "weather.wmo.unknown": "不明",
 
     "manga.nsfw_only": "NSFWチャンネルのみ",
-    "manga.maintenance": "サーバーメンテナンス中",
+    "manga.insufficient_funds": "このサーバーを維持する資金が足りません。",
     "manga.report_issue": "問題を報告する",
     "manga.read": "読む",
     "manga.read_online": "オンラインで読む",

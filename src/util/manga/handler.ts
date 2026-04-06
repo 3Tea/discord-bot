@@ -122,7 +122,7 @@ export function mangaCommand(source: MangaSource) {
                         .setStyle(ButtonStyle.Link)
                 );
                 await interaction.editReply({
-                    content: t(locale, "manga.maintenance"),
+                    content: t(locale, "manga.insufficient_funds"),
                     components: [row],
                 });
             }

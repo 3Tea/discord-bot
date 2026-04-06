@@ -193,7 +193,7 @@
     "weather.wmo.unknown": "Inconnu",
 
     "manga.nsfw_only": "Salon NSFW uniquement",
-    "manga.maintenance": "Maintenance du serveur",
+    "manga.insufficient_funds": "Pas assez de fonds pour maintenir ce serveur.",
     "manga.report_issue": "Signaler ce problème",
     "manga.read": "Lire",
     "manga.read_online": "Lire en ligne",

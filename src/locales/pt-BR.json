@@ -193,7 +193,7 @@
     "weather.wmo.unknown": "Desconhecido",
 
     "manga.nsfw_only": "Apenas canal NSFW",
-    "manga.maintenance": "Manutenção do servidor",
+    "manga.insufficient_funds": "Fundos insuficientes para manter este servidor.",
     "manga.report_issue": "Reportar este problema",
     "manga.read": "Ler",
     "manga.read_online": "Ler Online",
