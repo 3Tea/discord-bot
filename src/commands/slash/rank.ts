@@ -66,6 +66,7 @@ export default {
                     voiceMinutes: member?.voiceMinutes ?? 0,
                     reactionCount: member?.reactionCount ?? 0,
                     totalXP: globalXP,
+                    periodStats,
                 });
 
                 const attachment = new AttachmentBuilder(pngBuffer, { name: "rank.png" });

@@ -801,6 +801,7 @@ export interface RankCardOptions {
     voiceMinutes: number;
     reactionCount: number;
     totalXP?: number;
+    periodStats?: { daily: number; weekly: number; monthly: number };
 }
 
 export async function renderRankCard(options: RankCardOptions): Promise<Buffer> {
@@ -818,6 +819,7 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
         voiceMinutes,
         reactionCount,
         totalXP = xp,
+        periodStats,
     } = options;
 
     const canvas = createCanvas(W, H);
@@ -887,6 +889,26 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
         const { label, value, color } = statItems[i];
         const sx = CONTENT_X + i * (STAT_W + STAT_GAP);
         drawStatCard(ctx, label, value, sx, STAT_Y, STAT_W, STAT_H, color);
+    }
+
+    // --- Period stat cards (second row, above existing stats) ---
+    if (periodStats) {
+        const PERIOD_Y = STAT_Y - STAT_H - 12;
+        const PERIOD_N = 3;
+        const PERIOD_GAP = 12;
+        const PERIOD_W = (CONTENT_W - (PERIOD_N - 1) * PERIOD_GAP) / PERIOD_N;
+
+        const periodItems: { label: string; value: string; color: string }[] = [
+            { label: "TODAY", value: `+${periodStats.daily.toLocaleString()}`, color: C.pink },
+            { label: "THIS WEEK", value: `+${periodStats.weekly.toLocaleString()}`, color: C.purple },
+            { label: "THIS MONTH", value: `+${periodStats.monthly.toLocaleString()}`, color: C.gold },
+        ];
+
+        for (let i = 0; i < periodItems.length; i++) {
+            const { label, value, color } = periodItems[i];
+            const sx = CONTENT_X + i * (PERIOD_W + PERIOD_GAP);
+            drawStatCard(ctx, label, value, sx, PERIOD_Y, PERIOD_W, STAT_H, color);
+        }
     }
 
     // --- Outer card border ---
