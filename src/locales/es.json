@@ -93,7 +93,7 @@
     "leaderboard.period.monthly": "Este Mes",
     "leaderboard.period.yearly": "Este Año",
     "leaderboard.period.all": "Todo",
-    "leaderboard.period_title": "Clasificación {{mode}} — {{period}}",
+    "leaderboard.period_title": "Clasificación {{mode}} — {{period}} ({{periodKey}})",
     "leaderboard.period_title_all": "Clasificación {{mode}} — Todo",
 
     "ping.pinging": "Comprobando...",

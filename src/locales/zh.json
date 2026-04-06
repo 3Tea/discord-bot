@@ -87,7 +87,7 @@
     "leaderboard.period.monthly": "本月",
     "leaderboard.period.yearly": "今年",
     "leaderboard.period.all": "全部",
-    "leaderboard.period_title": "{{mode}}排行榜 — {{period}}",
+    "leaderboard.period_title": "{{mode}}排行榜 — {{period}} ({{periodKey}})",
     "leaderboard.period_title_all": "{{mode}}排行榜 — 全部",
 
     "ping.pinging": "正在测速...",

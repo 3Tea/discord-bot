@@ -87,7 +87,7 @@
     "leaderboard.period.monthly": "今月",
     "leaderboard.period.yearly": "今年",
     "leaderboard.period.all": "全期間",
-    "leaderboard.period_title": "{{mode}}ランキング — {{period}}",
+    "leaderboard.period_title": "{{mode}}ランキング — {{period}} ({{periodKey}})",
     "leaderboard.period_title_all": "{{mode}}ランキング — 全期間",
 
     "ping.pinging": "確認中...",

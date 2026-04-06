@@ -87,7 +87,7 @@
     "leaderboard.period.monthly": "이번 달",
     "leaderboard.period.yearly": "올해",
     "leaderboard.period.all": "전체",
-    "leaderboard.period_title": "{{mode}} 리더보드 — {{period}}",
+    "leaderboard.period_title": "{{mode}} 리더보드 — {{period}} ({{periodKey}})",
     "leaderboard.period_title_all": "{{mode}} 리더보드 — 전체",
 
     "ping.pinging": "핑 확인 중...",

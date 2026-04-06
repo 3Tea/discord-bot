@@ -87,7 +87,7 @@
     "leaderboard.period.monthly": "This Month",
     "leaderboard.period.yearly": "This Year",
     "leaderboard.period.all": "All Time",
-    "leaderboard.period_title": "{{mode}} Leaderboard — {{period}}",
+    "leaderboard.period_title": "{{mode}} Leaderboard — {{period}} ({{periodKey}})",
     "leaderboard.period_title_all": "{{mode}} Leaderboard — All Time",
 
     "ping.pinging": "Pinging...",

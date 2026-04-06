@@ -19,6 +19,7 @@ import { getCurrentPeriodKeys } from "../../util/xp/periodKey";
 import type { Period } from "../../util/xp/periodKey";
 import type { SupportedLocale } from "../../util/i18n/index";
 import type { IUser } from "../../models/user.model";
+import type { IMemberXP } from "../../models/memberXP.model";
 
 const PAGE_SIZE = 10;
 const MAX_RESULTS = 100;
@@ -97,7 +98,9 @@ function buildTitle(mode: string, period: LeaderboardPeriod, locale: SupportedLo
         return t(locale, "leaderboard.period_title_all", { mode: modeLabel });
     }
     const periodLabel = t(locale, PERIOD_LABEL_KEYS[period]);
-    return t(locale, "leaderboard.period_title", { mode: modeLabel, period: periodLabel });
+    const periodKeys = getCurrentPeriodKeys();
+    const periodKey = periodKeys[period];
+    return t(locale, "leaderboard.period_title", { mode: modeLabel, period: periodLabel, periodKey });
 }
 
 async function resolveUsernames(
@@ -162,13 +165,13 @@ async function paginateLeaderboard(
     let currentPeriod: LeaderboardPeriod = "weekly";
     let page = 1;
 
-    async function fetchData(): Promise<{ entries: SnapshotEntry[]; allTimeGlobal?: IUser[]; allTimeServer?: { userId: string; xp: number; level: number }[] }> {
+    async function fetchData(): Promise<{ entries: SnapshotEntry[]; allTimeGlobal?: IUser[]; allTimeServer?: IMemberXP[] }> {
         if (currentPeriod === "all") {
             if (mode === "global") {
-                const allUsers = await UserModel.find().sort({ totalPoint: -1 }).limit(MAX_RESULTS).lean();
-                return { entries: [], allTimeGlobal: allUsers as unknown as IUser[] };
+                const allUsers = await UserModel.find().sort({ totalPoint: -1 }).limit(MAX_RESULTS);
+                return { entries: [], allTimeGlobal: allUsers };
             } else {
-                const allMembers = await MemberXPModel.find({ guildId }).sort({ xp: -1 }).limit(MAX_RESULTS).lean();
+                const allMembers = await MemberXPModel.find({ guildId }).sort({ xp: -1 }).limit(MAX_RESULTS);
                 return { entries: [], allTimeServer: allMembers };
             }
         }
@@ -182,11 +185,12 @@ async function paginateLeaderboard(
         if (currentPeriod === "all") {
             if (mode === "global" && data.allTimeGlobal) {
                 const pageData = data.allTimeGlobal.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
-                await resolveUsernames(pageData as IUser[], interaction, usernameCache);
-                return buildGlobalLeaderboardEmbed(pageData as IUser[], usernameCache, locale, p, totalPages);
-            } else if (data.allTimeServer) {
+                await resolveUsernames(pageData, interaction, usernameCache);
+                return buildGlobalLeaderboardEmbed(pageData, usernameCache, locale, p, totalPages);
+            }
+            if (data.allTimeServer) {
                 const pageData = data.allTimeServer.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
-                return buildLeaderboardEmbed(pageData as any, guildName, locale, p, totalPages);
+                return buildLeaderboardEmbed(pageData, guildName, locale, p, totalPages);
             }
         }
 

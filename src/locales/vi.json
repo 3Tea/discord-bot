@@ -87,7 +87,7 @@
     "leaderboard.period.monthly": "Tháng này",
     "leaderboard.period.yearly": "Năm nay",
     "leaderboard.period.all": "Tất cả",
-    "leaderboard.period_title": "Bảng xếp hạng {{mode}} — {{period}}",
+    "leaderboard.period_title": "Bảng xếp hạng {{mode}} — {{period}} ({{periodKey}})",
     "leaderboard.period_title_all": "Bảng xếp hạng {{mode}} — Tất cả",
 
     "ping.pinging": "Đang ping...",

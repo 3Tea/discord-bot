@@ -85,7 +85,7 @@
     "leaderboard.period.monthly": "Bulan Ini",
     "leaderboard.period.yearly": "Tahun Ini",
     "leaderboard.period.all": "Semua",
-    "leaderboard.period_title": "Papan Peringkat {{mode}} — {{period}}",
+    "leaderboard.period_title": "Papan Peringkat {{mode}} — {{period}} ({{periodKey}})",
     "leaderboard.period_title_all": "Papan Peringkat {{mode}} — Semua",
     "ping.pinging": "Mengecek ping...",
     "ping.result": "Latensi roundtrip: {{latency}}ms",
