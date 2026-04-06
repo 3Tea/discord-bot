@@ -1,5 +1,7 @@
 // src/util/xp/snapshotSync.ts
 import XPSnapshotModel from "../../models/xpSnapshot.model";
+import GuildStatsModel from "../../models/guildStats.model";
+import GuildStatsSnapshotModel from "../../models/guildStatsSnapshot.model";
 import { getCurrentPeriodKeys, ALL_PERIODS } from "./periodKey";
 import type { Period } from "./periodKey";
 
@@ -12,9 +14,17 @@ const SOURCE_COUNTER: Record<XPSource, string | null> = {
     admin: null,
 };
 
+// Maps XP source to GuildStats field name
+const GUILD_COUNTER: Record<XPSource, string | null> = {
+    message: "totalMessages",
+    voice: "totalVoiceMinutes",
+    reaction: "totalReactions",
+    admin: null,
+};
+
 /**
- * Upsert XP snapshots for all 4 periods in both guild and global scope.
- * Uses a single bulkWrite (8 ops) for minimal MongoDB round-trips.
+ * Upsert XP snapshots for all 4 periods in both guild and global scope,
+ * plus sync guild-level stats (GuildStats + GuildStatsSnapshot).
  */
 export async function syncSnapshots(
     userId: string,
@@ -27,13 +37,58 @@ export async function syncSnapshots(
     const periodKeys = getCurrentPeriodKeys();
     const counterField = SOURCE_COUNTER[source];
 
-    const ops = buildUpsertOps(userId, guildId, periodKeys, xpGain, counterField)
-        .concat(buildUpsertOps(userId, null, periodKeys, xpGain, counterField));
+    // --- User XP Snapshots (existing) ---
+    const userOps = buildUserUpsertOps(userId, guildId, periodKeys, xpGain, counterField)
+        .concat(buildUserUpsertOps(userId, null, periodKeys, xpGain, counterField));
+    await XPSnapshotModel.bulkWrite(userOps, { ordered: false });
 
-    await XPSnapshotModel.bulkWrite(ops, { ordered: false });
+    // --- Guild Stats (real-time counters) ---
+    const guildCounterField = GUILD_COUNTER[source];
+    const guildInc: Record<string, number> = { totalXP: xpGain };
+    if (guildCounterField) {
+        guildInc[guildCounterField] = 1;
+    }
+
+    await GuildStatsModel.bulkWrite(
+        [
+            {
+                updateOne: {
+                    filter: { guildId },
+                    update: {
+                        $inc: guildInc,
+                        $setOnInsert: { guildId },
+                    },
+                    upsert: true,
+                },
+            },
+        ],
+        { ordered: false }
+    );
+
+    // --- Guild Stats Snapshots (period-based) ---
+    const snapshotCounterField = counterField;
+    const guildSnapshotOps = ALL_PERIODS.map((period) => {
+        const $inc: Record<string, number> = { xp: xpGain };
+        if (snapshotCounterField) {
+            $inc[snapshotCounterField] = 1;
+        }
+
+        return {
+            updateOne: {
+                filter: { guildId, period, periodKey: periodKeys[period] },
+                update: {
+                    $inc,
+                    $setOnInsert: { guildId, period, periodKey: periodKeys[period] },
+                },
+                upsert: true,
+            },
+        };
+    });
+
+    await GuildStatsSnapshotModel.bulkWrite(guildSnapshotOps, { ordered: false });
 }
 
-function buildUpsertOps(
+function buildUserUpsertOps(
     userId: string,
     guildId: string | null,
     periodKeys: Record<Period, string>,
