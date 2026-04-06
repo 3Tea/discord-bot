@@ -1,4 +1,4 @@
-export type Category = "voice" | "manga" | "utility" | "info";
+export type Category = "voice" | "xp" | "economy" | "manga" | "utility" | "info" | "settings";
 
 export interface Command {
   name: string;
@@ -13,12 +13,16 @@ export const categoryMeta: Record<
   { label: string; color: string; bg: string }
 > = {
   voice: { label: "Voice", color: "#5865F2", bg: "rgba(88,101,242,0.15)" },
+  xp: { label: "XP", color: "#9B59B6", bg: "rgba(155,89,182,0.15)" },
+  economy: { label: "Economy", color: "#F1C40F", bg: "rgba(241,196,15,0.15)" },
   manga: { label: "NSFW", color: "#ED4245", bg: "rgba(237,66,69,0.15)" },
   utility: { label: "Utility", color: "#3BA55C", bg: "rgba(59,165,92,0.15)" },
   info: { label: "Info", color: "#FAA61A", bg: "rgba(250,166,26,0.15)" },
+  settings: { label: "Settings", color: "#7289DA", bg: "rgba(114,137,218,0.15)" },
 };
 
 export const commands: Command[] = [
+  // Voice
   {
     name: "voice",
     description:
@@ -28,42 +32,99 @@ export const commands: Command[] = [
       "limit", "name", "lock", "unlock", "hide", "permit", "block", "kick", "transfer",
     ],
   },
+  // XP & Leveling
+  {
+    name: "rank",
+    description: "View your rank card — level, XP progress, server & global rank, activity stats",
+    category: "xp",
+    options: ["user (optional)"],
+  },
+  {
+    name: "leaderboard",
+    description:
+      "Paginated XP leaderboard with period filtering (daily, weekly, monthly, yearly) and server/global/servers modes",
+    category: "xp",
+    options: ["mode (server/global/servers)"],
+  },
+  {
+    name: "server-rank",
+    description: "View this server's XP stats, ranking among all servers, and activity breakdown",
+    category: "xp",
+  },
+  {
+    name: "xp",
+    description: "Admin XP management — set, add, remove XP or blacklist channels from XP gains",
+    category: "xp",
+    subcommands: ["set", "add", "remove", "channel-blacklist"],
+  },
+  // Economy
+  {
+    name: "balance",
+    description: "View coin and gem balance, pray streak, and last activity",
+    category: "economy",
+    options: ["user (optional)"],
+  },
+  {
+    name: "pray",
+    description: "Daily prayer to receive coins — streak bonuses at 3, 7, 14, and 30 days",
+    category: "economy",
+    options: ["target (optional)"],
+  },
+  {
+    name: "curse",
+    description: "Daily curse action with coin rewards — mirrors pray mechanics",
+    category: "economy",
+    options: ["target (optional)"],
+  },
+  {
+    name: "shop",
+    description: "View and purchase server shop items — roles, cosmetics, and currency exchanges",
+    category: "economy",
+  },
+  {
+    name: "economy",
+    description: "Admin currency management — set or add coins and gems for users",
+    category: "economy",
+    subcommands: ["set-coin", "add-coin", "set-gem", "add-gem"],
+  },
+  // Manga
   {
     name: "nhentai",
-    description: "H manga and D reader from nhentai.net",
+    description: "Manga and doujinshi reader from nhentai.net",
     category: "manga",
     subcommands: ["read", "random"],
   },
   {
     name: "3hentai",
-    description: "H manga and D from 3hentai",
+    description: "Manga and doujinshi from 3hentai",
     category: "manga",
     subcommands: ["read", "random"],
   },
   {
     name: "asmhentai",
-    description: "Gets random doujinshi on asmhentai",
+    description: "Random doujinshi from asmhentai",
     category: "manga",
     subcommands: ["read", "random"],
   },
   {
     name: "hentaifox",
-    description: "Gets random doujinshi on hentaifox",
+    description: "Random doujinshi from hentaifox",
     category: "manga",
     subcommands: ["read", "random"],
   },
   {
     name: "nhentai-lite",
-    description: "H manga and D reader nhentai lite",
+    description: "Manga and doujinshi reader — nhentai lite version",
     category: "manga",
     subcommands: ["read", "random"],
   },
   {
     name: "pururin",
-    description: "Gets random doujinshi on pururin",
+    description: "Random doujinshi from pururin",
     category: "manga",
     subcommands: ["read", "random"],
   },
+  // Utility
   {
     name: "trans",
     description: "Translate all languages to Vietnamese",
@@ -81,6 +142,7 @@ export const commands: Command[] = [
     description: "Replies with Pong! Shows bot latency",
     category: "utility",
   },
+  // Info
   {
     name: "help",
     description: "Get the help commands list",
@@ -97,5 +159,12 @@ export const commands: Command[] = [
     description: "Get the avatar URL of the selected user, or your own avatar",
     category: "info",
     options: ["target (optional)"],
+  },
+  // Settings
+  {
+    name: "settings",
+    description: "Configure personal or server language preference (7 languages supported)",
+    category: "settings",
+    subcommands: ["language", "server-language"],
   },
 ];

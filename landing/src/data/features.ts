@@ -12,33 +12,33 @@ export const features: Feature[] = [
       "Create temporary voice channels with full control — lock, hide, permit, kick, transfer.",
   },
   {
+    icon: "📊",
+    title: "XP & Leveling",
+    description:
+      "Earn XP from messages, voice, and reactions. Track ranks, view canvas cards, and compete on leaderboards.",
+  },
+  {
+    icon: "💰",
+    title: "Economy System",
+    description:
+      "Coins, gems, daily prayers, streak rewards, and a server shop with purchasable roles and items.",
+  },
+  {
     icon: "📖",
     title: "Manga Reader",
     description:
-      "Read from 6 sources directly in Discord — nhentai, 3hentai, asmhentai, hentaifox & more.",
+      "Read from 6+ sources directly in Discord — nhentai, 3hentai, asmhentai, hentaifox & more.",
   },
   {
     icon: "🌐",
-    title: "Translation",
+    title: "Multi-Language",
     description:
-      "Translate any language to Vietnamese instantly via Google Translate API.",
+      "Supports 7 languages — English, Vietnamese, Indonesian, Spanish, Japanese, Chinese, Korean.",
   },
   {
     icon: "🌤️",
-    title: "Weather",
+    title: "Utility Tools",
     description:
-      "Real-time weather info for any location. Celsius, Vietnamese language support.",
-  },
-  {
-    icon: "👤",
-    title: "User Tools",
-    description:
-      "Avatar viewer, server info, bot info, ping — quick utility commands.",
-  },
-  {
-    icon: "⚡",
-    title: "Slash Commands",
-    description:
-      "100% slash commands — no prefix needed. Auto-complete, instant response.",
+      "Weather, translation, avatar viewer, bot info — plus 100% slash commands with auto-complete.",
   },
 ];

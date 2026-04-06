@@ -14,7 +14,12 @@
 | `avatar` | Show user avatar (PNG, 2048px) | `target` (User, optional) |
 | `trans` | Translate any language to Vietnamese via Google Translate API | `word` (String, required) |
 | `weather` | Weather info via Open-Meteo API (locale-aware) | `location` (String, required, max 200) |
-| `settings language` | Set personal language preference (vi/en) | `locale` (String choice), `reset` (Boolean) |
+
+### Settings
+
+| Command | Description | Options |
+|---------|-------------|---------|
+| `settings language` | Set personal language preference (en/vi/id/es/ja/zh/ko) | `locale` (String choice), `reset` (Boolean) |
 | `settings server-language` | Set server default language (requires Manage Guild) | `locale` (String choice), `reset` (Boolean) |
 
 ### Voice Channel Management (`voice`)
@@ -47,6 +52,39 @@ Full temporary voice channel system. Users join a trigger channel (prefix `TEST 
 - `blocked:{channelId}` -> user ID array
 - `kick_target:{userId}:{channelId}` -> target userId (30s TTL)
 - `cd:{action}:{channelId}` -> cooldown marker
+
+### XP & Leveling
+
+See [xp-system.md](xp-system.md) for full system documentation.
+
+| Command | Description | Options |
+|---------|-------------|---------|
+| `rank` | View rank card — level, XP progress, server & global rank, activity stats | `user` (User, optional) |
+| `leaderboard` | Paginated XP leaderboard with period filtering and mode selection | `mode` (server/global/servers) |
+| `server-rank` | View server's total XP, ranking among all servers, activity breakdown | None |
+| `xp set` | Set user's XP to exact amount (Admin, requires Manage Guild) | `user`, `amount` |
+| `xp add` | Add XP to user (Admin) | `user`, `amount` |
+| `xp remove` | Remove XP from user (Admin) | `user`, `amount` |
+| `xp channel-blacklist add` | Blacklist channel from XP gains (Admin) | `channel` |
+| `xp channel-blacklist remove` | Remove channel from blacklist (Admin) | `channel` |
+
+### Economy
+
+See [economy-system.md](economy-system.md) for full system documentation.
+
+| Command | Description | Options |
+|---------|-------------|---------|
+| `balance` | View coin/gem balance, pray streak, last activity | `user` (User, optional) |
+| `pray` | Daily prayer for coins — streak bonuses at 3/7/14/30 days | `target` (User, optional) |
+| `curse` | Daily curse for coins (lower rewards, no streak/gems) | `target` (User, optional) |
+| `shop view` | Browse server shop items (paginated, 5 per page) | None |
+| `shop buy` | Purchase a shop item | `item-id` (String, required) |
+| `shop add` | Add item to server shop (Admin) | `item-id`, `name`, `description`, `type`, `price`, `currency`, `role?`, `stock?` |
+| `shop remove` | Remove item from server shop (Admin) | `item-id` |
+| `economy set-coin` | Set user's coin balance (Admin) | `user`, `amount` |
+| `economy add-coin` | Add/subtract coins (Admin) | `user`, `amount` |
+| `economy set-gem` | Set user's gem balance (Admin) | `user`, `amount` |
+| `economy add-gem` | Add/subtract gems (Admin) | `user`, `amount` |
 
 ### Manga Commands (NSFW)
 
@@ -106,6 +144,19 @@ Displayed in the voice channel control panel. All validate channel ownership.
 | `VOICE_KICK_ONLY` | Kick without blocking |
 | `VOICE_KICK_BLOCK` | Kick and block |
 
+### Leaderboard Buttons
+
+| Button ID | Action |
+|-----------|--------|
+| `lb_period_all` | Show all-time leaderboard |
+| `lb_period_daily` | Filter by current day |
+| `lb_period_weekly` | Filter by current ISO week |
+| `lb_period_monthly` | Filter by current month |
+| `lb_period_yearly` | Filter by current year |
+| Prev / Next | Page navigation (10 entries/page, max 100 results) |
+
+Leaderboard buttons auto-disable after 60s idle timeout.
+
 ### Manga
 
 | Button ID | Action |
@@ -121,21 +172,40 @@ Displayed in the voice channel control panel. All validate channel ownership.
 | `InteractionCreate` | `interactionCreateButton.ts` | Route button clicks to handlers |
 | `InteractionCreate` | `interactionCreateSelectMenu.ts` | Route user select menus to handlers |
 | `InteractionCreate` | `interactionCreateModal.ts` | Handle modal submissions (voice rename + limit) |
-| `VoiceStateUpdate` | `voiceStateUpdate.ts` | Auto-create temp channels on join trigger, auto-delete on leave |
+| `VoiceStateUpdate` | `voiceStateUpdate.ts` | Auto-create temp channels, track voice XP, auto-delete on leave |
+| `MessageCreate` | `messageCreate.ts` | Award message XP (anti-spam, cooldown, level-up detection) |
+| `MessageReactionAdd` | `messageReactionAdd.ts` | Award reaction XP (30s cooldown per user per guild) |
 
 ### Voice State Update Details
 
 - **Join trigger channel** (prefix `TEST `): Creates temp channel with `* ` prefix, inherits bitrate, 23 user limit, owner stored in Redis, sends control panel
 - **Leave temp channel** (prefix `* `): Deletes channel if empty/bots-only, cleans up Redis keys
+- **Voice XP sessions**: Tracked in Redis set `voice_xp_sessions`, checked every 60s, requires 2+ non-bot members and not server-deafened
+
+### Message Create Details
+
+- Validates: guild context, non-bot author, no webhooks, config enabled, channel not blacklisted
+- Anti-spam: message hash dedup (MD5), 60s cooldown, minimum 3 characters
+- Awards 15-25 XP (base 20, variance ±5), increments messageCount
+- Syncs to period snapshots and guild stats
+- Triggers level-up detection
+
+### Message Reaction Add Details
+
+- Validates: guild context, non-bot, config enabled, channel not blacklisted, not own message
+- Cooldown: 30s per user per guild (Redis key `reaction_xp:guildId:userId`)
+- Awards configurable XP (default 3), increments reactionCount
+- Syncs to period snapshots and guild stats
+- Triggers level-up detection
 
 ## i18n (Multi-Language)
 
-All user-facing strings are translated via i18next. Supported: English (`en`, fallback) + Vietnamese (`vi`).
+All user-facing strings are translated via i18next. Supported languages: English (`en`, fallback), Vietnamese (`vi`), Indonesian (`id`), Spanish (`es`), Japanese (`ja`), Chinese (`zh`), Korean (`ko`).
 
 **Locale resolution**: per-user > per-guild > Discord client locale > `"en"` fallback.
 
 **Settings**: Users set language via `/settings language`, guild admins via `/settings server-language` (requires Manage Guild). Preferences cached in Redis (30-day TTL).
 
-**Translation files**: `src/locales/en.json` and `src/locales/vi.json`. All commands, button labels, error messages, embed titles/fields, voice panel, weather descriptions, and manga handler use `t(locale, "key")`.
+**Translation files**: `src/locales/{en,vi,id,es,ja,zh,ko}.json`. All commands, button labels, error messages, embed titles/fields, voice panel, weather descriptions, XP/economy messages, and manga handler use `t(locale, "key")`.
 
 **What is NOT translated**: Command names, option names, internal logs.

@@ -3,7 +3,7 @@
 ## Project Overview
 
 Discord bot "3AT - Endless Paradox" (v5.0.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
-Runs on Node.js >= 18 via Gateway (WebSocket). Uses slash commands exclusively.
+Runs on Node.js >= 24 via Gateway (WebSocket). Uses slash commands exclusively.
 
 ## Quick Reference
 
@@ -34,13 +34,30 @@ src/
   commands/slash/         # One file per slash command (auto-loaded)
   events/                 # One file per event (auto-loaded)
   buttons/                # One file per button handler (auto-loaded)
-  models/                 # Mongoose schemas (Guild, User)
+  models/                 # Mongoose schemas
+    guild.model.ts        # Guild metadata + locale
+    user.model.ts         # Global user data + totalPoint
+    memberXP.model.ts     # Per-member, per-guild XP tracking
+    guildXPConfig.model.ts # Server-specific XP settings
+    xpSnapshot.model.ts   # Period-based XP snapshots (daily/weekly/monthly/yearly)
+    guildStats.model.ts   # Server-wide XP aggregation
+    guildStatsSnapshot.model.ts # Server period stats
+    userEconomy.model.ts  # Per-guild currency (coin, gem, streak)
+    shopItem.model.ts     # Server shop inventory
+    transaction.model.ts  # Economy transaction history
+  services/
+    economy/              # Currency, pray/curse, shop services
   connector/
     mongo/index.ts        # MongoDB connection
     redis/index.ts        # RedisService singleton class
-  locales/                # i18n translation files
-    en.json               # English (fallback language)
+  locales/                # i18n translation files (7 languages)
+    en.json               # English (fallback)
     vi.json               # Vietnamese
+    id.json               # Indonesian
+    es.json               # Spanish
+    ja.json               # Japanese
+    zh.json               # Chinese
+    ko.json               # Korean
   util/
     config/index.ts       # All env vars as typed constants
     config/button.ts      # Button ID constants (BUTTON_ID)
@@ -50,6 +67,17 @@ src/
     i18n/locale.ts        # resolveLocale() — locale resolution chain
     log/logger.mixed.ts   # Winston (file) + Tracer (console) logging
     date/day.ts           # getNumberOfDays() helper
+    xp/                   # XP system utilities
+      calculator.ts       # levelFromXP(), progressToNextLevel(), xpForLevel()
+      antiSpam.ts         # Message deduplication via hash
+      globalXP.ts         # Aggregates guild XP to global rank
+      snapshotSync.ts     # Syncs XP changes to period snapshots
+      periodKey.ts        # ISO 8601 period key generation
+      guildStatsAggregator.ts # Cron: aggregates GuildStats every 10 min
+      rankCard.ts         # Embed builders for rank/leaderboard
+      canvasRankCard.ts   # Canvas-based rank card image
+      canvasServerRankCard.ts # Canvas-based server rank card image
+      canvasHelpers.ts    # Shared canvas text rendering helpers
   types/common/discord.d.ts  # Client type augmentation (commands, buttons)
 ```
 
@@ -69,7 +97,14 @@ export default {
     data: new SlashCommandBuilder()
         .setName("command-name")
         .setDescription("What it does in English")
-        .setDescriptionLocalizations({ vi: "Mô tả bằng Tiếng Việt" }),
+        .setDescriptionLocalizations({
+            vi: "Mô tả bằng Tiếng Việt",
+            id: "Deskripsi dalam Bahasa Indonesia",
+            "es-ES": "Descripción en español",
+            ja: "日本語での説明",
+            "zh-CN": "中文描述",
+            ko: "한국어 설명",
+        }),
     async execute(interaction: ChatInputCommandInteraction) {
         const locale = await resolveLocale(interaction);
         const embed = new EmbedBuilder()
@@ -87,13 +122,16 @@ export default {
 Create `src/buttons/{name}.button.ts`:
 
 ```typescript
-import { ButtonInteraction, TextChannel, ThreadAutoArchiveDuration } from "discord.js";
+import { ButtonInteraction } from "discord.js";
 import { BUTTON_ID } from "../util/config/button";
+import { resolveLocale } from "../util/i18n/locale";
+import { t } from "../util/i18n/t";
 
 export default {
     id: BUTTON_ID.myButton,
     async execute(interaction: ButtonInteraction) {
-        // logic
+        const locale = await resolveLocale(interaction);
+        // use t(locale, "key") for all user-facing strings
     },
 };
 ```
@@ -301,7 +339,7 @@ member.voice.channel?.setName("x");
 
 ## i18n (Internationalization)
 
-Uses [i18next](https://www.i18next.com/) with `i18next-fs-backend`. Supported languages: English (`en`, fallback) + Vietnamese (`vi`).
+Uses [i18next](https://www.i18next.com/) with `i18next-fs-backend`. Supported languages: English (`en`, fallback), Vietnamese (`vi`), Indonesian (`id`), Spanish (`es`), Japanese (`ja`), Chinese (`zh`), Korean (`ko`).
 
 ### Locale Resolution Priority
 
@@ -343,8 +381,8 @@ const locale = await resolveGuildLocale(guildId);
 ### Rules — MUST follow
 
 - **Never hardcode user-facing strings** — always use `t(locale, "key")`
-- **English is the primary description** in `setDescription()`, Vietnamese goes in `setDescriptionLocalizations({ vi: "..." })`
-- **Add keys to BOTH** `src/locales/en.json` and `src/locales/vi.json` when adding new strings
+- **English is the primary description** in `setDescription()`, localizations go in `setDescriptionLocalizations({ vi: "...", id: "...", es: "...", ja: "...", zh: "...", ko: "..." })`
+- **Add keys to ALL 7 locale files** (`en.json`, `vi.json`, `id.json`, `es.json`, `ja.json`, `zh.json`, `ko.json`) when adding new strings
 - **Use interpolation** for dynamic values: `t(locale, "key", { name: value })` with `{{name}}` in JSON
 - **Error catch blocks**: resolve locale with fallback: `await resolveLocale(interaction).catch(() => "en" as const)`
 - **Event handlers**: use `resolveGuildLocale(guildId)` since there's no interaction
@@ -354,10 +392,10 @@ const locale = await resolveGuildLocale(guildId);
 
 ### Adding a New Translation Key
 
-1. Add the key to `src/locales/en.json` (English)
-2. Add the same key to `src/locales/vi.json` (Vietnamese)
+1. Add the key to `src/locales/en.json` (English — primary)
+2. Add the same key to all other locale files (`vi.json`, `id.json`, `es.json`, `ja.json`, `zh.json`, `ko.json`)
 3. Use `t(locale, "your.new.key")` in code
-4. Keys must exist in both files — mismatches will show raw keys to users
+4. Keys must exist in all files — mismatches will show raw keys to users
 
 ### Redis Caching
 
@@ -368,20 +406,69 @@ const locale = await resolveGuildLocale(guildId);
 
 `"none"` = negative cache (user/guild has no preference set). Managed via `/settings language` and `/settings server-language` commands.
 
+## XP & Leveling System
+
+### How It Works
+
+- **Message XP**: Awards XP per message (default 20) with anti-spam (60s cooldown, message hash dedup, 3-char min length)
+- **Voice XP**: Awards XP per minute in voice (default 5), tracked via `voiceStateUpdate` event
+- **Reaction XP**: Awards XP per reaction (default 3) with 30s cooldown per user per channel
+- **Level-up**: Detected after each XP change, notification sent to channel
+- **Global XP**: Aggregated from all guilds to `User.totalPoint`
+
+### Period Snapshots
+
+XP changes sync to `XPSnapshot` for time-filtered leaderboards (daily/weekly/monthly/yearly). Period keys use ISO 8601 format (e.g., `2026-W14` for weeks, `2026-04-06` for daily).
+
+### Server Stats
+
+`GuildStats` aggregated every 10 minutes by cron (`guildStatsAggregator`). Tracks totalXP, totalMessages, totalVoiceMinutes, totalReactions, activeMembers. `GuildStatsSnapshot` stores period-based server stats for the servers leaderboard.
+
+### Configuration
+
+Per-server via `GuildXPConfig`: xpPerMessage (20), xpPerVoiceMinute (5), xpPerReaction (3), messageCooldown (60s), minMessageLength (3), blacklistedChannels[], enabled flag.
+
+### Canvas Rendering
+
+Rank cards and server rank cards rendered as images via `@napi-rs/canvas` with embed fallback if canvas fails.
+
+## Economy System
+
+### Currency
+
+Two currencies per guild: **coin** and **gem**. Tracked in `UserEconomy` model per (userId, guildId).
+
+### Pray & Curse
+
+- Daily actions (24h cooldown, UTC-based)
+- **Targeted pray**: 100-200 coin, 5% gem chance
+- **Self pray**: 50-150 coin
+- **Streak tracking**: Consecutive daily prays with milestone bonuses at 3/7/14/30 days
+- Curse mirrors pray mechanics
+
+### Shop
+
+Server-configurable shop items (`ShopItem` model) with types: role assignment, cosmetic, currency exchange. Transactions logged in `Transaction` model.
+
+### Admin Commands
+
+`/economy set-coin|add-coin|set-gem|add-gem` — requires Administrator permission.
+
 ## Database
 
 ### MongoDB (Mongoose v8)
 
 - Connection: `src/connector/mongo/index.ts`
-- Models define TypeScript interfaces (`IGuild`, `IUser`) with `Document`
+- Models define TypeScript interfaces (`IGuild`, `IUser`, `IMemberXP`, etc.) with `Document`
 - Error handler checks `MongoServerError` (not `MongoError`)
 - Timestamps auto-managed (`createdAt`, `updatedAt`)
+- Key indexes: `MemberXP(guildId, xp DESC)`, `XPSnapshot(userId, guildId, period, periodKey)`
 
 ### Redis (ioredis)
 
 - Singleton: `import redis from "../connector/redis"`
 - Methods: `setJson`, `getJson`, `deleteKey`, `ttlKey`, `flushdb`
-- Used for: image cache (10min TTL), voice channel ownership (12hr TTL), rate limiting (120s default)
+- Used for: image cache (10min TTL), voice channel ownership (12hr TTL), rate limiting (120s default), locale preferences (30-day TTL), XP anti-spam cooldowns
 
 ## Environment
 
@@ -398,7 +485,11 @@ All variables documented in `.env.example`. Critical ones:
 
 ## Feature Documentation
 
-See [docs/steering/commands.md](docs/steering/commands.md) for full command inventory, button handlers, events, and business rules.
+| Document | Contents |
+|----------|----------|
+| [docs/steering/commands.md](docs/steering/commands.md) | Full command inventory, button handlers, events, i18n, and business rules |
+| [docs/steering/xp-system.md](docs/steering/xp-system.md) | XP earning, leveling formula, snapshots, server stats, leaderboards, canvas rendering |
+| [docs/steering/economy-system.md](docs/steering/economy-system.md) | Coins, gems, pray/curse, streaks, shop, transactions, services |
 
 ## Docker
 
