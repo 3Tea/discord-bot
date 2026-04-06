@@ -16,6 +16,9 @@ async function main(): Promise<void> {
 
     await import("../connector/mongo");
     await import("../bot");
+
+    const { startGuildStatsAggregator } = await import("../util/xp/guildStatsAggregator");
+    startGuildStatsAggregator();
 }
 
 main().catch(console.error);
