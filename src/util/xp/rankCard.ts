@@ -72,7 +72,9 @@ export function buildRankEmbed(
                         ? `📊 **${t(locale, "rank.recent_activity")}**\n${t(locale, "rank.today")}: ${t(locale, "rank.period_xp", { xp: periodStats.daily.toLocaleString() })} | ${t(locale, "rank.this_week")}: ${t(locale, "rank.period_xp", { xp: periodStats.weekly.toLocaleString() })} | ${t(locale, "rank.this_month")}: ${t(locale, "rank.period_xp", { xp: periodStats.monthly.toLocaleString() })}`
                         : "",
                     "💬 0  ·  🎤 0m  ·  ❤️ 0",
-                ].filter(Boolean).join("\n")
+                ]
+                    .filter(Boolean)
+                    .join("\n")
             )
             .setColor(0x2b2d31);
     }
@@ -93,7 +95,9 @@ export function buildRankEmbed(
                     ? `📊 **${t(locale, "rank.recent_activity")}**\n${t(locale, "rank.today")}: ${t(locale, "rank.period_xp", { xp: periodStats.daily.toLocaleString() })} | ${t(locale, "rank.this_week")}: ${t(locale, "rank.period_xp", { xp: periodStats.weekly.toLocaleString() })} | ${t(locale, "rank.this_month")}: ${t(locale, "rank.period_xp", { xp: periodStats.monthly.toLocaleString() })}`
                     : "",
                 `💬 ${member.messageCount.toLocaleString()}  ·  🎤 ${formatVoiceTime(member.voiceMinutes)}  ·  ❤️ ${member.reactionCount.toLocaleString()}`,
-            ].filter(Boolean).join("\n")
+            ]
+                .filter(Boolean)
+                .join("\n")
         )
         .setColor(0x5865f2)
         .setTimestamp();
@@ -196,10 +200,7 @@ export async function buildPeriodLeaderboardEmbed(
     usernameCache: Map<string, string>
 ): Promise<EmbedBuilder> {
     if (entries.length === 0) {
-        return new EmbedBuilder()
-            .setTitle(title)
-            .setDescription(t(locale, "leaderboard.empty"))
-            .setColor(0xf0b132);
+        return new EmbedBuilder().setTitle(title).setDescription(t(locale, "leaderboard.empty")).setColor(0xf0b132);
     }
 
     // Resolve usernames for global mode
@@ -231,9 +232,7 @@ export async function buildPeriodLeaderboardEmbed(
         const rank = offset + i;
         const medal = rank < 3 ? MEDALS[rank] : "";
         const prefix = `#${rank + 1}  ${medal}`;
-        const display = isGlobal && usernameCache.has(e.userId)
-            ? `@${usernameCache.get(e.userId)}`
-            : `<@${e.userId}>`;
+        const display = isGlobal && usernameCache.has(e.userId) ? `@${usernameCache.get(e.userId)}` : `<@${e.userId}>`;
         return `${prefix} ${display} — ${e.xp.toLocaleString()} XP`;
     });
 

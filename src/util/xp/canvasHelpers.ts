@@ -564,14 +564,7 @@ export function drawRankBadge(ctx: Ctx, label: string, cx: number, topY: number,
     return bh;
 }
 
-export function drawNameBlock(
-    ctx: Ctx,
-    username: string,
-    subtitle: string,
-    x: number,
-    y: number,
-    maxW: number
-): void {
+export function drawNameBlock(ctx: Ctx, username: string, subtitle: string, x: number, y: number, maxW: number): void {
     // Username
     ctx.font = '44px "Inter Bold"';
     const name = clampText(ctx, username, maxW);

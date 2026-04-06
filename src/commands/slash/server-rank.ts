@@ -10,9 +10,7 @@ import { getCurrentPeriodKeys } from "../../util/xp/periodKey";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 
-async function getServerPeriodStats(
-    guildId: string
-): Promise<{ daily: number; weekly: number; monthly: number }> {
+async function getServerPeriodStats(guildId: string): Promise<{ daily: number; weekly: number; monthly: number }> {
     const keys = getCurrentPeriodKeys();
     const [daily, weekly, monthly] = await Promise.all([
         GuildStatsSnapshotModel.findOne({ guildId, period: "daily", periodKey: keys.daily }).lean(),

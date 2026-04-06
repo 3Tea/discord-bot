@@ -26,20 +26,16 @@ const GUILD_COUNTER: Record<XPSource, string | null> = {
  * Upsert XP snapshots for all 4 periods in both guild and global scope,
  * plus sync guild-level stats (GuildStats + GuildStatsSnapshot).
  */
-export async function syncSnapshots(
-    userId: string,
-    guildId: string,
-    xpGain: number,
-    source: XPSource
-): Promise<void> {
+export async function syncSnapshots(userId: string, guildId: string, xpGain: number, source: XPSource): Promise<void> {
     if (xpGain === 0) return;
 
     const periodKeys = getCurrentPeriodKeys();
     const counterField = SOURCE_COUNTER[source];
 
     // --- User XP Snapshots (existing) ---
-    const userOps = buildUserUpsertOps(userId, guildId, periodKeys, xpGain, counterField)
-        .concat(buildUserUpsertOps(userId, null, periodKeys, xpGain, counterField));
+    const userOps = buildUserUpsertOps(userId, guildId, periodKeys, xpGain, counterField).concat(
+        buildUserUpsertOps(userId, null, periodKeys, xpGain, counterField)
+    );
     await XPSnapshotModel.bulkWrite(userOps, { ordered: false });
 
     // --- Guild Stats (real-time counters) ---

@@ -1,11 +1,21 @@
 import { createCanvas } from "@napi-rs/canvas";
 import {
-    type Ctx, W, C,
-    formatVoice, roundRect, gradientH, gradientV,
-    shadow, clearShadow,
-    drawAnimeBackground, drawCircularImage,
-    drawRankBadge, drawNameBlock, drawXPBar,
-    drawLevelBox, drawStatCard,
+    type Ctx,
+    W,
+    C,
+    formatVoice,
+    roundRect,
+    gradientH,
+    gradientV,
+    shadow,
+    clearShadow,
+    drawAnimeBackground,
+    drawCircularImage,
+    drawRankBadge,
+    drawNameBlock,
+    drawXPBar,
+    drawLevelBox,
+    drawStatCard,
     drawDivider,
 } from "./canvasHelpers";
 import { levelFromXP, xpForLevel, progressToNextLevel } from "./calculator";
