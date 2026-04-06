@@ -37,6 +37,14 @@ function mapDiscordLocale(discordLocale: string): SupportedLocale {
     if (discordLocale === "ja") return "ja";
     if (discordLocale.startsWith("zh")) return "zh";
     if (discordLocale === "ko") return "ko";
+    if (discordLocale === "pt-BR") return "pt-BR";
+    if (discordLocale === "fr") return "fr";
+    if (discordLocale === "de") return "de";
+    if (discordLocale === "ru") return "ru";
+    if (discordLocale === "tr") return "tr";
+    if (discordLocale === "it") return "it";
+    if (discordLocale === "pl") return "pl";
+    if (discordLocale === "nl") return "nl";
     if (discordLocale.startsWith("en")) return "en";
     return DEFAULT_LOCALE;
 }
