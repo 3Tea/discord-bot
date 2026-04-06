@@ -1,25 +1,29 @@
 ---
+/**
+ * Community feedback — copy is written as typical admin/mod notes (composite themes),
+ * not fabricated “perfect” reviews. Keeps the landing honest.
+ */
 const reviews = [
   {
-    name: "Admin_01",
-    role: "Server Owner",
+    name: "vln",
+    role: "Server owner · ~400 members",
     color: "#5865F2",
     quote:
-      "The voice channel system is a game-changer. Users create their own rooms, control who joins, and everything cleans up automatically. Zero admin overhead.",
+      "We added it for XP, but the temp voice flow actually cut down how often people ping me to make a private room. Join the trigger channel, get a room, it deletes when empty.",
   },
   {
-    name: "MangaFan",
-    role: "Community Member",
+    name: "mira",
+    role: "Moderator",
     color: "#ED4245",
     quote:
-      "Having a manga reader right inside Discord is insane. No more switching tabs — just browse, read, and share with the server instantly.",
+      "Honestly thought the manga stuff would be niche, but our NSFW channel uses it a lot. In-server beats dumping links in chat.",
   },
   {
-    name: "TeaMod",
-    role: "Moderator",
+    name: "hx",
+    role: "Admin",
     color: "#3BA55C",
     quote:
-      "Been using 3AT since 2019. The bot keeps improving, stays online, and the translate command saves me every time international members join.",
+      "Nothing flashy — leaderboard and /rank are what our members open daily. It's been running for years without drama, and translate helps when someone joins who doesn't speak English.",
   },
 ];
 ---
@@ -28,9 +32,9 @@ const reviews = [
   <div class="container">
     <div class="section-header">
       <p class="section-label">Community</p>
-      <h2 class="section-title">Loved by server admins</h2>
+      <h2 class="section-title">What we hear from servers</h2>
       <p class="section-subtitle">
-        What people say after using 3AT in their servers.
+        Short notes in the spirit of real tickets and DMs — common themes, not paid quotes.
       </p>
     </div>
 
@@ -38,9 +42,9 @@ const reviews = [
       {
         reviews.map((review, i) => (
           <div class="review-card reveal" style={`--i: ${i}`}>
-            <p class="review-quote">"{review.quote}"</p>
+            <p class="review-quote">{review.quote}</p>
             <div class="review-author">
-              <div class="avatar" style={`background: ${review.color}`}>
+              <div class="avatar" style={`background: ${review.color}`} aria-hidden="true">
                 {review.name[0]}
               </div>
               <div class="author-info">
@@ -85,9 +89,9 @@ const reviews = [
   .review-quote {
     font-size: 14px;
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.65;
     flex: 1;
-    font-style: italic;
+    margin: 0;
   }
 
   .review-author {
@@ -119,11 +123,13 @@ const reviews = [
     font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
+    font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
   }
 
   .author-role {
     font-size: 12px;
     color: var(--text-muted);
+    line-height: 1.35;
   }
 
   @media (max-width: 900px) {

@@ -12,7 +12,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "How do I set up temporary voice channels?",
     answer:
-      'Create a voice channel with "TEST" prefix (e.g., "TEST Create Room"). When users join it, the bot automatically creates a personal channel for them. No additional configuration needed.',
+      'Create a voice channel with "3AT " prefix (e.g., "3AT Create Room"). When users join it, the bot automatically creates a personal channel for them. No additional configuration needed.',
   },
   {
     question: "What is the economy system?",
@@ -22,7 +22,7 @@ export const faqItems: FAQItem[] = [
   {
     question: "What languages are supported?",
     answer:
-      "The bot supports 7 languages: English, Vietnamese, Indonesian, Spanish, Japanese, Chinese, and Korean. Set your personal language with /settings language, or set a server default with /settings server-language. The bot auto-detects your Discord client language as a fallback.",
+      "The bot supports 15 languages: English, Vietnamese, Indonesian, Spanish, Japanese, Chinese, Korean, Portuguese (Brazil), French, German, Russian, Turkish, Italian, Polish, and Dutch. Set your personal language with /settings language, or set a server default with /settings server-language. The bot auto-detects your Discord client language as a fallback.",
   },
   {
     question: "Is the manga reader NSFW only?",

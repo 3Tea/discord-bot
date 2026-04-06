@@ -163,7 +163,7 @@ export const commands: Command[] = [
   // Settings
   {
     name: "settings",
-    description: "Configure personal or server language preference (7 languages supported)",
+    description: "Configure personal or server language preference (15 languages supported)",
     category: "settings",
     subcommands: ["language", "server-language"],
   },

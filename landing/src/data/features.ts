@@ -33,7 +33,7 @@ export const features: Feature[] = [
     icon: "🌐",
     title: "Multi-Language",
     description:
-      "Supports 7 languages — English, Vietnamese, Indonesian, Spanish, Japanese, Chinese, Korean.",
+      "Supports 15 languages — English, Vietnamese, Indonesian, Spanish, Japanese, Chinese, Korean, Portuguese (Brazil), French, German, Russian, Turkish, Italian, Polish, and Dutch.",
   },
   {
     icon: "🌤️",
