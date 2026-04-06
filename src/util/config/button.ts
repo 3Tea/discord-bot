@@ -22,4 +22,10 @@ export const BUTTON_ID = {
     // Modal IDs
     VOICE_MODAL_RENAME: "voice_modal_rename",
     VOICE_MODAL_LIMIT: "voice_modal_limit",
+    // Leaderboard period filter buttons
+    LEADERBOARD_PERIOD_DAILY: "lb_period_daily",
+    LEADERBOARD_PERIOD_WEEKLY: "lb_period_weekly",
+    LEADERBOARD_PERIOD_MONTHLY: "lb_period_monthly",
+    LEADERBOARD_PERIOD_YEARLY: "lb_period_yearly",
+    LEADERBOARD_PERIOD_ALL: "lb_period_all",
 };
