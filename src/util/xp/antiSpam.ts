@@ -16,8 +16,8 @@ export function checkMessageSpam(
     member: IMemberXP | null,
     config: { messageCooldown: number; minMessageLength: number }
 ): SpamCheckResult {
-    // Check minimum length
-    if (content.length < config.minMessageLength) {
+    // Check minimum length (skip if content is empty due to missing MessageContent intent)
+    if (content.length > 0 && content.length < config.minMessageLength) {
         return { isSpam: true, reason: "too_short" };
     }
 
@@ -26,8 +26,8 @@ export function checkMessageSpam(
         return { isSpam: false };
     }
 
-    // Check duplicate content
-    if (member.lastMessageHash === contentHash) {
+    // Check duplicate content (skip if content is empty due to missing MessageContent intent)
+    if (content.length > 0 && member.lastMessageHash === contentHash) {
         return { isSpam: true, reason: "duplicate" };
     }
 

@@ -12,9 +12,9 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMessageReactions,
         // TODO: Uncomment after Discord approves privileged intents
         // GatewayIntentBits.MessageContent,
-        // GatewayIntentBits.GuildMessageReactions,
     ],
 });
 
