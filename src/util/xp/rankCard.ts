@@ -2,6 +2,8 @@ import { EmbedBuilder } from "discord.js";
 import type { ChatInputCommandInteraction } from "discord.js";
 import type { IMemberXP } from "../../models/memberXP.model";
 import type { IUser } from "../../models/user.model";
+import type { IGuildStats } from "../../models/guildStats.model";
+import type { IGuildStatsSnapshot } from "../../models/guildStatsSnapshot.model";
 import XPSnapshotModel from "../../models/xpSnapshot.model";
 import client from "../../client";
 import { levelFromXP, progressToNextLevel, xpForLevel } from "./calculator";
@@ -242,5 +244,107 @@ export async function buildPeriodLeaderboardEmbed(
         .setDescription(lines.join("\n"))
         .setColor(0xf0b132)
         .setFooter({ text: `${footerLabel} · ${t(locale, "leaderboard.page_footer", { page, totalPages })}` })
+        .setTimestamp();
+}
+
+export function buildServerRankEmbed(
+    stats: IGuildStats | null,
+    guildName: string,
+    rank: number,
+    totalServers: number,
+    locale: SupportedLocale,
+    periodStats?: { daily: number; weekly: number; monthly: number }
+): EmbedBuilder {
+    const totalXP = stats?.totalXP ?? 0;
+    const level = levelFromXP(totalXP);
+    const progress = progressToNextLevel(totalXP);
+
+    const lines = [
+        `🏅 ${t(locale, "server_rank.rank", { rank: rank || "—", total: totalServers })}`,
+        "",
+        `${buildProgressBar(progress.percentage)} ${progress.percentage}%`,
+        `${totalXP.toLocaleString()} / ${xpForLevel(level + 1).toLocaleString()} XP`,
+        "",
+    ];
+
+    if (periodStats) {
+        lines.push(
+            `📊 **${t(locale, "rank.recent_activity")}**`,
+            `${t(locale, "server_rank.period_daily")}: +${periodStats.daily.toLocaleString()} | ${t(locale, "server_rank.period_weekly")}: +${periodStats.weekly.toLocaleString()} | ${t(locale, "server_rank.period_monthly")}: +${periodStats.monthly.toLocaleString()}`,
+            ""
+        );
+    }
+
+    lines.push(
+        `💬 ${(stats?.totalMessages ?? 0).toLocaleString()}  ·  🎤 ${formatVoiceTime(stats?.totalVoiceMinutes ?? 0)}  ·  ❤️ ${(stats?.totalReactions ?? 0).toLocaleString()}  ·  👥 ${(stats?.activeMembers ?? 0).toLocaleString()}`
+    );
+
+    return new EmbedBuilder()
+        .setTitle(`🏆 ${guildName} — Level ${level}`)
+        .setDescription(lines.join("\n"))
+        .setColor(0xf0b132)
+        .setTimestamp();
+}
+
+export function buildServerLeaderboardEmbed(
+    servers: IGuildStats[],
+    serverNames: Map<string, string>,
+    locale: SupportedLocale,
+    page: number,
+    totalPages: number
+): EmbedBuilder {
+    if (servers.length === 0) {
+        return new EmbedBuilder()
+            .setTitle(`🏆 ${t(locale, "leaderboard.servers_title")}`)
+            .setDescription(t(locale, "leaderboard.servers_empty"))
+            .setColor(0xf0b132);
+    }
+
+    const offset = (page - 1) * 10;
+    const lines = servers.map((s, i) => {
+        const rank = offset + i;
+        const medal = rank < 3 ? MEDALS[rank] : "";
+        const prefix = `#${rank + 1}  ${medal}`;
+        const name = serverNames.get(s.guildId) ?? "Unknown Server";
+        return `${prefix} ${name} — ${s.totalXP.toLocaleString()} XP (👥 ${s.activeMembers})`;
+    });
+
+    return new EmbedBuilder()
+        .setTitle(`🏆 ${t(locale, "leaderboard.servers_title")}`)
+        .setDescription(lines.join("\n"))
+        .setColor(0xf0b132)
+        .setFooter({ text: t(locale, "leaderboard.page_footer", { page, totalPages }) })
+        .setTimestamp();
+}
+
+export function buildServerPeriodLeaderboardEmbed(
+    snapshots: IGuildStatsSnapshot[],
+    title: string,
+    serverNames: Map<string, string>,
+    locale: SupportedLocale,
+    page: number,
+    totalPages: number
+): EmbedBuilder {
+    if (snapshots.length === 0) {
+        return new EmbedBuilder()
+            .setTitle(title)
+            .setDescription(t(locale, "leaderboard.servers_empty"))
+            .setColor(0xf0b132);
+    }
+
+    const offset = (page - 1) * 10;
+    const lines = snapshots.map((s, i) => {
+        const rank = offset + i;
+        const medal = rank < 3 ? MEDALS[rank] : "";
+        const prefix = `#${rank + 1}  ${medal}`;
+        const name = serverNames.get(s.guildId) ?? "Unknown Server";
+        return `${prefix} ${name} — ${s.xp.toLocaleString()} XP (👥 ${s.activeMembers})`;
+    });
+
+    return new EmbedBuilder()
+        .setTitle(title)
+        .setDescription(lines.join("\n"))
+        .setColor(0xf0b132)
+        .setFooter({ text: t(locale, "leaderboard.page_footer", { page, totalPages }) })
         .setTimestamp();
 }
