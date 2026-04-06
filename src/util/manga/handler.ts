@@ -15,6 +15,7 @@ import { FOOTER, SERVER_HD, URL_REPORT_BUG } from "../../util/config";
 import { BUTTON_ID } from "../../util/config/button";
 import { resolveLocale } from "../i18n/locale";
 import { t } from "../i18n/t";
+import { descriptionLocales } from "../i18n/commandLocales";
 import log from "../../util/log/logger.mixed";
 import type { MangaSource } from "./sources";
 
@@ -30,12 +31,22 @@ export function mangaCommand(source: MangaSource) {
             .addSubcommand((sub) =>
                 sub
                     .setName("read")
-                    .setDescription(`Read H manga and D`)
+                    .setDescription("Read H manga and D")
+                    .setDescriptionLocalizations(descriptionLocales("cmd.manga.read.desc"))
                     .addIntegerOption((opt) =>
-                        opt.setName("id").setDescription("The ID you wanna read").setRequired(true)
+                        opt
+                            .setName("id")
+                            .setDescription("The ID you wanna read")
+                            .setDescriptionLocalizations(descriptionLocales("cmd.manga.read.id.desc"))
+                            .setRequired(true)
                     )
             )
-            .addSubcommand((sub) => sub.setName("random").setDescription(`Random H and D from ${source.name}`)),
+            .addSubcommand((sub) =>
+                sub
+                    .setName("random")
+                    .setDescription(`Random H and D from ${source.name}`)
+                    .setDescriptionLocalizations(descriptionLocales("cmd.manga.random.desc"))
+            ),
 
         async execute(interaction: ChatInputCommandInteraction): Promise<void> {
             const locale = await resolveLocale(interaction);
