@@ -10,6 +10,7 @@ import MemberXPModel from "../../models/memberXP.model";
 import GuildXPConfigModel from "../../models/guildXPConfig.model";
 import { levelFromXP } from "../../util/xp/calculator";
 import { syncGlobalXP } from "../../util/xp/globalXP";
+import { syncSnapshots } from "../../util/xp/snapshotSync";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
@@ -162,6 +163,9 @@ export default {
                     const delta = amount - oldXP;
                     await syncGlobalXP(target.id, delta);
 
+                    // Sync period snapshots with delta
+                    await syncSnapshots(target.id, guildId, delta, "admin");
+
                     const embed = new EmbedBuilder()
                         .setDescription(
                             t(locale, "xp.set", {
@@ -203,6 +207,9 @@ export default {
                     // Sync global XP
                     await syncGlobalXP(target.id, amount);
 
+                    // Sync period snapshots
+                    await syncSnapshots(target.id, guildId, amount, "admin");
+
                     const embed = new EmbedBuilder()
                         .setDescription(
                             t(locale, "xp.add", {
@@ -242,6 +249,9 @@ export default {
                     // Sync global XP (negative delta, clamped in syncGlobalXP)
                     const actualRemoved = currentXP - newXP;
                     await syncGlobalXP(target.id, -actualRemoved);
+
+                    // Sync period snapshots (negative delta)
+                    await syncSnapshots(target.id, guildId, -actualRemoved, "admin");
 
                     const embed = new EmbedBuilder()
                         .setDescription(
