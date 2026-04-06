@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import PrayService, { CurseResult } from "../../services/economy/pray.service";
 import Reply from "../../util/decorator/reply";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
@@ -36,12 +37,12 @@ export default {
     data: new SlashCommandBuilder()
         .setName("curse")
         .setDescription("Curse to receive coin (less than pray)")
-        .setDescriptionLocalizations({ vi: "Nguyền rủa để nhận coin (ít hơn pray)" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.curse.desc"))
         .addUserOption((option) =>
             option
                 .setName("target")
                 .setDescription("Curse someone")
-                .setDescriptionLocalizations({ vi: "Nguyền rủa ai đó" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.curse.target.desc"))
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();

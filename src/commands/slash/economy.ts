@@ -6,6 +6,7 @@ import {
     SlashCommandBuilder,
 } from "discord.js";
 import CurrencyService from "../../services/economy/currency.service";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
@@ -18,25 +19,25 @@ export default {
     data: new SlashCommandBuilder()
         .setName("economy")
         .setDescription("Economy management (admin)")
-        .setDescriptionLocalizations({ vi: "Quản lý kinh tế (admin)" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.economy.desc"))
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addSubcommand((sub) =>
             sub
                 .setName("set-coin")
                 .setDescription("Set a user's coin")
-                .setDescriptionLocalizations({ vi: "Đặt coin cho người dùng" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.economy.set-coin.desc"))
                 .addUserOption((opt) =>
                     opt
                         .setName("user")
                         .setDescription("Target user")
-                        .setDescriptionLocalizations({ vi: "Người dùng" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.set-coin.user.desc"))
                         .setRequired(true)
                 )
                 .addIntegerOption((opt) =>
                     opt
                         .setName("amount")
                         .setDescription("Coin amount")
-                        .setDescriptionLocalizations({ vi: "Số coin" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.set-coin.amount.desc"))
                         .setMinValue(0)
                         .setRequired(true)
                 )
@@ -45,19 +46,19 @@ export default {
             sub
                 .setName("add-coin")
                 .setDescription("Add coin to a user")
-                .setDescriptionLocalizations({ vi: "Thêm coin cho người dùng" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.economy.add-coin.desc"))
                 .addUserOption((opt) =>
                     opt
                         .setName("user")
                         .setDescription("Target user")
-                        .setDescriptionLocalizations({ vi: "Người dùng" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.add-coin.user.desc"))
                         .setRequired(true)
                 )
                 .addIntegerOption((opt) =>
                     opt
                         .setName("amount")
                         .setDescription("Coin to add")
-                        .setDescriptionLocalizations({ vi: "Số coin thêm" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.add-coin.amount.desc"))
                         .setRequired(true)
                 )
         )
@@ -65,19 +66,19 @@ export default {
             sub
                 .setName("set-gem")
                 .setDescription("Set a user's gem")
-                .setDescriptionLocalizations({ vi: "Đặt gem cho người dùng" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.economy.set-gem.desc"))
                 .addUserOption((opt) =>
                     opt
                         .setName("user")
                         .setDescription("Target user")
-                        .setDescriptionLocalizations({ vi: "Người dùng" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.set-gem.user.desc"))
                         .setRequired(true)
                 )
                 .addIntegerOption((opt) =>
                     opt
                         .setName("amount")
                         .setDescription("Gem amount")
-                        .setDescriptionLocalizations({ vi: "Số gem" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.set-gem.amount.desc"))
                         .setMinValue(0)
                         .setRequired(true)
                 )
@@ -86,19 +87,19 @@ export default {
             sub
                 .setName("add-gem")
                 .setDescription("Add gem to a user")
-                .setDescriptionLocalizations({ vi: "Thêm gem cho người dùng" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.economy.add-gem.desc"))
                 .addUserOption((opt) =>
                     opt
                         .setName("user")
                         .setDescription("Target user")
-                        .setDescriptionLocalizations({ vi: "Người dùng" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.add-gem.user.desc"))
                         .setRequired(true)
                 )
                 .addIntegerOption((opt) =>
                     opt
                         .setName("amount")
                         .setDescription("Gem to add")
-                        .setDescriptionLocalizations({ vi: "Số gem thêm" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.add-gem.amount.desc"))
                         .setRequired(true)
                 )
         ),

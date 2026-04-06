@@ -7,6 +7,7 @@ import {
 } from "discord.js";
 import ShopService from "../../services/economy/shop.service";
 import CurrencyService from "../../services/economy/currency.service";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
@@ -157,17 +158,17 @@ export default {
     data: new SlashCommandBuilder()
         .setName("shop")
         .setDescription("Server shop")
-        .setDescriptionLocalizations({ vi: "Cửa hàng server" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.shop.desc"))
         .addSubcommand((sub) =>
             sub
                 .setName("view")
                 .setDescription("View items in the shop")
-                .setDescriptionLocalizations({ vi: "Xem danh sách items" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.shop.view.desc"))
                 .addIntegerOption((opt) =>
                     opt
                         .setName("page")
                         .setDescription("Page number")
-                        .setDescriptionLocalizations({ vi: "Trang" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.view.page.desc"))
                         .setMinValue(1)
                 )
         )
@@ -175,12 +176,12 @@ export default {
             sub
                 .setName("buy")
                 .setDescription("Buy an item")
-                .setDescriptionLocalizations({ vi: "Mua item" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.shop.buy.desc"))
                 .addStringOption((opt) =>
                     opt
                         .setName("item-id")
                         .setDescription("Item ID")
-                        .setDescriptionLocalizations({ vi: "ID của item" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.buy.item-id.desc"))
                         .setRequired(true)
                 )
         )
@@ -188,33 +189,33 @@ export default {
             sub
                 .setName("add")
                 .setDescription("Add an item to the shop (Admin)")
-                .setDescriptionLocalizations({ vi: "Thêm item vào shop (Admin)" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.shop.add.desc"))
                 .addStringOption((opt) =>
                     opt
                         .setName("item-id")
                         .setDescription("Unique ID")
-                        .setDescriptionLocalizations({ vi: "Unique ID" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.add.item-id.desc"))
                         .setRequired(true)
                 )
                 .addStringOption((opt) =>
                     opt
                         .setName("name")
                         .setDescription("Item name")
-                        .setDescriptionLocalizations({ vi: "Tên item" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.add.name.desc"))
                         .setRequired(true)
                 )
                 .addStringOption((opt) =>
                     opt
                         .setName("description")
                         .setDescription("Description")
-                        .setDescriptionLocalizations({ vi: "Mô tả" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.add.description.desc"))
                         .setRequired(true)
                 )
                 .addStringOption((opt) =>
                     opt
                         .setName("type")
                         .setDescription("Item type")
-                        .setDescriptionLocalizations({ vi: "Loại item" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.add.type.desc"))
                         .setRequired(true)
                         .addChoices(
                             { name: "Role", value: "role" },
@@ -226,7 +227,7 @@ export default {
                     opt
                         .setName("price")
                         .setDescription("Price")
-                        .setDescriptionLocalizations({ vi: "Giá" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.add.price.desc"))
                         .setMinValue(1)
                         .setRequired(true)
                 )
@@ -234,7 +235,7 @@ export default {
                     opt
                         .setName("currency")
                         .setDescription("Currency type")
-                        .setDescriptionLocalizations({ vi: "Loại tiền" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.add.currency.desc"))
                         .setRequired(true)
                         .addChoices({ name: "Coin", value: "coin" }, { name: "Gem", value: "gem" })
                 )
@@ -242,13 +243,13 @@ export default {
                     opt
                         .setName("role")
                         .setDescription("Role (if type=role)")
-                        .setDescriptionLocalizations({ vi: "Role (nếu type=role)" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.add.role.desc"))
                 )
                 .addIntegerOption((opt) =>
                     opt
                         .setName("stock")
                         .setDescription("Stock quantity (leave empty = unlimited)")
-                        .setDescriptionLocalizations({ vi: "Số lượng (bỏ trống = vô hạn)" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.add.stock.desc"))
                         .setMinValue(1)
                 )
         )
@@ -256,12 +257,12 @@ export default {
             sub
                 .setName("remove")
                 .setDescription("Remove an item from the shop (Admin)")
-                .setDescriptionLocalizations({ vi: "Xóa item khỏi shop (Admin)" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.shop.remove.desc"))
                 .addStringOption((opt) =>
                     opt
                         .setName("item-id")
                         .setDescription("Item ID")
-                        .setDescriptionLocalizations({ vi: "ID của item" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.shop.remove.item-id.desc"))
                         .setRequired(true)
                 )
         ),

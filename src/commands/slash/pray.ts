@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import PrayService, { PrayResult } from "../../services/economy/pray.service";
 import Reply from "../../util/decorator/reply";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
@@ -52,12 +53,12 @@ export default {
     data: new SlashCommandBuilder()
         .setName("pray")
         .setDescription("Pray to receive coin")
-        .setDescriptionLocalizations({ vi: "Cầu nguyện để nhận coin" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.pray.desc"))
         .addUserOption((option) =>
             option
                 .setName("target")
                 .setDescription("Pray for another user")
-                .setDescriptionLocalizations({ vi: "Cầu nguyện cho người khác" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.pray.target.desc"))
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();

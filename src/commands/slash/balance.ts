@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import CurrencyService from "../../services/economy/currency.service";
 import Reply from "../../util/decorator/reply";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
@@ -13,12 +14,12 @@ export default {
     data: new SlashCommandBuilder()
         .setName("balance")
         .setDescription("View your coin and gem balance")
-        .setDescriptionLocalizations({ vi: "Xem số dư coin và gem" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.balance.desc"))
         .addUserOption((option) =>
             option
                 .setName("user")
                 .setDescription("View another user's balance")
-                .setDescriptionLocalizations({ vi: "Xem số dư của người khác" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.balance.user.desc"))
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
