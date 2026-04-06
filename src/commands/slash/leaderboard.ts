@@ -10,9 +10,13 @@ import {
 import client from "../../client";
 import MemberXPModel from "../../models/memberXP.model";
 import UserModel from "../../models/user.model";
-import { buildLeaderboardEmbed, buildGlobalLeaderboardEmbed } from "../../util/xp/rankCard";
+import XPSnapshotModel from "../../models/xpSnapshot.model";
+import { BUTTON_ID } from "../../util/config/button";
+import { buildLeaderboardEmbed, buildGlobalLeaderboardEmbed, buildPeriodLeaderboardEmbed } from "../../util/xp/rankCard";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
+import { getCurrentPeriodKeys } from "../../util/xp/periodKey";
+import type { Period } from "../../util/xp/periodKey";
 import type { SupportedLocale } from "../../util/i18n/index";
 import type { IUser } from "../../models/user.model";
 
@@ -20,7 +24,49 @@ const PAGE_SIZE = 10;
 const MAX_RESULTS = 100;
 const IDLE_TIMEOUT = 60_000;
 
-function buildButtons(
+type LeaderboardPeriod = Period | "all";
+
+const PERIOD_BUTTON_MAP: Record<string, LeaderboardPeriod> = {
+    [BUTTON_ID.LEADERBOARD_PERIOD_DAILY]: "daily",
+    [BUTTON_ID.LEADERBOARD_PERIOD_WEEKLY]: "weekly",
+    [BUTTON_ID.LEADERBOARD_PERIOD_MONTHLY]: "monthly",
+    [BUTTON_ID.LEADERBOARD_PERIOD_YEARLY]: "yearly",
+    [BUTTON_ID.LEADERBOARD_PERIOD_ALL]: "all",
+};
+
+const PERIOD_LABEL_KEYS: Record<LeaderboardPeriod, string> = {
+    daily: "leaderboard.period.daily",
+    weekly: "leaderboard.period.weekly",
+    monthly: "leaderboard.period.monthly",
+    yearly: "leaderboard.period.yearly",
+    all: "leaderboard.period.all",
+};
+
+function buildPeriodRow(
+    activePeriod: LeaderboardPeriod,
+    locale: SupportedLocale,
+    disabled = false
+): ActionRowBuilder<ButtonBuilder> {
+    const periods: { id: string; period: LeaderboardPeriod }[] = [
+        { id: BUTTON_ID.LEADERBOARD_PERIOD_DAILY, period: "daily" },
+        { id: BUTTON_ID.LEADERBOARD_PERIOD_WEEKLY, period: "weekly" },
+        { id: BUTTON_ID.LEADERBOARD_PERIOD_MONTHLY, period: "monthly" },
+        { id: BUTTON_ID.LEADERBOARD_PERIOD_YEARLY, period: "yearly" },
+        { id: BUTTON_ID.LEADERBOARD_PERIOD_ALL, period: "all" },
+    ];
+
+    return new ActionRowBuilder<ButtonBuilder>().addComponents(
+        periods.map(({ id, period }) =>
+            new ButtonBuilder()
+                .setCustomId(id)
+                .setLabel(t(locale, PERIOD_LABEL_KEYS[period]))
+                .setStyle(period === activePeriod ? ButtonStyle.Primary : ButtonStyle.Secondary)
+                .setDisabled(disabled)
+        )
+    );
+}
+
+function buildPageRow(
     page: number,
     totalPages: number,
     locale: SupportedLocale,
@@ -45,6 +91,15 @@ function buildButtons(
     );
 }
 
+function buildTitle(mode: string, period: LeaderboardPeriod, locale: SupportedLocale): string {
+    const modeLabel = mode === "global" ? "🌐 Global" : "🏆 Server";
+    if (period === "all") {
+        return t(locale, "leaderboard.period_title_all", { mode: modeLabel });
+    }
+    const periodLabel = t(locale, PERIOD_LABEL_KEYS[period]);
+    return t(locale, "leaderboard.period_title", { mode: modeLabel, period: periodLabel });
+}
+
 async function resolveUsernames(
     users: IUser[],
     interaction: ChatInputCommandInteraction,
@@ -60,100 +115,142 @@ async function resolveUsernames(
                     return;
                 }
             } catch {
-                // Not in this guild — fall through
+                // Not in this guild
             }
             try {
                 const user = await client.users.fetch(u.userID);
                 cache.set(u.userID, user.displayName);
             } catch {
-                // User not fetchable — fallback handled in embed builder
+                // User not fetchable
             }
         })
     );
 }
 
-async function paginateGlobal(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
-    const allUsers = await UserModel.find().sort({ totalPoint: -1 }).limit(MAX_RESULTS);
-    const totalPages = Math.max(1, Math.ceil(allUsers.length / PAGE_SIZE));
-    let page = 1;
-
-    const usernameCache = new Map<string, string>();
-    const getPage = (p: number): IUser[] => allUsers.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
-
-    await resolveUsernames(getPage(page), interaction, usernameCache);
-
-    const embed = buildGlobalLeaderboardEmbed(getPage(page), usernameCache, locale, page, totalPages);
-    const row = buildButtons(page, totalPages, locale);
-    const message = await interaction.editReply({ embeds: [embed], components: [row] });
-
-    while (totalPages > 1) {
-        try {
-            const i = await message.awaitMessageComponent({
-                componentType: ComponentType.Button,
-                time: IDLE_TIMEOUT,
-                filter: (i) =>
-                    i.user.id === interaction.user.id && (i.customId === "lb_prev" || i.customId === "lb_next"),
-            });
-
-            await i.deferUpdate();
-
-            if (i.customId === "lb_next") page = Math.min(page + 1, totalPages);
-            else page = Math.max(page - 1, 1);
-
-            await resolveUsernames(getPage(page), interaction, usernameCache);
-            const newEmbed = buildGlobalLeaderboardEmbed(getPage(page), usernameCache, locale, page, totalPages);
-            const newRow = buildButtons(page, totalPages, locale);
-            await i.editReply({ embeds: [newEmbed], components: [newRow] });
-        } catch {
-            // Timeout — disable buttons
-            break;
-        }
-    }
-
-    const finalEmbed = buildGlobalLeaderboardEmbed(getPage(page), usernameCache, locale, page, totalPages);
-    const disabledRow = buildButtons(page, totalPages, locale, true);
-    await interaction.editReply({ embeds: [finalEmbed], components: [disabledRow] }).catch(() => {});
+interface SnapshotEntry {
+    userId: string;
+    xp: number;
+    messageCount: number;
+    voiceMinutes: number;
+    reactionCount: number;
 }
 
-async function paginateServer(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
+async function fetchPeriodData(
+    period: Period,
+    guildId: string | null
+): Promise<SnapshotEntry[]> {
+    const periodKeys = getCurrentPeriodKeys();
+    return XPSnapshotModel.find({
+        guildId,
+        period,
+        periodKey: periodKeys[period],
+    })
+        .sort({ xp: -1 })
+        .limit(MAX_RESULTS)
+        .lean();
+}
+
+async function paginateLeaderboard(
+    interaction: ChatInputCommandInteraction,
+    mode: "server" | "global",
+    locale: SupportedLocale
+): Promise<void> {
     const guildId = interaction.guildId!;
-    const allMembers = await MemberXPModel.find({ guildId }).sort({ xp: -1 }).limit(MAX_RESULTS);
-    const totalPages = Math.max(1, Math.ceil(allMembers.length / PAGE_SIZE));
+    const guildName = interaction.guild?.name ?? "Server";
+    const usernameCache = new Map<string, string>();
+
+    let currentPeriod: LeaderboardPeriod = "weekly";
     let page = 1;
 
-    const guildName = interaction.guild?.name ?? "Server";
-    const getPage = (p: number) => allMembers.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
+    async function fetchData(): Promise<{ entries: SnapshotEntry[]; allTimeGlobal?: IUser[]; allTimeServer?: { userId: string; xp: number; level: number }[] }> {
+        if (currentPeriod === "all") {
+            if (mode === "global") {
+                const allUsers = await UserModel.find().sort({ totalPoint: -1 }).limit(MAX_RESULTS).lean();
+                return { entries: [], allTimeGlobal: allUsers as unknown as IUser[] };
+            } else {
+                const allMembers = await MemberXPModel.find({ guildId }).sort({ xp: -1 }).limit(MAX_RESULTS).lean();
+                return { entries: [], allTimeServer: allMembers };
+            }
+        }
+        const entries = await fetchPeriodData(currentPeriod, mode === "global" ? null : guildId);
+        return { entries };
+    }
 
-    const embed = buildLeaderboardEmbed(getPage(page), guildName, locale, page, totalPages);
-    const row = buildButtons(page, totalPages, locale);
-    const message = await interaction.editReply({ embeds: [embed], components: [row] });
+    async function buildEmbed(data: Awaited<ReturnType<typeof fetchData>>, p: number, totalPages: number) {
+        const title = buildTitle(mode, currentPeriod, locale);
 
-    while (totalPages > 1) {
+        if (currentPeriod === "all") {
+            if (mode === "global" && data.allTimeGlobal) {
+                const pageData = data.allTimeGlobal.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
+                await resolveUsernames(pageData as IUser[], interaction, usernameCache);
+                return buildGlobalLeaderboardEmbed(pageData as IUser[], usernameCache, locale, p, totalPages);
+            } else if (data.allTimeServer) {
+                const pageData = data.allTimeServer.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
+                return buildLeaderboardEmbed(pageData as any, guildName, locale, p, totalPages);
+            }
+        }
+
+        const pageData = data.entries.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
+        return buildPeriodLeaderboardEmbed(pageData, title, locale, p, totalPages, mode === "global", interaction, usernameCache);
+    }
+
+    let data = await fetchData();
+    const getTotal = () => {
+        if (currentPeriod === "all") {
+            return data.allTimeGlobal?.length ?? data.allTimeServer?.length ?? 0;
+        }
+        return data.entries.length;
+    };
+
+    let totalPages = Math.max(1, Math.ceil(getTotal() / PAGE_SIZE));
+    page = 1;
+
+    const embed = await buildEmbed(data, page, totalPages);
+    const periodRow = buildPeriodRow(currentPeriod, locale);
+    const pageRow = buildPageRow(page, totalPages, locale);
+    const message = await interaction.editReply({ embeds: [embed!], components: [periodRow, pageRow] });
+
+    // Interaction collector
+    while (true) {
         try {
             const i = await message.awaitMessageComponent({
                 componentType: ComponentType.Button,
                 time: IDLE_TIMEOUT,
-                filter: (i) =>
-                    i.user.id === interaction.user.id && (i.customId === "lb_prev" || i.customId === "lb_next"),
+                filter: (i) => i.user.id === interaction.user.id,
             });
 
             await i.deferUpdate();
 
-            if (i.customId === "lb_next") page = Math.min(page + 1, totalPages);
-            else page = Math.max(page - 1, 1);
+            // Check if period button
+            if (i.customId in PERIOD_BUTTON_MAP) {
+                const newPeriod = PERIOD_BUTTON_MAP[i.customId];
+                if (newPeriod !== currentPeriod) {
+                    currentPeriod = newPeriod;
+                    data = await fetchData();
+                    totalPages = Math.max(1, Math.ceil(getTotal() / PAGE_SIZE));
+                    page = 1;
+                }
+            } else if (i.customId === "lb_next") {
+                page = Math.min(page + 1, totalPages);
+            } else if (i.customId === "lb_prev") {
+                page = Math.max(page - 1, 1);
+            }
 
-            const newEmbed = buildLeaderboardEmbed(getPage(page), guildName, locale, page, totalPages);
-            const newRow = buildButtons(page, totalPages, locale);
-            await i.editReply({ embeds: [newEmbed], components: [newRow] });
+            const newEmbed = await buildEmbed(data, page, totalPages);
+            const newPeriodRow = buildPeriodRow(currentPeriod, locale);
+            const newPageRow = buildPageRow(page, totalPages, locale);
+            await i.editReply({ embeds: [newEmbed!], components: [newPeriodRow, newPageRow] });
         } catch {
-            // Timeout — disable buttons
+            // Timeout
             break;
         }
     }
 
-    const finalEmbed = buildLeaderboardEmbed(getPage(page), guildName, locale, page, totalPages);
-    const disabledRow = buildButtons(page, totalPages, locale, true);
-    await interaction.editReply({ embeds: [finalEmbed], components: [disabledRow] }).catch(() => {});
+    // Disable all buttons
+    const finalEmbed = await buildEmbed(data, page, totalPages);
+    const disabledPeriodRow = buildPeriodRow(currentPeriod, locale, true);
+    const disabledPageRow = buildPageRow(page, totalPages, locale, true);
+    await interaction.editReply({ embeds: [finalEmbed!], components: [disabledPeriodRow, disabledPageRow] }).catch(() => {});
 }
 
 export default {
@@ -174,13 +271,8 @@ export default {
         const locale = await resolveLocale(interaction).catch(() => "en" as const);
 
         try {
-            const mode = interaction.options.getString("mode") ?? "server";
-
-            if (mode === "global") {
-                await paginateGlobal(interaction, locale);
-            } else {
-                await paginateServer(interaction, locale);
-            }
+            const mode = (interaction.options.getString("mode") ?? "server") as "server" | "global";
+            await paginateLeaderboard(interaction, mode, locale);
         } catch {
             await interaction.editReply(t(locale, "leaderboard.error"));
         }

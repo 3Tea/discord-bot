@@ -1,6 +1,8 @@
 import { EmbedBuilder } from "discord.js";
+import type { ChatInputCommandInteraction } from "discord.js";
 import type { IMemberXP } from "../../models/memberXP.model";
 import type { IUser } from "../../models/user.model";
+import client from "../../client";
 import { levelFromXP, progressToNextLevel, xpForLevel } from "./calculator";
 import { t } from "../i18n/t";
 import type { SupportedLocale } from "../i18n/index";
@@ -144,5 +146,75 @@ export function buildGlobalLeaderboardEmbed(
         .setDescription(lines.join("\n"))
         .setColor(0xf0b132)
         .setFooter({ text: `Global · ${t(locale, "leaderboard.page_footer", { page, totalPages })}` })
+        .setTimestamp();
+}
+
+interface PeriodEntry {
+    userId: string;
+    xp: number;
+    messageCount: number;
+    voiceMinutes: number;
+    reactionCount: number;
+}
+
+export async function buildPeriodLeaderboardEmbed(
+    entries: PeriodEntry[],
+    title: string,
+    locale: SupportedLocale,
+    page: number,
+    totalPages: number,
+    isGlobal: boolean,
+    interaction: ChatInputCommandInteraction,
+    usernameCache: Map<string, string>
+): Promise<EmbedBuilder> {
+    if (entries.length === 0) {
+        return new EmbedBuilder()
+            .setTitle(title)
+            .setDescription(t(locale, "leaderboard.empty"))
+            .setColor(0xf0b132);
+    }
+
+    // Resolve usernames for global mode
+    if (isGlobal) {
+        await Promise.all(
+            entries.map(async (e) => {
+                if (usernameCache.has(e.userId)) return;
+                try {
+                    const member = await interaction.guild?.members.fetch(e.userId);
+                    if (member) {
+                        usernameCache.set(e.userId, member.displayName);
+                        return;
+                    }
+                } catch {
+                    // Not in guild
+                }
+                try {
+                    const user = await client.users.fetch(e.userId);
+                    usernameCache.set(e.userId, user.displayName);
+                } catch {
+                    // Not fetchable
+                }
+            })
+        );
+    }
+
+    const offset = (page - 1) * 10;
+    const lines = entries.map((e, i) => {
+        const rank = offset + i;
+        const medal = rank < 3 ? MEDALS[rank] : "";
+        const prefix = `#${rank + 1}  ${medal}`;
+        const display = isGlobal && usernameCache.has(e.userId)
+            ? `@${usernameCache.get(e.userId)}`
+            : `<@${e.userId}>`;
+        return `${prefix} ${display} — ${e.xp.toLocaleString()} XP`;
+    });
+
+    const footerLabel = isGlobal ? "Global" : (interaction.guild?.name ?? "Server");
+
+    return new EmbedBuilder()
+        .setTitle(title)
+        .setDescription(lines.join("\n"))
+        .setColor(0xf0b132)
+        .setFooter({ text: `${footerLabel} · ${t(locale, "leaderboard.page_footer", { page, totalPages })}` })
         .setTimestamp();
 }
