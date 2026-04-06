@@ -28,6 +28,7 @@ export function mangaCommand(source: MangaSource) {
         data: new SlashCommandBuilder()
             .setName(source.name)
             .setDescription(source.description)
+            .setDescriptionLocalizations(descriptionLocales("cmd.manga.desc", { source: source.name }))
             .addSubcommand((sub) =>
                 sub
                     .setName("read")
@@ -45,7 +46,7 @@ export function mangaCommand(source: MangaSource) {
                 sub
                     .setName("random")
                     .setDescription(`Random H and D from ${source.name}`)
-                    .setDescriptionLocalizations(descriptionLocales("cmd.manga.random.desc"))
+                    .setDescriptionLocalizations(descriptionLocales("cmd.manga.random.desc", { source: source.name }))
             ),
 
         async execute(interaction: ChatInputCommandInteraction): Promise<void> {

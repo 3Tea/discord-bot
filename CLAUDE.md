@@ -50,7 +50,7 @@ src/
   connector/
     mongo/index.ts        # MongoDB connection
     redis/index.ts        # RedisService singleton class
-  locales/                # i18n translation files (7 languages)
+  locales/                # i18n translation files (15 languages)
     en.json               # English (fallback)
     vi.json               # Vietnamese
     id.json               # Indonesian
@@ -58,6 +58,14 @@ src/
     ja.json               # Japanese
     zh.json               # Chinese
     ko.json               # Korean
+    pt-BR.json            # Portuguese (Brazil)
+    fr.json               # French
+    de.json               # German
+    ru.json               # Russian
+    tr.json               # Turkish
+    it.json               # Italian
+    pl.json               # Polish
+    nl.json               # Dutch
   util/
     config/index.ts       # All env vars as typed constants
     config/button.ts      # Button ID constants (BUTTON_ID)
@@ -90,6 +98,7 @@ Create `src/commands/slash/{name}.ts` — auto-discovered by loader, no registra
 ```typescript
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Reply from "../../util/decorator/reply";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 
@@ -97,14 +106,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("command-name")
         .setDescription("What it does in English")
-        .setDescriptionLocalizations({
-            vi: "Mô tả bằng Tiếng Việt",
-            id: "Deskripsi dalam Bahasa Indonesia",
-            "es-ES": "Descripción en español",
-            ja: "日本語での説明",
-            "zh-CN": "中文描述",
-            ko: "한국어 설명",
-        }),
+        .setDescriptionLocalizations(descriptionLocales("cmd.command-name.desc")),
     async execute(interaction: ChatInputCommandInteraction) {
         const locale = await resolveLocale(interaction);
         const embed = new EmbedBuilder()
@@ -339,7 +341,7 @@ member.voice.channel?.setName("x");
 
 ## i18n (Internationalization)
 
-Uses [i18next](https://www.i18next.com/) with `i18next-fs-backend`. Supported languages: English (`en`, fallback), Vietnamese (`vi`), Indonesian (`id`), Spanish (`es`), Japanese (`ja`), Chinese (`zh`), Korean (`ko`).
+Uses [i18next](https://www.i18next.com/) with `i18next-fs-backend`. Supported languages: English (`en`, fallback), Vietnamese (`vi`), Indonesian (`id`), Spanish (`es`), Japanese (`ja`), Chinese (`zh`), Korean (`ko`), Portuguese Brazil (`pt-BR`), French (`fr`), German (`de`), Russian (`ru`), Turkish (`tr`), Italian (`it`), Polish (`pl`), Dutch (`nl`).
 
 ### Locale Resolution Priority
 
@@ -381,8 +383,8 @@ const locale = await resolveGuildLocale(guildId);
 ### Rules — MUST follow
 
 - **Never hardcode user-facing strings** — always use `t(locale, "key")`
-- **English is the primary description** in `setDescription()`, localizations go in `setDescriptionLocalizations({ vi: "...", id: "...", es: "...", ja: "...", zh: "...", ko: "..." })`
-- **Add keys to ALL 7 locale files** (`en.json`, `vi.json`, `id.json`, `es.json`, `ja.json`, `zh.json`, `ko.json`) when adding new strings
+- **English is the primary description** in `setDescription()`, localizations via `setDescriptionLocalizations(descriptionLocales("cmd.{command}.desc"))` — add `cmd.*` keys to all 15 locale files
+- **Add keys to ALL 15 locale files** (`en.json`, `vi.json`, `id.json`, `es.json`, `ja.json`, `zh.json`, `ko.json`, `pt-BR.json`, `fr.json`, `de.json`, `ru.json`, `tr.json`, `it.json`, `pl.json`, `nl.json`) when adding new strings
 - **Use interpolation** for dynamic values: `t(locale, "key", { name: value })` with `{{name}}` in JSON
 - **Error catch blocks**: resolve locale with fallback: `await resolveLocale(interaction).catch(() => "en" as const)`
 - **Event handlers**: use `resolveGuildLocale(guildId)` since there's no interaction

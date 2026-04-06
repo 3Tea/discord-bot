@@ -30,13 +30,13 @@ const I18N_TO_DISCORD_LOCALE: Record<string, string> = {
  *
  * Must be called after initI18n() has completed.
  */
-export function descriptionLocales(key: string): Record<string, string> {
+export function descriptionLocales(key: string, options?: Record<string, string>): Record<string, string> {
     const result: Record<string, string> = {};
     for (const locale of SUPPORTED_LOCALES) {
         if (locale === "en") continue;
         const discordCode = I18N_TO_DISCORD_LOCALE[locale];
         if (discordCode) {
-            result[discordCode] = i18next.t(key, { lng: locale });
+            result[discordCode] = i18next.t(key, { lng: locale, ...options });
         }
     }
     return result;
