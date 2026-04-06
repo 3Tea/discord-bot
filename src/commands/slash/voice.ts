@@ -15,6 +15,7 @@ import { BUTTON_ID } from "../../util/config/button";
 import { checkCooldown, setCooldown, updatePanel } from "../../util/voice/helpers";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 
 const TTL_12H = 60 * 60 * 12;
 
@@ -22,16 +23,17 @@ export default {
     data: new SlashCommandBuilder()
         .setName("voice")
         .setDescription("Voice channel management")
-        .setDescriptionLocalizations({ vi: "Quản lý kênh voice" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.voice.desc"))
         .addSubcommand((sub) =>
             sub
                 .setName("limit")
                 .setDescription("Set the user limit for the voice channel")
-                .setDescriptionLocalizations({ vi: "Đặt giới hạn người trong kênh voice" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.voice.limit.desc"))
                 .addIntegerOption((opt) =>
                     opt
                         .setName("number")
                         .setDescription("Number of users (0-99)")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.voice.limit.number.desc"))
                         .setMinValue(0)
                         .setMaxValue(99)
                         .setRequired(true)
@@ -41,56 +43,85 @@ export default {
             sub
                 .setName("name")
                 .setDescription("Change the voice channel name")
-                .setDescriptionLocalizations({ vi: "Đổi tên kênh voice" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.voice.name.desc"))
                 .addStringOption((opt) =>
-                    opt.setName("string").setDescription("New name").setMaxLength(50).setRequired(true)
+                    opt
+                        .setName("string")
+                        .setDescription("New name")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.voice.name.string.desc"))
+                        .setMaxLength(50)
+                        .setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("lock")
                 .setDescription("Lock the voice channel")
-                .setDescriptionLocalizations({ vi: "Khóa kênh voice" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.voice.lock.desc"))
         )
         .addSubcommand((sub) =>
             sub
                 .setName("unlock")
                 .setDescription("Unlock the voice channel")
-                .setDescriptionLocalizations({ vi: "Mở khóa kênh voice" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.voice.unlock.desc"))
         )
         .addSubcommand((sub) =>
             sub
                 .setName("hide")
                 .setDescription("Hide the voice channel")
-                .setDescriptionLocalizations({ vi: "Ẩn kênh voice" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.voice.hide.desc"))
         )
         .addSubcommand((sub) =>
             sub
                 .setName("permit")
                 .setDescription("Permit a user to join")
-                .setDescriptionLocalizations({ vi: "Cấp quyền cho người dùng" })
-                .addUserOption((opt) => opt.setName("user").setDescription("User to permit").setRequired(true))
+                .setDescriptionLocalizations(descriptionLocales("cmd.voice.permit.desc"))
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("User to permit")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.voice.permit.user.desc"))
+                        .setRequired(true)
+                )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("block")
                 .setDescription("Block a user from the channel")
-                .setDescriptionLocalizations({ vi: "Chặn người dùng khỏi kênh" })
-                .addUserOption((opt) => opt.setName("user").setDescription("User to block").setRequired(true))
+                .setDescriptionLocalizations(descriptionLocales("cmd.voice.block.desc"))
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("User to block")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.voice.block.user.desc"))
+                        .setRequired(true)
+                )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("kick")
                 .setDescription("Kick a user from the voice channel")
-                .setDescriptionLocalizations({ vi: "Kick người dùng khỏi kênh voice" })
-                .addUserOption((opt) => opt.setName("user").setDescription("User to kick").setRequired(true))
+                .setDescriptionLocalizations(descriptionLocales("cmd.voice.kick.desc"))
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("User to kick")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.voice.kick.user.desc"))
+                        .setRequired(true)
+                )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("transfer")
                 .setDescription("Transfer channel ownership")
-                .setDescriptionLocalizations({ vi: "Chuyển quyền sở hữu kênh" })
-                .addUserOption((opt) => opt.setName("user").setDescription("New owner").setRequired(true))
+                .setDescriptionLocalizations(descriptionLocales("cmd.voice.transfer.desc"))
+                .addUserOption((opt) =>
+                    opt
+                        .setName("user")
+                        .setDescription("New owner")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.voice.transfer.user.desc"))
+                        .setRequired(true)
+                )
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {

@@ -9,22 +9,23 @@ import {
 import { t } from "../../util/i18n/t";
 import { SUPPORTED_LOCALES } from "../../util/i18n/index";
 import type { SupportedLocale } from "../../util/i18n/index";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 
 export default {
     data: new SlashCommandBuilder()
         .setName("settings")
         .setDescription("Bot settings")
-        .setDescriptionLocalizations({ vi: "Cài đặt bot" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.settings.desc"))
         .addSubcommand((sub) =>
             sub
                 .setName("language")
                 .setDescription("Set your preferred language")
-                .setDescriptionLocalizations({ vi: "Đặt ngôn ngữ ưu tiên" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.settings.language.desc"))
                 .addStringOption((opt) =>
                     opt
                         .setName("locale")
                         .setDescription("Language")
-                        .setDescriptionLocalizations({ vi: "Ngôn ngữ" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.settings.language.locale.desc"))
                         .addChoices(
                             { name: "English", value: "en" },
                             { name: "Tiếng Việt", value: "vi" },
@@ -32,26 +33,34 @@ export default {
                             { name: "Español", value: "es" },
                             { name: "日本語", value: "ja" },
                             { name: "中文", value: "zh" },
-                            { name: "한국어", value: "ko" }
+                            { name: "한국어", value: "ko" },
+                            { name: "Português (Brasil)", value: "pt-BR" },
+                            { name: "Français", value: "fr" },
+                            { name: "Deutsch", value: "de" },
+                            { name: "Русский", value: "ru" },
+                            { name: "Türkçe", value: "tr" },
+                            { name: "Italiano", value: "it" },
+                            { name: "Polski", value: "pl" },
+                            { name: "Nederlands", value: "nl" }
                         )
                 )
                 .addBooleanOption((opt) =>
                     opt
                         .setName("reset")
                         .setDescription("Reset to auto-detect")
-                        .setDescriptionLocalizations({ vi: "Đặt lại về tự động phát hiện" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.settings.language.reset.desc"))
                 )
         )
         .addSubcommand((sub) =>
             sub
                 .setName("server-language")
                 .setDescription("Set the server default language (Manage Guild)")
-                .setDescriptionLocalizations({ vi: "Đặt ngôn ngữ mặc định cho server (Quản lý Guild)" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.settings.server-language.desc"))
                 .addStringOption((opt) =>
                     opt
                         .setName("locale")
                         .setDescription("Language")
-                        .setDescriptionLocalizations({ vi: "Ngôn ngữ" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.settings.server-language.locale.desc"))
                         .addChoices(
                             { name: "English", value: "en" },
                             { name: "Tiếng Việt", value: "vi" },
@@ -59,14 +68,22 @@ export default {
                             { name: "Español", value: "es" },
                             { name: "日本語", value: "ja" },
                             { name: "中文", value: "zh" },
-                            { name: "한국어", value: "ko" }
+                            { name: "한국어", value: "ko" },
+                            { name: "Português (Brasil)", value: "pt-BR" },
+                            { name: "Français", value: "fr" },
+                            { name: "Deutsch", value: "de" },
+                            { name: "Русский", value: "ru" },
+                            { name: "Türkçe", value: "tr" },
+                            { name: "Italiano", value: "it" },
+                            { name: "Polski", value: "pl" },
+                            { name: "Nederlands", value: "nl" }
                         )
                 )
                 .addBooleanOption((opt) =>
                     opt
                         .setName("reset")
                         .setDescription("Reset to auto-detect")
-                        .setDescriptionLocalizations({ vi: "Đặt lại về tự động phát hiện" })
+                        .setDescriptionLocalizations(descriptionLocales("cmd.settings.server-language.reset.desc"))
                 )
         ),
     async execute(interaction: ChatInputCommandInteraction) {
@@ -81,6 +98,14 @@ export default {
             ja: "日本語",
             zh: "中文",
             ko: "한국어",
+            "pt-BR": "Português (Brasil)",
+            fr: "Français",
+            de: "Deutsch",
+            ru: "Русский",
+            tr: "Türkçe",
+            it: "Italiano",
+            pl: "Polski",
+            nl: "Nederlands",
         };
 
         if (subcommand === "language") {
