@@ -2,7 +2,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction, SlashCommandBuilder } f
 
 import MemberXPModel from "../../models/memberXP.model";
 import { progressToNextLevel, xpForLevel } from "../../util/xp/calculator";
-import { buildRankEmbed } from "../../util/xp/rankCard";
+import { buildRankEmbed, getPeriodStats } from "../../util/xp/rankCard";
 import { renderRankCard } from "../../util/xp/canvasRankCard";
 import { getGlobalRank } from "../../util/xp/globalXP";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -46,6 +46,8 @@ export default {
             // Calculate global rank
             const { rank: globalRank, totalPoint: globalXP } = await getGlobalRank(target.id);
 
+            const periodStats = await getPeriodStats(target.id, interaction.guildId!);
+
             const progress = progressToNextLevel(member?.xp ?? 0);
 
             // Try canvas render, fallback to embed
@@ -70,7 +72,7 @@ export default {
                 await interaction.editReply({ files: [attachment] });
             } catch {
                 // Canvas failed — fallback to embed
-                const embed = buildRankEmbed(member, target.username, rank, globalRank, globalXP, locale);
+                const embed = buildRankEmbed(member, target.username, rank, globalRank, globalXP, locale, periodStats);
                 await interaction.editReply({ embeds: [embed] });
             }
         } catch {

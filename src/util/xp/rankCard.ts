@@ -2,8 +2,10 @@ import { EmbedBuilder } from "discord.js";
 import type { ChatInputCommandInteraction } from "discord.js";
 import type { IMemberXP } from "../../models/memberXP.model";
 import type { IUser } from "../../models/user.model";
+import XPSnapshotModel from "../../models/xpSnapshot.model";
 import client from "../../client";
 import { levelFromXP, progressToNextLevel, xpForLevel } from "./calculator";
+import { getCurrentPeriodKeys } from "./periodKey";
 import { t } from "../i18n/t";
 import type { SupportedLocale } from "../i18n/index";
 
@@ -24,13 +26,31 @@ function formatVoiceTime(minutes: number): string {
     return `${mins}m`;
 }
 
+export async function getPeriodStats(
+    userId: string,
+    guildId: string
+): Promise<{ daily: number; weekly: number; monthly: number }> {
+    const keys = getCurrentPeriodKeys();
+    const [daily, weekly, monthly] = await Promise.all([
+        XPSnapshotModel.findOne({ userId, guildId, period: "daily", periodKey: keys.daily }).lean(),
+        XPSnapshotModel.findOne({ userId, guildId, period: "weekly", periodKey: keys.weekly }).lean(),
+        XPSnapshotModel.findOne({ userId, guildId, period: "monthly", periodKey: keys.monthly }).lean(),
+    ]);
+    return {
+        daily: daily?.xp ?? 0,
+        weekly: weekly?.xp ?? 0,
+        monthly: monthly?.xp ?? 0,
+    };
+}
+
 export function buildRankEmbed(
     member: IMemberXP | null,
     username: string,
     rank: number,
     globalRank: number,
     globalXP: number,
-    locale: SupportedLocale
+    locale: SupportedLocale,
+    periodStats?: { daily: number; weekly: number; monthly: number }
 ): EmbedBuilder {
     if (!member) {
         const globalLine = globalRank
@@ -46,8 +66,11 @@ export function buildRankEmbed(
                     `${buildProgressBar(0)} 0%`,
                     `0 / ${xpForLevel(1)} XP`,
                     "",
+                    periodStats
+                        ? `📊 **${t(locale, "rank.recent_activity")}**\n${t(locale, "rank.today")}: ${t(locale, "rank.period_xp", { xp: periodStats.daily.toLocaleString() })} | ${t(locale, "rank.this_week")}: ${t(locale, "rank.period_xp", { xp: periodStats.weekly.toLocaleString() })} | ${t(locale, "rank.this_month")}: ${t(locale, "rank.period_xp", { xp: periodStats.monthly.toLocaleString() })}`
+                        : "",
                     "💬 0  ·  🎤 0m  ·  ❤️ 0",
-                ].join("\n")
+                ].filter(Boolean).join("\n")
             )
             .setColor(0x2b2d31);
     }
@@ -64,8 +87,11 @@ export function buildRankEmbed(
                 `${member.xp.toLocaleString()} / ${xpForLevel(progress.level + 1).toLocaleString()} XP`,
                 `🌐 ${t(locale, "rank.total_xp", { globalXP: globalXP.toLocaleString() })}`,
                 "",
+                periodStats
+                    ? `📊 **${t(locale, "rank.recent_activity")}**\n${t(locale, "rank.today")}: ${t(locale, "rank.period_xp", { xp: periodStats.daily.toLocaleString() })} | ${t(locale, "rank.this_week")}: ${t(locale, "rank.period_xp", { xp: periodStats.weekly.toLocaleString() })} | ${t(locale, "rank.this_month")}: ${t(locale, "rank.period_xp", { xp: periodStats.monthly.toLocaleString() })}`
+                    : "",
                 `💬 ${member.messageCount.toLocaleString()}  ·  🎤 ${formatVoiceTime(member.voiceMinutes)}  ·  ❤️ ${member.reactionCount.toLocaleString()}`,
-            ].join("\n")
+            ].filter(Boolean).join("\n")
         )
         .setColor(0x5865f2)
         .setTimestamp();
