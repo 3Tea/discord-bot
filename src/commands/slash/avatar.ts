@@ -1,17 +1,18 @@
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import Reply from "../../util/decorator/reply";
 
 export default {
     data: new SlashCommandBuilder()
         .setName("avatar")
         .setDescription("Get the avatar URL of the selected user, or your own avatar.")
-        .setDescriptionLocalizations({ vi: "Xem avatar của người dùng hoặc avatar của bạn." })
+        .setDescriptionLocalizations(descriptionLocales("cmd.avatar.desc"))
         .addUserOption((option) =>
             option
                 .setName("target")
                 .setDescription("The user's avatar to show")
-                .setDescriptionLocalizations({ vi: "Avatar của ai" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.avatar.target.desc"))
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         const user = interaction.options.getUser("target");

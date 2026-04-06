@@ -1,5 +1,6 @@
 import { bold, ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
 
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 
@@ -7,7 +8,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("ping")
         .setDescription("Replies with Pong!")
-        .setDescriptionLocalizations({ vi: "Kiểm tra độ trễ!" }),
+        .setDescriptionLocalizations(descriptionLocales("cmd.ping.desc")),
 
     async execute(interaction: ChatInputCommandInteraction) {
         const locale = await resolveLocale(interaction);

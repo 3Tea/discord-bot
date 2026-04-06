@@ -1,6 +1,7 @@
 import axios from "axios";
 import { bold, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import Reply from "../../util/decorator/reply";
 
 async function translate(text: string, to: string): Promise<string> {
@@ -13,12 +14,12 @@ export default {
     data: new SlashCommandBuilder()
         .setName("trans")
         .setDescription("Translate all languages to Vietnamese")
-        .setDescriptionLocalizations({ vi: "Dịch mọi ngôn ngữ sang Tiếng Việt" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.trans.desc"))
         .addStringOption((option) =>
             option
                 .setName("word")
                 .setDescription("word or paragraph")
-                .setDescriptionLocalizations({ vi: "từ hoặc đoạn văn" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.trans.word.desc"))
                 .setRequired(true)
         ),
     async execute(interaction: ChatInputCommandInteraction) {

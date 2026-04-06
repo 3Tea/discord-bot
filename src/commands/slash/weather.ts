@@ -1,6 +1,7 @@
 import axios from "axios";
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import Reply from "../../util/decorator/reply";
 import type { SupportedLocale } from "../../util/i18n/index";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -117,12 +118,12 @@ export default {
     data: new SlashCommandBuilder()
         .setName("weather")
         .setDescription("Get weather information.")
-        .setDescriptionLocalizations({ vi: "Xem thông tin thời tiết." })
+        .setDescriptionLocalizations(descriptionLocales("cmd.weather.desc"))
         .addStringOption((option) =>
             option
                 .setName("location")
                 .setDescription("Your location")
-                .setDescriptionLocalizations({ vi: "Vị trí của bạn" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.weather.location.desc"))
                 .setRequired(true)
                 .setMaxLength(200)
         ),

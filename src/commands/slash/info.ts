@@ -9,6 +9,7 @@ import {
 
 import infoBot from "../../../package.json";
 import reply from "../../util/decorator/reply";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 
@@ -16,12 +17,12 @@ export default {
     data: new SlashCommandBuilder()
         .setName("info")
         .setDescription("Information about bot")
-        .setDescriptionLocalizations({ vi: "Thông tin về bot" })
+        .setDescriptionLocalizations(descriptionLocales("cmd.info.desc"))
         .addSubcommand((subcommand) =>
             subcommand
                 .setName("bot")
                 .setDescription("Information about bot")
-                .setDescriptionLocalizations({ vi: "Thông tin về bot" })
+                .setDescriptionLocalizations(descriptionLocales("cmd.info.bot.desc"))
         ),
     async execute(interaction: ChatInputCommandInteraction) {
         const locale = await resolveLocale(interaction);

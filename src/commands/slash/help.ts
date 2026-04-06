@@ -9,6 +9,7 @@ import {
 
 import client from "../../client";
 import Reply from "../../util/decorator/reply";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 
@@ -16,7 +17,7 @@ export default {
     data: new SlashCommandBuilder()
         .setName("help")
         .setDescription("Get the help commands")
-        .setDescriptionLocalizations({ vi: "Xem danh sách lệnh" }),
+        .setDescriptionLocalizations(descriptionLocales("cmd.help.desc")),
     async execute(interaction: ChatInputCommandInteraction) {
         const locale = await resolveLocale(interaction);
         const embed = new EmbedBuilder().setColor("Random").setTimestamp();
