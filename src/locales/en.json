@@ -224,5 +224,115 @@
     "server_rank.error": "Could not load server stats. Please try again later.",
 
     "leaderboard.servers_title": "Server Leaderboard",
-    "leaderboard.servers_empty": "No server data yet!"
+    "leaderboard.servers_empty": "No server data yet!",
+
+    "cmd.ping.desc": "Replies with Pong!",
+
+    "cmd.help.desc": "Get the help commands",
+
+    "cmd.info.desc": "Information about bot",
+    "cmd.info.bot.desc": "Information about bot",
+
+    "cmd.avatar.desc": "Get the avatar URL of the selected user, or your own avatar.",
+    "cmd.avatar.target.desc": "The user's avatar to show",
+
+    "cmd.trans.desc": "Translate all languages to Vietnamese",
+    "cmd.trans.word.desc": "word or paragraph",
+
+    "cmd.weather.desc": "Get weather information.",
+    "cmd.weather.location.desc": "Your location",
+
+    "cmd.balance.desc": "View your coin and gem balance",
+    "cmd.balance.user.desc": "View another user's balance",
+
+    "cmd.pray.desc": "Pray to receive coin",
+    "cmd.pray.target.desc": "Pray for another user",
+
+    "cmd.curse.desc": "Curse to receive coin (less than pray)",
+    "cmd.curse.target.desc": "Curse someone",
+
+    "cmd.economy.desc": "Economy management (admin)",
+    "cmd.economy.set-coin.desc": "Set a user's coin",
+    "cmd.economy.set-coin.user.desc": "Target user",
+    "cmd.economy.set-coin.amount.desc": "Coin amount",
+    "cmd.economy.add-coin.desc": "Add coin to a user",
+    "cmd.economy.add-coin.user.desc": "Target user",
+    "cmd.economy.add-coin.amount.desc": "Coin to add",
+    "cmd.economy.set-gem.desc": "Set a user's gem",
+    "cmd.economy.set-gem.user.desc": "Target user",
+    "cmd.economy.set-gem.amount.desc": "Gem amount",
+    "cmd.economy.add-gem.desc": "Add gem to a user",
+    "cmd.economy.add-gem.user.desc": "Target user",
+    "cmd.economy.add-gem.amount.desc": "Gem to add",
+
+    "cmd.shop.desc": "Server shop",
+    "cmd.shop.view.desc": "View items in the shop",
+    "cmd.shop.view.page.desc": "Page number",
+    "cmd.shop.buy.desc": "Buy an item",
+    "cmd.shop.buy.item-id.desc": "Item ID",
+    "cmd.shop.add.desc": "Add an item to the shop (Admin)",
+    "cmd.shop.add.item-id.desc": "Unique ID",
+    "cmd.shop.add.name.desc": "Item name",
+    "cmd.shop.add.description.desc": "Description",
+    "cmd.shop.add.type.desc": "Item type",
+    "cmd.shop.add.price.desc": "Price",
+    "cmd.shop.add.currency.desc": "Currency type",
+    "cmd.shop.add.role.desc": "Role (if type=role)",
+    "cmd.shop.add.stock.desc": "Stock quantity (leave empty = unlimited)",
+    "cmd.shop.remove.desc": "Remove an item from the shop (Admin)",
+    "cmd.shop.remove.item-id.desc": "Item ID",
+
+    "cmd.rank.desc": "View your rank card or another user's",
+    "cmd.rank.user.desc": "User to check rank for",
+
+    "cmd.server-rank.desc": "View this server's XP stats and ranking",
+
+    "cmd.leaderboard.desc": "View the XP leaderboard",
+    "cmd.leaderboard.mode.desc": "Leaderboard type",
+
+    "cmd.xp.desc": "XP management (admin)",
+    "cmd.xp.set.desc": "Set a user's XP",
+    "cmd.xp.set.user.desc": "Target user",
+    "cmd.xp.set.amount.desc": "XP amount",
+    "cmd.xp.add.desc": "Add XP to a user",
+    "cmd.xp.add.user.desc": "Target user",
+    "cmd.xp.add.amount.desc": "XP to add",
+    "cmd.xp.remove.desc": "Remove XP from a user",
+    "cmd.xp.remove.user.desc": "Target user",
+    "cmd.xp.remove.amount.desc": "XP to remove",
+    "cmd.xp.channel-blacklist.desc": "Manage XP channel blacklist",
+    "cmd.xp.channel-blacklist.add.desc": "Blacklist a channel from XP",
+    "cmd.xp.channel-blacklist.add.channel.desc": "Channel to blacklist",
+    "cmd.xp.channel-blacklist.remove.desc": "Remove a channel from blacklist",
+    "cmd.xp.channel-blacklist.remove.channel.desc": "Channel to remove",
+
+    "cmd.settings.desc": "Bot settings",
+    "cmd.settings.language.desc": "Set your preferred language",
+    "cmd.settings.language.locale.desc": "Language",
+    "cmd.settings.language.reset.desc": "Reset to auto-detect",
+    "cmd.settings.server-language.desc": "Set the server default language (Manage Guild)",
+    "cmd.settings.server-language.locale.desc": "Language",
+    "cmd.settings.server-language.reset.desc": "Reset to auto-detect",
+
+    "cmd.voice.desc": "Voice channel management",
+    "cmd.voice.limit.desc": "Set the user limit for the voice channel",
+    "cmd.voice.limit.number.desc": "Number of users (0-99)",
+    "cmd.voice.name.desc": "Change the voice channel name",
+    "cmd.voice.name.string.desc": "New name",
+    "cmd.voice.lock.desc": "Lock the voice channel",
+    "cmd.voice.unlock.desc": "Unlock the voice channel",
+    "cmd.voice.hide.desc": "Hide the voice channel",
+    "cmd.voice.permit.desc": "Permit a user to join",
+    "cmd.voice.permit.user.desc": "User to permit",
+    "cmd.voice.block.desc": "Block a user from the channel",
+    "cmd.voice.block.user.desc": "User to block",
+    "cmd.voice.kick.desc": "Kick a user from the voice channel",
+    "cmd.voice.kick.user.desc": "User to kick",
+    "cmd.voice.transfer.desc": "Transfer channel ownership",
+    "cmd.voice.transfer.user.desc": "New owner",
+
+    "cmd.manga.desc": "Read manga from {{source}}",
+    "cmd.manga.read.desc": "Read H manga and D",
+    "cmd.manga.read.id.desc": "The ID you wanna read",
+    "cmd.manga.random.desc": "Random H and D from {{source}}"
 }
