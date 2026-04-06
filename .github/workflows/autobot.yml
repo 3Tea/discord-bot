@@ -31,6 +31,7 @@ jobs:
           git stash
           git pull https://github.com/3Tea/discord-bot.git develop
           npm i
+          rm -rf dist
           npm run build
           pm2 restart pm2.deploy.json
           pm2 flush
