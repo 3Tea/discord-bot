@@ -468,14 +468,6 @@ function drawAnimeBackground(ctx: Ctx2D): void {
 
 // --- UI sub-renderers ---
 
-function drawAccentStripe(ctx: Ctx2D): void {
-    const g = gradientV(ctx, 0, H, 0, [
-        [0, C.pink],
-        [1, C.purple],
-    ]);
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, 5, H);
-}
 
 async function drawAvatar(
     ctx: Ctx2D,
@@ -822,22 +814,33 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
         periodStats,
     } = options;
 
-    const canvas = createCanvas(W, H);
+    // Taller canvas when period stats are present
+    const cardH = periodStats ? 400 : H;
+    const canvas = createCanvas(W, cardH);
     const ctx = canvas.getContext("2d");
 
     // --- Clip card to rounded rect ---
-    roundRect(ctx, 0, 0, W, H, 14);
+    roundRect(ctx, 0, 0, W, cardH, 14);
     ctx.clip();
 
     // --- Background ---
+    // Fill entire canvas with deep background color first (handles taller card)
+    ctx.fillStyle = C.bgDeep;
+    ctx.fillRect(0, 0, W, cardH);
     drawAnimeBackground(ctx);
-    drawAccentStripe(ctx);
+    // Extend accent stripe to full card height
+    const stripeG = gradientV(ctx, 0, cardH, 0, [
+        [0, C.pink],
+        [1, C.purple],
+    ]);
+    ctx.fillStyle = stripeG;
+    ctx.fillRect(0, 0, 5, cardH);
 
     // --- Layout constants ---
     const PAD = 32; // outer padding
     const AV_R = 72; // avatar radius
     const AV_CX = PAD + AV_R + 8; // avatar center X
-    const AV_CY = H / 2 - 10; // avatar center Y
+    const AV_CY = cardH / 2 - 10; // avatar center Y
     const CONTENT_X = AV_CX + AV_R + 28; // right content start X
 
     const LV_W = 118;
@@ -847,7 +850,7 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
 
     const CONTENT_W = LV_X - CONTENT_X - 20; // usable width for text/bar
 
-    const STAT_Y = H - PAD - 78;
+    const STAT_Y = cardH - PAD - 78;
     const STAT_H = 78;
     const STAT_N = 4; // Messages, Voice, Reactions, Total XP
     const STAT_GAP = 12;
@@ -893,7 +896,8 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
 
     // --- Period stat cards (second row, above existing stats) ---
     if (periodStats) {
-        const PERIOD_Y = STAT_Y - STAT_H - 12;
+        const PERIOD_H = 60;
+        const PERIOD_Y = STAT_Y - PERIOD_H - 12;
         const PERIOD_N = 3;
         const PERIOD_GAP = 12;
         const PERIOD_W = (CONTENT_W - (PERIOD_N - 1) * PERIOD_GAP) / PERIOD_N;
@@ -907,14 +911,14 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
         for (let i = 0; i < periodItems.length; i++) {
             const { label, value, color } = periodItems[i];
             const sx = CONTENT_X + i * (PERIOD_W + PERIOD_GAP);
-            drawStatCard(ctx, label, value, sx, PERIOD_Y, PERIOD_W, STAT_H, color);
+            drawStatCard(ctx, label, value, sx, PERIOD_Y, PERIOD_W, PERIOD_H, color);
         }
     }
 
     // --- Outer card border ---
     ctx.strokeStyle = "rgba(255,255,255,0.06)";
     ctx.lineWidth = 1;
-    roundRect(ctx, 0.5, 0.5, W - 1, H - 1, 14);
+    roundRect(ctx, 0.5, 0.5, W - 1, cardH - 1, 14);
     ctx.stroke();
 
     return canvas.toBuffer("image/png");

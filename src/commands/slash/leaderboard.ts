@@ -49,11 +49,11 @@ function buildPeriodRow(
     disabled = false
 ): ActionRowBuilder<ButtonBuilder> {
     const periods: { id: string; period: LeaderboardPeriod }[] = [
+        { id: BUTTON_ID.LEADERBOARD_PERIOD_ALL, period: "all" },
         { id: BUTTON_ID.LEADERBOARD_PERIOD_DAILY, period: "daily" },
         { id: BUTTON_ID.LEADERBOARD_PERIOD_WEEKLY, period: "weekly" },
         { id: BUTTON_ID.LEADERBOARD_PERIOD_MONTHLY, period: "monthly" },
         { id: BUTTON_ID.LEADERBOARD_PERIOD_YEARLY, period: "yearly" },
-        { id: BUTTON_ID.LEADERBOARD_PERIOD_ALL, period: "all" },
     ];
 
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -162,7 +162,7 @@ async function paginateLeaderboard(
     const guildName = interaction.guild?.name ?? "Server";
     const usernameCache = new Map<string, string>();
 
-    let currentPeriod: LeaderboardPeriod = "weekly";
+    let currentPeriod: LeaderboardPeriod = "all";
     let page = 1;
 
     async function fetchData(): Promise<{ entries: SnapshotEntry[]; allTimeGlobal?: IUser[]; allTimeServer?: IMemberXP[] }> {
