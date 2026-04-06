@@ -294,25 +294,27 @@ async function paginateServerLeaderboard(
     locale: SupportedLocale
 ): Promise<void> {
     const serverNameCache = new Map<string, string>();
+    const knownGuildIds = [...client.guilds.cache.keys()];
 
     let currentPeriod: LeaderboardPeriod = "all";
     let page = 1;
 
     async function fetchData(): Promise<{ allTimeServers?: IGuildStats[]; periodServers?: IGuildStatsSnapshot[] }> {
         if (currentPeriod === "all") {
-            const servers = await GuildStatsModel.find().sort({ totalXP: -1 }).limit(MAX_RESULTS);
-            const filtered = servers.filter((s) => client.guilds.cache.has(s.guildId));
-            return { allTimeServers: filtered };
+            const servers = await GuildStatsModel.find({ guildId: { $in: knownGuildIds } })
+                .sort({ totalXP: -1 })
+                .limit(MAX_RESULTS);
+            return { allTimeServers: servers };
         }
         const periodKeys = getCurrentPeriodKeys();
         const servers = await GuildStatsSnapshotModel.find({
+            guildId: { $in: knownGuildIds },
             period: currentPeriod,
             periodKey: periodKeys[currentPeriod],
         })
             .sort({ xp: -1 })
             .limit(MAX_RESULTS);
-        const filtered = servers.filter((s) => client.guilds.cache.has(s.guildId));
-        return { periodServers: filtered };
+        return { periodServers: servers };
     }
 
     async function buildEmbed(data: Awaited<ReturnType<typeof fetchData>>, p: number, totalPages: number) {
