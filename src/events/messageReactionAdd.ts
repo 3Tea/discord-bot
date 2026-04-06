@@ -6,6 +6,7 @@ import GuildXPConfigModel from "../models/guildXPConfig.model";
 import { levelFromXP } from "../util/xp/calculator";
 import { buildLevelUpEmbed } from "../util/xp/rankCard";
 import { syncGlobalXP, getGlobalRank } from "../util/xp/globalXP";
+import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
 
 const REACTION_COOLDOWN_TTL = 30;
@@ -73,6 +74,8 @@ export default {
 
             // Sync global XP
             await syncGlobalXP(user.id, config.xpPerReaction);
+            // Sync period snapshots
+            await syncSnapshots(user.id, guildId, config.xpPerReaction, "reaction");
 
             // Check level up
             const newLevel = levelFromXP(updated.xp);

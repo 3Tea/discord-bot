@@ -6,6 +6,7 @@ import { levelFromXP, randomXP } from "../util/xp/calculator";
 import { checkMessageSpam, hashMessage } from "../util/xp/antiSpam";
 import { buildLevelUpEmbed } from "../util/xp/rankCard";
 import { syncGlobalXP, getGlobalRank } from "../util/xp/globalXP";
+import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
 
 export default {
@@ -66,6 +67,8 @@ export default {
 
             // Sync global XP
             await syncGlobalXP(message.author.id, xpGain);
+            // Sync period snapshots
+            await syncSnapshots(message.author.id, message.guild.id, xpGain, "message");
 
             // Check level up
             const newLevel = levelFromXP(updated.xp);

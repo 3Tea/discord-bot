@@ -9,6 +9,7 @@ import GuildXPConfigModel from "../models/guildXPConfig.model";
 import { levelFromXP } from "../util/xp/calculator";
 import { buildLevelUpEmbed } from "../util/xp/rankCard";
 import { syncGlobalXP, getGlobalRank } from "../util/xp/globalXP";
+import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
 import client from "../client";
 
@@ -191,6 +192,8 @@ setInterval(async () => {
 
                 // Sync global XP
                 await syncGlobalXP(sUserId, config.xpPerVoiceMinute);
+                // Sync period snapshots
+                await syncSnapshots(sUserId, sGuildId, config.xpPerVoiceMinute, "voice");
 
                 const newLevel = levelFromXP(updated.xp);
                 if (newLevel > updated.level) {
