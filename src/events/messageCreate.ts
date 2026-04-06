@@ -4,8 +4,7 @@ import MemberXPModel from "../models/memberXP.model";
 import GuildXPConfigModel from "../models/guildXPConfig.model";
 import { levelFromXP, randomXP } from "../util/xp/calculator";
 import { checkMessageSpam, hashMessage } from "../util/xp/antiSpam";
-import { buildLevelUpEmbed } from "../util/xp/rankCard";
-import { syncGlobalXP, getGlobalRank } from "../util/xp/globalXP";
+import { syncGlobalXP } from "../util/xp/globalXP";
 import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
 
@@ -74,14 +73,6 @@ export default {
             const newLevel = levelFromXP(updated.xp);
             if (newLevel > updated.level) {
                 await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
-
-                const { rank: globalRank } = await getGlobalRank(message.author.id);
-                const { resolveGuildLocale } = await import("../util/i18n/locale");
-                const locale = await resolveGuildLocale(message.guild.id);
-                const embed = buildLevelUpEmbed(message.author.id, newLevel, locale, globalRank);
-                if (message.channel.isSendable()) {
-                    await message.channel.send({ embeds: [embed] });
-                }
             }
         } catch (error) {
             logger.error(`[messageCreate:xp] ${error instanceof Error ? error.message : "Unknown error"}`);

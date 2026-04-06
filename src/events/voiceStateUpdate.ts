@@ -7,8 +7,7 @@ import { resolveGuildLocale } from "../util/i18n/locale";
 import MemberXPModel from "../models/memberXP.model";
 import GuildXPConfigModel from "../models/guildXPConfig.model";
 import { levelFromXP } from "../util/xp/calculator";
-import { buildLevelUpEmbed } from "../util/xp/rankCard";
-import { syncGlobalXP, getGlobalRank } from "../util/xp/globalXP";
+import { syncGlobalXP } from "../util/xp/globalXP";
 import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
 import client from "../client";
@@ -198,14 +197,6 @@ setInterval(async () => {
                 const newLevel = levelFromXP(updated.xp);
                 if (newLevel > updated.level) {
                     await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
-
-                    const { rank: globalRank } = await getGlobalRank(sUserId);
-                    const lvlLocale = await resolveGuildLocale(sGuildId);
-                    const embed = buildLevelUpEmbed(sUserId, newLevel, lvlLocale, globalRank);
-                    const textChannel = guild.systemChannel;
-                    if (textChannel) {
-                        await textChannel.send({ embeds: [embed] });
-                    }
                 }
             } catch (error) {
                 logger.error(`[voiceXP:session] ${error instanceof Error ? error.message : "Unknown error"}`);
