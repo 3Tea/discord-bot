@@ -190,5 +190,23 @@
     "settings.server_language_reset": "Preferensi bahasa server direset.",
     "btn.homepage": "Beranda",
     "btn.discussions": "Diskusi",
-    "btn.report_bug": "Laporkan bug"
+    "btn.report_bug": "Laporkan bug",
+
+    "server_rank.title": "Statistik Server",
+    "server_rank.rank": "Peringkat #{{rank}} / {{total}} server",
+    "server_rank.level": "Level {{level}}",
+    "server_rank.total_xp": "Total XP",
+    "server_rank.active_members": "Anggota Aktif",
+    "server_rank.messages": "Pesan",
+    "server_rank.voice_minutes": "Menit Suara",
+    "server_rank.reactions": "Reaksi",
+    "server_rank.period_daily": "Hari Ini",
+    "server_rank.period_weekly": "Minggu Ini",
+    "server_rank.period_monthly": "Bulan Ini",
+    "server_rank.no_data": "Belum ada data.",
+    "server_rank.guild_only": "Perintah ini hanya dapat digunakan di server.",
+    "server_rank.error": "Tidak dapat memuat statistik server. Silakan coba lagi nanti.",
+
+    "leaderboard.servers_title": "Peringkat Server",
+    "leaderboard.servers_empty": "Belum ada data server!"
 }

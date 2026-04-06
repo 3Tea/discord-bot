@@ -206,5 +206,23 @@
 
     "btn.homepage": "ホームページ",
     "btn.discussions": "ディスカッション",
-    "btn.report_bug": "バグを報告する"
+    "btn.report_bug": "バグを報告する",
+
+    "server_rank.title": "サーバー統計",
+    "server_rank.rank": "ランク #{{rank}} / {{total}} サーバー",
+    "server_rank.level": "レベル {{level}}",
+    "server_rank.total_xp": "合計XP",
+    "server_rank.active_members": "アクティブメンバー",
+    "server_rank.messages": "メッセージ",
+    "server_rank.voice_minutes": "通話時間",
+    "server_rank.reactions": "リアクション",
+    "server_rank.period_daily": "今日",
+    "server_rank.period_weekly": "今週",
+    "server_rank.period_monthly": "今月",
+    "server_rank.no_data": "データがまだありません。",
+    "server_rank.guild_only": "このコマンドはサーバー内でのみ使用できます。",
+    "server_rank.error": "サーバー統計を読み込めませんでした。後でもう一度お試しください。",
+
+    "leaderboard.servers_title": "サーバーランキング",
+    "leaderboard.servers_empty": "サーバーデータがまだありません！"
 }

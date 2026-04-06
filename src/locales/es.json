@@ -206,5 +206,23 @@
 
     "btn.homepage": "Página principal",
     "btn.discussions": "Discusiones",
-    "btn.report_bug": "Reportar error"
+    "btn.report_bug": "Reportar error",
+
+    "server_rank.title": "Estadísticas del Servidor",
+    "server_rank.rank": "Rango #{{rank}} / {{total}} servidores",
+    "server_rank.level": "Nivel {{level}}",
+    "server_rank.total_xp": "XP Total",
+    "server_rank.active_members": "Miembros Activos",
+    "server_rank.messages": "Mensajes",
+    "server_rank.voice_minutes": "Minutos de Voz",
+    "server_rank.reactions": "Reacciones",
+    "server_rank.period_daily": "Hoy",
+    "server_rank.period_weekly": "Esta Semana",
+    "server_rank.period_monthly": "Este Mes",
+    "server_rank.no_data": "Aún no hay datos disponibles.",
+    "server_rank.guild_only": "Este comando solo se puede usar en un servidor.",
+    "server_rank.error": "No se pudieron cargar las estadísticas del servidor. Inténtalo más tarde.",
+
+    "leaderboard.servers_title": "Clasificación de Servidores",
+    "leaderboard.servers_empty": "¡Aún no hay datos de servidores!"
 }

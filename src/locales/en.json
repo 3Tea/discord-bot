@@ -206,5 +206,23 @@
 
     "btn.homepage": "Homepage",
     "btn.discussions": "Discussions",
-    "btn.report_bug": "Report bug"
+    "btn.report_bug": "Report bug",
+
+    "server_rank.title": "Server Stats",
+    "server_rank.rank": "Rank #{{rank}} / {{total}} servers",
+    "server_rank.level": "Level {{level}}",
+    "server_rank.total_xp": "Total XP",
+    "server_rank.active_members": "Active Members",
+    "server_rank.messages": "Messages",
+    "server_rank.voice_minutes": "Voice Minutes",
+    "server_rank.reactions": "Reactions",
+    "server_rank.period_daily": "Today",
+    "server_rank.period_weekly": "This Week",
+    "server_rank.period_monthly": "This Month",
+    "server_rank.no_data": "No data available yet.",
+    "server_rank.guild_only": "This command can only be used in a server.",
+    "server_rank.error": "Could not load server stats. Please try again later.",
+
+    "leaderboard.servers_title": "Server Leaderboard",
+    "leaderboard.servers_empty": "No server data yet!"
 }

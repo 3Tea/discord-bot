@@ -206,5 +206,23 @@
 
     "btn.homepage": "홈페이지",
     "btn.discussions": "토론",
-    "btn.report_bug": "버그 신고"
+    "btn.report_bug": "버그 신고",
+
+    "server_rank.title": "서버 통계",
+    "server_rank.rank": "순위 #{{rank}} / {{total}} 서버",
+    "server_rank.level": "레벨 {{level}}",
+    "server_rank.total_xp": "총 XP",
+    "server_rank.active_members": "활성 멤버",
+    "server_rank.messages": "메시지",
+    "server_rank.voice_minutes": "음성 시간",
+    "server_rank.reactions": "리액션",
+    "server_rank.period_daily": "오늘",
+    "server_rank.period_weekly": "이번 주",
+    "server_rank.period_monthly": "이번 달",
+    "server_rank.no_data": "아직 데이터가 없습니다.",
+    "server_rank.guild_only": "이 명령어는 서버에서만 사용할 수 있습니다.",
+    "server_rank.error": "서버 통계를 불러올 수 없습니다. 나중에 다시 시도해주세요.",
+
+    "leaderboard.servers_title": "서버 랭킹",
+    "leaderboard.servers_empty": "서버 데이터가 아직 없습니다!"
 }

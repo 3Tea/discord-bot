@@ -206,5 +206,23 @@
 
     "btn.homepage": "主页",
     "btn.discussions": "讨论区",
-    "btn.report_bug": "反馈漏洞"
+    "btn.report_bug": "反馈漏洞",
+
+    "server_rank.title": "服务器统计",
+    "server_rank.rank": "排名 #{{rank}} / {{total}} 服务器",
+    "server_rank.level": "等级 {{level}}",
+    "server_rank.total_xp": "总XP",
+    "server_rank.active_members": "活跃成员",
+    "server_rank.messages": "消息",
+    "server_rank.voice_minutes": "语音时长",
+    "server_rank.reactions": "反应",
+    "server_rank.period_daily": "今天",
+    "server_rank.period_weekly": "本周",
+    "server_rank.period_monthly": "本月",
+    "server_rank.no_data": "暂无数据。",
+    "server_rank.guild_only": "此命令只能在服务器中使用。",
+    "server_rank.error": "无法加载服务器统计。请稍后重试。",
+
+    "leaderboard.servers_title": "服务器排行榜",
+    "leaderboard.servers_empty": "暂无服务器数据！"
 }

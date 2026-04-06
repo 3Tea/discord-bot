@@ -206,5 +206,23 @@
 
     "btn.homepage": "Trang chủ",
     "btn.discussions": "Thảo luận",
-    "btn.report_bug": "Báo lỗi"
+    "btn.report_bug": "Báo lỗi",
+
+    "server_rank.title": "Thống kê Server",
+    "server_rank.rank": "Hạng #{{rank}} / {{total}} server",
+    "server_rank.level": "Level {{level}}",
+    "server_rank.total_xp": "Tổng XP",
+    "server_rank.active_members": "Thành viên hoạt động",
+    "server_rank.messages": "Tin nhắn",
+    "server_rank.voice_minutes": "Phút thoại",
+    "server_rank.reactions": "Reactions",
+    "server_rank.period_daily": "Hôm nay",
+    "server_rank.period_weekly": "Tuần này",
+    "server_rank.period_monthly": "Tháng này",
+    "server_rank.no_data": "Chưa có dữ liệu.",
+    "server_rank.guild_only": "Lệnh này chỉ dùng được trong server.",
+    "server_rank.error": "Không thể tải thống kê server. Vui lòng thử lại sau.",
+
+    "leaderboard.servers_title": "Bảng xếp hạng Server",
+    "leaderboard.servers_empty": "Chưa có dữ liệu server!"
 }
