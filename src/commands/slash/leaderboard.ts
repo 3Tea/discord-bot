@@ -12,7 +12,7 @@ import MemberXPModel from "../../models/memberXP.model";
 import UserModel from "../../models/user.model";
 import XPSnapshotModel from "../../models/xpSnapshot.model";
 import { BUTTON_ID } from "../../util/config/button";
-import { buildLeaderboardEmbed, buildGlobalLeaderboardEmbed, buildPeriodLeaderboardEmbed } from "../../util/xp/rankCard";
+import { buildLeaderboardEmbed, buildGlobalLeaderboardEmbed, buildPeriodLeaderboardEmbed, buildServerLeaderboardEmbed, buildServerPeriodLeaderboardEmbed } from "../../util/xp/rankCard";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import { getCurrentPeriodKeys } from "../../util/xp/periodKey";
@@ -22,7 +22,6 @@ import type { IUser } from "../../models/user.model";
 import type { IMemberXP } from "../../models/memberXP.model";
 import GuildStatsModel from "../../models/guildStats.model";
 import GuildStatsSnapshotModel from "../../models/guildStatsSnapshot.model";
-import { buildServerLeaderboardEmbed, buildServerPeriodLeaderboardEmbed } from "../../util/xp/rankCard";
 import type { IGuildStats } from "../../models/guildStats.model";
 import type { IGuildStatsSnapshot } from "../../models/guildStatsSnapshot.model";
 

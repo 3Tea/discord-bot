@@ -3,7 +3,7 @@ import { AttachmentBuilder, ChatInputCommandInteraction, SlashCommandBuilder } f
 
 import GuildStatsModel from "../../models/guildStats.model";
 import GuildStatsSnapshotModel from "../../models/guildStatsSnapshot.model";
-import { progressToNextLevel, xpForLevel } from "../../util/xp/calculator";
+
 import { buildServerRankEmbed } from "../../util/xp/rankCard";
 import { renderServerRankCard } from "../../util/xp/canvasServerRankCard";
 import { getCurrentPeriodKeys } from "../../util/xp/periodKey";
@@ -36,7 +36,7 @@ export default {
             ko: "서버 XP 통계 및 랭킹 보기",
             "zh-CN": "查看服务器XP统计和排名",
             id: "Lihat statistik XP dan peringkat server",
-            "es-ES": "Ver estadísticas de XP dan clasificación del servidor",
+            "es-ES": "Ver estadísticas de XP y clasificación del servidor",
         }),
     async execute(interaction: ChatInputCommandInteraction) {
         if (!interaction.guildId) {
