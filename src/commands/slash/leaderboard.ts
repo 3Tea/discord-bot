@@ -12,7 +12,13 @@ import MemberXPModel from "../../models/memberXP.model";
 import UserModel from "../../models/user.model";
 import XPSnapshotModel from "../../models/xpSnapshot.model";
 import { BUTTON_ID } from "../../util/config/button";
-import { buildLeaderboardEmbed, buildGlobalLeaderboardEmbed, buildPeriodLeaderboardEmbed, buildServerLeaderboardEmbed, buildServerPeriodLeaderboardEmbed } from "../../util/xp/rankCard";
+import {
+    buildLeaderboardEmbed,
+    buildGlobalLeaderboardEmbed,
+    buildPeriodLeaderboardEmbed,
+    buildServerLeaderboardEmbed,
+    buildServerPeriodLeaderboardEmbed,
+} from "../../util/xp/rankCard";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import { getCurrentPeriodKeys } from "../../util/xp/periodKey";
@@ -142,10 +148,7 @@ interface SnapshotEntry {
     reactionCount: number;
 }
 
-async function fetchPeriodData(
-    period: Period,
-    guildId: string | null
-): Promise<SnapshotEntry[]> {
+async function fetchPeriodData(period: Period, guildId: string | null): Promise<SnapshotEntry[]> {
     const periodKeys = getCurrentPeriodKeys();
     return XPSnapshotModel.find({
         guildId,
@@ -169,7 +172,11 @@ async function paginateLeaderboard(
     let currentPeriod: LeaderboardPeriod = "all";
     let page = 1;
 
-    async function fetchData(): Promise<{ entries: SnapshotEntry[]; allTimeGlobal?: IUser[]; allTimeServer?: IMemberXP[] }> {
+    async function fetchData(): Promise<{
+        entries: SnapshotEntry[];
+        allTimeGlobal?: IUser[];
+        allTimeServer?: IMemberXP[];
+    }> {
         if (currentPeriod === "all") {
             if (mode === "global") {
                 const allUsers = await UserModel.find().sort({ totalPoint: -1 }).limit(MAX_RESULTS);
@@ -199,7 +206,16 @@ async function paginateLeaderboard(
         }
 
         const pageData = data.entries.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
-        return buildPeriodLeaderboardEmbed(pageData, title, locale, p, totalPages, mode === "global", interaction, usernameCache);
+        return buildPeriodLeaderboardEmbed(
+            pageData,
+            title,
+            locale,
+            p,
+            totalPages,
+            mode === "global",
+            interaction,
+            usernameCache
+        );
     }
 
     let data = await fetchData();
@@ -258,13 +274,12 @@ async function paginateLeaderboard(
     const finalEmbed = await buildEmbed(data, page, totalPages);
     const disabledPeriodRow = buildPeriodRow(currentPeriod, locale, true);
     const disabledPageRow = buildPageRow(page, totalPages, locale, true);
-    await interaction.editReply({ embeds: [finalEmbed!], components: [disabledPeriodRow, disabledPageRow] }).catch(() => {});
+    await interaction
+        .editReply({ embeds: [finalEmbed!], components: [disabledPeriodRow, disabledPageRow] })
+        .catch(() => {});
 }
 
-function resolveServerNames(
-    guildIds: string[],
-    cache: Map<string, string>
-): void {
+function resolveServerNames(guildIds: string[], cache: Map<string, string>): void {
     for (const guildId of guildIds) {
         if (cache.has(guildId)) continue;
         const guild = client.guilds.cache.get(guildId);
@@ -286,7 +301,8 @@ async function paginateServerLeaderboard(
     async function fetchData(): Promise<{ allTimeServers?: IGuildStats[]; periodServers?: IGuildStatsSnapshot[] }> {
         if (currentPeriod === "all") {
             const servers = await GuildStatsModel.find().sort({ totalXP: -1 }).limit(MAX_RESULTS);
-            return { allTimeServers: servers };
+            const filtered = servers.filter((s) => client.guilds.cache.has(s.guildId));
+            return { allTimeServers: filtered };
         }
         const periodKeys = getCurrentPeriodKeys();
         const servers = await GuildStatsSnapshotModel.find({
@@ -295,7 +311,8 @@ async function paginateServerLeaderboard(
         })
             .sort({ xp: -1 })
             .limit(MAX_RESULTS);
-        return { periodServers: servers };
+        const filtered = servers.filter((s) => client.guilds.cache.has(s.guildId));
+        return { periodServers: filtered };
     }
 
     async function buildEmbed(data: Awaited<ReturnType<typeof fetchData>>, p: number, totalPages: number) {
@@ -303,13 +320,19 @@ async function paginateServerLeaderboard(
 
         if (currentPeriod === "all" && data.allTimeServers) {
             const pageData = data.allTimeServers.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
-            resolveServerNames(pageData.map((s) => s.guildId), serverNameCache);
+            resolveServerNames(
+                pageData.map((s) => s.guildId),
+                serverNameCache
+            );
             return buildServerLeaderboardEmbed(pageData, serverNameCache, locale, p, totalPages);
         }
 
         if (data.periodServers) {
             const pageData = data.periodServers.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
-            resolveServerNames(pageData.map((s) => s.guildId), serverNameCache);
+            resolveServerNames(
+                pageData.map((s) => s.guildId),
+                serverNameCache
+            );
             return buildServerPeriodLeaderboardEmbed(pageData, title, serverNameCache, locale, p, totalPages);
         }
 
@@ -365,7 +388,9 @@ async function paginateServerLeaderboard(
     const finalEmbed = await buildEmbed(data, page, totalPages);
     const disabledPeriodRow = buildPeriodRow(currentPeriod, locale, true);
     const disabledPageRow = buildPageRow(page, totalPages, locale, true);
-    await interaction.editReply({ embeds: [finalEmbed!], components: [disabledPeriodRow, disabledPageRow] }).catch(() => {});
+    await interaction
+        .editReply({ embeds: [finalEmbed!], components: [disabledPeriodRow, disabledPageRow] })
+        .catch(() => {});
 }
 
 export default {
