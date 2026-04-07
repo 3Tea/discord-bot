@@ -94,6 +94,14 @@
     "ping.result": "Retourlatentie: {{latency}}ms",
 
     "help.title": "3AT - Endless Paradox Slash CMD Ondersteuning",
+    "help.category.general": "General",
+    "help.category.xp": "XP & leaderboards",
+    "help.category.economy": "Economy",
+    "help.category.voice": "Voice channels",
+    "help.category.moderation": "Moderation",
+    "help.category.manga": "Manga (NSFW)",
+    "help.category.other": "Other",
+    "help.category_truncated": "… (list truncated)",
 
     "info.title": "3AT - Endless Paradox",
     "info.name": "Naam: ",

@@ -9,9 +9,32 @@ import {
 
 import client from "../../client";
 import Reply from "../../util/decorator/reply";
+import { HELP_CATEGORY_ORDER, getHelpCategory } from "../../util/help/commandCategories";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
+import type { SupportedLocale } from "../../util/i18n/index";
+
+/** Discord embed field value max length; leave margin for safety. */
+const FIELD_VALUE_SAFE_MAX = 1000;
+
+type CommandLine = { name: string; description: string };
+
+function buildCategoryValue(locale: SupportedLocale, lines: CommandLine[]): string {
+    const sorted = [...lines].sort((a, b) => a.name.localeCompare(b.name));
+    const parts: string[] = [];
+    let total = 0;
+    for (const { name, description } of sorted) {
+        const line = `• \`/${name}\` — ${description}`;
+        if (total + line.length + 1 > FIELD_VALUE_SAFE_MAX) {
+            parts.push(t(locale, "help.category_truncated"));
+            break;
+        }
+        parts.push(line);
+        total += line.length + 1;
+    }
+    return parts.join("\n");
+}
 
 export default {
     data: new SlashCommandBuilder()
@@ -24,11 +47,26 @@ export default {
 
         embed.setTitle(t(locale, "help.title"));
 
-        for (const i of client.commands) {
-            const field = i[1].data.toJSON();
+        const byCategory = new Map<string, CommandLine[]>();
+        for (const [, cmd] of client.commands) {
+            const field = cmd.data.toJSON() as { name: string; description?: string };
+            const name = field.name;
+            const description = field.description ?? "";
+            const category = getHelpCategory(name);
+            const list = byCategory.get(category) ?? [];
+            list.push({ name, description });
+            byCategory.set(category, list);
+        }
+
+        for (const categoryId of HELP_CATEGORY_ORDER) {
+            const lines = byCategory.get(categoryId);
+            if (!lines?.length) {
+                continue;
+            }
+            const value = buildCategoryValue(locale, lines);
             embed.addFields({
-                name: field.name,
-                value: field.description,
+                name: t(locale, `help.category.${categoryId}`),
+                value: value,
             });
         }
 

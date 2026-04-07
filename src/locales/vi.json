@@ -94,6 +94,14 @@
     "ping.result": "Độ trễ khứ hồi: {{latency}}ms",
 
     "help.title": "3AT - Endless Paradox Slash CMD Support",
+    "help.category.general": "Chung",
+    "help.category.xp": "XP & bảng xếp hạng",
+    "help.category.economy": "Kinh tế",
+    "help.category.voice": "Kênh thoại",
+    "help.category.moderation": "Kiểm duyệt",
+    "help.category.manga": "Manga (NSFW)",
+    "help.category.other": "Khác",
+    "help.category_truncated": "… (danh sách đã rút gọn)",
 
     "info.title": "3AT - Endless Paradox",
     "info.name": "Tên: ",

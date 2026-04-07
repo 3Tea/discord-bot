@@ -94,6 +94,14 @@
     "ping.result": "Задержка туда-обратно: {{latency}}ms",
 
     "help.title": "3AT - Endless Paradox Поддержка команд",
+    "help.category.general": "General",
+    "help.category.xp": "XP & leaderboards",
+    "help.category.economy": "Economy",
+    "help.category.voice": "Voice channels",
+    "help.category.moderation": "Moderation",
+    "help.category.manga": "Manga (NSFW)",
+    "help.category.other": "Other",
+    "help.category_truncated": "… (list truncated)",
 
     "info.title": "3AT - Endless Paradox",
     "info.name": "Имя: ",

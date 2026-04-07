@@ -94,6 +94,14 @@
     "ping.result": "왕복 지연 시간: {{latency}}ms",
 
     "help.title": "3AT - Endless Paradox 슬래시 CMD 지원",
+    "help.category.general": "General",
+    "help.category.xp": "XP & leaderboards",
+    "help.category.economy": "Economy",
+    "help.category.voice": "Voice channels",
+    "help.category.moderation": "Moderation",
+    "help.category.manga": "Manga (NSFW)",
+    "help.category.other": "Other",
+    "help.category_truncated": "… (list truncated)",
 
     "info.title": "3AT - Endless Paradox",
     "info.name": "이름: ",
