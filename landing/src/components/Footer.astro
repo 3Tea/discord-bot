@@ -35,6 +35,11 @@ const resources = [
   },
 ];
 
+const legal = [
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Service", href: "/terms" },
+];
+
 const year = new Date().getFullYear();
 ---
 
@@ -80,6 +85,19 @@ const year = new Date().getFullYear();
           ))}
         </ul>
       </div>
+
+      <div class="footer-col">
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-list">
+          {legal.map((item) => (
+            <li>
+              <a href={item.href} class="footer-link">
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
 
     <div class="footer-bottom">
@@ -106,8 +124,8 @@ const year = new Date().getFullYear();
 
   .footer-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 40px;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 32px;
     padding-bottom: 24px;
   }
 

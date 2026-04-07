@@ -1,0 +1,22 @@
+---
+/**
+ * Shared wrapper for legal pages (privacy, terms). Typography is styled via
+ * global `.legal-page` / `.legal-prose` in global.css for consistency.
+ */
+interface Props {
+  title: string;
+  lastUpdated: string;
+}
+
+const { title, lastUpdated } = Astro.props;
+---
+
+<article class="legal-page container">
+  <header class="legal-header">
+    <h1 class="legal-title">{title}</h1>
+    <p class="legal-meta">Last updated: {lastUpdated}</p>
+  </header>
+  <div class="legal-prose">
+    <slot />
+  </div>
+</article>

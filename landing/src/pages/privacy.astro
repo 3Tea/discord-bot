@@ -1,0 +1,233 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import LegalArticle from "../components/LegalArticle.astro";
+
+const metaDescription =
+  "Privacy Policy for 3AT - Endless Paradox: Discord data, MongoDB, Redis, XP, economy, and how to contact us.";
+---
+
+<BaseLayout title="Privacy Policy | 3AT - Endless Paradox" description={metaDescription}>
+  <LegalArticle title="Privacy Policy" lastUpdated="April 8, 2026">
+    <p>
+      This Privacy Policy explains how the operators of <strong>3AT - Endless Paradox</strong> (“3AT,” “we,”
+      “us”) handle information when you use the 3AT Discord bot, visit official landing pages (including
+      <strong>discords.sbs</strong>), or interact with the open-source project at
+      <a href="https://github.com/3Tea/discord-bot" target="_blank" rel="noopener">3Tea/discord-bot</a>.
+    </p>
+
+    <h2>1. Who we are</h2>
+    <p>
+      3AT is a community Discord bot. The codebase is public on GitHub; the <em>live bot</em> you add to a
+      server is run by project maintainers on infrastructure they control (or by you, if you self-host—see
+      below). For questions about how <em>our</em> hosted instance processes data, use the contact section.
+    </p>
+    <p>
+      If you run your own copy of the bot from source, <strong>you</strong> are responsible for your own
+      privacy notices and processing; this policy describes the public service as operated by the project, not
+      every private deployment.
+    </p>
+
+    <h2>2. Scope and Discord</h2>
+    <p>
+      This policy covers 3AT’s behavior in Discord guilds that install it and use of official marketing or
+      documentation sites. It does <strong>not</strong> replace
+      <a href="https://discord.com/privacy" target="_blank" rel="noopener">Discord’s Privacy Policy</a> or
+      <a href="https://discord.com/terms" target="_blank" rel="noopener">Terms of Service</a>, which govern
+      your Discord account and the Discord platform.
+    </p>
+
+    <h2>3. Information we process</h2>
+    <p>What we process depends on which features your server enables and how you interact with the bot.</p>
+
+    <h3>3.1 Discord platform data</h3>
+    <p>We receive data from Discord’s APIs and events when the bot is online, for example:</p>
+    <ul>
+      <li>
+        <strong>Identifiers</strong> — user IDs, guild (server) IDs, channel IDs, role IDs, message IDs, and
+        similar technical IDs required to execute slash commands and background features.
+      </li>
+      <li>
+        <strong>Profile fields exposed by Discord</strong> — such as usernames, display names, avatars, or
+        badges when the API returns them for embeds, rank cards, leaderboards, or command output.
+      </li>
+      <li>
+        <strong>Interactions</strong> — slash-command payloads, button presses, and related metadata Discord
+        sends with each interaction.
+      </li>
+      <li>
+        <strong>Messages and message-like content</strong> — only where Discord provides content to the bot
+        under your server’s intents and permissions (for example text you submit via command options, or
+        message content when the bot is configured with the Message Content privileged intent). Some XP and
+        anti-spam logic may use message length, timing, or a <strong>one-way hash</strong> of normalized text
+        for duplicate detection when content is available; we do not store full message logs for advertising
+        or model training.
+      </li>
+      <li>
+        <strong>Voice state</strong> — whether you are connected to voice channels (and related fields Discord
+        exposes) for features such as voice XP or temporary voice channels, depending on configuration.
+      </li>
+      <li>
+        <strong>Reactions</strong> — enough information to attribute a reaction to a user and channel for
+        reaction-based XP or similar, subject to cooldowns and server settings.
+      </li>
+    </ul>
+
+    <h3>3.2 Data we store in our application database (e.g. MongoDB)</h3>
+    <p>Typical persisted categories include:</p>
+    <ul>
+      <li>
+        <strong>Per-user global profile</strong> — Discord user ID, aggregated XP/currency fields used across
+        guilds where applicable, optional language preference, activity timestamps, and account status flags.
+      </li>
+      <li>
+        <strong>Per-guild, per-member progression</strong> — XP, level, message/voice/reaction counters,
+        timestamps for cooldowns, and (when message content is available) a stored hash of the last message
+        content used only to detect repeated spam-like messages for the same member.
+      </li>
+      <li>
+        <strong>Guild configuration</strong> — server locale, XP tuning (amounts, cooldowns, blacklisted
+        channels), and related settings.
+      </li>
+      <li>
+        <strong>Time-bucketed snapshots</strong> — period keys (daily/weekly/monthly/yearly style) for
+        leaderboards and server statistics aggregates.
+      </li>
+      <li>
+        <strong>Economy</strong> — per-guild balances (coins/gems), pray/curse streak and cooldown timestamps,
+        shop catalog entries administrators define, and transaction records for shop or economy actions.
+      </li>
+    </ul>
+    <p>
+      Exact fields evolve with the software version deployed; the public source repository remains the most
+      precise technical reference.
+    </p>
+
+    <h3>3.3 Caching and fast storage (e.g. Redis or in-memory)</h3>
+    <p>
+      We use short-lived caches for responsiveness and abuse prevention, such as: resolved language
+      preferences, rendered image or payload caches, voice-channel ownership markers, interaction rate limits,
+      and XP anti-spam cooldown markers. TTLs are typically on the order of minutes to days depending on the
+      key. Cached data is derived from the categories above and is not sold.
+    </p>
+
+    <h3>3.4 Logs and security</h3>
+    <p>
+      Server or application logs may contain errors, coarse timestamps, and technical diagnostics. We avoid
+      retaining full message bodies in logs unless temporarily needed to investigate a specific incident.
+    </p>
+
+    <h3>3.5 Website visitors</h3>
+    <p>
+      Official static landing pages may log standard web server metadata (for example IP address, user agent,
+      request path) as part of normal hosting. We do not use those pages to run behavioral ad networks on
+      behalf of third-party advertisers.
+    </p>
+
+    <h2>4. Purposes of processing</h2>
+    <p>We process information to:</p>
+    <ul>
+      <li>Deliver slash commands, buttons, XP, economy, voice utilities, shop flows, and related features.</li>
+      <li>Render leaderboards, rank cards, server stats, and other user-visible summaries.</li>
+      <li>Apply cooldowns, deduplication, and rate limits to reduce spam and protect stability.</li>
+      <li>Remember preferences you or administrators set (including language).</li>
+      <li>Operate, secure, debug, and improve the service, including backups where used.</li>
+    </ul>
+    <p>
+      <strong>We do not sell your personal information.</strong> We do not use Discord data to train
+      commercial machine-learning models for unrelated products.
+    </p>
+
+    <h2>5. Legal bases (where GDPR-style laws apply)</h2>
+    <p>
+      Where European or similar rules require a “legal basis,” we rely on <strong>performance of a
+      service</strong> you or your server administrators request by adding the bot, <strong>legitimate
+      interests</strong> in securing and improving the bot (balanced against your rights), and, where
+      applicable, <strong>consent</strong> for optional interactions you clearly initiate.
+    </p>
+
+    <h2>6. Sharing and subprocessors</h2>
+    <p>We disclose information only as needed:</p>
+    <ul>
+      <li>
+        <strong>Discord, Inc.</strong> — we call Discord’s APIs; they process data under their policies.
+      </li>
+      <li>
+        <strong>Infrastructure providers</strong> — hosting, databases, DNS, or monitoring vendors that store or
+        transmit data on our behalf.
+      </li>
+      <li>
+        <strong>Third-party content or APIs</strong> — certain commands may request external services (for
+        example media or translation endpoints). Only the parameters required for that request are sent; those
+        providers have their own policies.
+      </li>
+      <li>
+        <strong>Law and safety</strong> — when required by law or to protect rights, safety, and integrity.
+      </li>
+    </ul>
+
+    <h2>7. Retention</h2>
+    <p>
+      Data generally remains while the bot remains in the guild and features are used. Redis-style entries
+      expire automatically by TTL. Database records may be deleted when no longer needed, when administrators
+      use available tools, or when you contact us for reasonable deletion requests we can honor within Discord
+      and operational constraints. Residual copies may persist for a limited time in backups.
+    </p>
+
+    <h2>8. Security</h2>
+    <p>
+      We apply reasonable access controls, encrypted transport where standard, and least-privilege OAuth
+      scopes for the bot. No method of storage is perfectly secure; protect your Discord account with
+      two-factor authentication and review the permissions you grant when inviting 3AT.
+    </p>
+
+    <h2>9. Your rights and choices</h2>
+    <ul>
+      <li>
+        <strong>Remove the bot</strong> — administrators can kick or uninstall 3AT to stop new processing for
+        that guild (subject to logs/backups).
+      </li>
+      <li>
+        <strong>Access, correction, deletion</strong> — contact us via GitHub (below). We will assist where we
+        can verify your request and Discord’s platform allows the operation.
+      </li>
+      <li>
+        <strong>Object or restrict</strong> — you may object to certain processing where local law provides
+        that right; removing the bot or disabling features may be the practical outcome.
+      </li>
+      <li>
+        <strong>Complaints</strong> — you may lodge a complaint with your local data-protection authority.
+      </li>
+    </ul>
+
+    <h2>10. International transfers</h2>
+    <p>
+      Discord and our hosting providers may process data in multiple countries. By using 3AT, you understand
+      that information may cross borders to jurisdictions with different privacy rules.
+    </p>
+
+    <h2>11. Children</h2>
+    <p>
+      3AT is not aimed at children under the age required by Discord or your region (commonly 13+ in the U.S.,
+      higher in some EU countries). If you believe we have processed a child’s data improperly, contact us.
+    </p>
+
+    <h2>12. Changes</h2>
+    <p>
+      We may update this policy; the “Last updated” date reflects the latest revision. Continued use after
+      changes means you acknowledge the updated policy where permitted by law.
+    </p>
+
+    <h2>13. Contact</h2>
+    <p>
+      Privacy questions:
+      <a href="https://github.com/3Tea/discord-bot/issues" target="_blank" rel="noopener">GitHub Issues</a> or
+      <a href="https://github.com/3Tea/discord-bot/discussions" target="_blank" rel="noopener">Discussions</a>.
+      This text is for transparency only and is not legal advice.
+    </p>
+
+    <p class="legal-note">
+      This Privacy Policy is general information, not legal advice. Operators may adjust processing as the
+      bot evolves; check this page and the repository for the current behavior.
+    </p>
+  </LegalArticle>
+</BaseLayout>
