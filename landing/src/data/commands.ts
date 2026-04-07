@@ -1,4 +1,12 @@
-export type Category = "voice" | "xp" | "economy" | "manga" | "utility" | "info" | "settings";
+export type Category =
+  | "voice"
+  | "xp"
+  | "economy"
+  | "moderation"
+  | "manga"
+  | "utility"
+  | "info"
+  | "settings";
 
 export interface Command {
   name: string;
@@ -15,6 +23,7 @@ export const categoryMeta: Record<
   voice: { label: "Voice", color: "#5865F2", bg: "rgba(88,101,242,0.15)" },
   xp: { label: "XP", color: "#9B59B6", bg: "rgba(155,89,182,0.15)" },
   economy: { label: "Economy", color: "#F1C40F", bg: "rgba(241,196,15,0.15)" },
+  moderation: { label: "Moderation", color: "#C0392B", bg: "rgba(192,57,43,0.15)" },
   manga: { label: "NSFW", color: "#ED4245", bg: "rgba(237,66,69,0.15)" },
   utility: { label: "Utility", color: "#3BA55C", bg: "rgba(59,165,92,0.15)" },
   info: { label: "Info", color: "#FAA61A", bg: "rgba(250,166,26,0.15)" },
@@ -86,6 +95,13 @@ export const commands: Command[] = [
     description: "Admin currency management — set or add coins and gems for users",
     category: "economy",
     subcommands: ["set-coin", "add-coin", "set-gem", "add-gem"],
+  },
+  {
+    name: "moderation",
+    description:
+      "Staff moderation — timeout (≤28 days), remove timeout, ban, kick, and unban by user ID (requires ModerateMembers / BanMembers)",
+    category: "moderation",
+    subcommands: ["timeout", "untimeout", "ban", "kick", "unban"],
   },
   // Manga
   {
