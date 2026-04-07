@@ -85,6 +85,10 @@ See [economy-system.md](economy-system.md) for full system documentation.
 | `economy add-coin` | Add/subtract coins (Admin) | `user`, `amount` |
 | `economy set-gem` | Set user's gem balance (Admin) | `user`, `amount` |
 | `economy add-gem` | Add/subtract gems (Admin) | `user`, `amount` |
+| `moderation timeout` | Timeout member — mute text and voice (≤28 days) | `user`, `duration`, `unit`, `reason?` |
+| `moderation untimeout` | Remove an active timeout | `user` |
+| `moderation ban` | Ban a member from the server | `user`, `reason?`, `delete_messages?` |
+| `moderation unban` | Unban by user snowflake ID | `user_id`, `reason?` |
 
 ### Manga Commands (NSFW)
 
