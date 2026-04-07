@@ -35,7 +35,7 @@ Example:
 |------|--------|
 | **Trigger** | Push to `develop` where `CHANGELOG.md` differs from the previous commit (or is present on the first commit when there is no parent) |
 | **Gate** | Bot `npm run build` **succeeds** in the `build` job before the `notify-changelog` job runs |
-| **Secret** | Repository secret `DISCORD_CHANGELOG_WEBHOOK_URL` — **never** commit the webhook URL. If unset, the notify step **skips** (does not fail the workflow) |
+| **Secret** | Repository secret `DISCORD_CHANGELOG_WEBHOOK_URL` — **never** commit the webhook URL. If unset, the notify step **skips** (does not fail the workflow). Use **Repository** secrets (Settings → Secrets and variables → **Actions** → **Repository secrets**), not only org-level secrets unless this repo is explicitly allowed to read them. Paste the URL as **one line** with no spaces or extra lines after the token. If Postman works but CI returns **403**, the value in GitHub almost always differs from Postman (old webhook, typo, or newline) — replace the secret with a fresh copy from Discord. Re-run the job and check logs for `Discord response body` if the script prints it. |
 | **Payload** | Discord **embed**: title `Release notes · v<version>`, description = **`## [version]`** section (from `CHANGELOG.md`) plus optional GitHub blob link, footer with version, branch, short SHA |
 
 | File | Role |

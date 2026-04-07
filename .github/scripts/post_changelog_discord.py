@@ -55,10 +55,27 @@ def extract_released_section(text: str, version: str) -> str:
 
 
 def main() -> int:
-    webhook = os.environ.get("DISCORD_CHANGELOG_WEBHOOK_URL", "").strip()
+    # Strip whitespace, BOM, and accidental newlines from pasted GitHub Secrets.
+    raw_webhook = os.environ.get("DISCORD_CHANGELOG_WEBHOOK_URL", "")
+    webhook = (
+        raw_webhook.strip().lstrip("\ufeff").splitlines()[0].strip() if raw_webhook.strip() else ""
+    )
     if not webhook:
         print("DISCORD_CHANGELOG_WEBHOOK_URL not set; skipping Discord notification.")
         return 0
+    allowed_prefixes = (
+        "https://discord.com/api/webhooks/",
+        "https://discordapp.com/api/webhooks/",
+        "https://canary.discord.com/api/webhooks/",
+        "https://ptb.discord.com/api/webhooks/",
+    )
+    if not any(webhook.startswith(p) for p in allowed_prefixes):
+        print(
+            "DISCORD_CHANGELOG_WEBHOOK_URL must be a Discord webhook URL "
+            "(https://discord.com/api/webhooks/...).",
+            file=sys.stderr,
+        )
+        return 1
 
     try:
         version = read_package_version()
@@ -115,7 +132,11 @@ def main() -> int:
     request = urllib.request.Request(
         webhook,
         data=json.dumps(payload).encode("utf-8"),
-        headers={"Content-Type": "application/json"},
+        headers={
+            "Content-Type": "application/json",
+            # Some stacks treat missing User-Agent differently than Postman/browser.
+            "User-Agent": "3AT-discord-bot-changelog-ci/1.0 (GitHub Actions)",
+        },
         method="POST",
     )
     try:
@@ -124,7 +145,10 @@ def main() -> int:
                 print(f"Discord returned HTTP {response.status}", file=sys.stderr)
                 return 1
     except urllib.error.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")[:800]
         print(f"Discord HTTP error: {exc}", file=sys.stderr)
+        if detail.strip():
+            print(f"Discord response body: {detail}", file=sys.stderr)
         return 1
     except urllib.error.URLError as exc:
         print(f"Discord network error: {exc}", file=sys.stderr)
