@@ -109,6 +109,9 @@
     "info.language": "언어: ",
     "info.runtime": "런타임: ",
     "info.discord": "Discord: ",
+    "info.guilds": "Servers",
+    "info.users": "Users (approx.)",
+    "info.uptime": "Uptime",
 
     "voice.not_in_channel": "음성 채널에 입장해 있지 않아요.",
     "voice.not_owner": "이 음성 채널의 소유자가 아니에요.",

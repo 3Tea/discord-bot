@@ -109,6 +109,9 @@
     "info.language": "言語: ",
     "info.runtime": "ランタイム: ",
     "info.discord": "Discord: ",
+    "info.guilds": "Servers",
+    "info.users": "Users (approx.)",
+    "info.uptime": "Uptime",
 
     "voice.not_in_channel": "ボイスチャンネルに入ってないよ。",
     "voice.not_owner": "このボイスチャンネルのオーナーじゃないよ。",

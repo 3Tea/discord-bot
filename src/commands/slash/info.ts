@@ -13,6 +13,19 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 
+/** Formats process uptime as H:MM:SS (locale-neutral, readable in any language). */
+function formatUptimeClock(totalSeconds: number): string {
+    const sec = Math.max(0, Math.floor(totalSeconds));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function totalMemberCount(client: ChatInputCommandInteraction["client"]): number {
+    return client.guilds.cache.reduce((sum, g) => sum + g.memberCount, 0);
+}
+
 export default {
     data: new SlashCommandBuilder()
         .setName("info")
@@ -30,7 +43,12 @@ export default {
         const embed = new EmbedBuilder().setColor("Random").setTimestamp();
 
         switch (subcommand) {
-            case "bot":
+            case "bot": {
+                const client = interaction.client;
+                const guildCount = client.guilds.cache.size;
+                const userApprox = totalMemberCount(client);
+                const uptimeClock = formatUptimeClock(process.uptime());
+
                 embed.setTitle(t(locale, "info.title"));
                 embed.addFields(
                     {
@@ -41,6 +59,21 @@ export default {
                     {
                         name: t(locale, "info.version"),
                         value: `${infoBot.version}`,
+                        inline: true,
+                    },
+                    {
+                        name: t(locale, "info.guilds"),
+                        value: String(guildCount),
+                        inline: true,
+                    },
+                    {
+                        name: t(locale, "info.users"),
+                        value: String(userApprox),
+                        inline: true,
+                    },
+                    {
+                        name: t(locale, "info.uptime"),
+                        value: uptimeClock,
                         inline: true,
                     },
                     {
@@ -60,6 +93,7 @@ export default {
                     }
                 );
                 break;
+            }
 
             default:
                 break;
@@ -85,7 +119,3 @@ export default {
         return;
     },
 };
-
-export function getInfoBot(interaction: ChatInputCommandInteraction) {
-    return interaction.client.guilds.cache.reduce((a, g) => a + g.memberCount, 0);
-}

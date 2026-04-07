@@ -109,6 +109,9 @@
     "info.language": "语言：",
     "info.runtime": "运行环境：",
     "info.discord": "Discord：",
+    "info.guilds": "Servers",
+    "info.users": "Users (approx.)",
+    "info.uptime": "Uptime",
 
     "voice.not_in_channel": "你不在语音频道中。",
     "voice.not_owner": "你不是该语音频道的所有者。",

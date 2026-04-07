@@ -109,6 +109,9 @@
     "info.language": "Dil: ",
     "info.runtime": "Çalışma Zamanı: ",
     "info.discord": "Discord: ",
+    "info.guilds": "Servers",
+    "info.users": "Users (approx.)",
+    "info.uptime": "Uptime",
 
     "voice.not_in_channel": "Bir ses kanalında değilsiniz.",
     "voice.not_owner": "Bu ses kanalının sahibi değilsiniz.",

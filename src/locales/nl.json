@@ -109,6 +109,9 @@
     "info.language": "Taal: ",
     "info.runtime": "Runtime: ",
     "info.discord": "Discord: ",
+    "info.guilds": "Servers",
+    "info.users": "Users (approx.)",
+    "info.uptime": "Uptime",
 
     "voice.not_in_channel": "Je bent niet in een spraakkanaal.",
     "voice.not_owner": "Je bent niet de eigenaar van dit spraakkanaal.",

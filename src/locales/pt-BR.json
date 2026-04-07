@@ -109,6 +109,9 @@
     "info.language": "Linguagem: ",
     "info.runtime": "Runtime: ",
     "info.discord": "Discord: ",
+    "info.guilds": "Servers",
+    "info.users": "Users (approx.)",
+    "info.uptime": "Uptime",
 
     "voice.not_in_channel": "Você não está em um canal de voz.",
     "voice.not_owner": "Você não é o dono deste canal de voz.",

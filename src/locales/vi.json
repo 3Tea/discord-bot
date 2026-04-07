@@ -109,6 +109,9 @@
     "info.language": "Ngôn ngữ: ",
     "info.runtime": "Runtime: ",
     "info.discord": "Discord: ",
+    "info.guilds": "Máy chủ",
+    "info.users": "Người dùng (ước lượng)",
+    "info.uptime": "Thời gian chạy",
 
     "voice.not_in_channel": "Bạn không ở trong kênh voice.",
     "voice.not_owner": "Bạn không phải chủ kênh voice này.",
