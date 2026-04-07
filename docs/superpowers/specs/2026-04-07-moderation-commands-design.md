@@ -1,7 +1,7 @@
 # Moderation Slash Commands Design
 
 **Date:** 2026-04-07
-**Status:** Draft (pending user review)
+**Status:** Approved
 
 ## Overview
 
