@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Discord bot "3AT - Endless Paradox" (v5.0.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
+Discord bot "3AT - Endless Paradox" (v5.1.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
 Runs on Node.js >= 24 via Gateway (WebSocket). Uses slash commands exclusively.
 
 ## Quick Reference
@@ -492,11 +492,11 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/commands.md](docs/steering/commands.md) | Full command inventory, button handlers, events, i18n, and business rules |
 | [docs/steering/xp-system.md](docs/steering/xp-system.md) | XP earning, leveling formula, snapshots, server stats, leaderboards, canvas rendering |
 | [docs/steering/economy-system.md](docs/steering/economy-system.md) | Coins, gems, pray/curse, streaks, shop, transactions, services |
-| [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md) | Root `CHANGELOG.md` format (first `##` section), CI + Discord webhook embed via GitHub Actions |
+| [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md) | Root `CHANGELOG.md` + `package.json` version; CI posts the matching `## [x.y.z]` section to Discord |
 
 ## Changelog & release notes
 
-- Edit **`CHANGELOG.md`** at the repo root using **`##` sections**; **new notes go in the top section** (first `##` … until the next `##`). That block is what CI sends to Discord as an embed after a successful bot build on `develop` when the file changes (if `DISCORD_CHANGELOG_WEBHOOK_URL` is set in repo secrets). See [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md).
+- **`package.json` `version`** is the shipped semver (also shown by **`/info bot`**). In **`CHANGELOG.md`**, use **`## [Unreleased]`** for drafts and a **`## [x.y.z] - date`** block for each release where **`[x.y.z]`** matches `package.json`. CI sends **that release section** to Discord (not `[Unreleased]`) after a successful `develop` build when `CHANGELOG.md` changes, if `DISCORD_CHANGELOG_WEBHOOK_URL` is set. See [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md).
 
 ## Docker
 

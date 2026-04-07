@@ -112,3 +112,6 @@ landing/.astro/
 
 # Superpowers brainstorm
 .superpowers/
+
+# Python (e.g. .github/scripts)
+**/__pycache__/

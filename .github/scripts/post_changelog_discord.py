@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Extract the first ## section from CHANGELOG.md and POST a Discord webhook embed.
+Post the CHANGELOG section that matches package.json's version to Discord (incoming webhook).
 
-Called from GitHub Actions when CHANGELOG.md changed and DISCORD_CHANGELOG_WEBHOOK_URL is set.
+Reads root package.json for the semver, finds "## [<version>]" (optional " - YYYY-MM-DD") in
+CHANGELOG.md, and sends that block — not the first ## section, so "## [Unreleased]" can stay on top.
 """
 from __future__ import annotations
 
@@ -17,14 +18,40 @@ import urllib.request
 MAX_DESCRIPTION = 4000
 
 
-def extract_first_section(text: str) -> str:
-    """Return markdown from the first ## heading through the line before the next ## heading."""
-    matches = list(re.finditer(r"^## .+$", text, re.MULTILINE))
-    if not matches:
-        raise ValueError("No ## heading found in CHANGELOG.md")
-    start = matches[0].start()
-    end = matches[1].start() if len(matches) > 1 else len(text)
-    return text[start:end].strip()
+def read_package_version() -> str:
+    """Return the `version` field from the repository root package.json."""
+    with open("package.json", encoding="utf-8") as fp:
+        data = json.load(fp)
+    ver = data.get("version")
+    if not ver or not isinstance(ver, str):
+        raise ValueError("package.json must contain a string `version` field")
+    return ver.strip()
+
+
+def extract_released_section(text: str, version: str) -> str:
+    """
+    Return markdown for the ## [<version>] section (optional date suffix after the closing bracket).
+
+    Example headings: ## [5.1.0] or ## [5.1.0] - 2026-04-07
+    Skips [Unreleased] and other versions.
+    """
+    # Match the full heading line only (so we do not match a different semver that shares a prefix).
+    line_re = re.compile(
+        rf"^## \[{re.escape(version)}\](?:\s+-\s+\d{{4}}-\d{{2}}-\d{{2}})?\s*$",
+        re.MULTILINE,
+    )
+    headings = list(re.finditer(r"^## .+$", text, re.MULTILINE))
+    for i, m in enumerate(headings):
+        if not line_re.match(m.group(0)):
+            continue
+        start = m.start()
+        end = headings[i + 1].start() if i + 1 < len(headings) else len(text)
+        return text[start:end].strip()
+
+    raise ValueError(
+        f"No '## [{version}]' section found in CHANGELOG.md "
+        f"(add a release block matching package.json version).",
+    )
 
 
 def main() -> int:
@@ -32,6 +59,12 @@ def main() -> int:
     if not webhook:
         print("DISCORD_CHANGELOG_WEBHOOK_URL not set; skipping Discord notification.")
         return 0
+
+    try:
+        version = read_package_version()
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"package.json: {exc}", file=sys.stderr)
+        return 1
 
     sha_full = os.environ.get("GITHUB_SHA", "")
     sha_short = (sha_full[:7] if len(sha_full) >= 7 else sha_full) or "unknown"
@@ -47,7 +80,7 @@ def main() -> int:
         return 1
 
     try:
-        section = extract_first_section(changelog_text)
+        section = extract_released_section(changelog_text, version)
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         return 1
@@ -58,7 +91,6 @@ def main() -> int:
         if len(description) + len(link_line) <= MAX_DESCRIPTION:
             description = description + link_line
         elif len(link_line) < MAX_DESCRIPTION:
-            # Truncate section so the link still fits (human-readable changelog should stay short).
             budget = MAX_DESCRIPTION - len(link_line) - 3
             description = section[:budget].rstrip() + "..." + link_line
         else:
@@ -67,9 +99,9 @@ def main() -> int:
     elif len(description) > MAX_DESCRIPTION:
         description = description[: MAX_DESCRIPTION - 3] + "..."
 
-    footer_text = f"{ref_name} · {sha_short}"
+    footer_text = f"v{version} · {ref_name} · {sha_short}"
     embed = {
-        "title": "Changelog update",
+        "title": f"Release notes · v{version}",
         "description": description,
         "color": 0x5865F2,
         "footer": {"text": footer_text[:2048]},
@@ -98,7 +130,7 @@ def main() -> int:
         print(f"Discord network error: {exc}", file=sys.stderr)
         return 1
 
-    print("Posted changelog embed to Discord.")
+    print(f"Posted CHANGELOG section for v{version} to Discord.")
     return 0
 
 
