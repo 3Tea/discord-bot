@@ -25,6 +25,24 @@ function getNonBotMemberCount(channel: VoiceChannel | null): number {
     return channel.members.filter((m) => !m.user.bot).size;
 }
 
+/** True when this application's bot user is connected to the given voice channel. */
+function isApplicationBotInVoiceChannel(channel: VoiceChannel): boolean {
+    const botId = client.user?.id;
+    if (!botId) return false;
+    return channel.members.has(botId);
+}
+
+/**
+ * Voice XP is granted when at least two human members share the channel, or when at least
+ * one human is in the channel together with this bot (so solo users still earn XP if the bot is in voice).
+ */
+function channelEligibleForVoiceXp(channel: VoiceChannel | null): boolean {
+    if (!channel) return false;
+    const humans = getNonBotMemberCount(channel);
+    if (humans >= 2) return true;
+    return humans >= 1 && isApplicationBotInVoiceChannel(channel);
+}
+
 async function startVoiceSession(guildId: string, userId: string, channelId: string): Promise<void> {
     await redis.addToSet(VOICE_XP_SET, `${guildId}:${userId}:${channelId}`);
 }
@@ -100,8 +118,8 @@ export default {
         if (oldChannel) {
             await stopVoiceSession(guildId, userId, oldChannel.id);
 
-            // If channel drops below 2 non-bot members, clean up all sessions
-            if (getNonBotMemberCount(oldChannel) < 2) {
+            // If the channel no longer qualifies for voice XP, remove every session tied to it
+            if (!channelEligibleForVoiceXp(oldChannel)) {
                 await cleanupChannelSessions(guildId, oldChannel.id);
             }
         }
@@ -109,12 +127,12 @@ export default {
         // User joined a channel or moved
         if (newChannel) {
             const isServerDeafened = newState.serverDeaf ?? false;
-            const hasEnoughMembers = getNonBotMemberCount(newChannel) >= 2;
+            const channelEligible = channelEligibleForVoiceXp(newChannel);
 
-            if (!isServerDeafened && hasEnoughMembers) {
+            if (!isServerDeafened && channelEligible) {
                 await startVoiceSession(guildId, userId, newChannel.id);
 
-                // Start sessions for other eligible members who now have 2+ people
+                // Start sessions for other eligible humans in the same channel (now qualifies for XP)
                 for (const [memberId, member] of newChannel.members) {
                     if (member.user.bot || memberId === userId) continue;
                     if (!member.voice.serverDeaf) {
@@ -159,7 +177,7 @@ setInterval(async () => {
                 }
 
                 const member = channel.members.get(sUserId);
-                if (!member || member.voice.serverDeaf || getNonBotMemberCount(channel) < 2) {
+                if (!member || member.voice.serverDeaf || !channelEligibleForVoiceXp(channel)) {
                     await redis.removeFromSet(VOICE_XP_SET, session);
                     continue;
                 }
