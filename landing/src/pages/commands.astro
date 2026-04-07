@@ -40,14 +40,18 @@ import { commands } from "../data/commands";
   }
 
   .commands-header {
-    margin-bottom: 24px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
   }
 
   .commands-title {
+    font-family: var(--font-display);
     color: var(--text-primary);
-    font-size: 22px;
+    font-size: clamp(1.35rem, 3vw, 1.65rem);
     font-weight: 700;
     margin-bottom: 4px;
+    letter-spacing: -0.02em;
   }
 
   .commands-count {

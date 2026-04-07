@@ -79,11 +79,17 @@ const reviews = [
     display: flex;
     flex-direction: column;
     gap: 20px;
-    transition: border-color 0.2s ease;
+    box-shadow: var(--shadow-card);
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
   .review-card:hover {
     border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card-hover);
   }
 
   .review-quote {
@@ -120,10 +126,11 @@ const reviews = [
   }
 
   .author-name {
+    font-family: var(--font-display);
     font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
-    font-family: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
+    letter-spacing: -0.02em;
   }
 
   .author-role {

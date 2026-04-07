@@ -1,4 +1,4 @@
-/* Design tokens — Discord palette */
+/* Design tokens — Discord palette + typography (Outfit + Source Sans 3) */
 :root {
   --bg-primary: #313338;
   --bg-secondary: #2B2D31;
@@ -7,6 +7,7 @@
   --border: #3F4147;
   --accent: #5865F2;
   --accent-hover: #4752C4;
+  --accent-soft: rgba(88, 101, 242, 0.12);
   --text-primary: #F2F3F5;
   --text-secondary: #B5BAC1;
   --text-muted: #80848E;
@@ -15,7 +16,14 @@
   --warning: #FAA61A;
   --btn-secondary: #4E5058;
 
-  --font-family: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", system-ui, -apple-system, sans-serif;
+  --font-body: "Source Sans 3", system-ui, -apple-system, sans-serif;
+  --font-family: var(--font-body);
+
+  --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.22);
+  --shadow-card-hover: 0 10px 28px rgba(0, 0, 0, 0.32);
+  --shadow-nav: 0 1px 0 rgba(0, 0, 0, 0.2);
+
   --radius-sm: 4px;
   --radius-md: 8px;
 
@@ -40,11 +48,33 @@ html {
 }
 
 body {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   background-color: var(--bg-primary);
   color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.6;
+}
+
+/* Headings use display font for clearer hierarchy */
+h1,
+h2,
+h3,
+.section-title {
+  font-family: var(--font-display);
+}
+
+/* Keyboard focus — visible ring without changing mouse click outline */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible) {
+  outline: none;
 }
 
 a {
@@ -68,16 +98,18 @@ img {
   color: var(--accent);
   font-size: 13px;
   font-weight: 600;
+  font-family: var(--font-display);
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   margin-bottom: 8px;
 }
 
 .section-title {
   color: var(--text-primary);
-  font-size: 28px;
+  font-size: clamp(1.35rem, 3.5vw, 1.85rem);
   font-weight: 700;
   margin-bottom: 8px;
+  letter-spacing: -0.02em;
 }
 
 .section-subtitle {
@@ -111,7 +143,4 @@ img {
     --section-padding: 48px 0;
   }
 
-  .section-title {
-    font-size: 24px;
-  }
 }

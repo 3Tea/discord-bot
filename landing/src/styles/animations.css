@@ -4,6 +4,42 @@
   50% { opacity: 0.7; }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow {
+    animation: none !important;
+  }
+
+  .hero-scroll {
+    animation: none !important;
+  }
+
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  .reveal-stagger > .reveal {
+    transition-delay: 0ms !important;
+  }
+
+  .faq-chevron {
+    transition: none !important;
+  }
+
+  details .faq-content {
+    transition: none !important;
+  }
+
+  .feature-card:hover,
+  .cmd-preview:hover,
+  .review-card:hover,
+  .command-card:hover,
+  .back-to-top:hover {
+    transform: none !important;
+  }
+}
+
 /* Scroll indicator bounce */
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }

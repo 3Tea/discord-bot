@@ -110,6 +110,17 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    box-shadow: var(--shadow-card);
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .cmd-preview:hover {
+    transform: translateY(-3px);
+    border-color: rgba(88, 101, 242, 0.45);
+    box-shadow: var(--shadow-card-hover);
   }
 
   .cmd-header {
@@ -132,6 +143,7 @@
   }
 
   .cmd-name {
+    font-family: var(--font-display);
     color: var(--text-primary);
     font-size: 14px;
     font-weight: 600;

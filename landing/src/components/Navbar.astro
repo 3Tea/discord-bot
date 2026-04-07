@@ -53,10 +53,11 @@ const inviteUrl =
     left: 0;
     right: 0;
     z-index: 100;
-    background: rgba(30, 31, 34, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(30, 31, 34, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-nav);
     height: 56px;
   }
 
@@ -82,9 +83,11 @@ const inviteUrl =
   }
 
   .navbar-name {
+    font-family: var(--font-display);
     color: var(--text-primary);
     font-size: 15px;
     font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   .navbar-menu {
@@ -109,7 +112,7 @@ const inviteUrl =
 
   .navbar-link:hover {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--accent-soft);
   }
 
   .btn {

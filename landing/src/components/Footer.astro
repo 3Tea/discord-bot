@@ -100,6 +100,8 @@ const year = new Date().getFullYear();
   .footer {
     background: var(--bg-tertiary);
     padding: 40px 0 0;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
   }
 
   .footer-grid {
@@ -118,12 +120,16 @@ const year = new Date().getFullYear();
 
   .footer-logo {
     border-radius: 50%;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
   }
 
   .footer-name {
+    font-family: var(--font-display);
     color: var(--text-primary);
     font-weight: 600;
     font-size: 14px;
+    letter-spacing: -0.02em;
   }
 
   .footer-desc {
@@ -134,10 +140,12 @@ const year = new Date().getFullYear();
   }
 
   .footer-heading {
+    font-family: var(--font-display);
     color: var(--text-primary);
     font-size: 13px;
     font-weight: 600;
     margin-bottom: 12px;
+    letter-spacing: -0.02em;
   }
 
   .footer-list {

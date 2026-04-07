@@ -4,7 +4,8 @@ const inviteUrl =
 ---
 
 <section class="hero">
-  <div class="hero-glow"></div>
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-noise" aria-hidden="true"></div>
   <div class="hero-content">
     <img
       src="/maid2.gif"
@@ -54,12 +55,25 @@ const inviteUrl =
     top: 50%;
     left: 50%;
     transform: translate(-50%, -60%);
-    width: 500px;
-    height: 500px;
+    width: 560px;
+    height: 560px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(88, 101, 242, 0.15) 0%, transparent 70%);
+    background:
+      radial-gradient(circle at 35% 42%, rgba(88, 101, 242, 0.22) 0%, transparent 48%),
+      radial-gradient(circle at 68% 48%, rgba(155, 89, 182, 0.1) 0%, transparent 52%),
+      radial-gradient(circle, rgba(88, 101, 242, 0.08) 0%, transparent 72%);
     animation: glow-pulse 4s ease-in-out infinite;
     pointer-events: none;
+  }
+
+  /* Subtle film grain so the hero feels less flat without heavy assets */
+  .hero-noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
   }
 
   .hero-content {
@@ -84,11 +98,22 @@ const inviteUrl =
   }
 
   .hero-title {
-    font-size: 42px;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5.5vw, 2.75rem);
     font-weight: 700;
-    color: var(--text-primary);
-    line-height: 1.2;
+    line-height: 1.15;
     margin: 0;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+  }
+
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    .hero-title {
+      background: linear-gradient(135deg, #f8f9fc 0%, #e4e7ff 45%, #b5bac1 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
   }
 
   .hero-subtitle {
@@ -130,6 +155,12 @@ const inviteUrl =
 
   .btn-primary:hover {
     background: var(--accent-hover);
+    box-shadow: 0 4px 16px rgba(88, 101, 242, 0.35);
+  }
+
+  .btn-primary:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
   }
 
   .btn-secondary {
@@ -165,10 +196,6 @@ const inviteUrl =
   }
 
   @media (max-width: 600px) {
-    .hero-title {
-      font-size: 30px;
-    }
-
     .hero-subtitle {
       font-size: 15px;
     }

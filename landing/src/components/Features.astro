@@ -45,12 +45,17 @@ import { features } from "../data/features";
     display: flex;
     flex-direction: column;
     gap: 10px;
-    transition: border-color 0.2s ease, transform 0.2s ease;
+    box-shadow: var(--shadow-card);
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
   }
 
   .feature-card:hover {
     border-color: var(--accent);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card-hover);
   }
 
   .feature-icon {
@@ -65,9 +70,11 @@ import { features } from "../data/features";
   }
 
   .feature-title {
+    font-family: var(--font-display);
     font-size: 15px;
     font-weight: 600;
     color: var(--text-primary);
+    letter-spacing: -0.02em;
   }
 
   .feature-desc {

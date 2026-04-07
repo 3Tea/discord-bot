@@ -13,7 +13,7 @@ const maxShow = 4;
 const overflow = items.length - maxShow;
 ---
 
-<div class="command-card">
+<div class="command-card" style={`--cat-color: ${meta.color}`}>
   <div class="command-header">
     <span class="slash-badge">/</span>
     <span class="command-name">{command.name}</span>
@@ -39,8 +39,21 @@ const overflow = items.length - maxShow;
   .command-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
+    border-left: 3px solid var(--cat-color, var(--border));
     border-radius: var(--radius-md);
     padding: 16px;
+    box-shadow: var(--shadow-card);
+    transition:
+      border-color 0.2s ease,
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .command-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--border);
+    border-left-color: var(--cat-color, var(--border));
   }
 
   .command-header {
@@ -60,9 +73,11 @@ const overflow = items.length - maxShow;
   }
 
   .command-name {
+    font-family: var(--font-display);
     color: var(--text-primary);
     font-size: 14px;
     font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   .category-tag {
