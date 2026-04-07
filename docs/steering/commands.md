@@ -88,6 +88,7 @@ See [economy-system.md](economy-system.md) for full system documentation.
 | `moderation timeout` | Timeout member — mute text and voice (≤28 days) | `user`, `duration`, `unit`, `reason?` |
 | `moderation untimeout` | Remove an active timeout | `user` |
 | `moderation ban` | Ban a member from the server | `user`, `reason?`, `delete_messages?` |
+| `moderation kick` | Kick a member from the server (not banned) | `user`, `reason?` |
 | `moderation unban` | Unban by user snowflake ID | `user_id`, `reason?` |
 
 ### Manga Commands (NSFW)

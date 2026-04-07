@@ -1,7 +1,7 @@
 # Moderation — `kick` Subcommand Design
 
 **Date:** 2026-04-08  
-**Status:** Draft (pending user review)  
+**Status:** Approved  
 **Parent:** [2026-04-07-moderation-commands-design.md](./2026-04-07-moderation-commands-design.md) (implemented + post-review fixes in code)
 
 ## Overview

@@ -15,7 +15,7 @@ import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 
 const MAX_TIMEOUT_MS = 28 * 24 * 60 * 60 * 1000;
-/** Discord API max length for timeout / ban / unban audit reasons. */
+/** Discord API max length for timeout / ban / kick / unban audit reasons. */
 const MAX_MODERATION_REASON_LENGTH = 512;
 const SNOWFLAKE_RE = /^\d{17,20}$/;
 
@@ -100,7 +100,7 @@ function invokerCanModerateTarget(guild: Guild, executor: GuildMember, target: G
 export default {
     data: new SlashCommandBuilder()
         .setName("moderation")
-        .setDescription("Server moderation (timeout, ban, unban)")
+        .setDescription("Server moderation (timeout, ban, kick, unban)")
         .setDescriptionLocalizations(descriptionLocales("cmd.moderation.desc"))
         .addSubcommand((sub) =>
             sub
@@ -182,6 +182,26 @@ export default {
                         .setRequired(false)
                         .setMinValue(0)
                         .setMaxValue(604800)
+                )
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("kick")
+                .setDescription("Kick a member from the server")
+                .setDescriptionLocalizations(descriptionLocales("cmd.moderation.kick.desc"))
+                .addUserOption((o) =>
+                    o
+                        .setName("user")
+                        .setDescription("Member to kick")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.moderation.kick.user.desc"))
+                        .setRequired(true)
+                )
+                .addStringOption((o) =>
+                    o
+                        .setName("reason")
+                        .setDescription("Reason (optional)")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.moderation.kick.reason.desc"))
+                        .setRequired(false)
                 )
         )
         .addSubcommand((sub) =>
@@ -357,6 +377,49 @@ export default {
                 const embed = new EmbedBuilder()
                     .setColor(0xed4245)
                     .setDescription(t(locale, "moderation.ban_success", { username: targetUser.tag }));
+                return Reply.embed(interaction, embed);
+            }
+
+            if (sub === "kick") {
+                if (!execMember.permissions.has(PermissionFlagsBits.KickMembers)) {
+                    return ephemeralError(interaction, locale, "moderation.no_permission_kick");
+                }
+                const targetUser = interaction.options.getUser("user", true);
+                if (targetUser.id === interaction.user.id) {
+                    return ephemeralError(interaction, locale, "moderation.no_target_self");
+                }
+                if (targetUser.id === interaction.client.user?.id) {
+                    return ephemeralError(interaction, locale, "moderation.no_target_bot");
+                }
+
+                const reason = normalizeModerationReason(interaction.options.getString("reason"));
+
+                const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
+                if (!member) {
+                    return ephemeralError(interaction, locale, "moderation.member_not_found");
+                }
+
+                if (!invokerCanModerateTarget(interaction.guild, execMember, member)) {
+                    if (member.id === interaction.guild.ownerId) {
+                        return ephemeralError(interaction, locale, "moderation.cannot_moderate_owner");
+                    }
+                    return ephemeralError(interaction, locale, "moderation.invoker_hierarchy");
+                }
+
+                const botMember = await interaction.guild.members.fetchMe();
+                if (!member.kickable) {
+                    return ephemeralError(interaction, locale, "moderation.bot_hierarchy");
+                }
+                if (!botMember.permissions.has(PermissionFlagsBits.KickMembers)) {
+                    return ephemeralError(interaction, locale, "moderation.bot_missing_permission");
+                }
+
+                const displayTag = member.user.tag;
+                await member.kick(reason);
+
+                const embed = new EmbedBuilder()
+                    .setColor(0xfee75c)
+                    .setDescription(t(locale, "moderation.kick_success", { username: displayTag }));
                 return Reply.embed(interaction, embed);
             }
 
