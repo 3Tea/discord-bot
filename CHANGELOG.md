@@ -6,7 +6,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
-- _Nothing yet._
+### Fixed
+
+- **CI (changelog → Discord webhook):** normalize the secret URL (strip BOM, use the first line only), validate known Discord webhook host prefixes, send a **`User-Agent`** header, and log Discord’s **HTTP response body** on failure to simplify debugging (e.g. 403 vs invalid token).
+
+### Changed
+
+- **Docs:** `docs/steering/changelog-ci.md` — notes on repository secrets, one-line URL pasting, and when the notify job runs (**only if `CHANGELOG.md` changes** in the push).
 
 ## [5.1.0] - 2026-04-07
 
