@@ -1,6 +1,7 @@
 import {
     ChatInputCommandInteraction,
     EmbedBuilder,
+    Guild,
     GuildMember,
     MessageFlags,
     PermissionFlagsBits,
@@ -14,6 +15,8 @@ import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 
 const MAX_TIMEOUT_MS = 28 * 24 * 60 * 60 * 1000;
+/** Discord API max length for timeout / ban / unban audit reasons. */
+const MAX_MODERATION_REASON_LENGTH = 512;
 const SNOWFLAKE_RE = /^\d{17,20}$/;
 
 function fallbackLocale(): SupportedLocale {
@@ -59,6 +62,39 @@ function ephemeralError(
         content: t(locale, key, vars),
         flags: MessageFlags.Ephemeral,
     });
+}
+
+/**
+ * Truncates optional reason so Discord API calls do not fail on length limits.
+ * Long input is cut at MAX_MODERATION_REASON_LENGTH without surfacing a separate error.
+ */
+function normalizeModerationReason(reason: string | null | undefined): string | undefined {
+    if (reason === null || reason === undefined) {
+        return undefined;
+    }
+    const trimmed = reason.trim();
+    if (trimmed.length === 0) {
+        return undefined;
+    }
+    if (trimmed.length <= MAX_MODERATION_REASON_LENGTH) {
+        return trimmed;
+    }
+    return trimmed.slice(0, MAX_MODERATION_REASON_LENGTH);
+}
+
+/**
+ * Returns whether the executor may moderate the target based on guild ownership and role position.
+ * Guild owner bypasses role checks; non-owners cannot moderate the owner; otherwise target's highest
+ * role must be strictly below the executor's highest role.
+ */
+function invokerCanModerateTarget(guild: Guild, executor: GuildMember, target: GuildMember): boolean {
+    if (executor.id === guild.ownerId) {
+        return true;
+    }
+    if (target.id === guild.ownerId) {
+        return false;
+    }
+    return target.roles.highest.position < executor.roles.highest.position;
 }
 
 export default {
@@ -179,7 +215,7 @@ export default {
         const sub = interaction.options.getSubcommand(true);
         const executor = interaction.member;
         if (!executor) {
-            return ephemeralError(interaction, locale, "moderation.guild_only");
+            return ephemeralError(interaction, locale, "moderation.missing_member");
         }
         const execMember = executor as GuildMember;
 
@@ -198,7 +234,7 @@ export default {
 
                 const amount = interaction.options.getInteger("duration", true);
                 const unit = interaction.options.getString("unit", true) as DurationUnit;
-                const reason = interaction.options.getString("reason") ?? undefined;
+                const reason = normalizeModerationReason(interaction.options.getString("reason"));
 
                 const ms = durationToMs(amount, unit);
                 if (ms <= 0) {
@@ -211,6 +247,13 @@ export default {
                 const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
                 if (!member) {
                     return ephemeralError(interaction, locale, "moderation.member_not_found");
+                }
+
+                if (!invokerCanModerateTarget(interaction.guild, execMember, member)) {
+                    if (member.id === interaction.guild.ownerId) {
+                        return ephemeralError(interaction, locale, "moderation.cannot_moderate_owner");
+                    }
+                    return ephemeralError(interaction, locale, "moderation.invoker_hierarchy");
                 }
 
                 const botMember = await interaction.guild.members.fetchMe();
@@ -242,6 +285,13 @@ export default {
                 const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
                 if (!member) {
                     return ephemeralError(interaction, locale, "moderation.member_not_found");
+                }
+
+                if (!invokerCanModerateTarget(interaction.guild, execMember, member)) {
+                    if (member.id === interaction.guild.ownerId) {
+                        return ephemeralError(interaction, locale, "moderation.cannot_moderate_owner");
+                    }
+                    return ephemeralError(interaction, locale, "moderation.invoker_hierarchy");
                 }
 
                 if (!member.communicationDisabledUntil) {
@@ -278,12 +328,20 @@ export default {
                     return ephemeralError(interaction, locale, "moderation.no_target_bot");
                 }
 
-                const reason = interaction.options.getString("reason") ?? undefined;
+                const reason = normalizeModerationReason(interaction.options.getString("reason"));
                 const deleteSeconds = interaction.options.getInteger("delete_messages");
 
                 const member = await interaction.guild.members.fetch(targetUser.id).catch(() => null);
-                if (member && !member.bannable) {
-                    return ephemeralError(interaction, locale, "moderation.bot_hierarchy");
+                if (member) {
+                    if (!invokerCanModerateTarget(interaction.guild, execMember, member)) {
+                        if (member.id === interaction.guild.ownerId) {
+                            return ephemeralError(interaction, locale, "moderation.cannot_moderate_owner");
+                        }
+                        return ephemeralError(interaction, locale, "moderation.invoker_hierarchy");
+                    }
+                    if (!member.bannable) {
+                        return ephemeralError(interaction, locale, "moderation.bot_hierarchy");
+                    }
                 }
 
                 const botMember = await interaction.guild.members.fetchMe();
@@ -310,7 +368,7 @@ export default {
                 if (!SNOWFLAKE_RE.test(rawId)) {
                     return ephemeralError(interaction, locale, "moderation.unban_invalid_id");
                 }
-                const reason = interaction.options.getString("reason") ?? undefined;
+                const reason = normalizeModerationReason(interaction.options.getString("reason"));
 
                 const botMember = await interaction.guild.members.fetchMe();
                 if (!botMember.permissions.has(PermissionFlagsBits.BanMembers)) {
@@ -330,7 +388,7 @@ export default {
             const code =
                 error && typeof error === "object" && "code" in error
                     ? Number((error as { code: unknown }).code)
-                    : NaN;
+                    : Number.NaN;
             if (code === 10026) {
                 return ephemeralError(interaction, locale, "moderation.unban_not_banned");
             }
