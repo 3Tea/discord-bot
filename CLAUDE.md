@@ -492,6 +492,11 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/commands.md](docs/steering/commands.md) | Full command inventory, button handlers, events, i18n, and business rules |
 | [docs/steering/xp-system.md](docs/steering/xp-system.md) | XP earning, leveling formula, snapshots, server stats, leaderboards, canvas rendering |
 | [docs/steering/economy-system.md](docs/steering/economy-system.md) | Coins, gems, pray/curse, streaks, shop, transactions, services |
+| [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md) | Root `CHANGELOG.md` format (first `##` section), CI + Discord webhook embed via GitHub Actions |
+
+## Changelog & release notes
+
+- Edit **`CHANGELOG.md`** at the repo root using **`##` sections**; **new notes go in the top section** (first `##` … until the next `##`). That block is what CI sends to Discord as an embed after a successful bot build on `develop` when the file changes (if `DISCORD_CHANGELOG_WEBHOOK_URL` is set in repo secrets). See [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md).
 
 ## Docker
 
