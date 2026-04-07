@@ -99,7 +99,9 @@ export default {
                             opt
                                 .setName("channel")
                                 .setDescription("Channel to blacklist")
-                                .setDescriptionLocalizations(descriptionLocales("cmd.xp.channel-blacklist.add.channel.desc"))
+                                .setDescriptionLocalizations(
+                                    descriptionLocales("cmd.xp.channel-blacklist.add.channel.desc")
+                                )
                                 .setRequired(true)
                         )
                 )
@@ -112,7 +114,9 @@ export default {
                             opt
                                 .setName("channel")
                                 .setDescription("Channel to remove")
-                                .setDescriptionLocalizations(descriptionLocales("cmd.xp.channel-blacklist.remove.channel.desc"))
+                                .setDescriptionLocalizations(
+                                    descriptionLocales("cmd.xp.channel-blacklist.remove.channel.desc")
+                                )
                                 .setRequired(true)
                         )
                 )

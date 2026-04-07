@@ -286,14 +286,12 @@ export default {
 
                 await member.timeout(ms, reason);
 
-                const embed = new EmbedBuilder()
-                    .setColor(0x57f287)
-                    .setDescription(
-                        t(locale, "moderation.timeout_success", {
-                            username: member.user.tag,
-                            duration: formatDuration(locale, ms),
-                        })
-                    );
+                const embed = new EmbedBuilder().setColor(0x57f287).setDescription(
+                    t(locale, "moderation.timeout_success", {
+                        username: member.user.tag,
+                        duration: formatDuration(locale, ms),
+                    })
+                );
                 return Reply.embed(interaction, embed);
             }
 
