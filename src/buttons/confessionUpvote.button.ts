@@ -22,7 +22,10 @@ export default {
 
         if (!result.ok) {
             if (result.code === "own_confession") {
-                await interaction.followUp({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.vote_own") });
+                await interaction.followUp({
+                    flags: MessageFlags.Ephemeral,
+                    content: t(locale, "confession.vote_own"),
+                });
             }
             return;
         }

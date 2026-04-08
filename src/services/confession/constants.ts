@@ -10,7 +10,7 @@ export const CONFESSION_KEYWORD_MAX_LENGTH = 50;
 export const CONFESSION_KEYWORDS_MAX_COUNT = 50;
 
 export const CONFESSION_TAGS = ["heartfelt", "funny", "question", "sharing", "other"] as const;
-export type ConfessionTag = typeof CONFESSION_TAGS[number];
+export type ConfessionTag = (typeof CONFESSION_TAGS)[number];
 
 export function confessionCooldownRedisKey(guildId: string, userId: string): string {
     return `confession:cd:${guildId}:${userId}`;

@@ -34,5 +34,9 @@ async function shutdown(): Promise<void> {
     process.exit(0);
 }
 
-process.on("SIGINT", () => { shutdown().catch(() => process.exit(1)); });
-process.on("SIGTERM", () => { shutdown().catch(() => process.exit(1)); });
+process.on("SIGINT", () => {
+    shutdown().catch(() => process.exit(1));
+});
+process.on("SIGTERM", () => {
+    shutdown().catch(() => process.exit(1));
+});

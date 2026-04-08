@@ -143,7 +143,11 @@ export function validateConfessionAttachment(
     };
 }
 
-export function buildPublicConfessionEmbed(confessionNumber: number, content: string, tag?: string | null): EmbedBuilder {
+export function buildPublicConfessionEmbed(
+    confessionNumber: number,
+    content: string,
+    tag?: string | null
+): EmbedBuilder {
     const tagLine = tag ? `[🏷️ ${tag.charAt(0).toUpperCase() + tag.slice(1)}]\n` : "";
     const desc = tagLine + content;
     const embed = new EmbedBuilder()
@@ -155,7 +159,11 @@ export function buildPublicConfessionEmbed(confessionNumber: number, content: st
     return embed;
 }
 
-export function buildVipPublicConfessionEmbed(confessionNumber: number, content: string, tag?: string | null): EmbedBuilder {
+export function buildVipPublicConfessionEmbed(
+    confessionNumber: number,
+    content: string,
+    tag?: string | null
+): EmbedBuilder {
     const tagLine = tag ? `[🏷️ ${tag.charAt(0).toUpperCase() + tag.slice(1)}]\n` : "";
     const desc = tagLine + content;
     const embed = new EmbedBuilder()
@@ -185,9 +193,7 @@ export function buildReviewConfessionEmbed(params: {
     const embed = new EmbedBuilder()
         .setColor(params.isVip ? 0xf1c40f : 0xe67e22)
         .setTitle(title)
-        .setDescription(
-            desc.length > CONFESSION_CONTENT_MAX ? desc.slice(0, CONFESSION_CONTENT_MAX) : desc
-        )
+        .setDescription(desc.length > CONFESSION_CONTENT_MAX ? desc.slice(0, CONFESSION_CONTENT_MAX) : desc)
         .addFields({
             name: "Author (moderators only)",
             value: `<@${params.authorId}> — \`${params.authorId}\``,
@@ -346,7 +352,15 @@ export async function approveConfession(interaction: ButtonInteraction): Promise
     }
 
     const textChannel = ch as TextChannel;
-    const sendResult = await sendAnonymousConfessionToChannel(textChannel, doc.number, doc.content, doc.image, doc.isVip, rawId, doc.tag);
+    const sendResult = await sendAnonymousConfessionToChannel(
+        textChannel,
+        doc.number,
+        doc.content,
+        doc.image,
+        doc.isVip,
+        rawId,
+        doc.tag
+    );
     if ("error" in sendResult) {
         return { ok: false, code: "send_failed" };
     }
@@ -463,16 +477,16 @@ export async function banConfessionUser(input: {
 }
 
 export async function unbanConfessionUser(guildId: string, userId: string): Promise<boolean> {
-    const result = await ConfessionBanModel.updateMany(
-        { guildId, userId, active: true },
-        { active: false }
-    ).exec();
+    const result = await ConfessionBanModel.updateMany({ guildId, userId, active: true }, { active: false }).exec();
     return result.modifiedCount > 0;
 }
 
 // --- Keyword Filter ---
 
-export async function addBlockedKeyword(guildId: string, keyword: string): Promise<"added" | "duplicate" | "max_reached" | "not_configured"> {
+export async function addBlockedKeyword(
+    guildId: string,
+    keyword: string
+): Promise<"added" | "duplicate" | "max_reached" | "not_configured"> {
     const config = await GuildConfessionConfigModel.findOne({ guildId }).exec();
     if (!config) return "not_configured";
 
@@ -485,7 +499,10 @@ export async function addBlockedKeyword(guildId: string, keyword: string): Promi
     return "added";
 }
 
-export async function removeBlockedKeyword(guildId: string, keyword: string): Promise<"removed" | "not_found" | "not_configured"> {
+export async function removeBlockedKeyword(
+    guildId: string,
+    keyword: string
+): Promise<"removed" | "not_found" | "not_configured"> {
     const config = await GuildConfessionConfigModel.findOne({ guildId }).exec();
     if (!config) return "not_configured";
 
@@ -574,10 +591,7 @@ export async function handleConfessionVote(
     } else {
         existing.vote = voteType;
         await existing.save();
-        const inc =
-            voteType === "up"
-                ? { upvotes: 1, downvotes: -1 }
-                : { upvotes: -1, downvotes: 1 };
+        const inc = voteType === "up" ? { upvotes: 1, downvotes: -1 } : { upvotes: -1, downvotes: 1 };
         await ConfessionModel.findByIdAndUpdate(confessionMongoId, { $inc: inc }).exec();
     }
 
@@ -711,9 +725,7 @@ export async function handleConfessionReply(params: {
 
         return { ok: true, replyNumber };
     } catch (error) {
-        logger.error(
-            `confession: failed to post reply: ${error instanceof Error ? error.message : String(error)}`
-        );
+        logger.error(`confession: failed to post reply: ${error instanceof Error ? error.message : String(error)}`);
         return { ok: false, code: "send_failed" };
     }
 }

@@ -29,9 +29,7 @@ async function flush(): Promise<void> {
     try {
         await CommandLogModel.insertMany(batch, { ordered: false });
     } catch (error) {
-        logger.error(
-            `[CommandLogService] flush failed: ${error instanceof Error ? error.message : "Unknown error"}`
-        );
+        logger.error(`[CommandLogService] flush failed: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
 }
 

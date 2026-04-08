@@ -125,9 +125,8 @@ export default {
                 ]);
 
                 const avgLatency = latencyResult[0]?.avg ?? 0;
-                const topList = topCommands
-                    .map((c, i) => `${i + 1}. \`/${c._id}\` — **${c.count}** uses`)
-                    .join("\n") || "No data";
+                const topList =
+                    topCommands.map((c, i) => `${i + 1}. \`/${c._id}\` — **${c.count}** uses`).join("\n") || "No data";
 
                 const embed = new EmbedBuilder()
                     .setTitle(`Command Stats — ${period}`)
@@ -153,11 +152,14 @@ export default {
                     .limit(limit)
                     .lean();
 
-                const lines = logs.map((log) => {
-                    const time = `<t:${Math.floor(log.createdAt.getTime() / 1000)}:R>`;
-                    const status = log.success ? "OK" : `ERR: ${log.errorMessage ?? "unknown"}`;
-                    return `\`/${log.commandName}\` ${time} [${status}]`;
-                }).join("\n") || "No logs found.";
+                const lines =
+                    logs
+                        .map((log) => {
+                            const time = `<t:${Math.floor(log.createdAt.getTime() / 1000)}:R>`;
+                            const status = log.success ? "OK" : `ERR: ${log.errorMessage ?? "unknown"}`;
+                            return `\`/${log.commandName}\` ${time} [${status}]`;
+                        })
+                        .join("\n") || "No logs found.";
 
                 const embed = new EmbedBuilder()
                     .setTitle(`Command History — ${target.username}`)
@@ -178,11 +180,14 @@ export default {
                     .limit(limit)
                     .lean();
 
-                const lines = logs.map((log) => {
-                    const time = `<t:${Math.floor(log.createdAt.getTime() / 1000)}:R>`;
-                    const status = log.success ? `${log.latencyMs}ms` : `ERR`;
-                    return `**${log.username}** ${time} [${status}]`;
-                }).join("\n") || "No logs found.";
+                const lines =
+                    logs
+                        .map((log) => {
+                            const time = `<t:${Math.floor(log.createdAt.getTime() / 1000)}:R>`;
+                            const status = log.success ? `${log.latencyMs}ms` : `ERR`;
+                            return `**${log.username}** ${time} [${status}]`;
+                        })
+                        .join("\n") || "No logs found.";
 
                 const embed = new EmbedBuilder()
                     .setTitle(`Usage History — /${name}`)

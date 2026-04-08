@@ -149,7 +149,11 @@ export default {
                 .setDescription("Ban a user from confessions")
                 .setDescriptionLocalizations(descriptionLocales("cmd.confession.ban.desc"))
                 .addUserOption((opt) =>
-                    opt.setName("user").setDescription("User to ban").setDescriptionLocalizations(descriptionLocales("cmd.confession.ban.user.desc")).setRequired(true)
+                    opt
+                        .setName("user")
+                        .setDescription("User to ban")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.ban.user.desc"))
+                        .setRequired(true)
                 )
                 .addStringOption((opt) =>
                     opt
@@ -166,7 +170,11 @@ export default {
                         )
                 )
                 .addStringOption((opt) =>
-                    opt.setName("reason").setDescription("Reason for ban").setDescriptionLocalizations(descriptionLocales("cmd.confession.ban.reason.desc")).setRequired(false)
+                    opt
+                        .setName("reason")
+                        .setDescription("Reason for ban")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.ban.reason.desc"))
+                        .setRequired(false)
                 )
         )
         .addSubcommand((sub) =>
@@ -175,7 +183,11 @@ export default {
                 .setDescription("Remove a confession ban")
                 .setDescriptionLocalizations(descriptionLocales("cmd.confession.unban.desc"))
                 .addUserOption((opt) =>
-                    opt.setName("user").setDescription("User to unban").setDescriptionLocalizations(descriptionLocales("cmd.confession.unban.user.desc")).setRequired(true)
+                    opt
+                        .setName("user")
+                        .setDescription("User to unban")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.unban.user.desc"))
+                        .setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
@@ -184,7 +196,12 @@ export default {
                 .setDescription("Add a keyword to the confession blacklist")
                 .setDescriptionLocalizations(descriptionLocales("cmd.confession.filter_add.desc"))
                 .addStringOption((opt) =>
-                    opt.setName("keyword").setDescription("Keyword to block").setDescriptionLocalizations(descriptionLocales("cmd.confession.filter_add.keyword.desc")).setRequired(true).setMaxLength(50)
+                    opt
+                        .setName("keyword")
+                        .setDescription("Keyword to block")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.filter_add.keyword.desc"))
+                        .setRequired(true)
+                        .setMaxLength(50)
                 )
         )
         .addSubcommand((sub) =>
@@ -193,7 +210,11 @@ export default {
                 .setDescription("Remove a keyword from the blacklist")
                 .setDescriptionLocalizations(descriptionLocales("cmd.confession.filter_remove.desc"))
                 .addStringOption((opt) =>
-                    opt.setName("keyword").setDescription("Keyword to remove").setDescriptionLocalizations(descriptionLocales("cmd.confession.filter_remove.keyword.desc")).setRequired(true)
+                    opt
+                        .setName("keyword")
+                        .setDescription("Keyword to remove")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.filter_remove.keyword.desc"))
+                        .setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
@@ -312,7 +333,10 @@ async function executeBan(
         return;
     }
     if (!hasModPermission(interaction)) {
-        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.no_permission_setup") });
+        await interaction.reply({
+            flags: MessageFlags.Ephemeral,
+            content: t(locale, "confession.no_permission_setup"),
+        });
         return;
     }
 
@@ -329,9 +353,7 @@ async function executeBan(
         expiresAt,
     });
 
-    const durationText = durationRaw
-        ? t(locale, "confession.ban_duration", { time: durationRaw })
-        : "";
+    const durationText = durationRaw ? t(locale, "confession.ban_duration", { time: durationRaw }) : "";
 
     await interaction.reply({
         flags: MessageFlags.Ephemeral,
@@ -348,7 +370,10 @@ async function executeUnban(
         return;
     }
     if (!hasModPermission(interaction)) {
-        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.no_permission_setup") });
+        await interaction.reply({
+            flags: MessageFlags.Ephemeral,
+            content: t(locale, "confession.no_permission_setup"),
+        });
         return;
     }
 
@@ -375,7 +400,10 @@ async function executeFilterAdd(
         return;
     }
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.no_permission_setup") });
+        await interaction.reply({
+            flags: MessageFlags.Ephemeral,
+            content: t(locale, "confession.no_permission_setup"),
+        });
         return;
     }
 
@@ -401,7 +429,10 @@ async function executeFilterRemove(
         return;
     }
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.no_permission_setup") });
+        await interaction.reply({
+            flags: MessageFlags.Ephemeral,
+            content: t(locale, "confession.no_permission_setup"),
+        });
         return;
     }
 
@@ -426,7 +457,10 @@ async function executeFilterList(
         return;
     }
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
-        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.no_permission_setup") });
+        await interaction.reply({
+            flags: MessageFlags.Ephemeral,
+            content: t(locale, "confession.no_permission_setup"),
+        });
         return;
     }
 
@@ -610,7 +644,9 @@ async function executeSubmit(
     // --- Helper to refund all deducted currency ---
     async function refundAll(reason: string): Promise<void> {
         if (coinDeducted) {
-            await CurrencyService.addCoin(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, "confession_refund", { reason });
+            await CurrencyService.addCoin(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, "confession_refund", {
+                reason,
+            });
         }
         if (gemDeducted) {
             await CurrencyService.addGem(userId, guildId, CONFESSION_VIP_COST_GEM, "confession_refund", { reason });
@@ -649,7 +685,15 @@ async function executeSubmit(
         }
 
         const mongoId = String(publishedDoc._id);
-        const sendResult = await sendAnonymousConfessionToChannel(textPublic, confessionNumber, content, image, isVip, mongoId, tag);
+        const sendResult = await sendAnonymousConfessionToChannel(
+            textPublic,
+            confessionNumber,
+            content,
+            image,
+            isVip,
+            mongoId,
+            tag
+        );
         if ("error" in sendResult) {
             await refundAll("send_failed");
             await interaction.editReply({ content: t(locale, "confession.send_failed") });
