@@ -384,5 +384,10 @@
     "confession.approve_success": "Confession approved and posted anonymously.",
     "confession.reject_success": "Confession rejected.",
     "btn.confession.approve": "Approve",
-    "btn.confession.reject": "Reject"
+    "btn.confession.reject": "Reject",
+    "cmd.confession.submit.vip.desc": "VIP confession with golden embed (costs 5 gems)",
+    "cmd.confession.submit.skip_cooldown.desc": "Skip cooldown (costs 50 coins)",
+    "confession.insufficient_coin": "You need at least **{{cost}}** coins to skip cooldown. Your balance: **{{balance}}** coins.",
+    "confession.insufficient_gem": "You need at least **{{cost}}** gems for a VIP confession. Your balance: **{{balance}}** gems.",
+    "confession.vip_footer": "VIP Confession"
 }

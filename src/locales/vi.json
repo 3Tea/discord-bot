@@ -384,5 +384,10 @@
     "confession.approve_success": "Đã duyệt và đăng confession ẩn danh.",
     "confession.reject_success": "Đã từ chối confession.",
     "btn.confession.approve": "Duyệt",
-    "btn.confession.reject": "Từ chối"
+    "btn.confession.reject": "Từ chối",
+    "cmd.confession.submit.vip.desc": "Confession VIP với embed vàng đặc biệt (tốn 5 gem)",
+    "cmd.confession.submit.skip_cooldown.desc": "Bỏ qua cooldown (tốn 50 coin)",
+    "confession.insufficient_coin": "Bạn cần ít nhất **{{cost}}** coin để bỏ qua cooldown. Số dư: **{{balance}}** coin.",
+    "confession.insufficient_gem": "Bạn cần ít nhất **{{cost}}** gem để gửi confession VIP. Số dư: **{{balance}}** gem.",
+    "confession.vip_footer": "VIP Confession"
 }
