@@ -1,0 +1,27 @@
+---
+import { guideMeta } from "../data/guides";
+
+interface Props {
+  currentSlug: string;
+  lang: string;
+}
+
+const { currentSlug, lang } = Astro.props;
+
+const allGuides = Object.values(guideMeta).filter((g) => g.slug !== currentSlug).slice(0, 2);
+---
+
+{allGuides.length > 0 && (
+  <div class="related-section">
+    <h2 class="related-title">Related Guides</h2>
+    <div class="related-grid">
+      {allGuides.map((guide) => (
+        <a href={`/${lang}/guide/${guide.slug}`} class="related-card">
+          <div class="related-card-name">
+            <span style={`color: ${guide.color}`}>●</span> {guide.label}
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+)}
