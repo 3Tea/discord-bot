@@ -1,0 +1,147 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../../components/Breadcrumb.astro";
+import LanguageSwitcher from "../../../components/LanguageSwitcher.astro";
+import GuideToc from "../../../components/GuideToc.astro";
+import RelatedGuides from "../../../components/RelatedGuides.astro";
+import { guideMeta } from "../../../data/guides";
+
+export async function getStaticPaths() {
+  const pages = await getCollection("guides");
+
+  return pages.map((page) => {
+    const [lang, ...slugParts] = page.id.split("/");
+    const slug = slugParts.join("/");
+    return {
+      params: { lang, slug },
+      props: { page },
+    };
+  });
+}
+
+const { lang, slug } = Astro.params;
+const { page } = Astro.props;
+const { Content, headings } = await render(page);
+
+const meta = guideMeta[page.data.slug];
+const pageTitle = `${page.data.title} — User Guide | 3AT Bot`;
+const altLang = lang === "en" ? "vi" : "en";
+const hreflang = [
+  { lang: "en", href: `/en/guide/${slug}` },
+  { lang: "vi", href: `/vi/guide/${slug}` },
+];
+
+const breadcrumbItems = [
+  { label: "Guide", href: "/guide" },
+  { label: page.data.title },
+];
+
+const allPages = await getCollection("guides");
+const altExists = allPages.some((p) => p.id === `${altLang}/${slug}`);
+const showTranslationNotice = lang === "vi" && !altExists;
+---
+
+<BaseLayout title={pageTitle} description={page.data.description} hreflang={hreflang}>
+  <div class="container guide-page-wrapper">
+    <div class="guide-page-main">
+      <Breadcrumb items={breadcrumbItems} />
+
+      <div class="guide-header">
+        <div class="guide-header-top">
+          <div class="guide-title-group">
+            <span class="guide-icon">{page.data.icon}</span>
+            <h1 class="guide-title">{page.data.title}</h1>
+            {meta && (
+              <span
+                class="guide-category-badge"
+                style={`color: ${meta.color}; background: ${meta.bg};`}
+              >
+                {meta.label}
+              </span>
+            )}
+          </div>
+          <LanguageSwitcher currentLang={lang!} slug={slug!} basePath="guide" />
+        </div>
+        <p class="guide-description">{page.data.description}</p>
+      </div>
+
+      {showTranslationNotice && (
+        <div class="translation-notice">
+          Bản dịch đang được cập nhật. Nội dung hiện tại hiển thị bằng tiếng Anh.
+        </div>
+      )}
+
+      <GuideToc headings={headings} />
+
+      <div class="guide-prose">
+        <Content />
+      </div>
+
+      <a href="/guide" class="guide-back-link">← Back to Guide</a>
+
+      {page.data.relatedCommands && page.data.relatedCommands.length > 0 && (
+        <div class="related-section">
+          <h2 class="related-title">Related Commands</h2>
+          <div class="related-grid">
+            {page.data.relatedCommands.map((cmd: string) => (
+              <a href={`/${lang}/commands/${cmd}`} class="related-card">
+                <div class="related-card-name">
+                  <span style="color: var(--accent)">/</span> {cmd}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <RelatedGuides currentSlug={page.data.slug} lang={lang!} />
+    </div>
+
+    <GuideToc headings={headings} />
+  </div>
+</BaseLayout>
+
+<style>
+  .guide-page-wrapper {
+    display: flex;
+    gap: 32px;
+    padding-top: 32px;
+    padding-bottom: 64px;
+    max-width: 1100px;
+  }
+
+  .guide-page-main {
+    flex: 1;
+    min-width: 0;
+    max-width: 820px;
+  }
+
+  .guide-icon {
+    font-size: 1.5rem;
+  }
+
+  .guide-page-main > :global(.toc-sidebar) {
+    display: none;
+  }
+
+  .guide-page-wrapper > :global(.toc-sidebar) {
+    display: none;
+  }
+
+  @media (min-width: 1080px) {
+    .guide-page-wrapper > :global(.toc-sidebar) {
+      display: block;
+    }
+
+    .guide-page-main > :global(.toc-mobile) {
+      display: none;
+    }
+  }
+
+  @media (max-width: 1079px) {
+    .guide-page-wrapper {
+      flex-direction: column;
+    }
+  }
+</style>
