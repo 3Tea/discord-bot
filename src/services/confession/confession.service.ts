@@ -6,7 +6,10 @@ import {
     ButtonInteraction,
     ButtonStyle,
     EmbedBuilder,
+    ModalBuilder,
     TextChannel,
+    TextInputBuilder,
+    TextInputStyle,
 } from "discord.js";
 import { isValidObjectId } from "mongoose";
 
@@ -16,6 +19,8 @@ import GuildConfessionConfigModel, {
     ConfessionMode,
     IGuildConfessionConfig,
 } from "../../models/guildConfessionConfig.model";
+import ConfessionVoteModel from "../../models/confessionVote.model";
+import ConfessionReplyModel from "../../models/confessionReply.model";
 import { FOOTER } from "../../util/config/index";
 import { BUTTON_ID } from "../../util/config/button";
 import { logger } from "../../util/log/logger.mixed";
@@ -25,6 +30,8 @@ import {
     CONFESSION_COOLDOWN_MIN,
     CONFESSION_VIP_COST_GEM,
     CONFESSION_SKIP_CD_COST_COIN,
+    CONFESSION_REPLY_COST_COIN,
+    CONFESSION_REPLY_MAX_LENGTH,
     confessionCooldownRedisKey,
 } from "./constants";
 
@@ -36,6 +43,7 @@ export {
     CONFESSION_COOLDOWN_DEFAULT,
 } from "./constants";
 export { CONFESSION_VIP_COST_GEM, CONFESSION_SKIP_CD_COST_COIN } from "./constants";
+export { CONFESSION_REPLY_COST_COIN, CONFESSION_REPLY_MAX_LENGTH } from "./constants";
 
 function applyConfessionFooter(embed: EmbedBuilder): void {
     if (FOOTER.text) {
@@ -217,14 +225,20 @@ export async function sendAnonymousConfessionToChannel(
     confessionNumber: number,
     content: string,
     image: IConfessionImage | null,
-    isVip = false
+    isVip = false,
+    mongoId?: string
 ): Promise<{ messageId: string } | { error: true }> {
     try {
         const embed = isVip
             ? buildVipPublicConfessionEmbed(confessionNumber, content)
             : buildPublicConfessionEmbed(confessionNumber, content);
         const files = await buildConfessionAttachmentFiles(image);
-        const msg = await channel.send({ embeds: [embed], files: files.length ? files : undefined });
+        const components = mongoId ? [buildConfessionInteractionRow(mongoId)] : [];
+        const msg = await channel.send({
+            embeds: [embed],
+            files: files.length ? files : undefined,
+            components: components.length ? components : undefined,
+        });
         return { messageId: msg.id };
     } catch (error) {
         logger.error(
@@ -316,7 +330,7 @@ export async function approveConfession(interaction: ButtonInteraction): Promise
     }
 
     const textChannel = ch as TextChannel;
-    const sendResult = await sendAnonymousConfessionToChannel(textChannel, doc.number, doc.content, doc.image, doc.isVip);
+    const sendResult = await sendAnonymousConfessionToChannel(textChannel, doc.number, doc.content, doc.image, doc.isVip, rawId);
     if ("error" in sendResult) {
         return { ok: false, code: "send_failed" };
     }
@@ -390,4 +404,213 @@ export function buildConfessionReviewComponents(
             .setLabel(labels.reject)
             .setStyle(ButtonStyle.Danger)
     );
+}
+
+export function buildConfessionInteractionRow(
+    confessionMongoId: string,
+    upvotes = 0,
+    downvotes = 0
+): ActionRowBuilder<ButtonBuilder> {
+    return new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+            .setCustomId(`${BUTTON_ID.CONFESSION_UPVOTE}:${confessionMongoId}`)
+            .setLabel(`👍 ${upvotes}`)
+            .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+            .setCustomId(`${BUTTON_ID.CONFESSION_DOWNVOTE}:${confessionMongoId}`)
+            .setLabel(`👎 ${downvotes}`)
+            .setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+            .setCustomId(`${BUTTON_ID.CONFESSION_REPLY}:${confessionMongoId}`)
+            .setLabel("💬 Reply")
+            .setStyle(ButtonStyle.Primary)
+    );
+}
+
+export type VoteResult =
+    | { ok: true; upvotes: number; downvotes: number }
+    | { ok: false; code: "invalid_id" | "not_found" | "own_confession" };
+
+export async function handleConfessionVote(
+    confessionMongoId: string,
+    guildId: string,
+    userId: string,
+    voteType: "up" | "down"
+): Promise<VoteResult> {
+    if (!isValidObjectId(confessionMongoId)) {
+        return { ok: false, code: "invalid_id" };
+    }
+
+    const doc = await ConfessionModel.findById(confessionMongoId).exec();
+    if (!doc || doc.guildId !== guildId || doc.status !== "published") {
+        return { ok: false, code: "not_found" };
+    }
+
+    if (doc.authorId === userId) {
+        return { ok: false, code: "own_confession" };
+    }
+
+    const existing = await ConfessionVoteModel.findOne({
+        confessionId: doc._id,
+        userId,
+    }).exec();
+
+    if (!existing) {
+        await ConfessionVoteModel.create({
+            confessionId: doc._id,
+            guildId,
+            userId,
+            vote: voteType,
+        });
+        const inc = voteType === "up" ? { upvotes: 1 } : { downvotes: 1 };
+        await ConfessionModel.findByIdAndUpdate(confessionMongoId, { $inc: inc }).exec();
+    } else if (existing.vote === voteType) {
+        await ConfessionVoteModel.deleteOne({ _id: existing._id }).exec();
+        const inc = voteType === "up" ? { upvotes: -1 } : { downvotes: -1 };
+        await ConfessionModel.findByIdAndUpdate(confessionMongoId, { $inc: inc }).exec();
+    } else {
+        existing.vote = voteType;
+        await existing.save();
+        const inc =
+            voteType === "up"
+                ? { upvotes: 1, downvotes: -1 }
+                : { upvotes: -1, downvotes: 1 };
+        await ConfessionModel.findByIdAndUpdate(confessionMongoId, { $inc: inc }).exec();
+    }
+
+    const updated = await ConfessionModel.findById(confessionMongoId).select("upvotes downvotes").exec();
+    return {
+        ok: true,
+        upvotes: updated?.upvotes ?? 0,
+        downvotes: updated?.downvotes ?? 0,
+    };
+}
+
+export function buildConfessionReplyModal(
+    confessionMongoId: string,
+    labels: { title: string; inputLabel: string }
+): ModalBuilder {
+    const modal = new ModalBuilder()
+        .setCustomId(`${BUTTON_ID.CONFESSION_REPLY_MODAL}:${confessionMongoId}`)
+        .setTitle(labels.title);
+
+    const input = new TextInputBuilder()
+        .setCustomId("reply_content")
+        .setLabel(labels.inputLabel)
+        .setStyle(TextInputStyle.Paragraph)
+        .setMaxLength(CONFESSION_REPLY_MAX_LENGTH)
+        .setRequired(true);
+
+    modal.addComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(input));
+    return modal;
+}
+
+export type ReplyResult =
+    | { ok: true; replyNumber: number }
+    | { ok: false; code: "not_found" | "empty" | "insufficient_coin" | "thread_failed" | "send_failed" };
+
+export async function handleConfessionReply(params: {
+    confessionMongoId: string;
+    guildId: string;
+    userId: string;
+    content: string;
+    channel: TextChannel;
+    publicMessageId: string;
+    confessionNumber: number;
+}): Promise<ReplyResult> {
+    const { confessionMongoId, guildId, userId, content, channel, publicMessageId, confessionNumber } = params;
+
+    const trimmed = content.trim();
+    if (trimmed.length === 0) {
+        return { ok: false, code: "empty" };
+    }
+
+    const existingCount = await ConfessionReplyModel.countDocuments({
+        confessionId: confessionMongoId,
+        authorId: userId,
+    }).exec();
+
+    if (existingCount > 0) {
+        const CurrencyService = (await import("../../services/economy/currency.service")).default;
+        try {
+            await CurrencyService.deduct(userId, guildId, CONFESSION_REPLY_COST_COIN, 0, "confession_reply", {
+                confessionNumber,
+            });
+        } catch (error) {
+            const CurrSvc = (await import("../../services/economy/currency.service")).default;
+            if (error instanceof CurrSvc.InsufficientFundsError) {
+                return { ok: false, code: "insufficient_coin" };
+            }
+            throw error;
+        }
+    }
+
+    const updated = await ConfessionModel.findByIdAndUpdate(
+        confessionMongoId,
+        { $inc: { replyCount: 1 } },
+        { new: true }
+    ).exec();
+    if (!updated) {
+        return { ok: false, code: "not_found" };
+    }
+    const replyNumber = updated.replyCount;
+
+    let threadId = updated.threadId;
+    if (threadId) {
+        const thread = await channel.threads.fetch(threadId).catch(() => null);
+        if (!thread) {
+            threadId = null;
+        }
+    }
+
+    if (!threadId) {
+        try {
+            const msg = await channel.messages.fetch(publicMessageId).catch(() => null);
+            if (!msg) {
+                return { ok: false, code: "thread_failed" };
+            }
+            const thread = await msg.startThread({
+                name: `Confession #${confessionNumber} — Replies`,
+                autoArchiveDuration: 1440,
+            });
+            threadId = thread.id;
+            await ConfessionModel.findByIdAndUpdate(confessionMongoId, { threadId }).exec();
+        } catch (error) {
+            logger.error(
+                `confession: failed to create reply thread: ${error instanceof Error ? error.message : String(error)}`
+            );
+            return { ok: false, code: "thread_failed" };
+        }
+    }
+
+    try {
+        const thread = await channel.threads.fetch(threadId!);
+        if (!thread) {
+            return { ok: false, code: "thread_failed" };
+        }
+
+        const replyEmbed = new EmbedBuilder()
+            .setColor(0x9b59b6)
+            .setDescription(trimmed)
+            .setFooter({ text: `Anonymous Reply #${replyNumber}` })
+            .setTimestamp();
+
+        const replyMsg = await thread.send({ embeds: [replyEmbed] });
+
+        await ConfessionReplyModel.create({
+            confessionId: confessionMongoId,
+            guildId,
+            authorId: userId,
+            replyNumber,
+            content: trimmed,
+            messageId: replyMsg.id,
+        });
+
+        return { ok: true, replyNumber };
+    } catch (error) {
+        logger.error(
+            `confession: failed to post reply: ${error instanceof Error ? error.message : String(error)}`
+        );
+        return { ok: false, code: "send_failed" };
+    }
 }
