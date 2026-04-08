@@ -1,0 +1,69 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import GuideCard from "../components/GuideCard.astro";
+import { getCollection } from "astro:content";
+import { guideMeta } from "../data/guides";
+
+const allGuides = await getCollection("guides");
+const enGuides = allGuides
+  .filter((g) => g.id.startsWith("en/"))
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout title="User Guide | 3AT - Endless Paradox" description="Learn how to use 3AT's economy, XP, voice, confession, and moderation systems.">
+  <div class="container guide-index">
+    <div class="guide-index-hero">
+      <p class="section-label">User Guide</p>
+      <h1 class="section-title">Everything you need to know about 3AT</h1>
+      <p class="section-subtitle">
+        Guides for every system — whether you're a member looking to earn coins or an admin setting up your server.
+      </p>
+    </div>
+
+    <div class="guide-grid">
+      {enGuides.map((guide) => {
+        const meta = guideMeta[guide.data.slug];
+        return (
+          <GuideCard
+            title={guide.data.title}
+            description={guide.data.description}
+            icon={guide.data.icon}
+            href={`/en/guide/${guide.data.slug}`}
+            color={meta?.color ?? "#5865F2"}
+            bg={meta?.bg ?? "rgba(88,101,242,0.15)"}
+          />
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .guide-index {
+    padding-top: 32px;
+    padding-bottom: 64px;
+  }
+
+  .guide-index-hero {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .guide-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .guide-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .guide-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
