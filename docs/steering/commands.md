@@ -111,7 +111,7 @@ Each command has two subcommands:
 **Business rules:**
 - **NSFW guard**: Channel must be NSFW, else ephemeral error
 - **External API**: Calls `SERVER_HD` backend (`/{source}/random` or `/{source}/get?book={id}`)
-- **Redis cache**: Images cached 10 min (key: `mangaRead_{id}`)
+- **Redis cache**: Images cached 10 min (key: `manga_read_{id}`)
 - **Page limit**: Max 50 pages for in-Discord reading. Over 50 -> "Read Online" only
 - **Button auto-removal**: 20 seconds after display
 
@@ -166,7 +166,7 @@ Leaderboard buttons auto-disable after 60s idle timeout.
 
 | Button ID | Action |
 |-----------|--------|
-| `mangaRead` | Paginated manga reader (images from Redis cache) |
+| `manga_read` | Paginated manga reader (images from Redis cache) |
 
 ## Events
 

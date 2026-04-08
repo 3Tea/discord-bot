@@ -1,6 +1,6 @@
 export const BUTTON_ID = {
     // Manga reader
-    mangaRead: "mangaRead",
+    MANGA_READ: "manga_read",
     // Voice control panel buttons
     VOICE_LOCK: "voice_lock",
     VOICE_UNLOCK: "voice_unlock",

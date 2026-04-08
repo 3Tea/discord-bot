@@ -87,15 +87,15 @@ export function mangaCommand(source: MangaSource) {
                 if (result.total < MAX_READ_PAGES) {
                     row.addComponents(
                         new ButtonBuilder()
-                            .setCustomId(BUTTON_ID.mangaRead)
+                            .setCustomId(BUTTON_ID.MANGA_READ)
                             .setLabel(t(locale, "manga.read"))
                             .setStyle(ButtonStyle.Primary)
                     );
-                    await redis.setJson(`${BUTTON_ID.mangaRead}_${result.id}`, result.image, CACHE_TTL);
+                    await redis.setJson(`${BUTTON_ID.MANGA_READ}_${result.id}`, result.image, CACHE_TTL);
                 } else {
                     row.addComponents(
                         new ButtonBuilder()
-                            .setCustomId(BUTTON_ID.mangaRead)
+                            .setCustomId(BUTTON_ID.MANGA_READ)
                             .setLabel(t(locale, "manga.too_many_pages"))
                             .setStyle(ButtonStyle.Primary)
                             .setDisabled(true)
