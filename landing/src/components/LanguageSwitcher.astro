@@ -2,9 +2,10 @@
 interface Props {
   currentLang: string;
   slug: string;
+  basePath?: string;
 }
 
-const { currentLang, slug } = Astro.props;
+const { currentLang, slug, basePath = "commands" } = Astro.props;
 
 const languages = [
   { code: "en", label: "EN" },
@@ -15,7 +16,7 @@ const languages = [
 <div class="lang-switcher">
   {languages.map((lang) => (
     <a
-      href={`/${lang.code}/commands/${slug}`}
+      href={`/${lang.code}/${basePath}/${slug}`}
       class:list={["lang-btn", { active: currentLang === lang.code }]}
       aria-label={`Switch to ${lang.label}`}
     >
