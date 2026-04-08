@@ -6,7 +6,8 @@ export type Category =
   | "manga"
   | "utility"
   | "info"
-  | "settings";
+  | "settings"
+  | "confession";
 
 export interface Command {
   name: string;
@@ -28,6 +29,7 @@ export const categoryMeta: Record<
   utility: { label: "Utility", color: "#3BA55C", bg: "rgba(59,165,92,0.15)" },
   info: { label: "Info", color: "#FAA61A", bg: "rgba(250,166,26,0.15)" },
   settings: { label: "Settings", color: "#7289DA", bg: "rgba(114,137,218,0.15)" },
+  confession: { label: "Confession", color: "#9B59B6", bg: "rgba(155,89,182,0.15)" },
 };
 
 export const commands: Command[] = [
@@ -182,5 +184,13 @@ export const commands: Command[] = [
     description: "Configure personal or server language preference (15 languages supported)",
     category: "settings",
     subcommands: ["language", "server-language"],
+  },
+  // Confession
+  {
+    name: "confession",
+    description:
+      "Anonymous confession system — setup confession channel (admin), submit confessions with optional image",
+    category: "confession",
+    subcommands: ["setup", "submit"],
   },
 ];
