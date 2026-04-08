@@ -389,5 +389,13 @@
     "cmd.confession.submit.skip_cooldown.desc": "Skip cooldown (costs 50 coins)",
     "confession.insufficient_coin": "You need at least **{{cost}}** coins to skip cooldown. Your balance: **{{balance}}** coins.",
     "confession.insufficient_gem": "You need at least **{{cost}}** gems for a VIP confession. Your balance: **{{balance}}** gems.",
-    "confession.vip_footer": "VIP Confession"
+    "confession.vip_footer": "VIP Confession",
+    "confession.vote_own": "You cannot vote on your own confession.",
+    "confession.vote_updated": "Vote updated.",
+    "confession.reply_modal_title": "Anonymous Reply",
+    "confession.reply_modal_label": "Your reply",
+    "confession.reply_success": "Your anonymous reply was posted.",
+    "confession.reply_insufficient_coin": "You need **{{cost}}** coins for additional replies. Balance: **{{balance}}** coins.",
+    "confession.reply_not_found": "This confession no longer exists.",
+    "confession.reply_empty": "Reply cannot be empty."
 }

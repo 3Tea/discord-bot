@@ -389,5 +389,13 @@
     "cmd.confession.submit.skip_cooldown.desc": "Bỏ qua cooldown (tốn 50 coin)",
     "confession.insufficient_coin": "Bạn cần ít nhất **{{cost}}** coin để bỏ qua cooldown. Số dư: **{{balance}}** coin.",
     "confession.insufficient_gem": "Bạn cần ít nhất **{{cost}}** gem để gửi confession VIP. Số dư: **{{balance}}** gem.",
-    "confession.vip_footer": "VIP Confession"
+    "confession.vip_footer": "VIP Confession",
+    "confession.vote_own": "Bạn không thể vote confession của chính mình.",
+    "confession.vote_updated": "Đã cập nhật vote.",
+    "confession.reply_modal_title": "Reply ẩn danh",
+    "confession.reply_modal_label": "Nội dung reply",
+    "confession.reply_success": "Reply ẩn danh đã được đăng.",
+    "confession.reply_insufficient_coin": "Bạn cần **{{cost}}** coin cho reply tiếp theo. Số dư: **{{balance}}** coin.",
+    "confession.reply_not_found": "Confession này không còn tồn tại.",
+    "confession.reply_empty": "Reply không được để trống."
 }
