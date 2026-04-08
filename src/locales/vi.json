@@ -2,14 +2,12 @@
     "common.error": "Có lỗi xảy ra. Vui lòng thử lại sau.",
     "common.no_permission": "Bạn cần quyền Administrator.",
     "common.unknown_subcommand": "Lệnh con không xác định.",
-
     "balance.title": "Ví của {{username}}",
     "balance.coin": "Coin",
     "balance.gem": "Gem",
     "balance.pray_streak": "Pray Streak",
     "balance.pray_streak_value": "**{{count}}** ngày",
     "balance.last_pray": "Pray cuối",
-
     "pray.texts.0": "cầu nguyện dưới ánh trăng...",
     "pray.texts.1": "thành tâm khấn vái thần linh...",
     "pray.texts.2": "gửi lời nguyện lên trời cao...",
@@ -25,7 +23,6 @@
     "pray.bot_error": "Không thể cầu nguyện cho bot.",
     "pray.self_error": "Không thể cầu nguyện cho chính mình bằng target. Dùng `/pray` không có target.",
     "pray.cooldown": "Bạn đã cầu nguyện hôm nay rồi. Quay lại vào ngày mai nhé!",
-
     "curse.texts.0": "thì thầm lời nguyền trong bóng tối...",
     "curse.texts.1": "triệu hồi bóng đêm vĩnh cửu...",
     "curse.texts.2": "gửi lời rủa vào hư vô...",
@@ -37,7 +34,6 @@
     "curse.bot_error": "Không thể nguyền rủa bot.",
     "curse.self_error": "Không thể nguyền rủa chính mình bằng target. Dùng `/curse` không có target.",
     "curse.cooldown": "Bạn đã nguyền rủa hôm nay rồi. Quay lại vào ngày mai nhé!",
-
     "shop.empty": "Shop hiện tại trống.",
     "shop.title": "Shop",
     "shop.stock_unlimited": "Không giới hạn",
@@ -54,12 +50,10 @@
     "shop.add_role_required": "Cần chọn role cho item loại Role.",
     "shop.remove_success": "Đã xóa item `{{itemId}}` khỏi shop.",
     "shop.remove_not_found": "Không tìm thấy item này.",
-
     "economy.set_coin": "Set coin cho <@{{userId}}>: **{{amount}}** coin",
     "economy.add_coin": "Đã thêm **{{amount}}** coin cho <@{{userId}}>\nTổng: **{{total}}** coin",
     "economy.set_gem": "Set gem cho <@{{userId}}>: **{{amount}}** gem",
     "economy.add_gem": "Đã thêm **{{amount}}** gem cho <@{{userId}}>\nTổng: **{{total}}** gem",
-
     "xp.set": "Set XP cho <@{{userId}}>:\n**{{oldXP}}** XP (Level {{oldLevel}}) → **{{newXP}}** XP (Level {{newLevel}})",
     "xp.add": "Đã thêm **{{amount}}** XP cho <@{{userId}}>\nTổng: **{{total}}** XP (Level {{level}})",
     "xp.remove": "Đã xóa **{{amount}}** XP từ <@{{userId}}>\nTổng: **{{total}}** XP (Level {{level}})",
@@ -67,14 +61,12 @@
     "xp.blacklist.not_in": "<#{{channelId}}> không có trong blacklist.",
     "xp.blacklist.title": "XP Channel Blacklist",
     "xp.blacklist.empty": "Không có",
-
     "rank.error": "Không thể tải rank card. Vui lòng thử lại sau.",
     "rank.no_rank": "Chưa có xếp hạng",
     "rank.global_line": "Toàn cầu **#{{globalRank}}** · Tổng XP: **{{globalXP}}**",
     "rank.server_line": "Rank **#{{rank}}** trên server · Toàn cầu **#{{globalRank}}**",
     "rank.total_xp": "Tổng XP: **{{globalXP}}**",
     "rank.level_up": "<@{{userId}}> đã đạt **Level {{level}}**!",
-
     "leaderboard.error": "Không thể tải bảng xếp hạng. Vui lòng thử lại sau.",
     "leaderboard.title": "Bảng xếp hạng",
     "leaderboard.global_title": "Bảng xếp hạng toàn cầu",
@@ -89,10 +81,8 @@
     "leaderboard.period.all": "Tất cả",
     "leaderboard.period_title": "Bảng xếp hạng {{mode}} — {{period}} ({{periodKey}})",
     "leaderboard.period_title_all": "Bảng xếp hạng {{mode}} — Tất cả",
-
     "ping.pinging": "Đang ping...",
     "ping.result": "Độ trễ khứ hồi: {{latency}}ms",
-
     "help.title": "3AT - Endless Paradox Slash CMD Support",
     "help.category.general": "Chung",
     "help.category.xp": "XP & bảng xếp hạng",
@@ -102,7 +92,6 @@
     "help.category.manga": "Manga (NSFW)",
     "help.category.other": "Khác",
     "help.category_truncated": "… (danh sách đã rút gọn)",
-
     "info.title": "3AT - Endless Paradox",
     "info.name": "Tên: ",
     "info.version": "Phiên bản: ",
@@ -112,7 +101,6 @@
     "info.guilds": "Máy chủ",
     "info.users": "Người dùng (ước lượng)",
     "info.uptime": "Thời gian chạy",
-
     "voice.not_in_channel": "Bạn không ở trong kênh voice.",
     "voice.not_owner": "Bạn không phải chủ kênh voice này.",
     "voice.cooldown": "Vui lòng thử lại sau {{seconds}}s.",
@@ -164,7 +152,6 @@
     "rank.today": "Hôm nay",
     "rank.this_week": "Tuần này",
     "rank.this_month": "Tháng này",
-
     "weather.not_found": "Không tìm thấy {{location}}",
     "weather.day.0": "Chủ nhật",
     "weather.day.1": "Thứ hai",
@@ -202,23 +189,19 @@
     "weather.wmo.96": "Giông kèm mưa đá",
     "weather.wmo.99": "Giông kèm mưa đá",
     "weather.wmo.unknown": "Không rõ",
-
     "manga.nsfw_only": "Chỉ dùng trong kênh NSFW",
     "manga.insufficient_funds": "Không đủ tiền để duy trì server này",
     "manga.report_issue": "Báo lỗi",
     "manga.read": "Đọc",
     "manga.read_online": "Đọc Online",
     "manga.too_many_pages": "Vui lòng đọc online. Quá nhiều trang.",
-
     "settings.language_set": "Đã đặt ngôn ngữ thành **{{language}}**.",
     "settings.language_reset": "Đã xóa tùy chọn ngôn ngữ. Sử dụng tự động phát hiện.",
     "settings.server_language_set": "Đã đặt ngôn ngữ server thành **{{language}}**.",
     "settings.server_language_reset": "Đã xóa tùy chọn ngôn ngữ server.",
-
     "btn.homepage": "Trang chủ",
     "btn.discussions": "Thảo luận",
     "btn.report_bug": "Báo lỗi",
-
     "server_rank.title": "Thống kê Server",
     "server_rank.rank": "Hạng #{{rank}} / {{total}} server",
     "server_rank.level": "Level {{level}}",
@@ -233,10 +216,8 @@
     "server_rank.no_data": "Chưa có dữ liệu.",
     "server_rank.guild_only": "Lệnh này chỉ dùng được trong server.",
     "server_rank.error": "Không thể tải thống kê server. Vui lòng thử lại sau.",
-
     "leaderboard.servers_title": "Bảng xếp hạng Server",
     "leaderboard.servers_empty": "Chưa có dữ liệu server!",
-
     "cmd.ping.desc": "Kiểm tra độ trễ!",
     "cmd.help.desc": "Xem danh sách lệnh",
     "cmd.info.desc": "Thông tin về bot",
@@ -329,7 +310,6 @@
     "cmd.manga.read.desc": "Đọc manga H và D",
     "cmd.manga.read.id.desc": "ID bạn muốn đọc",
     "cmd.manga.random.desc": "Random H và D từ {{source}}",
-
     "cmd.moderation.desc": "Quản lý server (timeout, cấm, kick, gỡ cấm)",
     "cmd.moderation.timeout.desc": "Tạm khóa thành viên (cấm chat và voice) trong một khoảng thời gian",
     "cmd.moderation.timeout.user.desc": "Thành viên cần timeout",
@@ -373,5 +353,36 @@
     "moderation.api_error": "Discord từ chối thao tác. Kiểm tra quyền và thử lại.",
     "moderation.fmt.days": "{{count}} ngày",
     "moderation.fmt.hours": "{{count}} giờ",
-    "moderation.fmt.minutes": "{{count}} phút"
+    "moderation.fmt.minutes": "{{count}} phút",
+    "cmd.confession.desc": "Xưng tội ẩn danh cho server này",
+    "cmd.confession.setup.desc": "Cấu hình kênh và chế độ xưng tội (Quản lý Server)",
+    "cmd.confession.setup.enabled.desc": "Bật hoặc tắt xưng tội",
+    "cmd.confession.setup.mode.desc": "Đăng ngay hoặc cần mod duyệt trước",
+    "cmd.confession.setup.public_channel.desc": "Kênh đăng confession đã duyệt (ẩn danh)",
+    "cmd.confession.setup.review_channel.desc": "Bắt buộc nếu chế độ Duyệt — mod phê duyệt hoặc từ chối tại đây",
+    "cmd.confession.setup.cooldown_minutes.desc": "Số phút giữa mỗi lần gửi của một người (1–120)",
+    "cmd.confession.submit.desc": "Gửi confession ẩn danh",
+    "cmd.confession.submit.content.desc": "Nội dung confession",
+    "cmd.confession.submit.image.desc": "Một ảnh tùy chọn",
+    "confession.guild_only": "Lệnh này chỉ dùng trong server.",
+    "confession.not_configured": "Chưa cấu hình confession. Nhờ admin chạy `/confession setup`.",
+    "confession.disabled": "Confession đang tắt trên server này.",
+    "confession.review_misconfigured": "Server đang ở chế độ duyệt nhưng thiếu kênh duyệt. Nhờ admin sửa `/confession setup`.",
+    "confession.review_channel_required": "Chế độ Duyệt cần chọn **kênh duyệt** khi dùng `/confession setup`.",
+    "confession.empty_content": "Nội dung confession không được để trống.",
+    "confession.content_too_long": "Nội dung confession quá dài.",
+    "confession.invalid_image": "Chỉ cho phép một file ảnh (ví dụ PNG hoặc JPEG).",
+    "confession.cooldown": "Vui lòng đợi **{{seconds}}** giây trước khi gửi confession tiếp.",
+    "confession.send_failed": "Không gửi được confession. Kiểm tra quyền bot và cấu hình kênh.",
+    "confession.submit_success_instant": "Confession của bạn đã được đăng ẩn danh.",
+    "confession.submit_success_review": "Confession của bạn đã được gửi cho mod duyệt.",
+    "confession.setup_success": "Đã lưu cấu hình confession.",
+    "confession.no_permission_setup": "Bạn cần quyền **Quản lý Server** để cấu hình confession.",
+    "confession.no_permission_review": "Bạn cần quyền **Quản tin nhắn** để duyệt confession.",
+    "confession.button.invalid": "Nút không hợp lệ hoặc đã hết hạn.",
+    "confession.already_resolved": "Confession này đã được xử lý.",
+    "confession.approve_success": "Đã duyệt và đăng confession ẩn danh.",
+    "confession.reject_success": "Đã từ chối confession.",
+    "btn.confession.approve": "Duyệt",
+    "btn.confession.reject": "Từ chối"
 }

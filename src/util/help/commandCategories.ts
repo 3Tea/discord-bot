@@ -12,6 +12,7 @@ const COMMAND_TO_CATEGORY: Record<string, HelpCategoryId> = {
     help: "general",
     info: "general",
     settings: "general",
+    confession: "general",
     weather: "general",
     avatar: "general",
     trans: "general",

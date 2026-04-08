@@ -28,4 +28,7 @@ export const BUTTON_ID = {
     LEADERBOARD_PERIOD_MONTHLY: "lb_period_monthly",
     LEADERBOARD_PERIOD_YEARLY: "lb_period_yearly",
     LEADERBOARD_PERIOD_ALL: "lb_period_all",
+    // Confession moderation (customId may be `confession_approve:<mongoId>`)
+    CONFESSION_APPROVE: "confession_approve",
+    CONFESSION_REJECT: "confession_reject",
 };

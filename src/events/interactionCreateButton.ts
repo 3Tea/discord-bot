@@ -8,7 +8,11 @@ export default {
     async execute(interaction: ButtonInteraction) {
         if (!interaction.isButton()) return;
 
-        const button = client?.buttons.get(interaction.customId);
+        let button = client?.buttons.get(interaction.customId);
+        if (!button && interaction.customId.includes(":")) {
+            const prefix = interaction.customId.split(":")[0] ?? "";
+            button = client?.buttons.get(prefix);
+        }
 
         if (!button) {
             // Unregistered buttons are handled by message component collectors

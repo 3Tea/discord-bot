@@ -91,6 +91,19 @@ See [economy-system.md](economy-system.md) for full system documentation.
 | `moderation kick` | Kick a member from the server (not banned) | `user`, `reason?` |
 | `moderation unban` | Unban by user snowflake ID | `user_id`, `reason?` |
 
+### Anonymous confessions (`confession`)
+
+| Command | Description | Options |
+|---------|-------------|---------|
+| `confession setup` | Configure anonymous confessions per server (**Manage Server**) | `enabled`, `mode` (`instant` \| `review`), `public_channel`, `review_channel` (required if `review`), `cooldown_minutes` (1–120, optional; default 10) |
+| `confession submit` | Send text + optional one image; **instant** posts anonymously to `public_channel`; **review** posts to `review_channel` for mods (author visible to mods only) | `content` (max 3500), `image` (attachment, optional) |
+
+**Business rules:**
+- **MongoDB**: `GuildConfessionConfig` + `Confession` collections; confession numbers increment per guild via `lastConfessionNumber`.
+- **Cooldown**: Redis key `confession:cd:{guildId}:{userId}`, TTL = configured minutes × 60 seconds.
+- **Moderation buttons** (review mode): `confession_approve` / `confession_reject` with `customId` `prefix:<mongoId>`; `interactionCreateButton.ts` resolves handlers by **prefix** before the first `:`.
+- **Permissions**: `setup` — **Manage Guild** (checked in handler); Approve/Reject — **Manage Messages**.
+
 ### Manga Commands (NSFW)
 
 Six sources sharing the same handler (`src/util/manga/handler.ts`). All require NSFW channel.
@@ -167,6 +180,13 @@ Leaderboard buttons auto-disable after 60s idle timeout.
 | Button ID | Action |
 |-----------|--------|
 | `manga_read` | Paginated manga reader (images from Redis cache) |
+
+### Confession (review mode)
+
+| Button ID | Action |
+|-----------|--------|
+| `confession_approve` | Approve pending confession; posts anonymous copy to public channel (`customId`: `confession_approve:<Confession _id>`) |
+| `confession_reject` | Reject pending confession (`customId`: `confession_reject:<Confession _id>`) |
 
 ## Events
 

@@ -1,0 +1,348 @@
+import {
+    ChannelType,
+    ChatInputCommandInteraction,
+    MessageFlags,
+    PermissionFlagsBits,
+    SlashCommandBuilder,
+    TextChannel,
+} from "discord.js";
+
+import {
+    buildConfessionAttachmentFiles,
+    buildConfessionReviewComponents,
+    buildReviewConfessionEmbed,
+    CONFESSION_COOLDOWN_DEFAULT,
+    CONFESSION_CONTENT_MAX,
+    createPendingConfessionRecord,
+    createPublishedConfessionRecord,
+    getConfessionCooldownRemainingSeconds,
+    getGuildConfessionConfig,
+    isConfessionOnCooldown,
+    reserveNextConfessionNumber,
+    sendAnonymousConfessionToChannel,
+    setConfessionCooldown,
+    setConfessionReviewMessageId,
+    upsertGuildConfessionConfig,
+    validateConfessionAttachment,
+} from "../../services/confession/confession.service";
+import { logger } from "../../util/log/logger.mixed";
+import { descriptionLocales } from "../../util/i18n/commandLocales";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
+
+export default {
+    data: new SlashCommandBuilder()
+        .setName("confession")
+        .setDescription("Anonymous confessions for this server")
+        .setDescriptionLocalizations(descriptionLocales("cmd.confession.desc"))
+        .addSubcommand((sub) =>
+            sub
+                .setName("setup")
+                .setDescription("Configure confession channels and mode (Manage Guild)")
+                .setDescriptionLocalizations(descriptionLocales("cmd.confession.setup.desc"))
+                .addBooleanOption((opt) =>
+                    opt
+                        .setName("enabled")
+                        .setDescription("Turn confessions on or off")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.setup.enabled.desc"))
+                        .setRequired(true)
+                )
+                .addStringOption((opt) =>
+                    opt
+                        .setName("mode")
+                        .setDescription("Post instantly or require moderator review first")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.setup.mode.desc"))
+                        .setRequired(true)
+                        .addChoices({ name: "Instant", value: "instant" }, { name: "Review", value: "review" })
+                )
+                .addChannelOption((opt) =>
+                    opt
+                        .setName("public_channel")
+                        .setDescription("Channel where approved confessions are posted (anonymous)")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.setup.public_channel.desc"))
+                        .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
+                        .setRequired(true)
+                )
+                .addChannelOption((opt) =>
+                    opt
+                        .setName("review_channel")
+                        .setDescription("Required if mode is Review — moderators approve or reject here")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.setup.review_channel.desc"))
+                        .addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)
+                        .setRequired(false)
+                )
+                .addIntegerOption((opt) =>
+                    opt
+                        .setName("cooldown_minutes")
+                        .setDescription("Minutes between submissions per user (1–120)")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.setup.cooldown_minutes.desc"))
+                        .setMinValue(1)
+                        .setMaxValue(120)
+                        .setRequired(false)
+                )
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("submit")
+                .setDescription("Submit an anonymous confession")
+                .setDescriptionLocalizations(descriptionLocales("cmd.confession.submit.desc"))
+                .addStringOption((opt) =>
+                    opt
+                        .setName("content")
+                        .setDescription("Your confession text")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.submit.content.desc"))
+                        .setRequired(true)
+                        .setMaxLength(CONFESSION_CONTENT_MAX)
+                )
+                .addAttachmentOption((opt) =>
+                    opt
+                        .setName("image")
+                        .setDescription("Optional single image")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.submit.image.desc"))
+                        .setRequired(false)
+                )
+        ),
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
+        const locale = await resolveLocale(interaction);
+        const sub = interaction.options.getSubcommand(true);
+
+        if (sub === "setup") {
+            await executeSetup(interaction, locale);
+            return;
+        }
+
+        await executeSubmit(interaction, locale);
+    },
+};
+
+async function executeSetup(
+    interaction: ChatInputCommandInteraction,
+    locale: Awaited<ReturnType<typeof resolveLocale>>
+): Promise<void> {
+    if (!interaction.inGuild() || !interaction.guildId) {
+        await interaction.reply({
+            flags: MessageFlags.Ephemeral,
+            content: t(locale, "confession.guild_only"),
+        });
+        return;
+    }
+
+    const memberPerms = interaction.memberPermissions;
+    if (!memberPerms?.has(PermissionFlagsBits.ManageGuild)) {
+        await interaction.reply({
+            flags: MessageFlags.Ephemeral,
+            content: t(locale, "confession.no_permission_setup"),
+        });
+        return;
+    }
+
+    const enabled = interaction.options.getBoolean("enabled", true);
+    const mode = interaction.options.getString("mode", true) as "instant" | "review";
+    const publicChannel = interaction.options.getChannel("public_channel", true);
+    const reviewChannel = interaction.options.getChannel("review_channel");
+    const cooldownRaw = interaction.options.getInteger("cooldown_minutes");
+    const cooldownMinutes = cooldownRaw ?? CONFESSION_COOLDOWN_DEFAULT;
+
+    if (mode === "review" && !reviewChannel) {
+        await interaction.reply({
+            flags: MessageFlags.Ephemeral,
+            content: t(locale, "confession.review_channel_required"),
+        });
+        return;
+    }
+
+    try {
+        await upsertGuildConfessionConfig({
+            guildId: interaction.guildId,
+            enabled,
+            mode,
+            publicChannelId: publicChannel.id,
+            reviewChannelId: reviewChannel?.id ?? null,
+            cooldownMinutes,
+        });
+    } catch (error) {
+        const msg = error instanceof Error ? error.message : "";
+        if (msg === "REVIEW_CHANNEL_REQUIRED") {
+            await interaction.reply({
+                flags: MessageFlags.Ephemeral,
+                content: t(locale, "confession.review_channel_required"),
+            });
+            return;
+        }
+        logger.error(`confession setup upsert failed: ${msg}`);
+        await interaction.reply({
+            flags: MessageFlags.Ephemeral,
+            content: t(locale, "confession.send_failed"),
+        });
+        return;
+    }
+
+    await interaction.reply({
+        flags: MessageFlags.Ephemeral,
+        content: t(locale, "confession.setup_success"),
+    });
+}
+
+async function executeSubmit(
+    interaction: ChatInputCommandInteraction,
+    locale: Awaited<ReturnType<typeof resolveLocale>>
+): Promise<void> {
+    if (!interaction.inGuild() || !interaction.guildId || !interaction.guild) {
+        await interaction.reply({
+            flags: MessageFlags.Ephemeral,
+            content: t(locale, "confession.guild_only"),
+        });
+        return;
+    }
+
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+    const rawContent = interaction.options.getString("content", true);
+    const content = rawContent.trim();
+    if (content.length === 0) {
+        await interaction.editReply({ content: t(locale, "confession.empty_content") });
+        return;
+    }
+    if (content.length > CONFESSION_CONTENT_MAX) {
+        await interaction.editReply({ content: t(locale, "confession.content_too_long") });
+        return;
+    }
+
+    const attachment = interaction.options.getAttachment("image");
+    const validated = validateConfessionAttachment(attachment);
+    if (!validated.ok) {
+        await interaction.editReply({ content: t(locale, "confession.invalid_image") });
+        return;
+    }
+    const image = validated.image;
+
+    const config = await getGuildConfessionConfig(interaction.guildId);
+    if (!config) {
+        await interaction.editReply({ content: t(locale, "confession.not_configured") });
+        return;
+    }
+    if (!config.enabled) {
+        await interaction.editReply({ content: t(locale, "confession.disabled") });
+        return;
+    }
+    if (config.mode === "review" && !config.reviewChannelId) {
+        logger.warn(`confession: guild ${interaction.guildId} has review mode but no review channel`);
+        await interaction.editReply({ content: t(locale, "confession.review_misconfigured") });
+        return;
+    }
+
+    const userId = interaction.user.id;
+    if (await isConfessionOnCooldown(interaction.guildId, userId)) {
+        const sec = await getConfessionCooldownRemainingSeconds(interaction.guildId, userId);
+        await interaction.editReply({
+            content: t(locale, "confession.cooldown", { seconds: Math.max(1, sec) }),
+        });
+        return;
+    }
+
+    let confessionNumber: number;
+    try {
+        confessionNumber = await reserveNextConfessionNumber(interaction.guildId);
+    } catch {
+        await interaction.editReply({ content: t(locale, "confession.not_configured") });
+        return;
+    }
+
+    const guildId = interaction.guildId;
+    const authorId = userId;
+
+    if (config.mode === "instant") {
+        const publicCh = await interaction.guild.channels.fetch(config.publicChannelId).catch(() => null);
+        if (!publicCh || !publicCh.isTextBased() || publicCh.isDMBased()) {
+            await interaction.editReply({ content: t(locale, "confession.send_failed") });
+            return;
+        }
+        const textPublic = publicCh as TextChannel;
+        const sendResult = await sendAnonymousConfessionToChannel(textPublic, confessionNumber, content, image);
+        if ("error" in sendResult) {
+            await interaction.editReply({ content: t(locale, "confession.send_failed") });
+            return;
+        }
+
+        try {
+            await createPublishedConfessionRecord({
+                guildId,
+                number: confessionNumber,
+                authorId,
+                content,
+                image,
+                publicMessageId: sendResult.messageId,
+            });
+        } catch (error) {
+            logger.error(
+                `confession: failed to save published record: ${error instanceof Error ? error.message : String(error)}`
+            );
+            await interaction.editReply({ content: t(locale, "confession.send_failed") });
+            return;
+        }
+
+        await setConfessionCooldown(guildId, userId, config.cooldownMinutes);
+        await interaction.editReply({ content: t(locale, "confession.submit_success_instant") });
+        return;
+    }
+
+    // Review mode
+    let pendingDoc;
+    try {
+        pendingDoc = await createPendingConfessionRecord({
+            guildId,
+            number: confessionNumber,
+            authorId,
+            content,
+            image,
+        });
+    } catch (error) {
+        logger.error(
+            `confession: failed to create pending record: ${error instanceof Error ? error.message : String(error)}`
+        );
+        await interaction.editReply({ content: t(locale, "confession.send_failed") });
+        return;
+    }
+
+    const mongoId = String(pendingDoc._id);
+    const reviewChannelId = config.reviewChannelId;
+    if (!reviewChannelId) {
+        await interaction.editReply({ content: t(locale, "confession.review_misconfigured") });
+        return;
+    }
+    const reviewCh = await interaction.guild.channels.fetch(reviewChannelId).catch(() => null);
+    if (!reviewCh || !reviewCh.isTextBased() || reviewCh.isDMBased()) {
+        await interaction.editReply({ content: t(locale, "confession.send_failed") });
+        return;
+    }
+    const textReview = reviewCh as TextChannel;
+
+    const reviewEmbed = buildReviewConfessionEmbed({
+        confessionNumber,
+        content,
+        authorId,
+    });
+    const files = await buildConfessionAttachmentFiles(image);
+    const row = buildConfessionReviewComponents(mongoId, {
+        approve: t(locale, "btn.confession.approve"),
+        reject: t(locale, "btn.confession.reject"),
+    });
+
+    try {
+        const msg = await textReview.send({
+            embeds: [reviewEmbed],
+            files: files.length > 0 ? files : undefined,
+            components: [row],
+        });
+        await setConfessionReviewMessageId(mongoId, msg.id);
+    } catch (error) {
+        logger.error(
+            `confession: failed to post review message: ${error instanceof Error ? error.message : String(error)}`
+        );
+        await interaction.editReply({ content: t(locale, "confession.send_failed") });
+        return;
+    }
+
+    await setConfessionCooldown(guildId, userId, config.cooldownMinutes);
+    await interaction.editReply({ content: t(locale, "confession.submit_success_review") });
+}
