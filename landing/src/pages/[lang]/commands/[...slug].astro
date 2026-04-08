@@ -1,0 +1,103 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../../components/Breadcrumb.astro";
+import LanguageSwitcher from "../../../components/LanguageSwitcher.astro";
+import RelatedCommands from "../../../components/RelatedCommands.astro";
+import { categoryMeta } from "../../../data/commands";
+import type { Category } from "../../../data/commands";
+
+export async function getStaticPaths() {
+  const pages = await getCollection("commands");
+
+  return pages.map((page) => {
+    const [lang, ...slugParts] = page.id.split("/");
+    const slug = slugParts.join("/");
+    return {
+      params: { lang, slug },
+      props: { page },
+    };
+  });
+}
+
+const { lang, slug } = Astro.params;
+const { page } = Astro.props;
+const { Content } = await render(page);
+
+const meta = categoryMeta[page.data.category as Category];
+const pageTitle = `${page.data.title} Guide — 3AT Bot`;
+const altLang = lang === "en" ? "vi" : "en";
+const hreflang = [
+  { lang: "en", href: `/en/commands/${slug}` },
+  { lang: "vi", href: `/vi/commands/${slug}` },
+];
+
+const breadcrumbItems = [
+  { label: "Commands", href: "/commands" },
+  { label: meta?.label ?? page.data.category, href: `/commands` },
+  { label: `/${page.data.command}` },
+];
+
+// Check if the alternate language version exists
+const allPages = await getCollection("commands");
+const altExists = allPages.some((p) => p.id === `${altLang}/${slug}`);
+const showTranslationNotice = lang === "vi" && !altExists;
+---
+
+<BaseLayout title={pageTitle} description={page.data.description} hreflang={hreflang}>
+  <div class="container guide-page">
+    <Breadcrumb items={breadcrumbItems} />
+
+    <div class="guide-header">
+      <div class="guide-header-top">
+        <div class="guide-title-group">
+          <h1 class="guide-title">{page.data.title}</h1>
+          {meta && (
+            <span
+              class="guide-category-badge"
+              style={`color: ${meta.color}; background: ${meta.bg};`}
+            >
+              {meta.label}
+            </span>
+          )}
+        </div>
+        <LanguageSwitcher currentLang={lang!} slug={slug!} />
+      </div>
+      <p class="guide-description">{page.data.description}</p>
+      {(page.data.permissions?.length || page.data.cooldown) && (
+        <div class="guide-meta">
+          {page.data.permissions && page.data.permissions.length > 0 && (
+            <span class="guide-meta-item">
+              <span class="guide-meta-icon">🔒</span>
+              {page.data.permissions.join(", ")}
+            </span>
+          )}
+          {page.data.cooldown && (
+            <span class="guide-meta-item">
+              <span class="guide-meta-icon">⏱</span>
+              {page.data.cooldown}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
+
+    {showTranslationNotice && (
+      <div class="translation-notice">
+        Bản dịch đang được cập nhật. Nội dung hiện tại hiển thị bằng tiếng Anh.
+      </div>
+    )}
+
+    <div class="guide-prose">
+      <Content />
+    </div>
+
+    <a href="/commands" class="guide-back-link">← Back to Commands</a>
+
+    <RelatedCommands
+      currentCommand={page.data.command}
+      category={page.data.category}
+      lang={lang!}
+    />
+  </div>
+</BaseLayout>
