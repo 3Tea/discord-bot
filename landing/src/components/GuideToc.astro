@@ -131,27 +131,32 @@ const tocItems = headings.filter((h) => h.depth === 2);
 </style>
 
 <script>
-  const links = document.querySelectorAll<HTMLAnchorElement>(".toc-sidebar .toc-link[data-heading]");
-  if (links.length > 0) {
-    const headingEls = Array.from(links).map((link) =>
-      document.getElementById(link.dataset.heading!)
-    ).filter(Boolean) as HTMLElement[];
+  const sidebars = document.querySelectorAll<HTMLElement>(".toc-sidebar");
+  const sidebar = sidebars[sidebars.length - 1];
+  if (sidebar) {
+    const links = sidebar.querySelectorAll<HTMLAnchorElement>(".toc-link[data-heading]");
+    const allLinks = document.querySelectorAll<HTMLAnchorElement>(".toc-sidebar .toc-link[data-heading]");
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            links.forEach((l) => l.classList.remove("active"));
-            const active = document.querySelector(
-              `.toc-sidebar .toc-link[data-heading="${entry.target.id}"]`
-            );
-            active?.classList.add("active");
+    if (links.length > 0) {
+      const headingEls = Array.from(links).map((link) =>
+        document.getElementById(link.dataset.heading!)
+      ).filter(Boolean) as HTMLElement[];
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              allLinks.forEach((l) => l.classList.remove("active"));
+              document.querySelectorAll(
+                `.toc-sidebar .toc-link[data-heading="${entry.target.id}"]`
+              ).forEach((el) => el.classList.add("active"));
+            }
           }
-        }
-      },
-      { rootMargin: "-80px 0px -60% 0px", threshold: 0 }
-    );
+        },
+        { rootMargin: "-80px 0px -60% 0px", threshold: 0 }
+      );
 
-    headingEls.forEach((el) => observer.observe(el));
+      headingEls.forEach((el) => observer.observe(el));
+    }
   }
 </script>
