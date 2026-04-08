@@ -1,3 +1,4 @@
+// src/bin/www.ts
 import dotenv from "dotenv";
 import path from "node:path";
 
@@ -19,6 +20,19 @@ async function main(): Promise<void> {
 
     const { startGuildStatsAggregator } = await import("../util/xp/guildStatsAggregator");
     startGuildStatsAggregator();
+
+    const { CommandLogService } = await import("../services/commandLog.service");
+    CommandLogService.startFlusher();
 }
 
 main().catch(console.error);
+
+// Graceful shutdown — flush pending command logs before exit
+async function shutdown(): Promise<void> {
+    const { CommandLogService } = await import("../services/commandLog.service");
+    await CommandLogService.flush();
+    process.exit(0);
+}
+
+process.on("SIGINT", () => { shutdown().catch(() => process.exit(1)); });
+process.on("SIGTERM", () => { shutdown().catch(() => process.exit(1)); });
