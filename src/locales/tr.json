@@ -202,6 +202,7 @@
     "btn.homepage": "Ana Sayfa",
     "btn.discussions": "Tartışmalar",
     "btn.report_bug": "Hata bildir",
+    "btn.guide": "Rehber",
     "server_rank.title": "Sunucu İstatistikleri",
     "server_rank.rank": "Sıra #{{rank}} / {{total}} sunucu",
     "server_rank.level": "Level {{level}}",

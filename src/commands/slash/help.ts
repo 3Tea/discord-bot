@@ -85,7 +85,12 @@ export default {
             .setURL(`${process.env.URL_REPORT_BUG}`)
             .setStyle(ButtonStyle.Link);
 
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(homepage, discussions, reportBug);
+        const guide = new ButtonBuilder()
+            .setLabel(t(locale, "btn.guide"))
+            .setURL(`${process.env.URL_HOMEPAGE}/guide`)
+            .setStyle(ButtonStyle.Link);
+
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(homepage, guide, discussions, reportBug);
         return Reply.embedButtons(interaction, embed, row);
     },
 };

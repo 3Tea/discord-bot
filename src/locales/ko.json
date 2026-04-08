@@ -202,6 +202,7 @@
     "btn.homepage": "홈페이지",
     "btn.discussions": "토론",
     "btn.report_bug": "버그 신고",
+    "btn.guide": "가이드",
     "server_rank.title": "서버 통계",
     "server_rank.rank": "순위 #{{rank}} / {{total}} 서버",
     "server_rank.level": "레벨 {{level}}",

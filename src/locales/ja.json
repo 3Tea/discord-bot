@@ -202,6 +202,7 @@
     "btn.homepage": "ホームページ",
     "btn.discussions": "ディスカッション",
     "btn.report_bug": "バグを報告する",
+    "btn.guide": "ガイド",
     "server_rank.title": "サーバー統計",
     "server_rank.rank": "ランク #{{rank}} / {{total}} サーバー",
     "server_rank.level": "レベル {{level}}",

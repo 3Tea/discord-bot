@@ -202,6 +202,7 @@
     "btn.homepage": "Strona główna",
     "btn.discussions": "Dyskusje",
     "btn.report_bug": "Zgłoś błąd",
+    "btn.guide": "Poradnik",
     "server_rank.title": "Statystyki Serwera",
     "server_rank.rank": "Ranking #{{rank}} / {{total}} serwerów",
     "server_rank.level": "Level {{level}}",
