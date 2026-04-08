@@ -1,6 +1,5 @@
 ---
 title: Voice Channels
-slug: voice
 description: Create your own temporary voice channel and control who can join, see, and use it.
 icon: "🎙️"
 order: 3

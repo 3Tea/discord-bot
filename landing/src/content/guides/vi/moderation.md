@@ -1,6 +1,5 @@
 ---
 title: Quản Lý Server
-slug: moderation
 description: Timeout, ban, kick và unban thành viên với kiểm tra quyền hạn đầy đủ.
 icon: "🛡️"
 order: 5

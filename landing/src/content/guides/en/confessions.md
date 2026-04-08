@@ -1,6 +1,5 @@
 ---
 title: Confessions
-slug: confessions
 description: Post anonymous confessions, vote, reply, and use VIP features.
 icon: "🎭"
 order: 4

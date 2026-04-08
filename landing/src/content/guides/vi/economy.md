@@ -1,6 +1,5 @@
 ---
 title: Hệ Thống Kinh Tế
-slug: economy
 description: Tìm hiểu cách kiếm coin và gem, xây dựng chuỗi cầu nguyện, và mua sắm trong shop.
 icon: "💰"
 order: 1

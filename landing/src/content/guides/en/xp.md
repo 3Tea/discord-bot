@@ -1,6 +1,5 @@
 ---
 title: XP & Leveling
-slug: xp
 description: Understand how XP works, level up, and compete on leaderboards.
 icon: "📊"
 order: 2

@@ -1,6 +1,5 @@
 ---
 title: Economy System
-slug: economy
 description: Learn how to earn coins and gems, build pray streaks, and spend in the shop.
 icon: "💰"
 order: 1

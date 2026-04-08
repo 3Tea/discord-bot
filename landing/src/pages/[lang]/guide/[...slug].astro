@@ -24,7 +24,8 @@ const { lang, slug } = Astro.params;
 const { page } = Astro.props;
 const { Content, headings } = await render(page);
 
-const meta = guideMeta[page.data.slug];
+const guideSlug = page.id.split("/").pop()!;
+const meta = guideMeta[guideSlug];
 const pageTitle = `${page.data.title} — User Guide | 3AT Bot`;
 const altLang = lang === "en" ? "vi" : "en";
 const hreflang = [
@@ -95,7 +96,7 @@ const showTranslationNotice = lang === "vi" && !altExists;
         </div>
       )}
 
-      <RelatedGuides currentSlug={page.data.slug} lang={lang!} />
+      <RelatedGuides currentSlug={guideSlug} lang={lang!} />
     </div>
 
     <GuideToc headings={headings} />

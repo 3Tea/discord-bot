@@ -1,6 +1,5 @@
 ---
 title: Confession
-slug: confessions
 description: Đăng confession ẩn danh, bình chọn, trả lời và sử dụng tính năng VIP.
 icon: "🎭"
 order: 4

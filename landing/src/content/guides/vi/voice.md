@@ -1,6 +1,5 @@
 ---
 title: Kênh Thoại
-slug: voice
 description: Tạo kênh thoại tạm thời của riêng bạn và kiểm soát ai có thể tham gia, xem và sử dụng.
 icon: "🎙️"
 order: 3

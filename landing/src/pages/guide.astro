@@ -22,13 +22,14 @@ const enGuides = allGuides
 
     <div class="guide-grid">
       {enGuides.map((guide) => {
-        const meta = guideMeta[guide.data.slug];
+        const guideSlug = guide.id.split("/").pop()!;
+        const meta = guideMeta[guideSlug];
         return (
           <GuideCard
             title={guide.data.title}
             description={guide.data.description}
             icon={guide.data.icon}
-            href={`/en/guide/${guide.data.slug}`}
+            href={`/en/guide/${guideSlug}`}
             color={meta?.color ?? "#5865F2"}
             bg={meta?.bg ?? "rgba(88,101,242,0.15)"}
           />

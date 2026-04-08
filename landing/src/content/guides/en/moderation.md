@@ -1,6 +1,5 @@
 ---
 title: Moderation
-slug: moderation
 description: Timeout, ban, kick, and unban members with proper permission checks.
 icon: "🛡️"
 order: 5

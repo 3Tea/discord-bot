@@ -1,6 +1,5 @@
 ---
 title: XP & Cấp Độ
-slug: xp
 description: Tìm hiểu cách hoạt động của XP, lên cấp và cạnh tranh trên bảng xếp hạng.
 icon: "📊"
 order: 2
