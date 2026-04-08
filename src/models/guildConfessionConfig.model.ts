@@ -11,6 +11,7 @@ export interface IGuildConfessionConfig extends Document {
     cooldownMinutes: number;
     /** Increments atomically with each new confession number issued for this guild. */
     lastConfessionNumber: number;
+    blockedKeywords: string[];
 }
 
 const guildConfessionConfigSchema = new Schema(
@@ -22,6 +23,7 @@ const guildConfessionConfigSchema = new Schema(
         reviewChannelId: { type: String, default: null },
         cooldownMinutes: { type: Number, default: 10, min: 1, max: 120 },
         lastConfessionNumber: { type: Number, default: 0 },
+        blockedKeywords: { type: [String], default: [] },
     },
     { timestamps: true, collection: "GuildConfessionConfigs" }
 );

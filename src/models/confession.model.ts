@@ -19,6 +19,7 @@ export interface IConfession extends Document {
     downvotes: number;
     threadId: string | null;
     replyCount: number;
+    tag: string | null;
     status: ConfessionStatus;
     reviewMessageId: string | null;
     publicMessageId: string | null;
@@ -44,6 +45,7 @@ const confessionSchema = new Schema(
         downvotes: { type: Number, default: 0 },
         threadId: { type: String, default: null },
         replyCount: { type: Number, default: 0 },
+        tag: { type: String, default: null },
         status: {
             type: String,
             enum: ["pending", "published", "rejected"],
