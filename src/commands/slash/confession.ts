@@ -9,6 +9,7 @@ import {
 
 import {
     buildConfessionAttachmentFiles,
+    buildConfessionInteractionRow,
     buildConfessionReviewComponents,
     buildReviewConfessionEmbed,
     CONFESSION_COOLDOWN_DEFAULT,
@@ -357,21 +358,17 @@ async function executeSubmit(
             return;
         }
         const textPublic = publicCh as TextChannel;
-        const sendResult = await sendAnonymousConfessionToChannel(textPublic, confessionNumber, content, image, isVip);
-        if ("error" in sendResult) {
-            await refundAll("send_failed");
-            await interaction.editReply({ content: t(locale, "confession.send_failed") });
-            return;
-        }
 
+        // Create record first to get mongoId for buttons
+        let publishedDoc;
         try {
-            await createPublishedConfessionRecord({
+            publishedDoc = await createPublishedConfessionRecord({
                 guildId,
                 number: confessionNumber,
                 authorId,
                 content,
                 image,
-                publicMessageId: sendResult.messageId,
+                publicMessageId: "pending",
                 isVip,
             });
         } catch (error) {
@@ -382,6 +379,18 @@ async function executeSubmit(
             await interaction.editReply({ content: t(locale, "confession.send_failed") });
             return;
         }
+
+        const mongoId = String(publishedDoc._id);
+        const sendResult = await sendAnonymousConfessionToChannel(textPublic, confessionNumber, content, image, isVip, mongoId);
+        if ("error" in sendResult) {
+            await refundAll("send_failed");
+            await interaction.editReply({ content: t(locale, "confession.send_failed") });
+            return;
+        }
+
+        // Update with real publicMessageId
+        publishedDoc.publicMessageId = sendResult.messageId;
+        await publishedDoc.save();
 
         await setConfessionCooldown(guildId, userId, config.cooldownMinutes);
         await interaction.editReply({ content: t(locale, "confession.submit_success_instant") });
