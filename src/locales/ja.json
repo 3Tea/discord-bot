@@ -428,5 +428,14 @@
     "confession.tag.funny": "Funny",
     "confession.tag.question": "Question",
     "confession.tag.sharing": "Sharing",
-    "confession.tag.other": "Other"
+    "confession.tag.other": "Other",
+    "cmd.commandlog.desc": "Command usage logs (dev only)",
+    "cmd.commandlog.stats.desc": "View command usage statistics",
+    "cmd.commandlog.stats.period.desc": "Time period for stats",
+    "cmd.commandlog.user.desc": "View a user's command history",
+    "cmd.commandlog.user.target.desc": "User to look up",
+    "cmd.commandlog.user.limit.desc": "Number of entries (1-25)",
+    "cmd.commandlog.command.desc": "View usage history for a command",
+    "cmd.commandlog.command.name.desc": "Command name to look up",
+    "cmd.commandlog.command.limit.desc": "Number of entries (1-25)"
 }
