@@ -13,6 +13,10 @@ export default {
     async execute(interaction: ModalSubmitInteraction) {
         if (!interaction.isModalSubmit()) return;
 
+        // Only handle voice modals — other modals (e.g. confession reply) are handled by awaitModalSubmit in their button handlers
+        const voiceModalIds: string[] = [BUTTON_ID.VOICE_MODAL_RENAME, BUTTON_ID.VOICE_MODAL_LIMIT];
+        if (!voiceModalIds.includes(interaction.customId)) return;
+
         const locale = await resolveLocale(interaction);
         const member = interaction.member as GuildMember;
         const voiceChannel = member?.voice.channel as VoiceChannel | null;
