@@ -1,6 +1,6 @@
 import { model, Schema, Document } from "mongoose";
 
-export type TransactionType = "pray" | "curse" | "purchase" | "exchange" | "streak_bonus" | "admin";
+export type TransactionType = "pray" | "curse" | "purchase" | "exchange" | "streak_bonus" | "admin" | "confession_vip" | "confession_skip_cd" | "confession_refund";
 
 export interface ITransaction extends Document {
     userId: string;
@@ -18,7 +18,7 @@ const transactionSchema = new Schema(
         guildId: { type: String, required: true },
         type: {
             type: String,
-            enum: ["pray", "curse", "purchase", "exchange", "streak_bonus", "admin"],
+            enum: ["pray", "curse", "purchase", "exchange", "streak_bonus", "admin", "confession_vip", "confession_skip_cd", "confession_refund"],
             required: true,
         },
         coinDelta: { type: Number, default: 0 },
