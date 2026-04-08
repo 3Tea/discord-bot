@@ -8,11 +8,13 @@ import "../styles/animations.css";
 interface Props {
   title: string;
   description?: string;
+  hreflang?: Array<{ lang: string; href: string }>;
 }
 
 const {
   title,
   description = "Discord bot for voice channel management, manga reading, translation, and more.",
+  hreflang,
 } = Astro.props;
 ---
 
@@ -30,6 +32,9 @@ const {
       rel="stylesheet"
     />
     <title>{title}</title>
+    {hreflang?.map((alt) => (
+      <link rel="alternate" hreflang={alt.lang} href={alt.href} />
+    ))}
   </head>
   <body>
     <Navbar />

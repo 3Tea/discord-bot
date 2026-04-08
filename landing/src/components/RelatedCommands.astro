@@ -1,0 +1,35 @@
+---
+import { commands, categoryMeta } from "../data/commands";
+import type { Category } from "../data/commands";
+
+interface Props {
+  currentCommand: string;
+  category: string;
+  lang: string;
+}
+
+const { currentCommand, category, lang } = Astro.props;
+
+const related = commands
+  .filter((cmd) => cmd.category === category && cmd.name !== currentCommand)
+  .slice(0, 3);
+---
+
+{related.length > 0 && (
+  <div class="related-section">
+    <h2 class="related-title">Related Commands</h2>
+    <div class="related-grid">
+      {related.map((cmd) => {
+        const meta = categoryMeta[cmd.category as Category];
+        return (
+          <a href={`/${lang}/commands/${cmd.name}`} class="related-card">
+            <div class="related-card-name">
+              <span style={`color: ${meta.color}`}>/</span> {cmd.name}
+            </div>
+            <p class="related-card-desc">{cmd.description}</p>
+          </a>
+        );
+      })}
+    </div>
+  </div>
+)}
