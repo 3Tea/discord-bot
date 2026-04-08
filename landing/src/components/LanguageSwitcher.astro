@@ -1,0 +1,25 @@
+---
+interface Props {
+  currentLang: string;
+  slug: string;
+}
+
+const { currentLang, slug } = Astro.props;
+
+const languages = [
+  { code: "en", label: "EN" },
+  { code: "vi", label: "VI" },
+];
+---
+
+<div class="lang-switcher">
+  {languages.map((lang) => (
+    <a
+      href={`/${lang.code}/commands/${slug}`}
+      class:list={["lang-btn", { active: currentLang === lang.code }]}
+      aria-label={`Switch to ${lang.label}`}
+    >
+      {lang.label}
+    </a>
+  ))}
+</div>
