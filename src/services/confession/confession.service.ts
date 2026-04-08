@@ -21,6 +21,7 @@ import GuildConfessionConfigModel, {
 } from "../../models/guildConfessionConfig.model";
 import ConfessionVoteModel from "../../models/confessionVote.model";
 import ConfessionReplyModel from "../../models/confessionReply.model";
+import ConfessionBanModel from "../../models/confessionBan.model";
 import { FOOTER } from "../../util/config/index";
 import { BUTTON_ID } from "../../util/config/button";
 import { logger } from "../../util/log/logger.mixed";
@@ -32,6 +33,9 @@ import {
     CONFESSION_SKIP_CD_COST_COIN,
     CONFESSION_REPLY_COST_COIN,
     CONFESSION_REPLY_MAX_LENGTH,
+    CONFESSION_KEYWORD_MAX_LENGTH,
+    CONFESSION_KEYWORDS_MAX_COUNT,
+    CONFESSION_TAGS,
     confessionCooldownRedisKey,
 } from "./constants";
 
@@ -44,6 +48,8 @@ export {
 } from "./constants";
 export { CONFESSION_VIP_COST_GEM, CONFESSION_SKIP_CD_COST_COIN } from "./constants";
 export { CONFESSION_REPLY_COST_COIN, CONFESSION_REPLY_MAX_LENGTH } from "./constants";
+export { CONFESSION_KEYWORD_MAX_LENGTH, CONFESSION_KEYWORDS_MAX_COUNT, CONFESSION_TAGS } from "./constants";
+export type { ConfessionTag } from "./constants";
 
 function applyConfessionFooter(embed: EmbedBuilder): void {
     if (FOOTER.text) {
@@ -137,21 +143,25 @@ export function validateConfessionAttachment(
     };
 }
 
-export function buildPublicConfessionEmbed(confessionNumber: number, content: string): EmbedBuilder {
+export function buildPublicConfessionEmbed(confessionNumber: number, content: string, tag?: string | null): EmbedBuilder {
+    const tagLine = tag ? `[🏷️ ${tag.charAt(0).toUpperCase() + tag.slice(1)}]\n` : "";
+    const desc = tagLine + content;
     const embed = new EmbedBuilder()
         .setColor(0x9b59b6)
         .setTitle(`Anonymous Confession (#${confessionNumber})`)
-        .setDescription(content.length > CONFESSION_CONTENT_MAX ? content.slice(0, CONFESSION_CONTENT_MAX) : content)
+        .setDescription(desc.length > CONFESSION_CONTENT_MAX ? desc.slice(0, CONFESSION_CONTENT_MAX) : desc)
         .setTimestamp();
     applyConfessionFooter(embed);
     return embed;
 }
 
-export function buildVipPublicConfessionEmbed(confessionNumber: number, content: string): EmbedBuilder {
+export function buildVipPublicConfessionEmbed(confessionNumber: number, content: string, tag?: string | null): EmbedBuilder {
+    const tagLine = tag ? `[🏷️ ${tag.charAt(0).toUpperCase() + tag.slice(1)}]\n` : "";
+    const desc = tagLine + content;
     const embed = new EmbedBuilder()
         .setColor(0xf1c40f)
         .setTitle(`✨ Confession (#${confessionNumber})`)
-        .setDescription(content.length > CONFESSION_CONTENT_MAX ? content.slice(0, CONFESSION_CONTENT_MAX) : content)
+        .setDescription(desc.length > CONFESSION_CONTENT_MAX ? desc.slice(0, CONFESSION_CONTENT_MAX) : desc)
         .setTimestamp();
     embed.setFooter({
         text: "VIP Confession",
@@ -165,17 +175,18 @@ export function buildReviewConfessionEmbed(params: {
     content: string;
     authorId: string;
     isVip?: boolean;
+    tag?: string | null;
 }): EmbedBuilder {
     const title = params.isVip
         ? `✨ Confession review (#${params.confessionNumber}) — VIP`
         : `Confession review (#${params.confessionNumber})`;
+    const tagLine = params.tag ? `[🏷️ ${params.tag.charAt(0).toUpperCase() + params.tag.slice(1)}]\n` : "";
+    const desc = tagLine + params.content;
     const embed = new EmbedBuilder()
         .setColor(params.isVip ? 0xf1c40f : 0xe67e22)
         .setTitle(title)
         .setDescription(
-            params.content.length > CONFESSION_CONTENT_MAX
-                ? params.content.slice(0, CONFESSION_CONTENT_MAX)
-                : params.content
+            desc.length > CONFESSION_CONTENT_MAX ? desc.slice(0, CONFESSION_CONTENT_MAX) : desc
         )
         .addFields({
             name: "Author (moderators only)",
@@ -226,12 +237,13 @@ export async function sendAnonymousConfessionToChannel(
     content: string,
     image: IConfessionImage | null,
     isVip = false,
-    mongoId?: string
+    mongoId?: string,
+    tag?: string | null
 ): Promise<{ messageId: string } | { error: true }> {
     try {
         const embed = isVip
-            ? buildVipPublicConfessionEmbed(confessionNumber, content)
-            : buildPublicConfessionEmbed(confessionNumber, content);
+            ? buildVipPublicConfessionEmbed(confessionNumber, content, tag)
+            : buildPublicConfessionEmbed(confessionNumber, content, tag);
         const files = await buildConfessionAttachmentFiles(image);
         const components = mongoId ? [buildConfessionInteractionRow(mongoId)] : [];
         const msg = await channel.send({
@@ -256,6 +268,7 @@ export async function createPublishedConfessionRecord(input: {
     image: IConfessionImage | null;
     publicMessageId: string;
     isVip?: boolean;
+    tag?: string | null;
 }): Promise<IConfession> {
     return ConfessionModel.create({
         guildId: input.guildId,
@@ -264,6 +277,7 @@ export async function createPublishedConfessionRecord(input: {
         content: input.content,
         image: input.image,
         isVip: input.isVip ?? false,
+        tag: input.tag ?? null,
         status: "published",
         reviewMessageId: null,
         publicMessageId: input.publicMessageId,
@@ -278,6 +292,7 @@ export async function createPendingConfessionRecord(input: {
     content: string;
     image: IConfessionImage | null;
     isVip?: boolean;
+    tag?: string | null;
 }): Promise<IConfession> {
     return ConfessionModel.create({
         guildId: input.guildId,
@@ -286,6 +301,7 @@ export async function createPendingConfessionRecord(input: {
         content: input.content,
         image: input.image,
         isVip: input.isVip ?? false,
+        tag: input.tag ?? null,
         status: "pending",
         reviewMessageId: null,
         publicMessageId: null,
@@ -330,7 +346,7 @@ export async function approveConfession(interaction: ButtonInteraction): Promise
     }
 
     const textChannel = ch as TextChannel;
-    const sendResult = await sendAnonymousConfessionToChannel(textChannel, doc.number, doc.content, doc.image, doc.isVip, rawId);
+    const sendResult = await sendAnonymousConfessionToChannel(textChannel, doc.number, doc.content, doc.image, doc.isVip, rawId, doc.tag);
     if ("error" in sendResult) {
         return { ok: false, code: "send_failed" };
     }
@@ -404,6 +420,93 @@ export function buildConfessionReviewComponents(
             .setLabel(labels.reject)
             .setStyle(ButtonStyle.Danger)
     );
+}
+
+// --- Confession Ban ---
+
+export async function checkConfessionBan(
+    guildId: string,
+    userId: string
+): Promise<{ banned: true; expiresAt: Date | null } | { banned: false }> {
+    const ban = await ConfessionBanModel.findOne({ guildId, userId, active: true }).exec();
+    if (!ban) return { banned: false };
+
+    if (ban.expiresAt && ban.expiresAt <= new Date()) {
+        ban.active = false;
+        await ban.save();
+        return { banned: false };
+    }
+
+    return { banned: true, expiresAt: ban.expiresAt };
+}
+
+export async function banConfessionUser(input: {
+    guildId: string;
+    userId: string;
+    moderatorId: string;
+    reason: string | null;
+    expiresAt: Date | null;
+}): Promise<void> {
+    await ConfessionBanModel.updateMany(
+        { guildId: input.guildId, userId: input.userId, active: true },
+        { active: false }
+    ).exec();
+
+    await ConfessionBanModel.create({
+        guildId: input.guildId,
+        userId: input.userId,
+        moderatorId: input.moderatorId,
+        reason: input.reason,
+        expiresAt: input.expiresAt,
+        active: true,
+    });
+}
+
+export async function unbanConfessionUser(guildId: string, userId: string): Promise<boolean> {
+    const result = await ConfessionBanModel.updateMany(
+        { guildId, userId, active: true },
+        { active: false }
+    ).exec();
+    return result.modifiedCount > 0;
+}
+
+// --- Keyword Filter ---
+
+export async function addBlockedKeyword(guildId: string, keyword: string): Promise<"added" | "duplicate" | "max_reached" | "not_configured"> {
+    const config = await GuildConfessionConfigModel.findOne({ guildId }).exec();
+    if (!config) return "not_configured";
+
+    const normalized = keyword.toLowerCase().trim().slice(0, CONFESSION_KEYWORD_MAX_LENGTH);
+    if (config.blockedKeywords.includes(normalized)) return "duplicate";
+    if (config.blockedKeywords.length >= CONFESSION_KEYWORDS_MAX_COUNT) return "max_reached";
+
+    config.blockedKeywords.push(normalized);
+    await config.save();
+    return "added";
+}
+
+export async function removeBlockedKeyword(guildId: string, keyword: string): Promise<"removed" | "not_found" | "not_configured"> {
+    const config = await GuildConfessionConfigModel.findOne({ guildId }).exec();
+    if (!config) return "not_configured";
+
+    const normalized = keyword.toLowerCase().trim();
+    const idx = config.blockedKeywords.indexOf(normalized);
+    if (idx === -1) return "not_found";
+
+    config.blockedKeywords.splice(idx, 1);
+    await config.save();
+    return "removed";
+}
+
+export async function getBlockedKeywords(guildId: string): Promise<string[]> {
+    const config = await GuildConfessionConfigModel.findOne({ guildId }).exec();
+    return config?.blockedKeywords ?? [];
+}
+
+export function checkKeywordFilter(content: string, blockedKeywords: string[]): boolean {
+    if (blockedKeywords.length === 0) return false;
+    const lower = content.toLowerCase();
+    return blockedKeywords.some((kw) => lower.includes(kw));
 }
 
 export function buildConfessionInteractionRow(
