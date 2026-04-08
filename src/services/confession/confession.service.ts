@@ -23,6 +23,8 @@ import {
     CONFESSION_CONTENT_MAX,
     CONFESSION_COOLDOWN_MAX,
     CONFESSION_COOLDOWN_MIN,
+    CONFESSION_VIP_COST_GEM,
+    CONFESSION_SKIP_CD_COST_COIN,
     confessionCooldownRedisKey,
 } from "./constants";
 
@@ -33,6 +35,7 @@ export {
     CONFESSION_COOLDOWN_MAX,
     CONFESSION_COOLDOWN_DEFAULT,
 } from "./constants";
+export { CONFESSION_VIP_COST_GEM, CONFESSION_SKIP_CD_COST_COIN } from "./constants";
 
 function applyConfessionFooter(embed: EmbedBuilder): void {
     if (FOOTER.text) {
@@ -136,14 +139,31 @@ export function buildPublicConfessionEmbed(confessionNumber: number, content: st
     return embed;
 }
 
+export function buildVipPublicConfessionEmbed(confessionNumber: number, content: string): EmbedBuilder {
+    const embed = new EmbedBuilder()
+        .setColor(0xf1c40f)
+        .setTitle(`✨ Confession (#${confessionNumber})`)
+        .setDescription(content.length > CONFESSION_CONTENT_MAX ? content.slice(0, CONFESSION_CONTENT_MAX) : content)
+        .setTimestamp();
+    embed.setFooter({
+        text: "VIP Confession",
+        ...(FOOTER.icon ? { iconURL: FOOTER.icon } : {}),
+    });
+    return embed;
+}
+
 export function buildReviewConfessionEmbed(params: {
     confessionNumber: number;
     content: string;
     authorId: string;
+    isVip?: boolean;
 }): EmbedBuilder {
+    const title = params.isVip
+        ? `✨ Confession review (#${params.confessionNumber}) — VIP`
+        : `Confession review (#${params.confessionNumber})`;
     const embed = new EmbedBuilder()
-        .setColor(0xe67e22)
-        .setTitle(`Confession review (#${params.confessionNumber})`)
+        .setColor(params.isVip ? 0xf1c40f : 0xe67e22)
+        .setTitle(title)
         .setDescription(
             params.content.length > CONFESSION_CONTENT_MAX
                 ? params.content.slice(0, CONFESSION_CONTENT_MAX)
@@ -196,10 +216,13 @@ export async function sendAnonymousConfessionToChannel(
     channel: TextChannel,
     confessionNumber: number,
     content: string,
-    image: IConfessionImage | null
+    image: IConfessionImage | null,
+    isVip = false
 ): Promise<{ messageId: string } | { error: true }> {
     try {
-        const embed = buildPublicConfessionEmbed(confessionNumber, content);
+        const embed = isVip
+            ? buildVipPublicConfessionEmbed(confessionNumber, content)
+            : buildPublicConfessionEmbed(confessionNumber, content);
         const files = await buildConfessionAttachmentFiles(image);
         const msg = await channel.send({ embeds: [embed], files: files.length ? files : undefined });
         return { messageId: msg.id };
@@ -218,6 +241,7 @@ export async function createPublishedConfessionRecord(input: {
     content: string;
     image: IConfessionImage | null;
     publicMessageId: string;
+    isVip?: boolean;
 }): Promise<IConfession> {
     return ConfessionModel.create({
         guildId: input.guildId,
@@ -225,6 +249,7 @@ export async function createPublishedConfessionRecord(input: {
         authorId: input.authorId,
         content: input.content,
         image: input.image,
+        isVip: input.isVip ?? false,
         status: "published",
         reviewMessageId: null,
         publicMessageId: input.publicMessageId,
@@ -238,6 +263,7 @@ export async function createPendingConfessionRecord(input: {
     authorId: string;
     content: string;
     image: IConfessionImage | null;
+    isVip?: boolean;
 }): Promise<IConfession> {
     return ConfessionModel.create({
         guildId: input.guildId,
@@ -245,6 +271,7 @@ export async function createPendingConfessionRecord(input: {
         authorId: input.authorId,
         content: input.content,
         image: input.image,
+        isVip: input.isVip ?? false,
         status: "pending",
         reviewMessageId: null,
         publicMessageId: null,
@@ -289,7 +316,7 @@ export async function approveConfession(interaction: ButtonInteraction): Promise
     }
 
     const textChannel = ch as TextChannel;
-    const sendResult = await sendAnonymousConfessionToChannel(textChannel, doc.number, doc.content, doc.image);
+    const sendResult = await sendAnonymousConfessionToChannel(textChannel, doc.number, doc.content, doc.image, doc.isVip);
     if ("error" in sendResult) {
         return { ok: false, code: "send_failed" };
     }
