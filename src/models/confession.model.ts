@@ -15,6 +15,10 @@ export interface IConfession extends Document {
     content: string;
     image: IConfessionImage | null;
     isVip: boolean;
+    upvotes: number;
+    downvotes: number;
+    threadId: string | null;
+    replyCount: number;
     status: ConfessionStatus;
     reviewMessageId: string | null;
     publicMessageId: string | null;
@@ -36,6 +40,10 @@ const confessionSchema = new Schema(
             default: null,
         },
         isVip: { type: Boolean, default: false },
+        upvotes: { type: Number, default: 0 },
+        downvotes: { type: Number, default: 0 },
+        threadId: { type: String, default: null },
+        replyCount: { type: Number, default: 0 },
         status: {
             type: String,
             enum: ["pending", "published", "rejected"],
