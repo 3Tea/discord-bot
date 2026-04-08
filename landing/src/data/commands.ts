@@ -189,8 +189,9 @@ export const commands: Command[] = [
   {
     name: "confession",
     description:
-      "Anonymous confession system — setup confession channel (admin), submit confessions with optional image",
+      "Anonymous confessions with VIP embeds, voting, reply threads, keyword filter, ban system, and category tags",
     category: "confession",
-    subcommands: ["setup", "submit"],
+    subcommands: ["setup", "submit", "ban", "unban", "filter-add", "filter-remove", "filter-list"],
+    options: ["vip", "skip_cooldown", "tag"],
   },
 ];

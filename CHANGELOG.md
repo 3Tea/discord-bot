@@ -6,6 +6,21 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [5.3.0] - 2026-04-08
+
+### Added
+
+- **`/confession submit vip:true`** — VIP confession with gold embed (`✨`), costs **5 gems** per use.
+- **`/confession submit skip_cooldown:true`** — bypass active cooldown for **50 coins** (only charged when on cooldown).
+- **`/confession submit tag:heartfelt`** — optional category tags (Heartfelt, Funny, Question, Sharing, Other) displayed as `[🏷️ Tag]` badge on embeds.
+- **Confession voting** — every published confession has `👍` / `👎` / `💬 Reply` buttons; vote counts update in real-time.
+- **Anonymous reply threads** — click 💬 Reply to open a modal, reply posted anonymously into a Discord thread; first reply free, **5 coins** per additional reply.
+- **`/confession ban` / `unban`** — ban users from confessing (timed: 1h/6h/1d/7d/30d, or permanent); requires Manage Guild or Manage Messages.
+- **`/confession filter-add` / `filter-remove` / `filter-list`** — keyword blacklist (up to 50 per server, case-insensitive substring match); auto-rejects confessions containing blocked words.
+- **New models:** `ConfessionVote`, `ConfessionReply`, `ConfessionBan`; extended `Confession` with `isVip`, `upvotes`, `downvotes`, `threadId`, `replyCount`, `tag`; extended `GuildConfessionConfig` with `blockedKeywords`.
+- **Transaction types:** `confession_vip`, `confession_skip_cd`, `confession_refund`, `confession_reply` for economy audit trail.
+- **Landing — Confession guide** updated with full premium feature documentation (EN + VI).
+
 ## [5.2.0] - 2026-04-08
 
 ### Added
