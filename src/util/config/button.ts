@@ -31,4 +31,10 @@ export const BUTTON_ID = {
     // Confession moderation (customId may be `confession_approve:<mongoId>`)
     CONFESSION_APPROVE: "confession_approve",
     CONFESSION_REJECT: "confession_reject",
+    // Confession interaction (customId: `confession_upvote:<mongoId>` etc.)
+    CONFESSION_UPVOTE: "confession_upvote",
+    CONFESSION_DOWNVOTE: "confession_downvote",
+    CONFESSION_REPLY: "confession_reply",
+    // Confession reply modal
+    CONFESSION_REPLY_MODAL: "confession_reply_modal",
 };
