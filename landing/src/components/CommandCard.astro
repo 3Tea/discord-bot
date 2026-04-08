@@ -4,38 +4,48 @@ import { categoryMeta } from "../data/commands";
 
 interface Props {
   command: Command;
+  href?: string;
 }
 
-const { command } = Astro.props;
+const { command, href } = Astro.props;
 const meta = categoryMeta[command.category];
 const items = command.subcommands || command.options || [];
 const maxShow = 4;
 const overflow = items.length - maxShow;
 ---
 
-<div class="command-card" style={`--cat-color: ${meta.color}`}>
-  <div class="command-header">
-    <span class="slash-badge">/</span>
-    <span class="command-name">{command.name}</span>
-    <span
-      class="category-tag"
-      style={`color: ${meta.color}; background: ${meta.bg};`}
-    >
-      {meta.label}
-    </span>
-  </div>
-  <p class="command-desc">{command.description}</p>
-  {items.length > 0 && (
-    <div class="command-pills">
-      {items.slice(0, maxShow).map((item) => (
-        <span class="pill">{item}</span>
-      ))}
-      {overflow > 0 && <span class="pill pill-more">+{overflow} more</span>}
+<a class="command-card-link" href={href || `/en/commands/${command.name}`}>
+  <div class="command-card" style={`--cat-color: ${meta.color}`}>
+    <div class="command-header">
+      <span class="slash-badge">/</span>
+      <span class="command-name">{command.name}</span>
+      <span
+        class="category-tag"
+        style={`color: ${meta.color}; background: ${meta.bg};`}
+      >
+        {meta.label}
+      </span>
     </div>
-  )}
-</div>
+    <p class="command-desc">{command.description}</p>
+    {items.length > 0 && (
+      <div class="command-pills">
+        {items.slice(0, maxShow).map((item) => (
+          <span class="pill">{item}</span>
+        ))}
+        {overflow > 0 && <span class="pill pill-more">+{overflow} more</span>}
+      </div>
+    )}
+    <span class="guide-link-text">Guide →</span>
+  </div>
+</a>
 
 <style>
+  .command-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
   .command-card {
     background: var(--bg-secondary);
     border: 1px solid var(--border);
@@ -47,13 +57,15 @@ const overflow = items.length - maxShow;
       border-color 0.2s ease,
       transform 0.2s ease,
       box-shadow 0.2s ease;
+    cursor: pointer;
+    position: relative;
   }
 
   .command-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-card-hover);
-    border-color: var(--border);
-    border-left-color: var(--cat-color, var(--border));
+    border-color: var(--accent);
+    border-left-color: var(--cat-color, var(--accent));
   }
 
   .command-header {
@@ -99,6 +111,7 @@ const overflow = items.length - maxShow;
     display: flex;
     gap: 4px;
     flex-wrap: wrap;
+    margin-bottom: 8px;
   }
 
   .pill {
@@ -111,5 +124,20 @@ const overflow = items.length - maxShow;
 
   .pill-more {
     color: var(--text-secondary);
+  }
+
+  .guide-link-text {
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.2s;
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+  }
+
+  .command-card:hover .guide-link-text {
+    opacity: 1;
   }
 </style>

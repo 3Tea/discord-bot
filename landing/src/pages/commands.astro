@@ -20,7 +20,7 @@ import { commands } from "../data/commands";
       <div class="commands-grid" id="commands-grid">
         {commands.map((cmd) => (
           <div data-category={cmd.category} data-name={cmd.name} data-desc={cmd.description}>
-            <CommandCard command={cmd} />
+            <CommandCard command={cmd} href={`/en/commands/${cmd.name}`} />
           </div>
         ))}
       </div>
