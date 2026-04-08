@@ -13,6 +13,8 @@ import {
     buildReviewConfessionEmbed,
     CONFESSION_COOLDOWN_DEFAULT,
     CONFESSION_CONTENT_MAX,
+    CONFESSION_VIP_COST_GEM,
+    CONFESSION_SKIP_CD_COST_COIN,
     createPendingConfessionRecord,
     createPublishedConfessionRecord,
     getConfessionCooldownRemainingSeconds,
@@ -25,6 +27,7 @@ import {
     upsertGuildConfessionConfig,
     validateConfessionAttachment,
 } from "../../services/confession/confession.service";
+import CurrencyService from "../../services/economy/currency.service";
 import { logger } from "../../util/log/logger.mixed";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -99,6 +102,20 @@ export default {
                         .setName("image")
                         .setDescription("Optional single image")
                         .setDescriptionLocalizations(descriptionLocales("cmd.confession.submit.image.desc"))
+                        .setRequired(false)
+                )
+                .addBooleanOption((opt) =>
+                    opt
+                        .setName("vip")
+                        .setDescription("VIP confession with golden embed (costs gems)")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.submit.vip.desc"))
+                        .setRequired(false)
+                )
+                .addBooleanOption((opt) =>
+                    opt
+                        .setName("skip_cooldown")
+                        .setDescription("Skip active cooldown (costs coins)")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.submit.skip_cooldown.desc"))
                         .setRequired(false)
                 )
         ),
@@ -216,6 +233,9 @@ async function executeSubmit(
     }
     const image = validated.image;
 
+    const wantVip = interaction.options.getBoolean("vip") ?? false;
+    const wantSkipCd = interaction.options.getBoolean("skip_cooldown") ?? false;
+
     const config = await getGuildConfessionConfig(interaction.guildId);
     if (!config) {
         await interaction.editReply({ content: t(locale, "confession.not_configured") });
@@ -232,34 +252,114 @@ async function executeSubmit(
     }
 
     const userId = interaction.user.id;
-    if (await isConfessionOnCooldown(interaction.guildId, userId)) {
-        const sec = await getConfessionCooldownRemainingSeconds(interaction.guildId, userId);
+    const guildId = interaction.guildId;
+
+    // --- Cooldown check with skip_cooldown economy integration ---
+    let coinDeducted = false;
+    const onCooldown = await isConfessionOnCooldown(guildId, userId);
+
+    if (onCooldown && !wantSkipCd) {
+        const sec = await getConfessionCooldownRemainingSeconds(guildId, userId);
         await interaction.editReply({
             content: t(locale, "confession.cooldown", { seconds: Math.max(1, sec) }),
         });
         return;
     }
 
+    if (onCooldown && wantSkipCd) {
+        try {
+            await CurrencyService.deduct(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, 0, "confession_skip_cd", {
+                action: "skip_cooldown",
+            });
+            coinDeducted = true;
+        } catch (error) {
+            if (error instanceof CurrencyService.InsufficientFundsError) {
+                const balance = (await CurrencyService.getBalance(userId, guildId)).coin;
+                await interaction.editReply({
+                    content: t(locale, "confession.insufficient_coin", {
+                        cost: CONFESSION_SKIP_CD_COST_COIN,
+                        balance,
+                    }),
+                });
+                return;
+            }
+            throw error;
+        }
+    }
+
+    // --- VIP economy integration ---
+    let gemDeducted = false;
+    if (wantVip) {
+        try {
+            await CurrencyService.deduct(userId, guildId, 0, CONFESSION_VIP_COST_GEM, "confession_vip", {
+                action: "vip_confession",
+            });
+            gemDeducted = true;
+        } catch (error) {
+            if (error instanceof CurrencyService.InsufficientFundsError) {
+                // Refund coin if it was already deducted
+                if (coinDeducted) {
+                    await CurrencyService.addCoin(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, "confession_refund", {
+                        reason: "vip_gem_insufficient",
+                    });
+                }
+                const balance = (await CurrencyService.getBalance(userId, guildId)).gem;
+                await interaction.editReply({
+                    content: t(locale, "confession.insufficient_gem", {
+                        cost: CONFESSION_VIP_COST_GEM,
+                        balance,
+                    }),
+                });
+                return;
+            }
+            throw error;
+        }
+    }
+
+    // --- Reserve confession number ---
     let confessionNumber: number;
     try {
-        confessionNumber = await reserveNextConfessionNumber(interaction.guildId);
+        confessionNumber = await reserveNextConfessionNumber(guildId);
     } catch {
+        // Refund all on failure
+        if (coinDeducted) {
+            await CurrencyService.addCoin(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, "confession_refund", {
+                reason: "reserve_failed",
+            });
+        }
+        if (gemDeducted) {
+            await CurrencyService.addGem(userId, guildId, CONFESSION_VIP_COST_GEM, "confession_refund", {
+                reason: "reserve_failed",
+            });
+        }
         await interaction.editReply({ content: t(locale, "confession.not_configured") });
         return;
     }
 
-    const guildId = interaction.guildId;
     const authorId = userId;
+    const isVip = wantVip && gemDeducted;
+
+    // --- Helper to refund all deducted currency ---
+    async function refundAll(reason: string): Promise<void> {
+        if (coinDeducted) {
+            await CurrencyService.addCoin(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, "confession_refund", { reason });
+        }
+        if (gemDeducted) {
+            await CurrencyService.addGem(userId, guildId, CONFESSION_VIP_COST_GEM, "confession_refund", { reason });
+        }
+    }
 
     if (config.mode === "instant") {
         const publicCh = await interaction.guild.channels.fetch(config.publicChannelId).catch(() => null);
         if (!publicCh || !publicCh.isTextBased() || publicCh.isDMBased()) {
+            await refundAll("channel_fetch_failed");
             await interaction.editReply({ content: t(locale, "confession.send_failed") });
             return;
         }
         const textPublic = publicCh as TextChannel;
-        const sendResult = await sendAnonymousConfessionToChannel(textPublic, confessionNumber, content, image);
+        const sendResult = await sendAnonymousConfessionToChannel(textPublic, confessionNumber, content, image, isVip);
         if ("error" in sendResult) {
+            await refundAll("send_failed");
             await interaction.editReply({ content: t(locale, "confession.send_failed") });
             return;
         }
@@ -272,11 +372,13 @@ async function executeSubmit(
                 content,
                 image,
                 publicMessageId: sendResult.messageId,
+                isVip,
             });
         } catch (error) {
             logger.error(
                 `confession: failed to save published record: ${error instanceof Error ? error.message : String(error)}`
             );
+            await refundAll("db_save_failed");
             await interaction.editReply({ content: t(locale, "confession.send_failed") });
             return;
         }
@@ -295,11 +397,13 @@ async function executeSubmit(
             authorId,
             content,
             image,
+            isVip,
         });
     } catch (error) {
         logger.error(
             `confession: failed to create pending record: ${error instanceof Error ? error.message : String(error)}`
         );
+        await refundAll("db_save_failed");
         await interaction.editReply({ content: t(locale, "confession.send_failed") });
         return;
     }
@@ -321,6 +425,7 @@ async function executeSubmit(
         confessionNumber,
         content,
         authorId,
+        isVip,
     });
     const files = await buildConfessionAttachmentFiles(image);
     const row = buildConfessionReviewComponents(mongoId, {
