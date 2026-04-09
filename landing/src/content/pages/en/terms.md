@@ -10,7 +10,7 @@ These Terms of Service ("Terms") govern your access to and use of **3AT - Endles
 
 3AT is a Discord application that provides **slash commands**, button interactions, and background features such as XP and leveling, economy (coins/gems, shop, transactions), voice utilities, server statistics, media- or utility-oriented commands, and other behavior described in project documentation. Availability, performance, and feature mix may change at any time. We may perform maintenance, impose limits, or retire functionality without prior notice.
 
-The source code is licensed under the repository's [LICENSE](https://github.com/3Tea/discord-bot/blob/main/LICENSE) (MIT unless stated otherwise). These Terms govern use of the *operated bot instance and official sites*, not your right to fork or modify the code under the open-source license.
+The source code is licensed under the repository's [LICENSE](https://github.com/3Tea/discord-bot/blob/main/LICENSE) (Mozilla Public License 2.0). These Terms govern use of the *operated bot instance and official sites*, not your right to fork or modify the code under the open-source license.
 
 If you **self-host** the bot, these Terms do not bind your own users—you must provide your own terms and privacy policy for that deployment.
 

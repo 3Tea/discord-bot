@@ -1,15 +1,5 @@
 ---
-import { getCollection, render } from "astro:content";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import LegalArticle from "../components/LegalArticle.astro";
-
-const allPages = await getCollection("pages");
-const page = allPages.find((p) => p.id === "en/terms")!;
-const { Content } = await render(page);
+import LegalPage from "../components/pages/LegalPage.astro";
 ---
 
-<BaseLayout title={`${page.data.title} | 3AT - Endless Paradox`} description={page.data.description}>
-  <LegalArticle title={page.data.title} lastUpdated={page.data.lastUpdated ?? ""}>
-    <Content />
-  </LegalArticle>
-</BaseLayout>
+<LegalPage lang="en" slug="terms" />

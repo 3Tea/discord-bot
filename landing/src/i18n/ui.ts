@@ -124,6 +124,9 @@ export const ui = {
     "guide.related.guides": "Related Guides",
     "guide.read": "Read guide →",
 
+    // Legal
+    "legal.lastUpdated": "Last updated",
+
     // Shared
     "translation.notice": "Translation is being updated. Content is currently displayed in English.",
   },
@@ -243,6 +246,9 @@ export const ui = {
     "guide.related": "Lệnh liên quan",
     "guide.related.guides": "Hướng dẫn liên quan",
     "guide.read": "Đọc hướng dẫn →",
+
+    // Legal
+    "legal.lastUpdated": "Cập nhật lần cuối",
 
     // Shared
     "translation.notice": "Bản dịch đang được cập nhật. Nội dung hiện tại hiển thị bằng tiếng Anh.",

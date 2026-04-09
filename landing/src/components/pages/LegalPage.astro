@@ -1,0 +1,25 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import LegalArticle from "../LegalArticle.astro";
+import { useTranslations } from "../../i18n/utils";
+import type { Lang } from "../../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+  slug: "terms" | "privacy";
+}
+
+const { lang = "en", slug } = Astro.props;
+const t = useTranslations(lang);
+
+const allPages = await getCollection("pages");
+const page = allPages.find((p) => p.id === `${lang}/${slug}`)!;
+const { Content } = await render(page);
+---
+
+<BaseLayout title={`${page.data.title} | 3AT - Endless Paradox`} description={page.data.description} lang={lang}>
+  <LegalArticle title={page.data.title} lastUpdated={page.data.lastUpdated ?? ""} lastUpdatedLabel={t("legal.lastUpdated")}>
+    <Content />
+  </LegalArticle>
+</BaseLayout>

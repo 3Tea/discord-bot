@@ -6,15 +6,16 @@
 interface Props {
   title: string;
   lastUpdated: string;
+  lastUpdatedLabel?: string;
 }
 
-const { title, lastUpdated } = Astro.props;
+const { title, lastUpdated, lastUpdatedLabel = "Last updated" } = Astro.props;
 ---
 
 <article class="legal-page container">
   <header class="legal-header">
     <h1 class="legal-title">{title}</h1>
-    <p class="legal-meta">Last updated: {lastUpdated}</p>
+    <p class="legal-meta">{lastUpdatedLabel}: {lastUpdated}</p>
   </header>
   <div class="legal-prose">
     <slot />
