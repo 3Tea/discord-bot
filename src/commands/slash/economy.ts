@@ -5,8 +5,10 @@ import {
     PermissionFlagsBits,
     SlashCommandBuilder,
 } from "discord.js";
+import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
 import GuildEconomyRewardConfigModel from "../../models/guildEconomyRewardConfig.model";
+import GuildGamblingConfigModel from "../../models/guildGamblingConfig.model";
 import { invalidateRewardConfigCache } from "../../util/economy/activityReward";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -157,6 +159,39 @@ export default {
                         .setMinValue(0)
                         .setRequired(true)
                 )
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("gambling-config-view")
+                .setDescription("View gambling config")
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("gambling-config-toggle")
+                .setDescription("Enable/disable gambling")
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("gambling-config-set")
+                .setDescription("Set a gambling config value")
+                .addStringOption((opt) =>
+                    opt
+                        .setName("setting")
+                        .setDescription("Setting to change")
+                        .setRequired(true)
+                        .addChoices(
+                            { name: "min-bet", value: "minBet" },
+                            { name: "max-bet", value: "maxBet" },
+                            { name: "cooldown", value: "cooldown" },
+                        )
+                )
+                .addIntegerOption((opt) =>
+                    opt
+                        .setName("value")
+                        .setDescription("New value")
+                        .setMinValue(0)
+                        .setRequired(true)
+                )
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -304,6 +339,51 @@ export default {
                             .setColor(0xed4245);
                     }
                     await invalidateRewardConfigCache(guildId);
+                    break;
+                }
+                case "gambling-config-view": {
+                    const config = await GuildGamblingConfigModel.findOneAndUpdate(
+                        { guildId },
+                        { $setOnInsert: { guildId } },
+                        { upsert: true, new: true }
+                    );
+                    embed = new EmbedBuilder()
+                        .setTitle(t(locale, "gambling_config.title"))
+                        .addFields(
+                            { name: t(locale, "gambling_config.enabled"), value: config.enabled ? "✅" : "❌", inline: true },
+                            { name: t(locale, "gambling_config.min_bet"), value: String(config.minBet), inline: true },
+                            { name: t(locale, "gambling_config.max_bet"), value: String(config.maxBet), inline: true },
+                            { name: t(locale, "gambling_config.cooldown"), value: `${config.cooldown}s`, inline: true },
+                        )
+                        .setColor(0x5865f2);
+                    break;
+                }
+                case "gambling-config-toggle": {
+                    const config = await GuildGamblingConfigModel.findOneAndUpdate(
+                        { guildId },
+                        { $setOnInsert: { guildId } },
+                        { upsert: true, new: true }
+                    );
+                    const newEnabled = !config.enabled;
+                    await GuildGamblingConfigModel.updateOne({ guildId }, { $set: { enabled: newEnabled } });
+                    await redis.deleteKey(`gambling_config:${guildId}`);
+                    embed = new EmbedBuilder()
+                        .setDescription(t(locale, newEnabled ? "gambling_config.toggled_on" : "gambling_config.toggled_off"))
+                        .setColor(newEnabled ? 0x57f287 : 0xed4245);
+                    break;
+                }
+                case "gambling-config-set": {
+                    const setting = interaction.options.getString("setting", true);
+                    const value = interaction.options.getInteger("value", true);
+                    await GuildGamblingConfigModel.findOneAndUpdate(
+                        { guildId },
+                        { $set: { [setting]: value }, $setOnInsert: { guildId } },
+                        { upsert: true }
+                    );
+                    await redis.deleteKey(`gambling_config:${guildId}`);
+                    embed = new EmbedBuilder()
+                        .setDescription(t(locale, "gambling_config.updated"))
+                        .setColor(0x57f287);
                     break;
                 }
                 default: {
