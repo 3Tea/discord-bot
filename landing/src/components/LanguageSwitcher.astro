@@ -1,26 +1,68 @@
 ---
+import { languages, defaultLang } from "../i18n/ui";
+import { getLangFromUrl } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
 interface Props {
-  currentLang: string;
-  slug: string;
-  basePath?: string;
+  lang?: Lang;
 }
 
-const { currentLang, slug, basePath = "commands" } = Astro.props;
+const currentLang = Astro.props.lang ?? getLangFromUrl(Astro.url);
+const pathname = Astro.url.pathname;
 
-const languages = [
-  { code: "en", label: "EN" },
-  { code: "vi", label: "VI" },
-];
+// Strip current locale prefix to get the base path
+function getBasePath(path: string): string {
+  for (const lang of Object.keys(languages)) {
+    if (path === `/${lang}` || path === `/${lang}/`) return "/";
+    if (path.startsWith(`/${lang}/`)) return path.slice(lang.length + 1);
+  }
+  return path;
+}
+
+const basePath = getBasePath(pathname);
+
+function buildHref(lang: string): string {
+  if (lang === defaultLang) return basePath;
+  return `/${lang}${basePath === "/" ? "" : basePath}`;
+}
 ---
 
 <div class="lang-switcher">
-  {languages.map((lang) => (
+  {Object.entries(languages).map(([code, label]) => (
     <a
-      href={`/${lang.code}/${basePath}/${slug}`}
-      class:list={["lang-btn", { active: currentLang === lang.code }]}
-      aria-label={`Switch to ${lang.label}`}
+      href={buildHref(code)}
+      class:list={["lang-btn", { active: currentLang === code }]}
+      aria-label={`Switch to ${label}`}
     >
-      {lang.label}
+      {code.toUpperCase()}
     </a>
   ))}
 </div>
+
+<style>
+  .lang-switcher {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .lang-btn {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: color 0.2s, background 0.2s;
+    text-decoration: none;
+  }
+
+  .lang-btn:hover {
+    color: var(--text-primary);
+    background: var(--accent-soft);
+  }
+
+  .lang-btn.active {
+    color: var(--accent);
+    background: rgba(88, 101, 242, 0.15);
+  }
+</style>

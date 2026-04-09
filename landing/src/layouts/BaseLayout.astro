@@ -2,24 +2,29 @@
 import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import BackToTop from "../components/BackToTop.astro";
+import { getLangFromUrl, useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
 import "../styles/global.css";
 import "../styles/animations.css";
 
 interface Props {
   title: string;
   description?: string;
+  lang?: Lang;
   hreflang?: Array<{ lang: string; href: string }>;
 }
 
+const lang = Astro.props.lang ?? getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 const {
   title,
-  description = "Discord bot for voice channel management, manga reading, translation, and more.",
+  description = t("meta.description"),
   hreflang,
 } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -37,11 +42,11 @@ const {
     ))}
   </head>
   <body>
-    <Navbar />
+    <Navbar lang={lang} />
     <main style="padding-top: 56px;">
       <slot />
     </main>
-    <Footer />
+    <Footer lang={lang} />
     <BackToTop />
     <script src="../scripts/scroll-animations.ts"></script>
     <script src="../scripts/counter.ts"></script>
