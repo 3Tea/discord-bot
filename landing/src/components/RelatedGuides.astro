@@ -1,5 +1,7 @@
 ---
 import { guideMeta } from "../data/guides";
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
 
 interface Props {
   currentSlug: string;
@@ -7,13 +9,14 @@ interface Props {
 }
 
 const { currentSlug, lang } = Astro.props;
+const t = useTranslations(lang as Lang);
 
 const allGuides = Object.values(guideMeta).filter((g) => g.slug !== currentSlug).slice(0, 2);
 ---
 
 {allGuides.length > 0 && (
   <div class="related-section">
-    <h2 class="related-title">Related Guides</h2>
+    <h2 class="related-title">{t("guide.related.guides")}</h2>
     <div class="related-grid">
       {allGuides.map((guide) => (
         <a href={`/${lang}/guide/${guide.slug}`} class="related-card">

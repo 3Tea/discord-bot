@@ -1,6 +1,8 @@
 ---
 import { commands, categoryMeta } from "../data/commands";
 import type { Category } from "../data/commands";
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
 
 interface Props {
   currentCommand: string;
@@ -9,6 +11,7 @@ interface Props {
 }
 
 const { currentCommand, category, lang } = Astro.props;
+const t = useTranslations(lang as Lang);
 
 const related = commands
   .filter((cmd) => cmd.category === category && cmd.name !== currentCommand)
@@ -17,7 +20,7 @@ const related = commands
 
 {related.length > 0 && (
   <div class="related-section">
-    <h2 class="related-title">Related Commands</h2>
+    <h2 class="related-title">{t("guide.related")}</h2>
     <div class="related-grid">
       {related.map((cmd) => {
         const meta = categoryMeta[cmd.category as Category];

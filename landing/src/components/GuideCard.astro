@@ -1,4 +1,7 @@
 ---
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
 interface Props {
   title: string;
   description: string;
@@ -6,9 +9,11 @@ interface Props {
   href: string;
   color: string;
   bg: string;
+  lang?: Lang;
 }
 
-const { title, description, icon, href, color, bg } = Astro.props;
+const { title, description, icon, href, color, bg, lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 ---
 
 <a class="guide-card" href={href} style={`--card-color: ${color}`}>
@@ -17,7 +22,7 @@ const { title, description, icon, href, color, bg } = Astro.props;
   </div>
   <h2 class="guide-card-title">{title}</h2>
   <p class="guide-card-desc">{description}</p>
-  <span class="guide-card-link">Read guide →</span>
+  <span class="guide-card-link">{t("guide.read")}</span>
 </a>
 
 <style>
