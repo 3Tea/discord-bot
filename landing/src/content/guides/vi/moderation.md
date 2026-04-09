@@ -62,6 +62,18 @@ Gỡ lệnh ban bằng ID người dùng (snowflake). Bạn cần ID số vì ng
 
 > **Mẹo:** Tìm ID người dùng bằng cách bật Developer Mode trong cài đặt Discord, rồi nhấp chuột phải vào người dùng → Copy User ID.
 
+## Quyền Bot
+
+Bot cần các quyền Discord này để thực thi lệnh quản lý:
+
+| Quyền | Cần Cho |
+|-------|---------|
+| Moderate Members | `/moderation timeout` và `/moderation untimeout` |
+| Ban Members | `/moderation ban` và `/moderation unban` |
+| Kick Members | `/moderation kick` |
+
+> **Mẹo:** Đảm bảo role của bot được đặt **trên** role của các thành viên bạn muốn quản lý trong thứ bậc role của server.
+
 ## Kiểm Tra An Toàn
 
 Mỗi hành động quản lý đều qua các kiểm tra:
@@ -71,8 +83,8 @@ Mỗi hành động quản lý đều qua các kiểm tra:
 | Tự nhắm | Bạn không thể tự quản lý chính mình |
 | Nhắm bot | Bạn không thể quản lý bot |
 | Bảo vệ chủ server | Chủ server không thể bị quản lý |
-| Thứ bậc role | Role cao nhất của bạn phải cao hơn role của mục tiêu |
-| Thứ bậc bot | Role của bot phải cao hơn role của mục tiêu |
+| Thứ bậc role | Role cao nhất của bạn phải **cao hơn tuyệt đối** so với role cao nhất của mục tiêu (cùng cấp = không thể quản lý) |
+| Thứ bậc bot | Role cao nhất của bot phải **cao hơn tuyệt đối** so với role cao nhất của mục tiêu |
 | Độ dài lý do | Cắt ngắn còn 512 ký tự (giới hạn Discord API) |
 
 Tất cả hành động được ghi trong **audit log** của Discord với lý do bạn cung cấp.

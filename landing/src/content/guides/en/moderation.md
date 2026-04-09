@@ -62,6 +62,18 @@ Lift a ban using the user's ID (snowflake). You need the numeric ID since banned
 
 > **Tip:** Find user IDs by enabling Developer Mode in Discord settings, then right-clicking a user → Copy User ID.
 
+## Bot Permissions
+
+The bot needs these Discord permissions to execute moderation commands:
+
+| Permission | Required For |
+|-----------|-------------|
+| Moderate Members | `/moderation timeout` and `/moderation untimeout` |
+| Ban Members | `/moderation ban` and `/moderation unban` |
+| Kick Members | `/moderation kick` |
+
+> **Tip:** Make sure the bot's role is placed **above** the roles of members you want to moderate in the server role hierarchy.
+
 ## Safety Checks
 
 Every moderation action goes through these checks:
@@ -71,8 +83,8 @@ Every moderation action goes through these checks:
 | Self-target | You cannot moderate yourself |
 | Bot target | You cannot moderate bots |
 | Owner protection | The server owner cannot be moderated (except by themselves) |
-| Role hierarchy | Your highest role must be above the target's highest role |
-| Bot hierarchy | The bot's role must be above the target's role |
+| Role hierarchy | Your highest role must be **strictly above** the target's highest role (same level = cannot moderate) |
+| Bot hierarchy | The bot's highest role must be **strictly above** the target's highest role |
 | Reason length | Truncated to 512 characters (Discord API limit) |
 
 All actions are recorded in Discord's **audit log** with the reason you provide.
