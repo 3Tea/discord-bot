@@ -438,5 +438,17 @@
     "cmd.commandlog.user.limit.desc": "Number of entries (1-25)",
     "cmd.commandlog.command.desc": "View usage history for a command",
     "cmd.commandlog.command.name.desc": "Command name to look up",
-    "cmd.commandlog.command.limit.desc": "Number of entries (1-25)"
+    "cmd.commandlog.command.limit.desc": "Number of entries (1-25)",
+    "economy.reward_config.title": "Cấu hình phần thưởng kinh tế",
+    "economy.reward_config.enabled": "Phần thưởng thụ động",
+    "economy.reward_config.level_base": "Coin cơ bản lên cấp",
+    "economy.reward_config.level_per": "Coin mỗi cấp",
+    "economy.reward_config.gem_milestones": "Mốc thưởng Gem",
+    "economy.reward_config.voice_interval": "Chu kỳ coin voice (phút)",
+    "economy.reward_config.voice_reward": "Coin thưởng voice",
+    "economy.reward_config.updated": "Đã cập nhật cấu hình phần thưởng.",
+    "economy.reward_config.toggled_on": "Phần thưởng thụ động đã **bật**.",
+    "economy.reward_config.toggled_off": "Phần thưởng thụ động đã **tắt**.",
+    "economy.reward_config.milestone_set": "Mốc gem đã đặt: Cấp **{{level}}** → **{{gems}}** gem",
+    "economy.reward_config.milestone_removed": "Mốc gem đã xóa: Cấp **{{level}}**"
 }

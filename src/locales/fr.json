@@ -438,5 +438,17 @@
     "cmd.commandlog.user.limit.desc": "Number of entries (1-25)",
     "cmd.commandlog.command.desc": "View usage history for a command",
     "cmd.commandlog.command.name.desc": "Command name to look up",
-    "cmd.commandlog.command.limit.desc": "Number of entries (1-25)"
+    "cmd.commandlog.command.limit.desc": "Number of entries (1-25)",
+    "economy.reward_config.title": "Economy Reward Config",
+    "economy.reward_config.enabled": "Passive Rewards",
+    "economy.reward_config.level_base": "Level Up Base Coin",
+    "economy.reward_config.level_per": "Coin per Level",
+    "economy.reward_config.gem_milestones": "Gem Milestones",
+    "economy.reward_config.voice_interval": "Voice Coin Interval (min)",
+    "economy.reward_config.voice_reward": "Voice Coin Reward",
+    "economy.reward_config.updated": "Reward config updated.",
+    "economy.reward_config.toggled_on": "Passive rewards **enabled**.",
+    "economy.reward_config.toggled_off": "Passive rewards **disabled**.",
+    "economy.reward_config.milestone_set": "Gem milestone set: Level **{{level}}** → **{{gems}}** gem",
+    "economy.reward_config.milestone_removed": "Gem milestone removed: Level **{{level}}**"
 }
