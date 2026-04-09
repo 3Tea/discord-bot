@@ -7,6 +7,10 @@
           {
             "type": "command",
             "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '\\.ts\"?$'; then cd /Users/nguyenhuuhung/Documents/GitHub/discord-bot && npx tsc --noEmit --pretty 2>&1 | head -20; fi"
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'landing/.*\\.astro\"?$'; then cd /Users/nguyenhuuhung/Documents/GitHub/discord-bot/landing && npx astro check 2>&1 | tail -15; fi"
           }
         ]
       }
