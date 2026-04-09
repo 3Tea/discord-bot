@@ -3,7 +3,7 @@ title: Economy System
 description: Learn how to earn coins and gems, build pray streaks, and spend in the shop.
 icon: "💰"
 order: 1
-relatedCommands: ["balance", "pray", "curse", "shop", "economy", "gamble", "work", "fish", "gift", "rob"]
+relatedCommands: ["balance", "pray", "curse", "shop", "economy", "gamble", "work", "fish", "gift", "rob", "wallet"]
 ---
 
 ## Overview
@@ -90,6 +90,33 @@ Send coins directly to another user. Max 1,000 coins per gift (configurable). No
 ### /rob
 Attempt to steal 10–30% of another user's coins. 40% success rate — but failure costs you 10–20% of your own balance. Protections prevent targeting poor or recently-robbed users.
 
+## Global Wallet & Star Currency
+
+Beyond coins and gems, there's a third currency: **Star** ⭐. Unlike coins and gems, stars are **global** — your balance is the same across all servers, and no admin can add or remove them.
+
+### Earning Stars
+
+**Daily claim:** Use `/wallet daily` once per day to earn 1–3 stars. Claiming on consecutive days builds a streak with bonus rewards:
+
+| Streak | Bonus Stars |
+|--------|-------------|
+| 3 days | +2 |
+| 7 days | +5 |
+| 14 days | +10 |
+| 30 days | +20 |
+
+**Achievement milestones:** Earn one-time star rewards for reaching milestones like leveling up (5–50 stars), maintaining pray streaks (3–20 stars), or being active in multiple servers (5–20 stars). Use `/wallet view` to see which milestones you've claimed.
+
+### Checking Your Wallet
+
+| Command | Description |
+|---------|-------------|
+| `/wallet view` | See your star balance, streak, and milestones |
+| `/wallet daily` | Claim daily star reward |
+| `/wallet history` | View global transaction history |
+
+> **Note:** Stars cannot be exchanged for coins/gems, cannot be transferred between users, and cannot be modified by admins. They are earned purely through bot activities.
+
 ## Commands Reference
 
 | Command | Description | Example |
@@ -102,6 +129,16 @@ Attempt to steal 10–30% of another user's coins. 40% success rate — but fail
 | `/curse target:@user` | Daily curse for more coins | `/curse target:@rival` |
 | `/shop view` | Browse available shop items | `/shop view` |
 | `/shop buy` | Purchase an item from the shop | `/shop buy` |
+| `/work` | Work a job for coins (4h cooldown) | `/work` |
+| `/fish` | Go fishing for coins (1h cooldown) | `/fish` |
+| `/gamble coinflip` | 50/50 coin bet | `/gamble coinflip bet:100` |
+| `/gamble slots` | Slot machine bet | `/gamble slots bet:50` |
+| `/gamble dice` | Dice high/low bet | `/gamble dice bet:100 mode:high` |
+| `/gift` | Send coins to another user | `/gift user:@friend amount:500` |
+| `/rob` | Attempt to steal coins | `/rob user:@target` |
+| `/wallet view` | View global star balance and milestones | `/wallet view` |
+| `/wallet daily` | Claim daily star reward | `/wallet daily` |
+| `/wallet history` | View global transaction history | `/wallet history` |
 
 ## For Admins & Mods
 
@@ -128,3 +165,12 @@ All currency changes are logged in the transaction history.
 | `/shop remove` | Remove an item from the shop |
 
 > **Tip:** Plan your shop items around your server's role hierarchy. Role items are popular rewards for active members!
+
+### Configuring Rewards & Gameplay
+
+| Command Group | What It Controls |
+|---------------|-----------------|
+| `/economy reward-config-*` | Level-up coin/gem rewards, voice chat coin rewards, milestone gem rewards |
+| `/economy gambling-config-*` | Min/max bet amounts, gambling cooldown, enable/disable gambling |
+| `/economy work-config-*` | Work/fish cooldowns, min/max coin rewards |
+| `/economy social-config-*` | Gift max amount, rob cooldown, success rate, steal/penalty percentages |
