@@ -203,6 +203,7 @@
     "btn.discussions": "Обсуждения",
     "btn.report_bug": "Сообщить об ошибке",
     "btn.guide": "Руководство",
+    "btn.support": "Сервер поддержки",
     "server_rank.title": "Статистика сервера",
     "server_rank.rank": "Ранг #{{rank}} / {{total}} серверов",
     "server_rank.level": "Level {{level}}",

@@ -203,6 +203,7 @@
     "btn.discussions": "Diskussionen",
     "btn.report_bug": "Bug melden",
     "btn.guide": "Anleitung",
+    "btn.support": "Support-Server",
     "server_rank.title": "Server-Statistiken",
     "server_rank.rank": "Rang #{{rank}} / {{total}} Server",
     "server_rank.level": "Level {{level}}",

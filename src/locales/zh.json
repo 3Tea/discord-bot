@@ -203,6 +203,7 @@
     "btn.discussions": "讨论区",
     "btn.report_bug": "反馈漏洞",
     "btn.guide": "使用指南",
+    "btn.support": "支持服务器",
     "server_rank.title": "服务器统计",
     "server_rank.rank": "排名 #{{rank}} / {{total}} 服务器",
     "server_rank.level": "等级 {{level}}",

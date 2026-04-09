@@ -14,6 +14,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import { SUPPORT_SERVER_LINK } from "../../util/config/index";
 
 /** Discord embed field value max length; leave margin for safety. */
 const FIELD_VALUE_SAFE_MAX = 1000;
@@ -90,7 +91,17 @@ export default {
             .setURL(`${process.env.URL_HOMEPAGE}/guide`)
             .setStyle(ButtonStyle.Link);
 
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(homepage, guide, discussions, reportBug);
+        const buttons = [homepage, guide, discussions, reportBug];
+
+        if (SUPPORT_SERVER_LINK) {
+            const support = new ButtonBuilder()
+                .setLabel(t(locale, "btn.support"))
+                .setURL(SUPPORT_SERVER_LINK)
+                .setStyle(ButtonStyle.Link);
+            buttons.push(support);
+        }
+
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(...buttons);
         return Reply.embedButtons(interaction, embed, row);
     },
 };

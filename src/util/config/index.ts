@@ -30,3 +30,4 @@ export const GUILD_ID = process.env.GUILD_ID || "";
 export const URL_REPORT_BUG = process.env.URL_REPORT_BUG || "";
 
 export const DEV_USER_ID = process.env.DEV_USER_ID || "";
+export const SUPPORT_SERVER_LINK = process.env.SUPPORT_SERVER_LINK || "";

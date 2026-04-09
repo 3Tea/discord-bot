@@ -203,6 +203,7 @@
     "btn.discussions": "Thảo luận",
     "btn.report_bug": "Báo lỗi",
     "btn.guide": "Hướng dẫn",
+    "btn.support": "Server Hỗ Trợ",
     "server_rank.title": "Thống kê Server",
     "server_rank.rank": "Hạng #{{rank}} / {{total}} server",
     "server_rank.level": "Level {{level}}",

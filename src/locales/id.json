@@ -203,6 +203,7 @@
     "btn.discussions": "Diskusi",
     "btn.report_bug": "Laporkan bug",
     "btn.guide": "Panduan",
+    "btn.support": "Server Dukungan",
     "server_rank.title": "Statistik Server",
     "server_rank.rank": "Peringkat #{{rank}} / {{total}} server",
     "server_rank.level": "Level {{level}}",
