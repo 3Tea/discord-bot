@@ -22,9 +22,6 @@ const guildGamblingConfigSchema = new Schema(
     }
 );
 
-const GuildGamblingConfigModel = model<IGuildGamblingConfig>(
-    "GuildGamblingConfig",
-    guildGamblingConfigSchema
-);
+const GuildGamblingConfigModel = model<IGuildGamblingConfig>("GuildGamblingConfig", guildGamblingConfigSchema);
 
 export default GuildGamblingConfigModel;

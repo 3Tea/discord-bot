@@ -1,8 +1,4 @@
-import {
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Reply from "../../util/decorator/reply";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -21,11 +17,7 @@ export default {
         .setName("wallet")
         .setDescription("View your global wallet and claim daily star")
         .setDescriptionLocalizations(descriptionLocales("cmd.wallet.desc"))
-        .addSubcommand((sub) =>
-            sub
-                .setName("view")
-                .setDescription("View your global wallet balance")
-        )
+        .addSubcommand((sub) => sub.setName("view").setDescription("View your global wallet balance"))
         .addSubcommand((sub) =>
             sub
                 .setName("daily")
@@ -149,10 +141,12 @@ function formatDailyEmbed(
     }
 
     if (result.milestoneHit) {
-        description += "\n" + t(locale, "wallet.daily.milestone", {
-            days: String(result.milestoneHit.days),
-            bonus: String(result.milestoneHit.bonus),
-        });
+        description +=
+            "\n" +
+            t(locale, "wallet.daily.milestone", {
+                days: String(result.milestoneHit.days),
+                bonus: String(result.milestoneHit.bonus),
+            });
     }
 
     embed.setDescription(description);

@@ -29,16 +29,12 @@ function formatCooldown(seconds: number): string {
     return parts.join(" ");
 }
 
-function rollRob(
-    robberBalance: number,
-    targetBalance: number,
-    config: RobConfig
-): RobResult {
+function rollRob(robberBalance: number, targetBalance: number, config: RobConfig): RobResult {
     const success = Math.random() < config.robSuccessRate;
 
     if (success) {
         const stealPct = randomInRange(config.robStealMinPct, config.robStealMaxPct);
-        let stealAmount = Math.floor(targetBalance * stealPct / 100);
+        let stealAmount = Math.floor((targetBalance * stealPct) / 100);
         // Never drain target below min balance
         const maxSteal = Math.max(0, targetBalance - config.robMinBalance);
         stealAmount = Math.min(stealAmount, maxSteal);
@@ -47,7 +43,7 @@ function rollRob(
     }
 
     const penaltyPct = randomInRange(config.robPenaltyMinPct, config.robPenaltyMaxPct);
-    const penaltyAmount = Math.floor(robberBalance * penaltyPct / 100);
+    const penaltyAmount = Math.floor((robberBalance * penaltyPct) / 100);
 
     return { success: false, amount: penaltyAmount, percentage: penaltyPct };
 }

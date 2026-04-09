@@ -1,8 +1,4 @@
-import {
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
 import GuildSocialConfigModel, { IGuildSocialConfig } from "../../models/guildSocialConfig.model";
@@ -34,18 +30,9 @@ export default {
         .setName("gift")
         .setDescription("Gift coins to another user")
         .setDescriptionLocalizations(descriptionLocales("cmd.gift.desc"))
-        .addUserOption((opt) =>
-            opt
-                .setName("user")
-                .setDescription("User to gift coins to")
-                .setRequired(true)
-        )
+        .addUserOption((opt) => opt.setName("user").setDescription("User to gift coins to").setRequired(true))
         .addIntegerOption((opt) =>
-            opt
-                .setName("amount")
-                .setDescription("Amount of coin to gift")
-                .setMinValue(1)
-                .setRequired(true)
+            opt.setName("amount").setDescription("Amount of coin to gift").setMinValue(1).setRequired(true)
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -61,23 +48,17 @@ export default {
             const config = await getSocialConfig(guildId);
 
             if (!config.enabled) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "gift.disabled"))
-                    .setColor(0xed4245);
+                const embed = new EmbedBuilder().setDescription(t(locale, "gift.disabled")).setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
 
             // Validate target
             if (target.bot) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "gift.bot_error"))
-                    .setColor(0xed4245);
+                const embed = new EmbedBuilder().setDescription(t(locale, "gift.bot_error")).setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
             if (target.id === giverId) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "gift.self_error"))
-                    .setColor(0xed4245);
+                const embed = new EmbedBuilder().setDescription(t(locale, "gift.self_error")).setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
 
@@ -142,9 +123,7 @@ export default {
             return Reply.embedEdit(interaction, embed);
         } catch {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-            const embed = new EmbedBuilder()
-                .setDescription(t(errLocale, "common.error"))
-                .setColor(0xed4245);
+            const embed = new EmbedBuilder().setDescription(t(errLocale, "common.error")).setColor(0xed4245);
             return Reply.embedEdit(interaction, embed);
         }
     },

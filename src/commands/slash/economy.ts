@@ -109,16 +109,8 @@ export default {
                         .setRequired(true)
                 )
         )
-        .addSubcommand((sub) =>
-            sub
-                .setName("reward-config-view")
-                .setDescription("View passive reward config")
-        )
-        .addSubcommand((sub) =>
-            sub
-                .setName("reward-config-toggle")
-                .setDescription("Enable/disable passive rewards")
-        )
+        .addSubcommand((sub) => sub.setName("reward-config-view").setDescription("View passive reward config"))
+        .addSubcommand((sub) => sub.setName("reward-config-toggle").setDescription("Enable/disable passive rewards"))
         .addSubcommand((sub) =>
             sub
                 .setName("reward-config-set")
@@ -132,15 +124,11 @@ export default {
                             { name: "level-coin-base", value: "levelUpCoinBase" },
                             { name: "level-coin-per-level", value: "levelUpCoinPerLevel" },
                             { name: "voice-interval", value: "voiceCoinInterval" },
-                            { name: "voice-reward", value: "voiceCoinReward" },
+                            { name: "voice-reward", value: "voiceCoinReward" }
                         )
                 )
                 .addIntegerOption((opt) =>
-                    opt
-                        .setName("value")
-                        .setDescription("New value")
-                        .setMinValue(0)
-                        .setRequired(true)
+                    opt.setName("value").setDescription("New value").setMinValue(0).setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
@@ -148,30 +136,14 @@ export default {
                 .setName("reward-config-milestone")
                 .setDescription("Set/remove a gem milestone (gems=0 removes)")
                 .addIntegerOption((opt) =>
-                    opt
-                        .setName("level")
-                        .setDescription("Level for the milestone")
-                        .setMinValue(1)
-                        .setRequired(true)
+                    opt.setName("level").setDescription("Level for the milestone").setMinValue(1).setRequired(true)
                 )
                 .addIntegerOption((opt) =>
-                    opt
-                        .setName("gems")
-                        .setDescription("Gem reward (0 to remove)")
-                        .setMinValue(0)
-                        .setRequired(true)
+                    opt.setName("gems").setDescription("Gem reward (0 to remove)").setMinValue(0).setRequired(true)
                 )
         )
-        .addSubcommand((sub) =>
-            sub
-                .setName("gambling-config-view")
-                .setDescription("View gambling config")
-        )
-        .addSubcommand((sub) =>
-            sub
-                .setName("gambling-config-toggle")
-                .setDescription("Enable/disable gambling")
-        )
+        .addSubcommand((sub) => sub.setName("gambling-config-view").setDescription("View gambling config"))
+        .addSubcommand((sub) => sub.setName("gambling-config-toggle").setDescription("Enable/disable gambling"))
         .addSubcommand((sub) =>
             sub
                 .setName("gambling-config-set")
@@ -184,27 +156,15 @@ export default {
                         .addChoices(
                             { name: "min-bet", value: "minBet" },
                             { name: "max-bet", value: "maxBet" },
-                            { name: "cooldown", value: "cooldown" },
+                            { name: "cooldown", value: "cooldown" }
                         )
                 )
                 .addIntegerOption((opt) =>
-                    opt
-                        .setName("value")
-                        .setDescription("New value")
-                        .setMinValue(0)
-                        .setRequired(true)
+                    opt.setName("value").setDescription("New value").setMinValue(0).setRequired(true)
                 )
         )
-        .addSubcommand((sub) =>
-            sub
-                .setName("work-config-view")
-                .setDescription("View work & fish config")
-        )
-        .addSubcommand((sub) =>
-            sub
-                .setName("work-config-toggle")
-                .setDescription("Enable/disable work & fish commands")
-        )
+        .addSubcommand((sub) => sub.setName("work-config-view").setDescription("View work & fish config"))
+        .addSubcommand((sub) => sub.setName("work-config-toggle").setDescription("Enable/disable work & fish commands"))
         .addSubcommand((sub) =>
             sub
                 .setName("work-config-set")
@@ -218,26 +178,16 @@ export default {
                             { name: "work-cooldown", value: "workCooldown" },
                             { name: "work-min-reward", value: "workMinReward" },
                             { name: "work-max-reward", value: "workMaxReward" },
-                            { name: "fish-cooldown", value: "fishCooldown" },
+                            { name: "fish-cooldown", value: "fishCooldown" }
                         )
                 )
                 .addIntegerOption((opt) =>
-                    opt
-                        .setName("value")
-                        .setDescription("New value")
-                        .setMinValue(0)
-                        .setRequired(true)
+                    opt.setName("value").setDescription("New value").setMinValue(0).setRequired(true)
                 )
         )
+        .addSubcommand((sub) => sub.setName("social-config-view").setDescription("View gift & rob config"))
         .addSubcommand((sub) =>
-            sub
-                .setName("social-config-view")
-                .setDescription("View gift & rob config")
-        )
-        .addSubcommand((sub) =>
-            sub
-                .setName("social-config-toggle")
-                .setDescription("Enable/disable gift & rob commands")
+            sub.setName("social-config-toggle").setDescription("Enable/disable gift & rob commands")
         )
         .addSubcommand((sub) =>
             sub
@@ -252,15 +202,11 @@ export default {
                             { name: "gift-max-amount", value: "giftMaxAmount" },
                             { name: "rob-cooldown", value: "robCooldown" },
                             { name: "rob-min-balance", value: "robMinBalance" },
-                            { name: "rob-immunity-duration", value: "robImmunityDuration" },
+                            { name: "rob-immunity-duration", value: "robImmunityDuration" }
                         )
                 )
                 .addIntegerOption((opt) =>
-                    opt
-                        .setName("value")
-                        .setDescription("New value")
-                        .setMinValue(0)
-                        .setRequired(true)
+                    opt.setName("value").setDescription("New value").setMinValue(0).setRequired(true)
                 )
         ),
 
@@ -337,23 +283,45 @@ export default {
                         { $setOnInsert: { guildId } },
                         { upsert: true, new: true }
                     );
-                    const milestones = config.gemMilestones instanceof Map
-                        ? config.gemMilestones
-                        : new Map(Object.entries(config.gemMilestones ?? {}));
-                    const milestoneStr = [...milestones.entries()]
-                        .sort(([a], [b]) => Number(a) - Number(b))
-                        .map(([lvl, gems]) => `Lv.${lvl} → ${gems} 💎`)
-                        .join("\n") || "None";
+                    const milestones =
+                        config.gemMilestones instanceof Map
+                            ? config.gemMilestones
+                            : new Map(Object.entries(config.gemMilestones ?? {}));
+                    const milestoneStr =
+                        [...milestones.entries()]
+                            .sort(([a], [b]) => Number(a) - Number(b))
+                            .map(([lvl, gems]) => `Lv.${lvl} → ${gems} 💎`)
+                            .join("\n") || "None";
 
                     embed = new EmbedBuilder()
                         .setTitle(t(locale, "economy.reward_config.title"))
                         .addFields(
-                            { name: t(locale, "economy.reward_config.enabled"), value: config.enabled ? "✅" : "❌", inline: true },
-                            { name: t(locale, "economy.reward_config.level_base"), value: String(config.levelUpCoinBase), inline: true },
-                            { name: t(locale, "economy.reward_config.level_per"), value: String(config.levelUpCoinPerLevel), inline: true },
-                            { name: t(locale, "economy.reward_config.voice_interval"), value: `${config.voiceCoinInterval} min`, inline: true },
-                            { name: t(locale, "economy.reward_config.voice_reward"), value: String(config.voiceCoinReward), inline: true },
-                            { name: t(locale, "economy.reward_config.gem_milestones"), value: milestoneStr },
+                            {
+                                name: t(locale, "economy.reward_config.enabled"),
+                                value: config.enabled ? "✅" : "❌",
+                                inline: true,
+                            },
+                            {
+                                name: t(locale, "economy.reward_config.level_base"),
+                                value: String(config.levelUpCoinBase),
+                                inline: true,
+                            },
+                            {
+                                name: t(locale, "economy.reward_config.level_per"),
+                                value: String(config.levelUpCoinPerLevel),
+                                inline: true,
+                            },
+                            {
+                                name: t(locale, "economy.reward_config.voice_interval"),
+                                value: `${config.voiceCoinInterval} min`,
+                                inline: true,
+                            },
+                            {
+                                name: t(locale, "economy.reward_config.voice_reward"),
+                                value: String(config.voiceCoinReward),
+                                inline: true,
+                            },
+                            { name: t(locale, "economy.reward_config.gem_milestones"), value: milestoneStr }
                         )
                         .setColor(0x5865f2);
                     break;
@@ -368,7 +336,12 @@ export default {
                     await GuildEconomyRewardConfigModel.updateOne({ guildId }, { $set: { enabled: newEnabled } });
                     await invalidateRewardConfigCache(guildId);
                     embed = new EmbedBuilder()
-                        .setDescription(t(locale, newEnabled ? "economy.reward_config.toggled_on" : "economy.reward_config.toggled_off"))
+                        .setDescription(
+                            t(
+                                locale,
+                                newEnabled ? "economy.reward_config.toggled_on" : "economy.reward_config.toggled_off"
+                            )
+                        )
                         .setColor(newEnabled ? 0x57f287 : 0xed4245);
                     break;
                 }
@@ -396,7 +369,12 @@ export default {
                             { upsert: true }
                         );
                         embed = new EmbedBuilder()
-                            .setDescription(t(locale, "economy.reward_config.milestone_set", { level: String(level), gems: String(gems) }))
+                            .setDescription(
+                                t(locale, "economy.reward_config.milestone_set", {
+                                    level: String(level),
+                                    gems: String(gems),
+                                })
+                            )
                             .setColor(0x57f287);
                     } else {
                         await GuildEconomyRewardConfigModel.findOneAndUpdate(
@@ -405,7 +383,9 @@ export default {
                             { upsert: true }
                         );
                         embed = new EmbedBuilder()
-                            .setDescription(t(locale, "economy.reward_config.milestone_removed", { level: String(level) }))
+                            .setDescription(
+                                t(locale, "economy.reward_config.milestone_removed", { level: String(level) })
+                            )
                             .setColor(0xed4245);
                     }
                     await invalidateRewardConfigCache(guildId);
@@ -420,10 +400,14 @@ export default {
                     embed = new EmbedBuilder()
                         .setTitle(t(locale, "gambling_config.title"))
                         .addFields(
-                            { name: t(locale, "gambling_config.enabled"), value: config.enabled ? "✅" : "❌", inline: true },
+                            {
+                                name: t(locale, "gambling_config.enabled"),
+                                value: config.enabled ? "✅" : "❌",
+                                inline: true,
+                            },
                             { name: t(locale, "gambling_config.min_bet"), value: String(config.minBet), inline: true },
                             { name: t(locale, "gambling_config.max_bet"), value: String(config.maxBet), inline: true },
-                            { name: t(locale, "gambling_config.cooldown"), value: `${config.cooldown}s`, inline: true },
+                            { name: t(locale, "gambling_config.cooldown"), value: `${config.cooldown}s`, inline: true }
                         )
                         .setColor(0x5865f2);
                     break;
@@ -438,7 +422,9 @@ export default {
                     await GuildGamblingConfigModel.updateOne({ guildId }, { $set: { enabled: newEnabled } });
                     await redis.deleteKey(`gambling_config:${guildId}`);
                     embed = new EmbedBuilder()
-                        .setDescription(t(locale, newEnabled ? "gambling_config.toggled_on" : "gambling_config.toggled_off"))
+                        .setDescription(
+                            t(locale, newEnabled ? "gambling_config.toggled_on" : "gambling_config.toggled_off")
+                        )
                         .setColor(newEnabled ? 0x57f287 : 0xed4245);
                     break;
                 }
@@ -451,9 +437,7 @@ export default {
                         { upsert: true }
                     );
                     await redis.deleteKey(`gambling_config:${guildId}`);
-                    embed = new EmbedBuilder()
-                        .setDescription(t(locale, "gambling_config.updated"))
-                        .setColor(0x57f287);
+                    embed = new EmbedBuilder().setDescription(t(locale, "gambling_config.updated")).setColor(0x57f287);
                     break;
                 }
                 case "work-config-view": {
@@ -467,12 +451,28 @@ export default {
                     embed = new EmbedBuilder()
                         .setTitle(t(locale, "work_config.title"))
                         .addFields(
-                            { name: t(locale, "work_config.enabled"), value: wConfig.enabled ? "✅" : "❌", inline: true },
+                            {
+                                name: t(locale, "work_config.enabled"),
+                                value: wConfig.enabled ? "✅" : "❌",
+                                inline: true,
+                            },
                             { name: t(locale, "work_config.work_cooldown"), value: workCdText, inline: true },
-                            { name: t(locale, "work_config.work_min"), value: String(wConfig.workMinReward), inline: true },
-                            { name: t(locale, "work_config.work_max"), value: String(wConfig.workMaxReward), inline: true },
+                            {
+                                name: t(locale, "work_config.work_min"),
+                                value: String(wConfig.workMinReward),
+                                inline: true,
+                            },
+                            {
+                                name: t(locale, "work_config.work_max"),
+                                value: String(wConfig.workMaxReward),
+                                inline: true,
+                            },
                             { name: t(locale, "work_config.fish_cooldown"), value: fishCdText, inline: true },
-                            { name: t(locale, "work_config.fish_multiplier"), value: `×${wConfig.fishRewardMultiplier}`, inline: true },
+                            {
+                                name: t(locale, "work_config.fish_multiplier"),
+                                value: `×${wConfig.fishRewardMultiplier}`,
+                                inline: true,
+                            }
                         )
                         .setColor(0x5865f2);
                     break;
@@ -500,9 +500,7 @@ export default {
                         { upsert: true }
                     );
                     await redis.deleteKey(`work_config:${guildId}`);
-                    embed = new EmbedBuilder()
-                        .setDescription(t(locale, "work_config.updated"))
-                        .setColor(0x57f287);
+                    embed = new EmbedBuilder().setDescription(t(locale, "work_config.updated")).setColor(0x57f287);
                     break;
                 }
                 case "social-config-view": {
@@ -516,14 +514,38 @@ export default {
                     embed = new EmbedBuilder()
                         .setTitle(t(locale, "social_config.title"))
                         .addFields(
-                            { name: t(locale, "social_config.enabled"), value: sConfig.enabled ? "✅" : "❌", inline: true },
-                            { name: t(locale, "social_config.gift_max"), value: String(sConfig.giftMaxAmount), inline: true },
+                            {
+                                name: t(locale, "social_config.enabled"),
+                                value: sConfig.enabled ? "✅" : "❌",
+                                inline: true,
+                            },
+                            {
+                                name: t(locale, "social_config.gift_max"),
+                                value: String(sConfig.giftMaxAmount),
+                                inline: true,
+                            },
                             { name: t(locale, "social_config.rob_cooldown"), value: robCdText, inline: true },
-                            { name: t(locale, "social_config.rob_success_rate"), value: `${Math.round(sConfig.robSuccessRate * 100)}%`, inline: true },
-                            { name: t(locale, "social_config.rob_steal_range"), value: `${sConfig.robStealMinPct}-${sConfig.robStealMaxPct}%`, inline: true },
-                            { name: t(locale, "social_config.rob_penalty_range"), value: `${sConfig.robPenaltyMinPct}-${sConfig.robPenaltyMaxPct}%`, inline: true },
-                            { name: t(locale, "social_config.rob_min_balance"), value: String(sConfig.robMinBalance), inline: true },
-                            { name: t(locale, "social_config.rob_immunity"), value: immunityText, inline: true },
+                            {
+                                name: t(locale, "social_config.rob_success_rate"),
+                                value: `${Math.round(sConfig.robSuccessRate * 100)}%`,
+                                inline: true,
+                            },
+                            {
+                                name: t(locale, "social_config.rob_steal_range"),
+                                value: `${sConfig.robStealMinPct}-${sConfig.robStealMaxPct}%`,
+                                inline: true,
+                            },
+                            {
+                                name: t(locale, "social_config.rob_penalty_range"),
+                                value: `${sConfig.robPenaltyMinPct}-${sConfig.robPenaltyMaxPct}%`,
+                                inline: true,
+                            },
+                            {
+                                name: t(locale, "social_config.rob_min_balance"),
+                                value: String(sConfig.robMinBalance),
+                                inline: true,
+                            },
+                            { name: t(locale, "social_config.rob_immunity"), value: immunityText, inline: true }
                         )
                         .setColor(0x5865f2);
                     break;
@@ -538,7 +560,9 @@ export default {
                     await GuildSocialConfigModel.updateOne({ guildId }, { $set: { enabled: newEnabled } });
                     await redis.deleteKey(`social_config:${guildId}`);
                     embed = new EmbedBuilder()
-                        .setDescription(t(locale, newEnabled ? "social_config.toggled_on" : "social_config.toggled_off"))
+                        .setDescription(
+                            t(locale, newEnabled ? "social_config.toggled_on" : "social_config.toggled_off")
+                        )
                         .setColor(newEnabled ? 0x57f287 : 0xed4245);
                     break;
                 }
@@ -551,9 +575,7 @@ export default {
                         { upsert: true }
                     );
                     await redis.deleteKey(`social_config:${guildId}`);
-                    embed = new EmbedBuilder()
-                        .setDescription(t(locale, "social_config.updated"))
-                        .setColor(0x57f287);
+                    embed = new EmbedBuilder().setDescription(t(locale, "social_config.updated")).setColor(0x57f287);
                     break;
                 }
                 default: {

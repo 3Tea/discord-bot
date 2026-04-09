@@ -1,8 +1,4 @@
-import {
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
 import WorkService from "../../services/economy/work.service";
@@ -47,9 +43,7 @@ export default {
             const config = await getWorkConfig(guildId);
 
             if (!config.enabled) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "work.disabled"))
-                    .setColor(0xed4245);
+                const embed = new EmbedBuilder().setDescription(t(locale, "work.disabled")).setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
 
@@ -88,9 +82,7 @@ export default {
             return Reply.embedEdit(interaction, embed);
         } catch {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-            const embed = new EmbedBuilder()
-                .setDescription(t(errLocale, "common.error"))
-                .setColor(0xed4245);
+            const embed = new EmbedBuilder().setDescription(t(errLocale, "common.error")).setColor(0xed4245);
             return Reply.embedEdit(interaction, embed);
         }
     },

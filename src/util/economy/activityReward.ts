@@ -1,8 +1,6 @@
 import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
-import GuildEconomyRewardConfigModel, {
-    IGuildEconomyRewardConfig,
-} from "../../models/guildEconomyRewardConfig.model";
+import GuildEconomyRewardConfigModel, { IGuildEconomyRewardConfig } from "../../models/guildEconomyRewardConfig.model";
 import { logger } from "../log/logger.mixed";
 
 const CONFIG_CACHE_TTL = 300; // 5 minutes
@@ -31,11 +29,7 @@ export async function invalidateRewardConfigCache(guildId: string): Promise<void
     await redis.deleteKey(`economy_reward_config:${guildId}`);
 }
 
-export async function rewardLevelUp(
-    userId: string,
-    guildId: string,
-    newLevel: number
-): Promise<LevelUpRewardResult> {
+export async function rewardLevelUp(userId: string, guildId: string, newLevel: number): Promise<LevelUpRewardResult> {
     try {
         const config = await getRewardConfig(guildId);
         if (!config.enabled) return { coinReward: 0, gemReward: 0 };
@@ -50,11 +44,7 @@ export async function rewardLevelUp(
         const milestones: Map<string, number> =
             milestonesRaw instanceof Map
                 ? (milestonesRaw as Map<string, number>)
-                : new Map(
-                      Object.entries(
-                          (milestonesRaw as Record<string, number>) ?? {}
-                      )
-                  );
+                : new Map(Object.entries((milestonesRaw as Record<string, number>) ?? {}));
         const gemReward = milestones.get(String(newLevel)) ?? 0;
 
         if (gemReward > 0) {

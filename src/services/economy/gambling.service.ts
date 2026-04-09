@@ -35,13 +35,13 @@ function coinflip(): CoinflipResult {
 const SYMBOLS = ["🍒", "🍋", "🔔", "💎", "7️⃣"] as const;
 
 const SLOTS_TABLE = [
-    { threshold: 0.005, combo: "777",     reels: ["7️⃣", "7️⃣", "7️⃣"] as [string, string, string], multiplier: 20 },
-    { threshold: 0.020, combo: "diamond", reels: ["💎", "💎", "💎"] as [string, string, string], multiplier: 8 },
-    { threshold: 0.060, combo: "bell",    reels: ["🔔", "🔔", "🔔"] as [string, string, string], multiplier: 4 },
-    { threshold: 0.160, combo: "lemon",   reels: ["🍋", "🍋", "🍋"] as [string, string, string], multiplier: 2 },
-    { threshold: 0.310, combo: "cherry3", reels: ["🍒", "🍒", "🍒"] as [string, string, string], multiplier: 1.5 },
-    { threshold: 0.460, combo: "cherry2", reels: null,                                            multiplier: 0.5 },
-    { threshold: 1.000, combo: "none",    reels: null,                                            multiplier: 0 },
+    { threshold: 0.005, combo: "777", reels: ["7️⃣", "7️⃣", "7️⃣"] as [string, string, string], multiplier: 20 },
+    { threshold: 0.02, combo: "diamond", reels: ["💎", "💎", "💎"] as [string, string, string], multiplier: 8 },
+    { threshold: 0.06, combo: "bell", reels: ["🔔", "🔔", "🔔"] as [string, string, string], multiplier: 4 },
+    { threshold: 0.16, combo: "lemon", reels: ["🍋", "🍋", "🍋"] as [string, string, string], multiplier: 2 },
+    { threshold: 0.31, combo: "cherry3", reels: ["🍒", "🍒", "🍒"] as [string, string, string], multiplier: 1.5 },
+    { threshold: 0.46, combo: "cherry2", reels: null, multiplier: 0.5 },
+    { threshold: 1.0, combo: "none", reels: null, multiplier: 0 },
 ];
 
 function randomSymbolExcept(...exclude: string[]): string {

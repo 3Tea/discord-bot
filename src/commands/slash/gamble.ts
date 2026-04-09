@@ -1,8 +1,4 @@
-import {
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
 import GamblingService from "../../services/economy/gambling.service";
@@ -40,11 +36,7 @@ export default {
                 .setName("coinflip")
                 .setDescription("Flip a coin — 50/50 chance to double your bet")
                 .addIntegerOption((opt) =>
-                    opt
-                        .setName("bet")
-                        .setDescription("Amount of coin to bet")
-                        .setMinValue(1)
-                        .setRequired(true)
+                    opt.setName("bet").setDescription("Amount of coin to bet").setMinValue(1).setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
@@ -52,11 +44,7 @@ export default {
                 .setName("slots")
                 .setDescription("Spin the slot machine — match symbols to win")
                 .addIntegerOption((opt) =>
-                    opt
-                        .setName("bet")
-                        .setDescription("Amount of coin to bet")
-                        .setMinValue(1)
-                        .setRequired(true)
+                    opt.setName("bet").setDescription("Amount of coin to bet").setMinValue(1).setRequired(true)
                 )
         )
         .addSubcommand((sub) =>
@@ -64,21 +52,14 @@ export default {
                 .setName("dice")
                 .setDescription("Roll 2 dice — guess high or low to win")
                 .addIntegerOption((opt) =>
-                    opt
-                        .setName("bet")
-                        .setDescription("Amount of coin to bet")
-                        .setMinValue(1)
-                        .setRequired(true)
+                    opt.setName("bet").setDescription("Amount of coin to bet").setMinValue(1).setRequired(true)
                 )
                 .addStringOption((opt) =>
                     opt
                         .setName("mode")
                         .setDescription("Guess high (≥8) or low (≤6)")
                         .setRequired(true)
-                        .addChoices(
-                            { name: "High (≥8)", value: "high" },
-                            { name: "Low (≤6)", value: "low" },
-                        )
+                        .addChoices({ name: "High (≥8)", value: "high" }, { name: "Low (≤6)", value: "low" })
                 )
         ),
 
@@ -97,9 +78,7 @@ export default {
 
             // Check enabled
             if (!config.enabled) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "gamble.disabled"))
-                    .setColor(0xed4245);
+                const embed = new EmbedBuilder().setDescription(t(locale, "gamble.disabled")).setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
 
@@ -163,9 +142,10 @@ export default {
                         });
                     }
 
-                    const resultText = result.result === "heads"
-                        ? t(locale, "gamble.coinflip.heads")
-                        : t(locale, "gamble.coinflip.tails");
+                    const resultText =
+                        result.result === "heads"
+                            ? t(locale, "gamble.coinflip.heads")
+                            : t(locale, "gamble.coinflip.tails");
 
                     embed = new EmbedBuilder()
                         .setTitle(`🪙 ${t(locale, "gamble.coinflip.title")}`)
@@ -198,11 +178,18 @@ export default {
                     }
 
                     const comboText = t(locale, `gamble.slots.combo.${result.combo}`);
-                    const payoutLine = result.multiplier >= 1
-                        ? t(locale, "gamble.payout.win", { amount: String(payout - bet), multiplier: String(result.multiplier) })
-                        : result.multiplier > 0
-                            ? t(locale, "gamble.payout.partial", { amount: String(payout), multiplier: String(result.multiplier) })
-                            : t(locale, "gamble.payout.lose", { amount: String(bet) });
+                    const payoutLine =
+                        result.multiplier >= 1
+                            ? t(locale, "gamble.payout.win", {
+                                  amount: String(payout - bet),
+                                  multiplier: String(result.multiplier),
+                              })
+                            : result.multiplier > 0
+                              ? t(locale, "gamble.payout.partial", {
+                                    amount: String(payout),
+                                    multiplier: String(result.multiplier),
+                                })
+                              : t(locale, "gamble.payout.lose", { amount: String(bet) });
 
                     embed = new EmbedBuilder()
                         .setTitle(`🎰 ${t(locale, "gamble.slots.title")}`)
@@ -235,9 +222,7 @@ export default {
                         });
                     }
 
-                    const modeText = mode === "high"
-                        ? t(locale, "gamble.dice.high")
-                        : t(locale, "gamble.dice.low");
+                    const modeText = mode === "high" ? t(locale, "gamble.dice.high") : t(locale, "gamble.dice.low");
 
                     embed = new EmbedBuilder()
                         .setTitle(`🎲 ${t(locale, "gamble.dice.title")} — ${modeText}`)
@@ -267,9 +252,7 @@ export default {
             return Reply.embedEdit(interaction, embed);
         } catch (error) {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-            const embed = new EmbedBuilder()
-                .setDescription(t(errLocale, "common.error"))
-                .setColor(0xed4245);
+            const embed = new EmbedBuilder().setDescription(t(errLocale, "common.error")).setColor(0xed4245);
             return Reply.embedEdit(interaction, embed);
         }
     },

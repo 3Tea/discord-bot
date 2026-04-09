@@ -26,9 +26,6 @@ const guildWorkConfigSchema = new Schema(
     }
 );
 
-const GuildWorkConfigModel = model<IGuildWorkConfig>(
-    "GuildWorkConfig",
-    guildWorkConfigSchema
-);
+const GuildWorkConfigModel = model<IGuildWorkConfig>("GuildWorkConfig", guildWorkConfigSchema);
 
 export default GuildWorkConfigModel;

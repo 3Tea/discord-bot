@@ -1,8 +1,4 @@
-import {
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
 import SocialService from "../../services/economy/social.service";
@@ -35,12 +31,7 @@ export default {
         .setName("rob")
         .setDescription("Attempt to rob coins from another user")
         .setDescriptionLocalizations(descriptionLocales("cmd.rob.desc"))
-        .addUserOption((opt) =>
-            opt
-                .setName("user")
-                .setDescription("User to rob")
-                .setRequired(true)
-        ),
+        .addUserOption((opt) => opt.setName("user").setDescription("User to rob").setRequired(true)),
 
     async execute(interaction: ChatInputCommandInteraction) {
         await interaction.deferReply();
@@ -54,23 +45,17 @@ export default {
             const config = await getSocialConfig(guildId);
 
             if (!config.enabled) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "gift.disabled"))
-                    .setColor(0xed4245);
+                const embed = new EmbedBuilder().setDescription(t(locale, "gift.disabled")).setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
 
             // Validate target
             if (target.bot) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "rob.bot_error"))
-                    .setColor(0xed4245);
+                const embed = new EmbedBuilder().setDescription(t(locale, "rob.bot_error")).setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
             if (target.id === robberId) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "rob.self_error"))
-                    .setColor(0xed4245);
+                const embed = new EmbedBuilder().setDescription(t(locale, "rob.self_error")).setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
 
@@ -98,10 +83,12 @@ export default {
             const immunityRemaining = await redis.ttlKey(immunityKey);
             if (immunityRemaining > 0) {
                 const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "rob.target_immune", {
-                        target: target.username,
-                        time: SocialService.formatCooldown(immunityRemaining),
-                    }))
+                    .setDescription(
+                        t(locale, "rob.target_immune", {
+                            target: target.username,
+                            time: SocialService.formatCooldown(immunityRemaining),
+                        })
+                    )
                     .setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
@@ -134,11 +121,13 @@ export default {
 
                 embed = new EmbedBuilder()
                     .setTitle(`💰 ${t(locale, "rob.title.success")}`)
-                    .setDescription(t(locale, "rob.success", {
-                        robber: interaction.user.username,
-                        amount: String(result.amount),
-                        target: target.username,
-                    }))
+                    .setDescription(
+                        t(locale, "rob.success", {
+                            robber: interaction.user.username,
+                            amount: String(result.amount),
+                            target: target.username,
+                        })
+                    )
                     .setColor(0x57f287);
             } else {
                 // Penalty — only deduct if robber has coin and penalty > 0
@@ -155,19 +144,23 @@ export default {
 
                     embed = new EmbedBuilder()
                         .setTitle(`🚔 ${t(locale, "rob.title.fail")}`)
-                        .setDescription(t(locale, "rob.fail", {
-                            robber: interaction.user.username,
-                            target: target.username,
-                            penalty: String(result.amount),
-                        }))
+                        .setDescription(
+                            t(locale, "rob.fail", {
+                                robber: interaction.user.username,
+                                target: target.username,
+                                penalty: String(result.amount),
+                            })
+                        )
                         .setColor(0xed4245);
                 } else {
                     embed = new EmbedBuilder()
                         .setTitle(`🚔 ${t(locale, "rob.title.fail")}`)
-                        .setDescription(t(locale, "rob.fail_broke", {
-                            robber: interaction.user.username,
-                            target: target.username,
-                        }))
+                        .setDescription(
+                            t(locale, "rob.fail_broke", {
+                                robber: interaction.user.username,
+                                target: target.username,
+                            })
+                        )
                         .setColor(0xed4245);
                 }
             }
@@ -178,9 +171,7 @@ export default {
             return Reply.embedEdit(interaction, embed);
         } catch {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-            const embed = new EmbedBuilder()
-                .setDescription(t(errLocale, "common.error"))
-                .setColor(0xed4245);
+            const embed = new EmbedBuilder().setDescription(t(errLocale, "common.error")).setColor(0xed4245);
             return Reply.embedEdit(interaction, embed);
         }
     },

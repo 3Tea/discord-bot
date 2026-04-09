@@ -187,14 +187,9 @@ async function paginateLeaderboard(
                 const allMembers = await MemberXPModel.find({ guildId }).sort({ xp: -1 }).limit(MAX_RESULTS);
 
                 // Check global wallet leaderboard milestone
-                const userRankIndex = allMembers.findIndex(
-                    (m) => m.userId === interaction.user.id
-                );
+                const userRankIndex = allMembers.findIndex((m) => m.userId === interaction.user.id);
                 if (userRankIndex >= 0 && userRankIndex < 3) {
-                    await WalletService.checkAndAwardMilestone(
-                        interaction.user.id,
-                        "leaderboard_top3"
-                    );
+                    await WalletService.checkAndAwardMilestone(interaction.user.id, "leaderboard_top3");
                 }
 
                 return { entries: [], allTimeServer: allMembers };

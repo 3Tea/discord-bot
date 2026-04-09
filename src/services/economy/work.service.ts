@@ -37,10 +37,10 @@ function rollWorkText(): number {
 // --- Fish ---
 
 const FISH_TABLE = [
-    { threshold: 0.55, rarity: "common",    emoji: "🐟", minCoin: 10,  maxCoin: 30 },
-    { threshold: 0.83, rarity: "uncommon",  emoji: "🐠", minCoin: 40,  maxCoin: 80 },
-    { threshold: 0.96, rarity: "rare",      emoji: "🐡", minCoin: 100, maxCoin: 200 },
-    { threshold: 1.00, rarity: "legendary", emoji: "🦈", minCoin: 300, maxCoin: 600 },
+    { threshold: 0.55, rarity: "common", emoji: "🐟", minCoin: 10, maxCoin: 30 },
+    { threshold: 0.83, rarity: "uncommon", emoji: "🐠", minCoin: 40, maxCoin: 80 },
+    { threshold: 0.96, rarity: "rare", emoji: "🐡", minCoin: 100, maxCoin: 200 },
+    { threshold: 1.0, rarity: "legendary", emoji: "🦈", minCoin: 300, maxCoin: 600 },
 ];
 
 const FISH_POOL_SIZE = 5; // 5 fish names per rarity

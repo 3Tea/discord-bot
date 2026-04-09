@@ -34,9 +34,6 @@ const guildSocialConfigSchema = new Schema(
     }
 );
 
-const GuildSocialConfigModel = model<IGuildSocialConfig>(
-    "GuildSocialConfig",
-    guildSocialConfigSchema
-);
+const GuildSocialConfigModel = model<IGuildSocialConfig>("GuildSocialConfig", guildSocialConfigSchema);
 
 export default GuildSocialConfigModel;
