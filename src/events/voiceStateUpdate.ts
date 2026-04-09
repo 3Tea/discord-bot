@@ -11,6 +11,7 @@ import { syncGlobalXP } from "../util/xp/globalXP";
 import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
 import client from "../client";
+import { rewardLevelUp, tickVoiceCoinReward, cleanupVoiceCoinCounter } from "../util/economy/activityReward";
 
 const TTL_12H = 60 * 60 * 12;
 const NAME_PREFIX_TRIGGER = "3AT ";
@@ -49,6 +50,7 @@ async function startVoiceSession(guildId: string, userId: string, channelId: str
 
 async function stopVoiceSession(guildId: string, userId: string, channelId: string): Promise<void> {
     await redis.removeFromSet(VOICE_XP_SET, `${guildId}:${userId}:${channelId}`);
+    await cleanupVoiceCoinCounter(userId, guildId);
 }
 
 async function cleanupChannelSessions(guildId: string, channelId: string): Promise<void> {
@@ -212,9 +214,13 @@ setInterval(async () => {
                 // Sync period snapshots
                 await syncSnapshots(sUserId, sGuildId, config.xpPerVoiceMinute, "voice");
 
+                // Voice coin reward tick
+                await tickVoiceCoinReward(sUserId, sGuildId);
+
                 const newLevel = levelFromXP(updated.xp);
                 if (newLevel > updated.level) {
                     await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
+                    await rewardLevelUp(sUserId, sGuildId, newLevel);
                 }
             } catch (error) {
                 logger.error(`[voiceXP:session] ${error instanceof Error ? error.message : "Unknown error"}`);
