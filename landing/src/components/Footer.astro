@@ -1,17 +1,28 @@
 ---
+import { useTranslations, useTranslatedPath } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
 const inviteUrl =
   "https://discord.com/api/oauth2/authorize?client_id=615052741911379983&permissions=8&scope=applications.commands%20bot";
 
 const links = [
-  { label: "Add to Server", href: inviteUrl, external: true },
-  { label: "Commands", href: "/commands" },
+  { label: t("footer.add"), href: inviteUrl, external: true },
+  { label: t("footer.commands"), href: tp("/commands") },
   {
-    label: "Support Server",
+    label: t("footer.support"),
     href: "https://github.com/3Tea/discord-bot/discussions",
     external: true,
   },
   {
-    label: "GitHub",
+    label: t("footer.github"),
     href: "https://github.com/3Tea/discord-bot",
     external: true,
   },
@@ -19,25 +30,25 @@ const links = [
 
 const resources = [
   {
-    label: "Documentation",
+    label: t("footer.docs"),
     href: "https://github.com/3Tea/discord-bot#readme",
     external: true,
   },
   {
-    label: "Report Bug",
+    label: t("footer.bug"),
     href: "https://github.com/3Tea/discord-bot/issues",
     external: true,
   },
   {
-    label: "Discussions",
+    label: t("footer.discussions"),
     href: "https://github.com/3Tea/discord-bot/discussions",
     external: true,
   },
 ];
 
 const legal = [
-  { label: "Privacy Policy", href: "/privacy" },
-  { label: "Terms of Service", href: "/terms" },
+  { label: t("footer.privacy"), href: "/privacy" },
+  { label: t("footer.terms"), href: "/terms" },
 ];
 
 const year = new Date().getFullYear();
@@ -52,12 +63,12 @@ const year = new Date().getFullYear();
           <span class="footer-name">3AT - Endless Paradox</span>
         </div>
         <p class="footer-desc">
-          Discord bot for voice management, manga reading & more. Running since 2019.
+          {t("footer.desc")}
         </p>
       </div>
 
       <div class="footer-col">
-        <h4 class="footer-heading">Links</h4>
+        <h4 class="footer-heading">{t("footer.links")}</h4>
         <ul class="footer-list">
           {links.map((l) => (
             <li>
@@ -74,7 +85,7 @@ const year = new Date().getFullYear();
       </div>
 
       <div class="footer-col">
-        <h4 class="footer-heading">Resources</h4>
+        <h4 class="footer-heading">{t("footer.resources")}</h4>
         <ul class="footer-list">
           {resources.map((r) => (
             <li>
@@ -87,7 +98,7 @@ const year = new Date().getFullYear();
       </div>
 
       <div class="footer-col">
-        <h4 class="footer-heading">Legal</h4>
+        <h4 class="footer-heading">{t("footer.legal")}</h4>
         <ul class="footer-list">
           {legal.map((item) => (
             <li>

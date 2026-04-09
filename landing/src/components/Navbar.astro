@@ -1,12 +1,24 @@
 ---
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+import { useTranslations, useTranslatedPath } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
+
 const navLinks = [
-  { href: "/#features", label: "Features" },
-  { href: "/commands", label: "Commands" },
-  { href: "/guide", label: "Guide" },
-  { href: "/#faq", label: "FAQ" },
+  { href: tp("/#features"), label: t("nav.features") },
+  { href: tp("/commands"), label: t("nav.commands") },
+  { href: tp("/guide"), label: t("nav.guide") },
+  { href: tp("/#faq"), label: t("nav.faq") },
   {
     href: "https://github.com/3Tea/discord-bot/discussions",
-    label: "Support",
+    label: t("nav.support"),
     external: true,
   },
 ];
@@ -40,8 +52,9 @@ const inviteUrl =
           </li>
         ))}
       </ul>
+      <LanguageSwitcher lang={lang} />
       <a href={inviteUrl} target="_blank" rel="noopener" class="btn btn-primary btn-sm">
-        Add to Server
+        {t("nav.add")}
       </a>
     </div>
   </div>
