@@ -203,7 +203,7 @@ export const ui = {
     "faq.economy.q": "Hệ thống kinh tế là gì?",
     "faq.economy.a": "Mỗi server có kinh tế riêng với coin và gem. Dùng /pray mỗi ngày để nhận coin (có thưởng streak ở ngày 3, 7, 14, 30). Kiểm tra số dư với /balance, và xem cửa hàng với /shop. Admin quản lý tiền tệ qua lệnh /economy.",
     "faq.lang.q": "Hỗ trợ những ngôn ngữ nào?",
-    "faq.lang.a": "Bot hỗ trợ 15 ngôn ngữ: Tiếng Anh, Tiếng Việt, Indonesia, Tây Ban Nha, Nhật, Trung, Hàn, Bồ Đào Nha (Brazil), Pháp, Đức, Nga, Thổ Nhĩ Kỳ, Ý, Ba Lan và Hà Lan. Đặt ngôn ngữ cá nhân với /settings language, hoặc mặc định server với /settings server-language.",
+    "faq.lang.a": "Bot hỗ trợ 15 ngôn ngữ: Tiếng Anh, Tiếng Việt, Indonesia, Tây Ban Nha, Nhật, Trung, Hàn, Bồ Đào Nha (Brazil), Pháp, Đức, Nga, Thổ Nhĩ Kỳ, Ý, Ba Lan và Hà Lan. Đặt ngôn ngữ cá nhân với /settings language, hoặc mặc định server với /settings server-language. Bot tự động phát hiện ngôn ngữ Discord client của bạn làm fallback.",
     "faq.nsfw.q": "Manga reader chỉ dùng cho NSFW?",
     "faq.nsfw.a": "Đúng. Tất cả lệnh manga yêu cầu kênh NSFW. Bot kiểm tra cài đặt kênh trước khi phản hồi và báo lỗi nếu kênh chưa được đánh dấu NSFW.",
     "faq.perms.q": "Bot cần những quyền gì?",
