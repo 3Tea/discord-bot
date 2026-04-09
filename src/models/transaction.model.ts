@@ -15,7 +15,10 @@ export type TransactionType =
     | "voice_reward"
     | "gambling"
     | "work"
-    | "fish";
+    | "fish"
+    | "gift"
+    | "rob"
+    | "rob_penalty";
 
 export interface ITransaction extends Document {
     userId: string;
@@ -49,6 +52,9 @@ const transactionSchema = new Schema(
                 "gambling",
                 "work",
                 "fish",
+                "gift",
+                "rob",
+                "rob_penalty",
             ],
             required: true,
         },
