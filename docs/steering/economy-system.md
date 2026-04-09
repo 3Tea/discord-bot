@@ -262,3 +262,42 @@ Admin commands: `/economy gambling-config-view`, `gambling-config-toggle`, `gamb
 5. If win: `CurrencyService.addCoin(payout)`
 6. Set Redis cooldown
 7. Transaction type: `"gambling"` with game metadata
+
+## Work & Task Commands
+
+Cooldown-based coin earning commands for steady income between daily pray/curse cycles.
+
+### Commands
+
+| Command | Cooldown | Reward | Mechanics |
+|---------|----------|--------|-----------|
+| `/work` | 4h (configurable) | 80-200 coin | Random reward + flavor text |
+| `/fish` | 1h (configurable) | 10-600 coin | 4-rarity fish roll (common/uncommon/rare/legendary) |
+
+### Fish Rarity Table
+
+| Rarity | Probability | Coin Range | Emoji |
+|--------|------------|------------|-------|
+| Common | 55% | 10-30 | 🐟 |
+| Uncommon | 28% | 40-80 | 🐠 |
+| Rare | 13% | 100-200 | 🐡 |
+| Legendary | 4% | 300-600 | 🦈 |
+
+Expected value: ~65 coin/hour at default settings.
+
+### Configuration
+
+Per-guild via `GuildWorkConfig` model:
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | `true` | Master toggle for work + fish |
+| `workCooldown` | `14400` (4h) | Work cooldown in seconds |
+| `workMinReward` | `80` | Minimum work coin reward |
+| `workMaxReward` | `200` | Maximum work coin reward |
+| `fishCooldown` | `3600` (1h) | Fish cooldown in seconds |
+| `fishRewardMultiplier` | `1.0` | Multiplier applied to all fish rewards |
+
+Admin commands: `/economy work-config-view`, `work-config-toggle`, `work-config-set`
+
+Transaction types: `"work"`, `"fish"`
