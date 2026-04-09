@@ -18,6 +18,8 @@ Mỗi tin nhắn bạn gửi, mỗi phút trong voice chat, và mỗi reaction b
 | Voice chat | 5 XP mỗi phút | Liên tục | Cần 2+ thành viên (không tính bot), không bị server deaf |
 | Reaction | 3 XP | 30 giây | Không kiếm từ reaction tin nhắn của chính mình |
 
+> **Lưu ý:** XP reaction được tính một lần mỗi reaction mỗi kênh trong 30 giây. Bạn không thể kiếm XP reaction từ việc react vào tin nhắn của bot hoặc của chính mình.
+
 > **Mẹo:** XP voice tích lũy nhanh — 1 giờ gọi thoại cùng bạn bè kiếm được 300 XP!
 
 ### Chống Spam
@@ -40,7 +42,7 @@ XP cần để đạt mỗi cấp theo công thức: **Cấp² × 50**.
 | 30 | 45.000 |
 | 50 | 125.000 |
 
-Khi bạn lên cấp, bot sẽ gửi thông báo trong kênh bạn đang hoạt động.
+Khi bạn lên cấp, bot sẽ gửi tin nhắn chúc mừng trong kênh bạn kiếm được XP kích hoạt việc lên cấp. Nếu hệ thống kinh tế được bật, bạn cũng có thể nhận phần thưởng coin và gem khi lên cấp (do admin server cấu hình).
 
 ## Thẻ Xếp Hạng
 
@@ -58,9 +60,9 @@ Dùng `/leaderboard` để xem ai đứng đầu. Ba chế độ:
 
 | Chế Độ | Hiển Thị |
 |--------|----------|
-| Server | Top thành viên trong server này |
-| Global | Top người dùng trên tất cả server |
-| Servers | Top server xếp theo tổng XP |
+| Server | Top thành viên trong server này theo XP |
+| Global | Top người dùng trên tất cả server theo tổng XP tích lũy |
+| Servers | Top server xếp theo tổng XP, tin nhắn và hoạt động |
 
 ### Bộ Lọc Thời Gian
 

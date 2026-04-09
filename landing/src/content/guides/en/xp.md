@@ -18,6 +18,8 @@ Every message you send, every minute in voice chat, and every reaction you add e
 | Voice chat | 5 XP per minute | Continuous | Must be in a channel with 2+ non-bot members, not server-deafened |
 | Reactions | 3 XP | 30 seconds | Cannot earn from reacting to your own messages |
 
+> **Note:** Reaction XP is earned once per reaction per channel every 30 seconds. You cannot earn reaction XP from reacting to bot messages or your own messages.
+
 > **Tip:** Voice XP adds up fast — a 1-hour call with friends earns you 300 XP!
 
 ### Anti-Spam
@@ -40,7 +42,7 @@ The XP needed to reach each level follows a simple formula: **Level² × 50**.
 | 30 | 45,000 |
 | 50 | 125,000 |
 
-When you level up, the bot sends a notification in the channel where you were active.
+When you level up, the bot sends a congratulations message in the channel where you earned the XP that triggered the level-up. If the economy system is enabled, you may also receive coin and gem rewards for leveling up (configured by your server admin).
 
 ## Your Rank Card
 
@@ -58,9 +60,9 @@ Use `/leaderboard` to see who's on top. Three modes are available:
 
 | Mode | Shows |
 |------|-------|
-| Server | Top members in this server |
-| Global | Top users across all servers |
-| Servers | Top servers ranked by total XP |
+| Server | Top members in this server by XP |
+| Global | Top users across all servers by total accumulated XP |
+| Servers | Top servers ranked by aggregate XP, messages, and activity |
 
 ### Period Filters
 
