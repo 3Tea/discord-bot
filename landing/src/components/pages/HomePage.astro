@@ -1,0 +1,29 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Hero from "../Hero.astro";
+import Features from "../Features.astro";
+import CommandsShowcase from "../CommandsShowcase.astro";
+import VoiceDemo from "../VoiceDemo.astro";
+import Stats from "../Stats.astro";
+import Testimonials from "../Testimonials.astro";
+import FAQ from "../FAQ.astro";
+import type { Lang } from "../../i18n/utils";
+
+interface Props { lang: Lang; }
+const { lang } = Astro.props;
+
+const hreflang = [
+  { lang: "en", href: "/" },
+  { lang: "vi", href: "/vi" },
+];
+---
+
+<BaseLayout title="3AT - Endless Paradox | Discord Bot" lang={lang} hreflang={hreflang}>
+  <Hero lang={lang} />
+  <Features lang={lang} />
+  <CommandsShowcase lang={lang} />
+  <VoiceDemo lang={lang} />
+  <Stats lang={lang} />
+  <Testimonials lang={lang} />
+  <FAQ lang={lang} />
+</BaseLayout>

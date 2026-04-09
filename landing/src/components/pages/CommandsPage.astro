@@ -1,0 +1,145 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import CommandsSidebar from "../CommandsSidebar.astro";
+import CommandCard from "../CommandCard.astro";
+import { commands } from "../../data/commands";
+import { useTranslations, useTranslatedPath } from "../../i18n/utils";
+import type { Lang } from "../../i18n/utils";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const hreflang = [
+  { lang: "en", href: "/commands" },
+  { lang: "vi", href: "/vi/commands" },
+];
+---
+
+<BaseLayout title={`${t("commands.title")} | 3AT - Endless Paradox`} lang={lang} hreflang={hreflang}>
+  <div class="commands-page">
+    <CommandsSidebar lang={lang} />
+
+    <div class="commands-main">
+      <div class="commands-header">
+        <h1 class="commands-title">{t("commands.title")}</h1>
+        <p class="commands-count">
+          <span id="commands-count">{commands.length}</span> {t("commands.available")}
+        </p>
+      </div>
+
+      <div class="commands-grid" id="commands-grid">
+        {commands.map((cmd) => (
+          <div data-category={cmd.category} data-name={cmd.name} data-desc={cmd.description}>
+            <CommandCard command={cmd} href={`/${lang}/commands/${cmd.name}`} lang={lang} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .commands-page {
+    display: flex;
+    min-height: calc(100vh - 56px);
+  }
+
+  .commands-main {
+    flex: 1;
+    padding: 24px;
+  }
+
+  .commands-header {
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .commands-title {
+    font-family: var(--font-display);
+    color: var(--text-primary);
+    font-size: clamp(1.35rem, 3vw, 1.65rem);
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+
+  .commands-count {
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  .commands-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  @media (max-width: 768px) {
+    .commands-page {
+      flex-direction: column;
+    }
+
+    .commands-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const sidebar = document.getElementById("commands-sidebar");
+  const grid = document.getElementById("commands-grid");
+  const searchInput = document.getElementById("command-search") as HTMLInputElement | null;
+  const countEl = document.getElementById("commands-count");
+  const titleEl = document.querySelector(".commands-title");
+  const cards = grid ? Array.from(grid.children) as HTMLElement[] : [];
+
+  let activeCategory = "all";
+
+  function filterCards(): void {
+    const query = searchInput?.value.toLowerCase() || "";
+    let visible = 0;
+
+    cards.forEach((card) => {
+      const cat = card.dataset.category || "";
+      const name = card.dataset.name || "";
+      const desc = card.dataset.desc || "";
+
+      const matchCategory = activeCategory === "all" || cat === activeCategory;
+      const matchSearch =
+        !query || name.includes(query) || desc.toLowerCase().includes(query);
+
+      const show = matchCategory && matchSearch;
+      card.style.display = show ? "" : "none";
+      if (show) visible++;
+    });
+
+    if (countEl) countEl.textContent = String(visible);
+  }
+
+  sidebar?.querySelectorAll("[data-category]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      sidebar.querySelectorAll("[data-category]").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeCategory = (btn as HTMLElement).dataset.category || "all";
+
+      const label =
+        activeCategory === "all"
+          ? btn.textContent?.trim() || "Commands"
+          : btn.textContent?.trim() || "Commands";
+      if (titleEl) titleEl.textContent = label;
+
+      filterCards();
+    });
+  });
+
+  let debounceTimer: ReturnType<typeof setTimeout>;
+  searchInput?.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(filterCards, 200);
+  });
+</script>

@@ -1,0 +1,93 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import GuideCard from "../GuideCard.astro";
+import { getCollection } from "astro:content";
+import { guideMeta } from "../../data/guides";
+import { useTranslations } from "../../i18n/utils";
+import type { Lang } from "../../i18n/utils";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const allGuides = await getCollection("guides");
+const langGuides = allGuides
+  .filter((g) => g.id.startsWith(`${lang}/`))
+  .sort((a, b) => a.data.order - b.data.order);
+
+// Fallback to EN if no guides exist for this locale
+const guides = langGuides.length > 0
+  ? langGuides
+  : allGuides.filter((g) => g.id.startsWith("en/")).sort((a, b) => a.data.order - b.data.order);
+
+const hreflang = [
+  { lang: "en", href: "/guide" },
+  { lang: "vi", href: "/vi/guide" },
+];
+---
+
+<BaseLayout
+  title={`${t("guide.section")} | 3AT - Endless Paradox`}
+  description={t("guide.subtitle")}
+  lang={lang}
+  hreflang={hreflang}
+>
+  <div class="container guide-index">
+    <div class="guide-index-hero">
+      <p class="section-label">{t("guide.section")}</p>
+      <h1 class="section-title">{t("guide.title")}</h1>
+      <p class="section-subtitle">{t("guide.subtitle")}</p>
+    </div>
+
+    <div class="guide-grid">
+      {guides.map((guide) => {
+        const guideSlug = guide.id.split("/").pop()!;
+        const meta = guideMeta[guideSlug];
+        return (
+          <GuideCard
+            title={guide.data.title}
+            description={guide.data.description}
+            icon={guide.data.icon}
+            href={`/${lang}/guide/${guideSlug}`}
+            color={meta?.color ?? "#5865F2"}
+            bg={meta?.bg ?? "rgba(88,101,242,0.15)"}
+            lang={lang}
+          />
+        );
+      })}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .guide-index {
+    padding-top: 32px;
+    padding-bottom: 64px;
+  }
+
+  .guide-index-hero {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .guide-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 900px) {
+    .guide-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 560px) {
+    .guide-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
