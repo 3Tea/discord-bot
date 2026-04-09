@@ -15,6 +15,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import { DEV_USER_ID } from "../../util/config/index";
 
 export default {
     data: new SlashCommandBuilder()
@@ -134,6 +135,12 @@ export default {
 
             if (subcommandGroup === "channel-blacklist") {
                 await handleChannelBlacklist(interaction, guildId, subcommand, locale);
+                return;
+            }
+
+            // XP set/add/remove restricted to bot developer only
+            if (interaction.user.id !== DEV_USER_ID) {
+                await interaction.editReply(t(locale, "common.no_permission"));
                 return;
             }
 

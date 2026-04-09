@@ -95,14 +95,6 @@ Use `/server-rank` to see how this server stacks up globally — total XP, membe
 
 > This section is for server administrators.
 
-### Managing XP
-
-| Subcommand | Description | Example |
-|------------|-------------|---------|
-| `/xp set` | Set a user's XP to an exact amount | `/xp set user:@user amount:5000` |
-| `/xp add` | Add XP to a user | `/xp add user:@user amount:500` |
-| `/xp remove` | Remove XP from a user | `/xp remove user:@user amount:200` |
-
 ### Channel Blacklist
 
 Prevent XP from being earned in specific channels (e.g., bot-spam channels):

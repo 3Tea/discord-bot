@@ -95,14 +95,6 @@ Dùng `/server-rank` để xem server này đứng ở vị trí nào — tổng
 
 > Phần này dành cho quản trị viên server.
 
-### Quản Lý XP
-
-| Lệnh Con | Mô Tả | Ví Dụ |
-|----------|--------|--------|
-| `/xp set` | Đặt XP chính xác | `/xp set user:@user amount:5000` |
-| `/xp add` | Thêm XP cho người dùng | `/xp add user:@user amount:500` |
-| `/xp remove` | Trừ XP của người dùng | `/xp remove user:@user amount:200` |
-
 ### Danh Sách Kênh Đen
 
 Ngăn kiếm XP trong các kênh cụ thể (ví dụ: kênh bot-spam):
