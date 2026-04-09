@@ -45,17 +45,22 @@ Admin server chọn cách confession hoạt động:
 
 Ở chế độ review, mod có thể thấy ai gửi confession — nhưng bài đăng công khai luôn ẩn danh.
 
+> **Lưu ý về quyền riêng tư:** Trong chế độ review, moderator có thể xem nội dung confession để kiểm duyệt, nhưng họ **không thể thấy danh tính tác giả**. Chỉ có cơ sở dữ liệu của bot lưu trữ ID tác giả, dùng duy nhất cho việc thực thi lệnh cấm.
+
 ## Confession VIP
 
-Dùng gem để confession nổi bật với **embed màu vàng**. Confession VIP khác biệt về mặt hình ảnh và thu hút sự chú ý hơn.
+Dùng **5 gem** để confession nổi bật với **embed màu vàng**. Confession VIP khác biệt về mặt hình ảnh và thu hút sự chú ý hơn. Nếu confession bị từ chối trong chế độ review, gem sẽ được hoàn lại.
 
 ## Bỏ Qua Cooldown
 
-Có thời gian chờ giữa các confession (admin đặt, 1–120 phút). Nếu không muốn đợi, bạn có thể dùng coin để bỏ qua.
+Có thời gian chờ giữa các confession (admin đặt, 1–120 phút). Nếu không muốn đợi, dùng **50 coin** để bỏ qua. Nếu confession bị từ chối trong chế độ review, coin sẽ được hoàn lại.
 
 ## Bình Chọn & Trả Lời
 
 Mỗi confession đã đăng có nút **upvote** và **downvote**. Bạn cũng có thể **trả lời** confession — phản hồi cũng ẩn danh.
+
+- **Lần trả lời đầu tiên** cho mỗi confession là **miễn phí**
+- **Các lần trả lời tiếp theo** tốn **5 coin** mỗi lần
 
 ## Bảng Lệnh
 

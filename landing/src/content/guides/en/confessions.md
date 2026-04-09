@@ -45,17 +45,22 @@ Your server admin chooses how confessions work:
 
 In review mode, mods can see who submitted the confession — but the public post is always anonymous.
 
+> **Privacy note:** In review mode, moderators can see the confession content for moderation purposes, but they **cannot see the author's identity**. Only the bot's database stores the author ID, which is used solely for ban enforcement.
+
 ## VIP Confessions
 
-Spend gems to make your confession stand out with a **golden embed**. VIP confessions are visually distinct and catch more attention.
+Spend **5 gems** to make your confession stand out with a **golden embed**. VIP confessions are visually distinct and catch more attention. If your confession is rejected in review mode, the gems are refunded.
 
 ## Skip Cooldown
 
-There's a cooldown between confessions (set by your server admin, 1–120 minutes). If you don't want to wait, you can spend coins to skip it.
+There's a cooldown between confessions (set by your server admin, 1–120 minutes). If you don't want to wait, spend **50 coins** to skip it. If your confession is rejected in review mode, the coins are refunded.
 
 ## Voting & Replies
 
-Every published confession has **upvote** and **downvote** buttons. You can also **reply** to confessions — replies are also anonymous.
+Every published confession has **upvote** and **downvote** buttons. You can also **reply** to confessions — replies are anonymous too.
+
+- **First reply** to any confession is **free**
+- **Subsequent replies** cost **5 coins** each
 
 ## Commands Reference
 
