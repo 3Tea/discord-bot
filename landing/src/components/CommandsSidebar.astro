@@ -1,6 +1,16 @@
 ---
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
+
 const categories = [
-  { key: "all", label: "All Commands" },
+  { key: "all", label: t("commands.title") },
   { key: "voice", label: "🎙️ Voice" },
   { key: "xp", label: "📊 XP & Leveling" },
   { key: "economy", label: "💰 Economy" },
@@ -14,7 +24,7 @@ const categories = [
 
 <aside class="sidebar" id="commands-sidebar">
   <div class="sidebar-section">
-    <p class="sidebar-label">Categories</p>
+    <p class="sidebar-label">{t("commands.categories")}</p>
     <div class="sidebar-categories">
       {categories.map((c) => (
         <button
@@ -28,11 +38,11 @@ const categories = [
   </div>
 
   <div class="sidebar-section">
-    <p class="sidebar-label">Search</p>
+    <p class="sidebar-label">{t("commands.search.label")}</p>
     <input
       type="text"
       class="sidebar-search"
-      placeholder="🔍 Search commands..."
+      placeholder={`🔍 ${t("commands.search")}`}
       id="command-search"
     />
   </div>

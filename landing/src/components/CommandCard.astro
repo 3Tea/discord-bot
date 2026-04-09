@@ -1,13 +1,17 @@
 ---
 import type { Command } from "../data/commands";
 import { categoryMeta } from "../data/commands";
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
 
 interface Props {
   command: Command;
   href?: string;
+  lang?: Lang;
 }
 
-const { command, href } = Astro.props;
+const { command, href, lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 const meta = categoryMeta[command.category];
 const items = command.subcommands || command.options || [];
 const maxShow = 4;
@@ -35,7 +39,7 @@ const overflow = items.length - maxShow;
         {overflow > 0 && <span class="pill pill-more">+{overflow} more</span>}
       </div>
     )}
-    <span class="guide-link-text">Guide →</span>
+    <span class="guide-link-text">{t("commands.guide")}</span>
   </div>
 </a>
 
