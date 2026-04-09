@@ -10,6 +10,7 @@ import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import WalletService, { DailyClaimResult } from "../../services/economy/wallet.service";
 import TransactionModel from "../../models/transaction.model";
+import UserEconomyModel from "../../models/userEconomy.model";
 
 const GLOBAL_GUILD_ID = "global";
 const HISTORY_PAGE_SIZE = 10;
@@ -112,6 +113,16 @@ async function handleDaily(interaction: ChatInputCommandInteraction): Promise<vo
         const locale = await resolveLocale(interaction);
         const userId = interaction.user.id;
         const result = await WalletService.claimDaily(userId);
+
+        // Check multi-server milestones
+        const mutualGuildIds = await UserEconomyModel.distinct("guildId", { userId });
+        const serverCount = mutualGuildIds.length;
+        const serverMilestones = [3, 5, 10] as const;
+        for (const threshold of serverMilestones) {
+            if (serverCount >= threshold) {
+                await WalletService.checkAndAwardMilestone(userId, `multi_server_${threshold}`);
+            }
+        }
 
         const embed = formatDailyEmbed(interaction, result, locale);
         await Reply.embedEdit(interaction, embed);

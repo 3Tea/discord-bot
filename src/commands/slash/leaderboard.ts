@@ -9,6 +9,7 @@ import {
 
 import client from "../../client";
 import MemberXPModel from "../../models/memberXP.model";
+import WalletService from "../../services/economy/wallet.service";
 import UserModel from "../../models/user.model";
 import XPSnapshotModel from "../../models/xpSnapshot.model";
 import { BUTTON_ID } from "../../util/config/button";
@@ -184,6 +185,18 @@ async function paginateLeaderboard(
                 return { entries: [], allTimeGlobal: allUsers };
             } else {
                 const allMembers = await MemberXPModel.find({ guildId }).sort({ xp: -1 }).limit(MAX_RESULTS);
+
+                // Check global wallet leaderboard milestone
+                const userRankIndex = allMembers.findIndex(
+                    (m) => m.userId === interaction.user.id
+                );
+                if (userRankIndex >= 0 && userRankIndex < 3) {
+                    await WalletService.checkAndAwardMilestone(
+                        interaction.user.id,
+                        "leaderboard_top3"
+                    );
+                }
+
                 return { entries: [], allTimeServer: allMembers };
             }
         }

@@ -1,6 +1,7 @@
 import { Events, Message } from "discord.js";
 
 import MemberXPModel from "../models/memberXP.model";
+import WalletService from "../services/economy/wallet.service";
 import GuildXPConfigModel from "../models/guildXPConfig.model";
 import { levelFromXP, randomXP } from "../util/xp/calculator";
 import { checkMessageSpam, hashMessage } from "../util/xp/antiSpam";
@@ -75,6 +76,14 @@ export default {
             if (newLevel > updated.level) {
                 await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
                 await rewardLevelUp(message.author.id, message.guild.id, newLevel);
+
+                // Check global wallet level milestones
+                const levelMilestones = [10, 25, 50, 100] as const;
+                for (const threshold of levelMilestones) {
+                    if (newLevel >= threshold) {
+                        await WalletService.checkAndAwardMilestone(message.author.id, `level_${threshold}`);
+                    }
+                }
             }
         } catch (error) {
             logger.error(`[messageCreate:xp] ${error instanceof Error ? error.message : "Unknown error"}`);

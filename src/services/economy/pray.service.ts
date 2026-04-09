@@ -1,5 +1,6 @@
 import UserEconomyModel from "../../models/userEconomy.model";
 import CurrencyService from "./currency.service";
+import WalletService from "./wallet.service";
 
 interface Reward {
     coin: number;
@@ -98,6 +99,14 @@ async function pray(userId: string, guildId: string, targetId?: string): Promise
             userReward.coin += milestone.bonusCoin;
             userReward.gem += milestone.bonusGem;
             break;
+        }
+    }
+
+    // Check global wallet pray streak milestones
+    const prayStreakMilestones = [7, 14, 30] as const;
+    for (const threshold of prayStreakMilestones) {
+        if (newStreak >= threshold) {
+            await WalletService.checkAndAwardMilestone(userId, `pray_streak_${threshold}`);
         }
     }
 
