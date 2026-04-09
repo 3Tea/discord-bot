@@ -190,3 +190,40 @@ Transaction type: `"admin"` with metadata `{ action: "set-coin" | "add-coin" | .
 | `buyItem(userId, guildId, itemId, guild)` | Full purchase flow with atomic deduction and effect application |
 | `addItem(guildId, data)` | Create shop item, prevent duplicate itemId |
 | `removeItem(guildId, itemId)` | Soft delete (enabled: false) |
+
+## Passive Activity Rewards
+
+Coin and gem rewards earned automatically through XP-tracked activity.
+
+### Level Up Rewards
+
+When a user levels up (via message or voice XP):
+- **Coin**: `levelUpCoinBase + (level × levelUpCoinPerLevel)` — default: `50 + (level × 10)`
+- **Gem**: Awarded at milestone levels only (default: Lv.10→1, Lv.25→2, Lv.50→3, Lv.75→4, Lv.100→5)
+- Transaction type: `level_up`
+
+### Voice Time Rewards
+
+During active voice sessions (same eligibility as voice XP):
+- Every `voiceCoinInterval` minutes (default: 30), user receives `voiceCoinReward` coins (default: 10)
+- Tracked via Redis counter `voice_coin:{guildId}:{userId}`, cleaned up on session end
+- Transaction type: `voice_reward`
+
+### Configuration
+
+Per-guild via `GuildEconomyRewardConfig` model:
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | `true` | Master toggle for passive rewards |
+| `levelUpCoinBase` | `50` | Base coin on level up |
+| `levelUpCoinPerLevel` | `10` | Additional coin per level |
+| `gemMilestones` | `{10:1, 25:2, 50:3, 75:4, 100:5}` | Level → gem reward map |
+| `voiceCoinInterval` | `30` | Minutes between voice coin awards |
+| `voiceCoinReward` | `10` | Coins per voice interval |
+
+Admin commands: `/economy reward-config-view`, `reward-config-toggle`, `reward-config-set`, `reward-config-milestone`
+
+### Dependency on XP
+
+Passive rewards hook into the XP flow. If `GuildXPConfig.enabled = false`, XP events don't fire and passive rewards are not awarded.
