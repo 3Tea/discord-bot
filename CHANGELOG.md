@@ -6,6 +6,37 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [5.4.0] - 2026-04-09
+
+### Added
+
+- **Global Wallet System** — new bot-controlled **star** currency, completely separate from per-guild coins/gems.
+  - **`/wallet view`** — check star balance, daily streak, and milestones claimed.
+  - **`/wallet daily`** — claim 1–3 stars per day (UTC reset) with consecutive-day streak bonuses (+2/+5/+10/+20 at 3/7/14/30 days).
+  - **`/wallet history`** — paginated global transaction history.
+  - **Achievement milestones** — one-time star rewards for reaching level 10/25/50/100, pray streak 7/14/30, leaderboard top 3, and being active in 3/5/10 servers.
+  - **Security**: no admin commands, no exchange with coin/gem, no transfer between users, atomic cooldown check to prevent double-claim.
+  - **`UserWallet` model**, **`WalletService`** (core, daily claim, milestones), 4 new `global_*` transaction types.
+  - **i18n**: wallet translation keys added to all 15 locales.
+- **Landing — 4 new user guides** (EN + VI):
+  - **Manga & NSFW** — 6 source commands, NSFW safety, search/read/random usage.
+  - **Utility** — `/ping`, `/trans`, `/weather`.
+  - **Info & Help** — `/help`, `/info bot`, `/avatar`.
+  - **Settings & Language** — `/settings language`, `/settings server-language`, 15-language table, resolution priority.
+- **Landing — Wallet command page** (EN + VI) with star currency, daily streak, and milestone documentation.
+- **Landing — Economy guide**: new "Global Wallet & Star Currency" section + admin config commands (`reward-config-*`, `gambling-config-*`, `work-config-*`, `social-config-*`) + expanded Commands Reference table.
+
+### Fixed
+
+- **Landing — XP guide**: detailed leaderboard modes (Server/Global/Servers), reaction XP note, level-up economy rewards.
+- **Landing — Voice guide**: ownership expiry, kick behavior, transfer details, rename rate limit.
+- **Landing — Confessions guide**: added VIP cost (5 gems), skip cooldown cost (50 coins), reply pricing (first free, 5 coins after), privacy note for review mode.
+- **Landing — Moderation guide**: bot permission requirements, "strictly above" role hierarchy clarification.
+
+### Changed
+
+- **`/xp set` / `add` / `remove`** restricted to `DEV_USER_ID` only — no longer available to server admins. Channel blacklist remains admin-accessible.
+
 ## [5.3.0] - 2026-04-08
 
 ### Added
