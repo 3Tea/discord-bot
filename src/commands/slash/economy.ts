@@ -9,6 +9,7 @@ import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
 import GuildEconomyRewardConfigModel from "../../models/guildEconomyRewardConfig.model";
 import GuildGamblingConfigModel from "../../models/guildGamblingConfig.model";
+import GuildWorkConfigModel from "../../models/guildWorkConfig.model";
 import { invalidateRewardConfigCache } from "../../util/economy/activityReward";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -183,6 +184,40 @@ export default {
                             { name: "min-bet", value: "minBet" },
                             { name: "max-bet", value: "maxBet" },
                             { name: "cooldown", value: "cooldown" },
+                        )
+                )
+                .addIntegerOption((opt) =>
+                    opt
+                        .setName("value")
+                        .setDescription("New value")
+                        .setMinValue(0)
+                        .setRequired(true)
+                )
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("work-config-view")
+                .setDescription("View work & fish config")
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("work-config-toggle")
+                .setDescription("Enable/disable work & fish commands")
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("work-config-set")
+                .setDescription("Set a work/fish config value")
+                .addStringOption((opt) =>
+                    opt
+                        .setName("setting")
+                        .setDescription("Setting to change")
+                        .setRequired(true)
+                        .addChoices(
+                            { name: "work-cooldown", value: "workCooldown" },
+                            { name: "work-min-reward", value: "workMinReward" },
+                            { name: "work-max-reward", value: "workMaxReward" },
+                            { name: "fish-cooldown", value: "fishCooldown" },
                         )
                 )
                 .addIntegerOption((opt) =>
@@ -383,6 +418,55 @@ export default {
                     await redis.deleteKey(`gambling_config:${guildId}`);
                     embed = new EmbedBuilder()
                         .setDescription(t(locale, "gambling_config.updated"))
+                        .setColor(0x57f287);
+                    break;
+                }
+                case "work-config-view": {
+                    const wConfig = await GuildWorkConfigModel.findOneAndUpdate(
+                        { guildId },
+                        { $setOnInsert: { guildId } },
+                        { upsert: true, new: true }
+                    );
+                    const workCdText = `${Math.floor(wConfig.workCooldown / 3600)}h ${Math.floor((wConfig.workCooldown % 3600) / 60)}m`;
+                    const fishCdText = `${Math.floor(wConfig.fishCooldown / 3600)}h ${Math.floor((wConfig.fishCooldown % 3600) / 60)}m`;
+                    embed = new EmbedBuilder()
+                        .setTitle(t(locale, "work_config.title"))
+                        .addFields(
+                            { name: t(locale, "work_config.enabled"), value: wConfig.enabled ? "✅" : "❌", inline: true },
+                            { name: t(locale, "work_config.work_cooldown"), value: workCdText, inline: true },
+                            { name: t(locale, "work_config.work_min"), value: String(wConfig.workMinReward), inline: true },
+                            { name: t(locale, "work_config.work_max"), value: String(wConfig.workMaxReward), inline: true },
+                            { name: t(locale, "work_config.fish_cooldown"), value: fishCdText, inline: true },
+                            { name: t(locale, "work_config.fish_multiplier"), value: `×${wConfig.fishRewardMultiplier}`, inline: true },
+                        )
+                        .setColor(0x5865f2);
+                    break;
+                }
+                case "work-config-toggle": {
+                    const wConfig = await GuildWorkConfigModel.findOneAndUpdate(
+                        { guildId },
+                        { $setOnInsert: { guildId } },
+                        { upsert: true, new: true }
+                    );
+                    const newEnabled = !wConfig.enabled;
+                    await GuildWorkConfigModel.updateOne({ guildId }, { $set: { enabled: newEnabled } });
+                    await redis.deleteKey(`work_config:${guildId}`);
+                    embed = new EmbedBuilder()
+                        .setDescription(t(locale, newEnabled ? "work_config.toggled_on" : "work_config.toggled_off"))
+                        .setColor(newEnabled ? 0x57f287 : 0xed4245);
+                    break;
+                }
+                case "work-config-set": {
+                    const setting = interaction.options.getString("setting", true);
+                    const value = interaction.options.getInteger("value", true);
+                    await GuildWorkConfigModel.findOneAndUpdate(
+                        { guildId },
+                        { $set: { [setting]: value }, $setOnInsert: { guildId } },
+                        { upsert: true }
+                    );
+                    await redis.deleteKey(`work_config:${guildId}`);
+                    embed = new EmbedBuilder()
+                        .setDescription(t(locale, "work_config.updated"))
                         .setColor(0x57f287);
                     break;
                 }
