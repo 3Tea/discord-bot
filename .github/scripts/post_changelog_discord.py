@@ -126,7 +126,7 @@ def main() -> int:
 
     payload = {
         "embeds": [embed],
-        "username": "GitHub Actions",
+        "username": "3AT Release Notes",
     }
 
     request = urllib.request.Request(
