@@ -12,7 +12,8 @@ export type TransactionType =
     | "confession_refund"
     | "confession_reply"
     | "level_up"
-    | "voice_reward";
+    | "voice_reward"
+    | "gambling";
 
 export interface ITransaction extends Document {
     userId: string;
@@ -43,6 +44,7 @@ const transactionSchema = new Schema(
                 "confession_reply",
                 "level_up",
                 "voice_reward",
+                "gambling",
             ],
             required: true,
         },
