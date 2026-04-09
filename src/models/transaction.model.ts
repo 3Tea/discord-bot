@@ -18,7 +18,11 @@ export type TransactionType =
     | "fish"
     | "gift"
     | "rob"
-    | "rob_penalty";
+    | "rob_penalty"
+    | "global_daily"
+    | "global_streak_bonus"
+    | "global_milestone"
+    | "global_spend";
 
 export interface ITransaction extends Document {
     userId: string;
@@ -55,6 +59,10 @@ const transactionSchema = new Schema(
                 "gift",
                 "rob",
                 "rob_penalty",
+                "global_daily",
+                "global_streak_bonus",
+                "global_milestone",
+                "global_spend",
             ],
             required: true,
         },
