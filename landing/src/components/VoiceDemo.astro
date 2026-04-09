@@ -1,25 +1,19 @@
 ---
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
+
 const steps = [
-  {
-    number: 1,
-    title: "Join the trigger channel",
-    desc: 'Any channel with a "3AT " prefix acts as a trigger. Just join it.',
-  },
-  {
-    number: 2,
-    title: "Bot auto-creates your room",
-    desc: "A private voice channel is instantly created just for you.",
-  },
-  {
-    number: 3,
-    title: "Use the control panel",
-    desc: "Lock, hide, permit, kick, rename — full control via slash commands.",
-  },
-  {
-    number: 4,
-    title: "Auto-cleanup when empty",
-    desc: "When everyone leaves, the channel is deleted automatically.",
-  },
+  { number: 1, title: t("voice.step1.title"), desc: t("voice.step1.desc") },
+  { number: 2, title: t("voice.step2.title"), desc: t("voice.step2.desc") },
+  { number: 3, title: t("voice.step3.title"), desc: t("voice.step3.desc") },
+  { number: 4, title: t("voice.step4.title"), desc: t("voice.step4.desc") },
 ];
 
 const controlButtons = [
@@ -37,10 +31,10 @@ const controlButtons = [
 <section id="voice" class="voice-section">
   <div class="container">
     <div class="section-header">
-      <p class="section-label">Voice Management</p>
-      <h2 class="section-title">Your room, your rules</h2>
+      <p class="section-label">{t("voice.label")}</p>
+      <h2 class="section-title">{t("voice.title")}</h2>
       <p class="section-subtitle">
-        Temporary voice channels that create themselves and clean up after.
+        {t("voice.subtitle")}
       </p>
     </div>
 

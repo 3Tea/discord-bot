@@ -1,7 +1,17 @@
 ---
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
+
 /**
  * Community feedback — copy is written as typical admin/mod notes (composite themes),
- * not fabricated “perfect” reviews. Keeps the landing honest.
+ * not fabricated "perfect" reviews. Keeps the landing honest.
  */
 const reviews = [
   {
@@ -31,10 +41,10 @@ const reviews = [
 <section class="testimonials-section">
   <div class="container">
     <div class="section-header">
-      <p class="section-label">Community</p>
-      <h2 class="section-title">What we hear from servers</h2>
+      <p class="section-label">{t("testimonials.label")}</p>
+      <h2 class="section-title">{t("testimonials.title")}</h2>
       <p class="section-subtitle">
-        Short notes in the spirit of real tickets and DMs — common themes, not paid quotes.
+        {t("testimonials.subtitle")}
       </p>
     </div>
 

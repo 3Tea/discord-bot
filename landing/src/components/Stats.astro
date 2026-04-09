@@ -1,9 +1,19 @@
 ---
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
+
 const stats = [
-  { value: "500+", label: "Servers", target: 500 },
-  { value: "50K+", label: "Users", target: 50000 },
-  { value: "99.9%", label: "Uptime", target: null },
-  { value: "2019", label: "Since", target: null },
+  { value: "500+", label: t("stats.servers"), target: 500 },
+  { value: "50K+", label: t("stats.users"), target: 50000 },
+  { value: "99.9%", label: t("stats.uptime"), target: null },
+  { value: "2019", label: t("stats.since"), target: null },
 ];
 ---
 

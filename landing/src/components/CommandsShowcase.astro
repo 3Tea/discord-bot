@@ -1,13 +1,23 @@
 ---
+import { useTranslations, useTranslatedPath } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
+const tp = useTranslatedPath(lang);
 ---
 
 <section id="commands" class="commands-section">
   <div class="container">
     <div class="section-header">
-      <p class="section-label">Commands</p>
-      <h2 class="section-title">See it in action</h2>
+      <p class="section-label">{t("showcase.label")}</p>
+      <h2 class="section-title">{t("showcase.title")}</h2>
       <p class="section-subtitle">
-        Discord-native embed previews of real bot responses.
+        {t("showcase.subtitle")}
       </p>
     </div>
 
@@ -84,8 +94,8 @@
     </div>
 
     <div class="commands-cta">
-      <a href="/commands" class="cta-link">
-        View all commands &rarr;
+      <a href={tp("/commands")} class="cta-link">
+        {t("showcase.cta")}
       </a>
     </div>
   </div>
