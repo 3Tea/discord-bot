@@ -127,6 +127,12 @@ export const commands: Command[] = [
     options: ["user (required)"],
   },
   {
+    name: "wallet",
+    description: "Global wallet — view star balance, claim daily rewards, and track history",
+    category: "economy",
+    subcommands: ["view", "daily", "history"],
+  },
+  {
     name: "moderation",
     description:
       "Staff moderation — timeout (≤28 days), remove timeout, ban, kick, and unban by user ID (requires ModerateMembers / BanMembers)",
