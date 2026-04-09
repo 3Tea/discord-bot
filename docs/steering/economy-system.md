@@ -301,3 +301,45 @@ Per-guild via `GuildWorkConfig` model:
 Admin commands: `/economy work-config-view`, `work-config-toggle`, `work-config-set`
 
 Transaction types: `"work"`, `"fish"`
+
+## Social Interactions
+
+User-to-user coin transfer commands. Rob acts as a net coin sink.
+
+### Commands
+
+| Command | Mechanics |
+|---------|-----------|
+| `/gift <user> <amount>` | Direct transfer, max configurable (default 1000), no cooldown |
+| `/rob <user>` | 40% success (steal 10-30% target balance), 60% fail (lose 10-20% own balance) |
+
+### Rob Protections
+
+- **Min balance:** Target must have ≥100 coin (configurable) to be robbed
+- **Immunity:** Target gets 2h immunity after being successfully robbed
+- **Cooldown:** Robber has 6h cooldown between attempts
+
+### Rob Economics
+
+- Average steal: ~20% × 40% = 8% of target transferred per attempt
+- Average penalty: ~15% × 60% = 9% of robber destroyed per attempt
+- **Net negative for robber** — rob is a coin sink on average
+
+### Configuration
+
+Per-guild via `GuildSocialConfig` model:
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | `true` | Master toggle for gift + rob |
+| `giftMaxAmount` | `1000` | Max coin per gift |
+| `robCooldown` | `21600` (6h) | Robber cooldown |
+| `robSuccessRate` | `0.4` (40%) | Rob success chance |
+| `robStealMinPct` / `robStealMaxPct` | `10` / `30` | Steal range (% of target) |
+| `robPenaltyMinPct` / `robPenaltyMaxPct` | `10` / `20` | Fine range (% of robber) |
+| `robMinBalance` | `100` | Target protection threshold |
+| `robImmunityDuration` | `7200` (2h) | Target immunity after rob |
+
+Admin commands: `/economy social-config-view`, `social-config-toggle`, `social-config-set`
+
+Transaction types: `"gift"`, `"rob"`, `"rob_penalty"`
