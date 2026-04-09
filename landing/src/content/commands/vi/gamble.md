@@ -1,8 +1,8 @@
 ---
-title: Cờ bạc
+title: Thử vận may
 command: gamble
 category: economy
-description: Mini-game cờ bạc — đặt cược coin với tung đồng xu, máy xèng, hoặc xúc xắc.
+description: Mini-game thử vận may — đặt cược coin với tung đồng xu, máy xèng, hoặc xúc xắc.
 cooldown: "30s (tùy chỉnh)"
 ---
 
@@ -43,7 +43,7 @@ cooldown: "30s (tùy chỉnh)"
 ### Xúc xắc
 Tung 2 xúc xắc (2d6). Chọn **cao** (tổng ≥ 8) hoặc **thấp** (tổng ≤ 6). Tổng 7 luôn thua — đó là lợi thế nhà cái.
 
-> **Lưu ý:** Cờ bạc là nơi tiêu coin — bạn sẽ mất coin trung bình theo thời gian. Đặt cược có trách nhiệm!
+> **Lưu ý:** Thử vận may là nơi tiêu coin — bạn sẽ mất coin trung bình theo thời gian. Đặt cược có trách nhiệm!
 
 ### Cấu hình Server
 Admin có thể cấu hình cược tối thiểu/tối đa, thời gian chờ qua lệnh `/economy gambling-config-*`.

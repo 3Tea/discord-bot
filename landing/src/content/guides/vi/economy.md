@@ -73,14 +73,14 @@ Kiếm 80–200 coin mỗi ca làm việc với thời gian chờ 4 giờ. Chạ
 ### /fish
 Thả câu mỗi giờ để có cơ hội bắt cá với 4 cấp độ hiếm. Cá thường (55%) cho 10–30 coin, trong khi cá huyền thoại (4%) có thể thưởng 300–600 coin. Tên cá và cấp độ hiếm được hiển thị trong embed.
 
-## Cờ Bạc
+## Thử Vận May
 
 Dùng `/gamble` để đặt cược coin vào các mini-game:
 - **Coinflip** — 50/50 nhân đôi hoặc mất tất cả
 - **Slots** — trùng biểu tượng để thắng đến ×20
 - **Dice** — đoán cao/thấp trên 2d6
 
-Cờ bạc có lợi thế nhà cái (trừ coinflip) và là nơi tiêu coin. Cược tối thiểu/tối đa và thời gian chờ có thể tùy chỉnh bởi admin.
+Thử vận may có lợi thế nhà cái (trừ coinflip) và là nơi tiêu coin. Cược tối thiểu/tối đa và thời gian chờ có thể tùy chỉnh bởi admin.
 
 ## Kinh Tế Xã Hội
 
