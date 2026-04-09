@@ -7,6 +7,7 @@ import { checkMessageSpam, hashMessage } from "../util/xp/antiSpam";
 import { syncGlobalXP } from "../util/xp/globalXP";
 import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
+import { rewardLevelUp } from "../util/economy/activityReward";
 
 export default {
     name: Events.MessageCreate,
@@ -73,6 +74,7 @@ export default {
             const newLevel = levelFromXP(updated.xp);
             if (newLevel > updated.level) {
                 await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
+                await rewardLevelUp(message.author.id, message.guild.id, newLevel);
             }
         } catch (error) {
             logger.error(`[messageCreate:xp] ${error instanceof Error ? error.message : "Unknown error"}`);
