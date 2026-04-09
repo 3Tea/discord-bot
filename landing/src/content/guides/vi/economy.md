@@ -3,7 +3,7 @@ title: Hệ Thống Kinh Tế
 description: Tìm hiểu cách kiếm coin và gem, xây dựng chuỗi cầu nguyện, và mua sắm trong shop.
 icon: "💰"
 order: 1
-relatedCommands: ["balance", "pray", "curse", "shop", "economy"]
+relatedCommands: ["balance", "pray", "curse", "shop", "economy", "gamble", "work", "fish", "gift", "rob"]
 ---
 
 ## Tổng Quan
@@ -64,6 +64,31 @@ Mỗi server có shop riêng với các vật phẩm tùy chỉnh. Xem với `/s
 | Currency Exchange | Đổi giữa các loại tiền |
 
 Vật phẩm có thể có **số lượng giới hạn** — hết hàng thì phải đợi admin bổ sung.
+
+## Làm Việc & Câu Cá
+
+### /work
+Kiếm 80–200 coin mỗi ca làm việc với thời gian chờ 4 giờ. Chạy lệnh, nhận mô tả công việc ngẫu nhiên và nhận lương. Thu nhập đơn giản và ổn định.
+
+### /fish
+Thả câu mỗi giờ để có cơ hội bắt cá với 4 cấp độ hiếm. Cá thường (55%) cho 10–30 coin, trong khi cá huyền thoại (4%) có thể thưởng 300–600 coin. Tên cá và cấp độ hiếm được hiển thị trong embed.
+
+## Cờ Bạc
+
+Dùng `/gamble` để đặt cược coin vào các mini-game:
+- **Coinflip** — 50/50 nhân đôi hoặc mất tất cả
+- **Slots** — trùng biểu tượng để thắng đến ×20
+- **Dice** — đoán cao/thấp trên 2d6
+
+Cờ bạc có lợi thế nhà cái (trừ coinflip) và là nơi tiêu coin. Cược tối thiểu/tối đa và thời gian chờ có thể tùy chỉnh bởi admin.
+
+## Kinh Tế Xã Hội
+
+### /gift
+Gửi coin trực tiếp cho người dùng khác. Tối đa 1.000 coin mỗi lần tặng (tùy chỉnh). Không có thời gian chờ.
+
+### /rob
+Cố cướp 10–30% coin của người dùng khác. Tỉ lệ thành công 40% — nhưng thất bại sẽ khiến bạn mất 10–20% số dư của mình. Các bảo vệ ngăn việc nhắm vào người nghèo hoặc vừa bị cướp.
 
 ## Bảng Lệnh
 

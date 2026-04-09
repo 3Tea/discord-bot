@@ -99,6 +99,34 @@ export const commands: Command[] = [
     subcommands: ["set-coin", "add-coin", "set-gem", "add-gem"],
   },
   {
+    name: "gamble",
+    description: "Gambling mini-games — coinflip, slots, and dice with coin betting",
+    category: "economy",
+    subcommands: ["coinflip", "slots", "dice"],
+  },
+  {
+    name: "work",
+    description: "Work a job to earn coins — random reward with cooldown",
+    category: "economy",
+  },
+  {
+    name: "fish",
+    description: "Go fishing to catch fish for coins — 4 rarity tiers from common to legendary",
+    category: "economy",
+  },
+  {
+    name: "gift",
+    description: "Gift coins to another user — direct transfer with configurable max amount",
+    category: "economy",
+    options: ["user (required)", "amount (required)"],
+  },
+  {
+    name: "rob",
+    description: "Attempt to rob coins from another user — 40% success rate with protections",
+    category: "economy",
+    options: ["user (required)"],
+  },
+  {
     name: "moderation",
     description:
       "Staff moderation — timeout (≤28 days), remove timeout, ban, kick, and unban by user ID (requires ModerateMembers / BanMembers)",

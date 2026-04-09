@@ -3,7 +3,7 @@ title: Economy System
 description: Learn how to earn coins and gems, build pray streaks, and spend in the shop.
 icon: "💰"
 order: 1
-relatedCommands: ["balance", "pray", "curse", "shop", "economy"]
+relatedCommands: ["balance", "pray", "curse", "shop", "economy", "gamble", "work", "fish", "gift", "rob"]
 ---
 
 ## Overview
@@ -64,6 +64,31 @@ Each server can have its own shop with custom items. Browse with `/shop view` an
 | Currency Exchange | Convert between currencies |
 
 Items may have **limited stock** — once sold out, they're gone until the admin restocks.
+
+## Working & Fishing
+
+### /work
+Earn 80–200 coins per work session with a 4-hour cooldown. Run the command, get a random job description, and collect your pay. Simple and reliable income.
+
+### /fish
+Cast your line every hour for a chance at 4 rarity tiers of fish. Common catches (55%) earn 10–30 coins, while legendary catches (4%) can reward 300–600 coins. Fish names and rarities are displayed in the embed.
+
+## Gambling
+
+Use `/gamble` to bet coins on mini-games:
+- **Coinflip** — 50/50 double or nothing
+- **Slots** — match symbols for up to ×20 payout
+- **Dice** — guess high/low on a 2d6 roll
+
+Gambling has a house edge (except coinflip) and acts as a coin sink. Min/max bets and cooldowns are configurable by admins.
+
+## Social Economy
+
+### /gift
+Send coins directly to another user. Max 1,000 coins per gift (configurable). No cooldown.
+
+### /rob
+Attempt to steal 10–30% of another user's coins. 40% success rate — but failure costs you 10–20% of your own balance. Protections prevent targeting poor or recently-robbed users.
 
 ## Commands Reference
 
