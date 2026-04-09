@@ -60,11 +60,13 @@ Bạn cũng có thể dùng các lệnh con `/voice` thay vì nút trên bảng:
 
 ## Lưu Ý
 
-- **Quyền sở hữu hết hạn** sau 12 giờ không hoạt động
-- **Kênh tự xóa** khi trống (hoặc chỉ còn bot)
+- **Quyền sở hữu hết hạn** sau 12 giờ không có ai trong kênh
+- **Kênh tự xóa** khi trống (hoặc chỉ còn bot) và quyền sở hữu đã hết hạn
+- Nếu chủ kênh **bị đuổi khỏi kênh**, họ mất quyền sở hữu ngay lập tức
+- **Transfer** trao toàn quyền cho chủ mới — danh sách permit và block của bạn bị xóa, chủ mới bắt đầu từ đầu
 - Bạn **không thể** tự permit, block, kick hoặc transfer cho chính mình
 - **Kick** hiện xác nhận — bạn có thể chọn "Chỉ đuổi" hoặc "Đuổi và Chặn"
-- **Transfer** xóa danh sách permit và block — chủ mới bắt đầu từ đầu
+- **Đổi tên** bị giới hạn tốc độ 2 lần mỗi 10 phút (giới hạn Discord API)
 - Chat thoại trong kênh kiếm **Voice XP** (5 XP/phút khi có 2+ người)
 
 ## Dành Cho Admin

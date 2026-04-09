@@ -60,11 +60,13 @@ You can also use `/voice` subcommands instead of the panel buttons:
 
 ## Things to Know
 
-- **Ownership expires** after 12 hours of inactivity
-- **Channels auto-delete** when empty (or only bots remain)
+- **Ownership expires** after 12 hours of inactivity (no one in the channel)
+- **Channels auto-delete** when empty (or only bots remain) and ownership has expired
+- If the owner is **kicked from the channel**, they lose ownership immediately
+- **Transfer** gives full control to the new owner — your permit and block lists are cleared, and the new owner starts fresh
 - You **cannot** target yourself for permit, block, kick, or transfer
 - **Kick** shows a confirmation — you can choose "Kick only" or "Kick & Block"
-- **Transfer** clears your permit and block lists — the new owner starts fresh
+- **Rename** is rate-limited to 2 changes per 10 minutes (Discord API limit)
 - Voice chat in your channel earns **Voice XP** (5 XP/min when 2+ humans are present)
 
 ## For Admins & Mods
