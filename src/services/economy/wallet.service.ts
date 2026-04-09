@@ -114,6 +114,7 @@ async function addStar(
     reason: TransactionType,
     metadata: Record<string, unknown> = {}
 ): Promise<IUserWallet> {
+    if (amount <= 0) throw new Error("addStar amount must be positive");
     const wallet = await UserWalletModel.findOneAndUpdate(
         { userId },
         {
@@ -132,6 +133,7 @@ async function deductStar(
     reason: TransactionType,
     metadata: Record<string, unknown> = {}
 ): Promise<IUserWallet> {
+    if (amount <= 0) throw new Error("deductStar amount must be positive");
     const wallet = await UserWalletModel.findOneAndUpdate(
         { userId, star: { $gte: amount } },
         { $inc: { star: -amount } },
@@ -146,13 +148,30 @@ async function deductStar(
 }
 
 async function claimDaily(userId: string): Promise<DailyClaimResult> {
-    const wallet = await getOrCreate(userId);
+    const now = new Date();
+    const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-    if (wallet.lastDaily && isSameUTCDay(wallet.lastDaily, new Date())) {
-        throw new Error("DAILY_COOLDOWN");
+    // Atomic cooldown check: only claim if lastDaily is null or before today UTC
+    const wallet = await UserWalletModel.findOneAndUpdate(
+        {
+            userId,
+            $or: [{ lastDaily: null }, { lastDaily: { $lt: startOfToday } }],
+        },
+        { $set: { lastDaily: now } },
+        { new: true }
+    );
+
+    if (!wallet) {
+        // Either wallet doesn't exist or cooldown active
+        const existing = await getOrCreate(userId);
+        if (existing.lastDaily && isSameUTCDay(existing.lastDaily, now)) {
+            throw new Error("DAILY_COOLDOWN");
+        }
+        // Wallet didn't exist — create and retry
+        return claimDaily(userId);
     }
 
-    const now = new Date();
+    // Calculate streak
     let newStreak = 1;
     if (wallet.lastStreakDate && isConsecutiveUTCDay(wallet.lastStreakDate, now)) {
         newStreak = wallet.dailyStreak + 1;
@@ -172,11 +191,12 @@ async function claimDaily(userId: string): Promise<DailyClaimResult> {
 
     const totalReward = baseReward + streakBonus;
 
+    // Update streak and star atomically
     await UserWalletModel.updateOne(
         { userId },
         {
             $inc: { star: totalReward },
-            $set: { lastDaily: now, dailyStreak: newStreak, lastStreakDate: now },
+            $set: { dailyStreak: newStreak, lastStreakDate: now },
         }
     );
 

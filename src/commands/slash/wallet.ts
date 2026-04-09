@@ -25,7 +25,6 @@ export default {
             sub
                 .setName("view")
                 .setDescription("View your global wallet balance")
-                .setDescriptionLocalizations(descriptionLocales("cmd.wallet.desc"))
         )
         .addSubcommand((sub) =>
             sub
