@@ -227,3 +227,38 @@ Admin commands: `/economy reward-config-view`, `reward-config-toggle`, `reward-c
 ### Dependency on XP
 
 Passive rewards hook into the XP flow. If `GuildXPConfig.enabled = false`, XP events don't fire and passive rewards are not awarded.
+
+## Gambling Mini-Games
+
+Coin-only betting games via `/gamble` command. Acts as a coin sink with house edge.
+
+### Games
+
+| Game | Command | House Edge | Mechanics |
+|------|---------|-----------|-----------|
+| Coinflip | `/gamble coinflip <bet>` | 0% | 50/50 heads/tails, win ×2 |
+| Slots | `/gamble slots <bet>` | ~12% | Flat probability table, 7 outcomes (×0 to ×20) |
+| Dice | `/gamble dice <bet> <mode>` | ~17% | 2d6, high(≥8)/low(≤6), 7 always loses, win ×2 |
+
+### Configuration
+
+Per-guild via `GuildGamblingConfig` model:
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `enabled` | `true` | Master toggle |
+| `minBet` | `10` | Minimum coin bet |
+| `maxBet` | `500` | Maximum coin bet |
+| `cooldown` | `30` | Seconds between games per user |
+
+Admin commands: `/economy gambling-config-view`, `gambling-config-toggle`, `gambling-config-set`
+
+### Bet Flow
+
+1. Validate config enabled + bet within min/max
+2. Check Redis cooldown (`gamble_cd:{guildId}:{userId}`)
+3. Atomic deduct via `CurrencyService.deduct()`
+4. Play game via `GamblingService`
+5. If win: `CurrencyService.addCoin(payout)`
+6. Set Redis cooldown
+7. Transaction type: `"gambling"` with game metadata
