@@ -1,26 +1,31 @@
 ---
-import { features } from "../data/features";
+import { featureIcons, featureKeys } from "../data/features";
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
+interface Props {
+  lang?: Lang;
+}
+
+const { lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 ---
 
 <section id="features" class="features-section">
   <div class="container">
     <div class="section-header">
-      <p class="section-label">What it does</p>
-      <h2 class="section-title">Everything you need, nothing you don't</h2>
-      <p class="section-subtitle">
-        Powerful features built for Discord servers of all sizes.
-      </p>
+      <p class="section-label">{t("features.label")}</p>
+      <h2 class="section-title">{t("features.title")}</h2>
+      <p class="section-subtitle">{t("features.subtitle")}</p>
     </div>
     <div class="features-grid reveal-stagger">
-      {
-        features.map((feature, i) => (
-          <div class="feature-card reveal" style={`--i: ${i}`}>
-            <div class="feature-icon">{feature.icon}</div>
-            <h3 class="feature-title">{feature.title}</h3>
-            <p class="feature-desc">{feature.description}</p>
-          </div>
-        ))
-      }
+      {featureKeys.map((key, i) => (
+        <div class="feature-card reveal" style={`--i: ${i}`}>
+          <div class="feature-icon">{featureIcons[i]}</div>
+          <h3 class="feature-title">{t(`features.${key}.title`)}</h3>
+          <p class="feature-desc">{t(`features.${key}.desc`)}</p>
+        </div>
+      ))}
     </div>
   </div>
 </section>
