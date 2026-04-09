@@ -10,6 +10,7 @@ import CurrencyService from "../../services/economy/currency.service";
 import GuildEconomyRewardConfigModel from "../../models/guildEconomyRewardConfig.model";
 import GuildGamblingConfigModel from "../../models/guildGamblingConfig.model";
 import GuildWorkConfigModel from "../../models/guildWorkConfig.model";
+import GuildSocialConfigModel from "../../models/guildSocialConfig.model";
 import { invalidateRewardConfigCache } from "../../util/economy/activityReward";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -218,6 +219,40 @@ export default {
                             { name: "work-min-reward", value: "workMinReward" },
                             { name: "work-max-reward", value: "workMaxReward" },
                             { name: "fish-cooldown", value: "fishCooldown" },
+                        )
+                )
+                .addIntegerOption((opt) =>
+                    opt
+                        .setName("value")
+                        .setDescription("New value")
+                        .setMinValue(0)
+                        .setRequired(true)
+                )
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("social-config-view")
+                .setDescription("View gift & rob config")
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("social-config-toggle")
+                .setDescription("Enable/disable gift & rob commands")
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("social-config-set")
+                .setDescription("Set a social config value")
+                .addStringOption((opt) =>
+                    opt
+                        .setName("setting")
+                        .setDescription("Setting to change")
+                        .setRequired(true)
+                        .addChoices(
+                            { name: "gift-max-amount", value: "giftMaxAmount" },
+                            { name: "rob-cooldown", value: "robCooldown" },
+                            { name: "rob-min-balance", value: "robMinBalance" },
+                            { name: "rob-immunity-duration", value: "robImmunityDuration" },
                         )
                 )
                 .addIntegerOption((opt) =>
@@ -467,6 +502,57 @@ export default {
                     await redis.deleteKey(`work_config:${guildId}`);
                     embed = new EmbedBuilder()
                         .setDescription(t(locale, "work_config.updated"))
+                        .setColor(0x57f287);
+                    break;
+                }
+                case "social-config-view": {
+                    const sConfig = await GuildSocialConfigModel.findOneAndUpdate(
+                        { guildId },
+                        { $setOnInsert: { guildId } },
+                        { upsert: true, new: true }
+                    );
+                    const robCdText = `${Math.floor(sConfig.robCooldown / 3600)}h ${Math.floor((sConfig.robCooldown % 3600) / 60)}m`;
+                    const immunityText = `${Math.floor(sConfig.robImmunityDuration / 3600)}h ${Math.floor((sConfig.robImmunityDuration % 3600) / 60)}m`;
+                    embed = new EmbedBuilder()
+                        .setTitle(t(locale, "social_config.title"))
+                        .addFields(
+                            { name: t(locale, "social_config.enabled"), value: sConfig.enabled ? "✅" : "❌", inline: true },
+                            { name: t(locale, "social_config.gift_max"), value: String(sConfig.giftMaxAmount), inline: true },
+                            { name: t(locale, "social_config.rob_cooldown"), value: robCdText, inline: true },
+                            { name: t(locale, "social_config.rob_success_rate"), value: `${Math.round(sConfig.robSuccessRate * 100)}%`, inline: true },
+                            { name: t(locale, "social_config.rob_steal_range"), value: `${sConfig.robStealMinPct}-${sConfig.robStealMaxPct}%`, inline: true },
+                            { name: t(locale, "social_config.rob_penalty_range"), value: `${sConfig.robPenaltyMinPct}-${sConfig.robPenaltyMaxPct}%`, inline: true },
+                            { name: t(locale, "social_config.rob_min_balance"), value: String(sConfig.robMinBalance), inline: true },
+                            { name: t(locale, "social_config.rob_immunity"), value: immunityText, inline: true },
+                        )
+                        .setColor(0x5865f2);
+                    break;
+                }
+                case "social-config-toggle": {
+                    const sConfig = await GuildSocialConfigModel.findOneAndUpdate(
+                        { guildId },
+                        { $setOnInsert: { guildId } },
+                        { upsert: true, new: true }
+                    );
+                    const newEnabled = !sConfig.enabled;
+                    await GuildSocialConfigModel.updateOne({ guildId }, { $set: { enabled: newEnabled } });
+                    await redis.deleteKey(`social_config:${guildId}`);
+                    embed = new EmbedBuilder()
+                        .setDescription(t(locale, newEnabled ? "social_config.toggled_on" : "social_config.toggled_off"))
+                        .setColor(newEnabled ? 0x57f287 : 0xed4245);
+                    break;
+                }
+                case "social-config-set": {
+                    const setting = interaction.options.getString("setting", true);
+                    const value = interaction.options.getInteger("value", true);
+                    await GuildSocialConfigModel.findOneAndUpdate(
+                        { guildId },
+                        { $set: { [setting]: value }, $setOnInsert: { guildId } },
+                        { upsert: true }
+                    );
+                    await redis.deleteKey(`social_config:${guildId}`);
+                    embed = new EmbedBuilder()
+                        .setDescription(t(locale, "social_config.updated"))
                         .setColor(0x57f287);
                     break;
                 }
