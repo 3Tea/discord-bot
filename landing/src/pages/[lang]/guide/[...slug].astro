@@ -6,6 +6,8 @@ import LanguageSwitcher from "../../../components/LanguageSwitcher.astro";
 import GuideToc from "../../../components/GuideToc.astro";
 import RelatedGuides from "../../../components/RelatedGuides.astro";
 import { guideMeta } from "../../../data/guides";
+import { useTranslations, useTranslatedPath } from "../../../i18n/utils";
+import type { Lang } from "../../../i18n/utils";
 
 export async function getStaticPaths() {
   const pages = await getCollection("guides");
@@ -21,6 +23,8 @@ export async function getStaticPaths() {
 }
 
 const { lang, slug } = Astro.params;
+const t = useTranslations(lang as Lang);
+const tp = useTranslatedPath(lang as Lang);
 const { page } = Astro.props;
 const { Content, headings } = await render(page);
 
@@ -34,7 +38,7 @@ const hreflang = [
 ];
 
 const breadcrumbItems = [
-  { label: "Guide", href: "/guide" },
+  { label: t("nav.guide"), href: tp("/guide") },
   { label: page.data.title },
 ];
 
@@ -43,7 +47,7 @@ const altExists = allPages.some((p) => p.id === `${altLang}/${slug}`);
 const showTranslationNotice = lang === "vi" && !altExists;
 ---
 
-<BaseLayout title={pageTitle} description={page.data.description} hreflang={hreflang}>
+<BaseLayout title={pageTitle} description={page.data.description} hreflang={hreflang} lang={lang as Lang}>
   <div class="container guide-page-wrapper">
     <div class="guide-page-main">
       <Breadcrumb items={breadcrumbItems} />
@@ -62,14 +66,14 @@ const showTranslationNotice = lang === "vi" && !altExists;
               </span>
             )}
           </div>
-          <LanguageSwitcher currentLang={lang!} slug={slug!} basePath="guide" />
+          <LanguageSwitcher lang={lang as Lang} />
         </div>
         <p class="guide-description">{page.data.description}</p>
       </div>
 
       {showTranslationNotice && (
         <div class="translation-notice">
-          Bản dịch đang được cập nhật. Nội dung hiện tại hiển thị bằng tiếng Anh.
+          {t("translation.notice")}
         </div>
       )}
 
@@ -79,11 +83,11 @@ const showTranslationNotice = lang === "vi" && !altExists;
         <Content />
       </div>
 
-      <a href="/guide" class="guide-back-link">← Back to Guide</a>
+      <a href={tp("/guide")} class="guide-back-link">{t("guide.back")}</a>
 
       {page.data.relatedCommands && page.data.relatedCommands.length > 0 && (
         <div class="related-section">
-          <h2 class="related-title">Related Commands</h2>
+          <h2 class="related-title">{t("guide.related")}</h2>
           <div class="related-grid">
             {page.data.relatedCommands.map((cmd: string) => (
               <a href={`/${lang}/commands/${cmd}`} class="related-card">

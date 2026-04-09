@@ -6,6 +6,8 @@ import LanguageSwitcher from "../../../components/LanguageSwitcher.astro";
 import RelatedCommands from "../../../components/RelatedCommands.astro";
 import { categoryMeta } from "../../../data/commands";
 import type { Category } from "../../../data/commands";
+import { useTranslations, useTranslatedPath } from "../../../i18n/utils";
+import type { Lang } from "../../../i18n/utils";
 
 export async function getStaticPaths() {
   const pages = await getCollection("commands");
@@ -21,6 +23,8 @@ export async function getStaticPaths() {
 }
 
 const { lang, slug } = Astro.params;
+const t = useTranslations(lang as Lang);
+const tp = useTranslatedPath(lang as Lang);
 const { page } = Astro.props;
 const { Content } = await render(page);
 
@@ -33,8 +37,8 @@ const hreflang = [
 ];
 
 const breadcrumbItems = [
-  { label: "Commands", href: "/commands" },
-  { label: meta?.label ?? page.data.category, href: `/commands` },
+  { label: t("nav.commands"), href: tp("/commands") },
+  { label: meta?.label ?? page.data.category, href: tp("/commands") },
   { label: `/${page.data.command}` },
 ];
 
@@ -44,7 +48,7 @@ const altExists = allPages.some((p) => p.id === `${altLang}/${slug}`);
 const showTranslationNotice = lang === "vi" && !altExists;
 ---
 
-<BaseLayout title={pageTitle} description={page.data.description} hreflang={hreflang}>
+<BaseLayout title={pageTitle} description={page.data.description} hreflang={hreflang} lang={lang as Lang}>
   <div class="container guide-page">
     <Breadcrumb items={breadcrumbItems} />
 
@@ -61,7 +65,7 @@ const showTranslationNotice = lang === "vi" && !altExists;
             </span>
           )}
         </div>
-        <LanguageSwitcher currentLang={lang!} slug={slug!} />
+        <LanguageSwitcher lang={lang as Lang} />
       </div>
       <p class="guide-description">{page.data.description}</p>
       {(page.data.permissions?.length || page.data.cooldown) && (
@@ -84,7 +88,7 @@ const showTranslationNotice = lang === "vi" && !altExists;
 
     {showTranslationNotice && (
       <div class="translation-notice">
-        Bản dịch đang được cập nhật. Nội dung hiện tại hiển thị bằng tiếng Anh.
+        {t("translation.notice")}
       </div>
     )}
 
@@ -92,7 +96,7 @@ const showTranslationNotice = lang === "vi" && !altExists;
       <Content />
     </div>
 
-    <a href="/commands" class="guide-back-link">← Back to Commands</a>
+    <a href={tp("/commands")} class="guide-back-link">{t("commands.back")}</a>
 
     <RelatedCommands
       currentCommand={page.data.command}
