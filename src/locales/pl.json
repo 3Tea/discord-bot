@@ -536,6 +536,40 @@
     "work_config.fish_multiplier": "Fish Reward Multiplier",
     "work_config.updated": "Work config updated.",
     "work_config.toggled_on": "Work commands **enabled**.",
-    "work_config.toggled_off": "Work commands **disabled**."
+    "work_config.toggled_off": "Work commands **disabled**.",
+    "gift.title": "Gift",
+    "gift.success": "**{{from}}** gifted **{{amount}} coin** to **{{to}}**",
+    "gift.from_balance": "{{from}}: {{before}} → {{after}} coin",
+    "gift.to_balance": "{{to}}: {{before}} → {{after}} coin",
+    "gift.max_amount": "Maximum gift is **{{max}}** coin.",
+    "gift.self_error": "Cannot gift yourself.",
+    "gift.bot_error": "Cannot gift a bot.",
+    "gift.insufficient": "Not enough coin. Balance: **{{balance}}**",
+    "gift.disabled": "Social commands are disabled in this server.",
+    "rob.title.success": "Rob — Success!",
+    "rob.title.fail": "Rob — Caught!",
+    "rob.success": "**{{robber}}** robbed **{{amount}} coin** from **{{target}}**!",
+    "rob.fail": "**{{robber}}** tried to rob **{{target}}** but got caught!
+Fined **{{penalty}} coin**",
+    "rob.fail_broke": "**{{robber}}** tried to rob **{{target}}** but got caught!
+No fine — you're broke!",
+    "rob.cooldown": "You can rob again in **{{time}}**.",
+    "rob.target_poor": "**{{target}}** doesn't have enough coin to rob.",
+    "rob.target_immune": "**{{target}}** was recently robbed. Try again in **{{time}}**.",
+    "rob.self_error": "Cannot rob yourself.",
+    "rob.bot_error": "Cannot rob a bot.",
+    "social_config.title": "Social Config",
+    "social_config.enabled": "Social Commands",
+    "social_config.gift_max": "Gift Max Amount",
+    "social_config.rob_cooldown": "Rob Cooldown",
+    "social_config.rob_success_rate": "Rob Success Rate",
+    "social_config.rob_steal_range": "Rob Steal Range",
+    "social_config.rob_penalty_range": "Rob Penalty Range",
+    "social_config.rob_min_balance": "Rob Min Balance",
+    "social_config.rob_immunity": "Rob Immunity",
+    "social_config.updated": "Social config updated.",
+    "social_config.toggled_on": "Social commands **enabled**.",
+    "social_config.toggled_off": "Social commands **disabled**."
+}
 }
 }
