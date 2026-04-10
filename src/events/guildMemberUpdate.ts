@@ -10,6 +10,9 @@ export default {
     once: false,
     async execute(oldMember: GuildMember | PartialGuildMember, newMember: GuildMember) {
         try {
+            // Fetch full member if partial (premiumSince may be unavailable)
+            if (oldMember.partial) oldMember = await oldMember.fetch();
+
             // Detect new boost: premiumSince was null, now has value
             const wasBoosting = oldMember.premiumSince !== null;
             const isBoosting = newMember.premiumSince !== null;

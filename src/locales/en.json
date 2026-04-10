@@ -607,6 +607,8 @@
     "notification.settings.thresholds_set": "Milestone thresholds set to: {{thresholds}}.",
     "notification.settings.no_channel": "Not set",
     "notification.settings.current_channel": "Current channel",
+    "notification.settings.no_permissions": "Bot does not have permission to send messages in that channel.",
+    "notification.settings.invalid_thresholds": "Please provide valid numbers greater than 0 (max 1,000,000).",
     "cmd.settings.notifications.desc": "Configure server notifications",
     "cmd.settings.notifications.view.desc": "View notification settings",
     "cmd.settings.notifications.toggle.desc": "Toggle a notification type on/off",

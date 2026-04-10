@@ -41,7 +41,7 @@ export function buildLevelUpEmbed(
 ): EmbedBuilder {
     const progress = progressToNextLevel(totalXP);
     const barLength = 10;
-    const filled = Math.round((progress.percentage / 100) * barLength);
+    const filled = Math.floor((progress.percentage / 100) * barLength);
     const progressBar = "\u2588".repeat(filled) + "\u2591".repeat(barLength - filled);
 
     return new EmbedBuilder()

@@ -237,16 +237,21 @@ export default {
 
             if (subcommand === "toggle") {
                 const type = interaction.options.getString("type", true) as NotificationType;
-                const config = await GuildNotificationConfigModel.findOneAndUpdate(
+
+                // Ensure doc exists, then atomically flip enabled
+                await GuildNotificationConfigModel.findOneAndUpdate(
                     { guildId, type },
                     { $setOnInsert: { guildId, type } },
-                    { upsert: true, new: true }
+                    { upsert: true }
                 );
-                config.enabled = !config.enabled;
-                await config.save();
+                const config = await GuildNotificationConfigModel.findOneAndUpdate(
+                    { guildId, type },
+                    [{ $set: { enabled: { $not: "$enabled" } } }],
+                    { new: true }
+                );
                 await invalidateNotificationCache(guildId, type);
 
-                const key = config.enabled
+                const key = config!.enabled
                     ? "notification.settings.toggled_on"
                     : "notification.settings.toggled_off";
                 await interaction.reply({
@@ -259,6 +264,19 @@ export default {
             if (subcommand === "channel") {
                 const type = interaction.options.getString("type", true) as NotificationType;
                 const channel = interaction.options.getChannel("channel", true) as TextChannel;
+
+                // Validate bot can send to this channel
+                const me = interaction.guild?.members.me;
+                if (me) {
+                    const perms = channel.permissionsFor(me);
+                    if (!perms?.has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks])) {
+                        await interaction.reply({
+                            content: t(locale, "notification.settings.no_permissions"),
+                            flags: MessageFlags.Ephemeral,
+                        });
+                        return;
+                    }
+                }
 
                 await GuildNotificationConfigModel.findOneAndUpdate(
                     { guildId, type },
@@ -282,12 +300,12 @@ export default {
                 const thresholds = raw
                     .split(",")
                     .map((s) => parseInt(s.trim(), 10))
-                    .filter((n) => !isNaN(n) && n > 0)
+                    .filter((n) => !isNaN(n) && n > 0 && n <= 1_000_000)
                     .sort((a, b) => a - b);
 
                 if (thresholds.length === 0) {
                     await interaction.reply({
-                        content: t(locale, "common.error"),
+                        content: t(locale, "notification.settings.invalid_thresholds"),
                         flags: MessageFlags.Ephemeral,
                     });
                     return;

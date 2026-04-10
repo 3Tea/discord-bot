@@ -607,6 +607,8 @@
     "notification.settings.thresholds_set": "Cột mốc thành viên đã đặt: {{thresholds}}.",
     "notification.settings.no_channel": "Chưa đặt",
     "notification.settings.current_channel": "Kênh hiện tại",
+    "notification.settings.no_permissions": "Bot không có quyền gửi tin nhắn trong kênh đó.",
+    "notification.settings.invalid_thresholds": "Vui lòng nhập các số hợp lệ lớn hơn 0 (tối đa 1.000.000).",
     "cmd.settings.notifications.desc": "Cấu hình thông báo server",
     "cmd.settings.notifications.view.desc": "Xem cài đặt thông báo",
     "cmd.settings.notifications.toggle.desc": "Bật/tắt một loại thông báo",
