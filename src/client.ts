@@ -15,6 +15,9 @@ const client = new Client({
         GatewayIntentBits.GuildMessageReactions,
         // TODO: Uncomment after Discord approves privileged intents
         // GatewayIntentBits.MessageContent,
+        // TODO: Enable GuildMembers intent for welcome/goodbye/boost/milestone notifications
+        // Requires approval in Discord Developer Portal (privileged intent)
+        // GatewayIntentBits.GuildMembers,
     ],
 });
 
