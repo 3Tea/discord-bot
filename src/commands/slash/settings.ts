@@ -208,9 +208,9 @@ export default {
                     milestone: "\uD83C\uDFAF Milestone",
                 };
 
-                const lines: string[] = [];
-                for (const type of types) {
-                    const config = await getNotificationConfig(guildId, type);
+                const configs = await Promise.all(types.map((type) => getNotificationConfig(guildId, type)));
+                const lines = types.map((type, i) => {
+                    const config = configs[i];
                     const status = config.enabled ? "\u2705 Enabled" : "\u274C Disabled";
                     let channel = t(locale, "notification.settings.no_channel");
                     if (config.channelId) {
@@ -222,8 +222,8 @@ export default {
                     if (type === "milestone" && config.options?.thresholds?.length) {
                         line += ` (${config.options.thresholds.join(", ")})`;
                     }
-                    lines.push(line);
-                }
+                    return line;
+                });
 
                 const embed = new EmbedBuilder()
                     .setColor(0x5865f2)

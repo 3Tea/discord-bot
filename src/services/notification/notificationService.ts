@@ -4,6 +4,7 @@ import GuildNotificationConfigModel, {
     NotificationType,
 } from "../../models/guildNotificationConfig.model";
 import redis from "../../connector/redis";
+import { FOOTER } from "../../util/config/index";
 import { logger } from "../../util/log/logger.mixed";
 
 const CONFIG_CACHE_TTL = 300; // 5 minutes
@@ -50,6 +51,10 @@ export async function sendNotification(
         const permissions = textChannel.permissionsFor(me);
         if (!permissions?.has([PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks])) {
             return false;
+        }
+
+        if (!embed.data.footer && FOOTER.text) {
+            embed.setFooter({ text: FOOTER.text, iconURL: FOOTER.icon });
         }
 
         await textChannel.send({ embeds: [embed] });
