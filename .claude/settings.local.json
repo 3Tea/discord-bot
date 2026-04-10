@@ -34,7 +34,11 @@
       "mcp__plugin_context7_context7__query-docs",
       "Bash(npx astro:*)",
       "Bash(grep -l \"confession.vote_own\" src/locales/*.json)",
-      "Bash(grep -l \"confession.banned\" src/locales/*.json)"
+      "Bash(grep -l \"confession.banned\" src/locales/*.json)",
+      "Bash(python3 -)",
+      "Bash(python3 -c 'import json; json.load\\(open\\('\\\\''/Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/locales/__TRACKED_VAR__.json'\\\\''\\)\\)')",
+      "Bash(python3)",
+      "Bash(grep -l \"IGuild.*Config\" /Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/models/*.ts)"
     ],
     "additionalDirectories": [
       "/Users/nguyenhuuhung/Documents/GitHub/discord-bot/landing/src/pages/[lang]"
