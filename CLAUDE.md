@@ -493,6 +493,15 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/xp-system.md](docs/steering/xp-system.md) | XP earning, leveling formula, snapshots, server stats, leaderboards, canvas rendering |
 | [docs/steering/economy-system.md](docs/steering/economy-system.md) | Coins, gems, pray/curse, streaks, shop, transactions, services |
 | [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md) | Root `CHANGELOG.md` + `package.json` version; CI posts the matching `## [x.y.z]` section to Discord |
+| [docs/steering/landing-page.md](docs/steering/landing-page.md) | Astro 6 landing site: routes, components, i18n, content collections, design system, deployment |
+| [docs/steering/confession-system.md](docs/steering/confession-system.md) | Anonymous confessions: submit flows, voting, replies, moderation, economy integration |
+| [docs/steering/i18n-system.md](docs/steering/i18n-system.md) | i18next: 15 languages, resolution chain, caching, settings, translation keys |
+| [docs/steering/canvas-rendering.md](docs/steering/canvas-rendering.md) | @napi-rs/canvas rank cards: anime theme, layout, helpers, embed fallback |
+| [docs/steering/moderation.md](docs/steering/moderation.md) | Timeout, ban, kick, unban: hierarchy enforcement, permissions, response styling |
+| [docs/steering/notification-system.md](docs/steering/notification-system.md) | Welcome, goodbye, boost, milestone: per-guild config, embeds, Redis caching |
+| [docs/steering/voice-system.md](docs/steering/voice-system.md) | Temporary voice channels: join-to-create, control panel, states, Redis ownership |
+| [docs/steering/global-wallet.md](docs/steering/global-wallet.md) | Global star currency: daily claims, streaks, milestones, cross-server |
+| [docs/steering/command-logging.md](docs/steering/command-logging.md) | Dev-only analytics: command stats, user/command history, buffered writes |
 
 ## Changelog & release notes
 
