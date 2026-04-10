@@ -12,6 +12,9 @@ import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
 import client from "../client";
 import { rewardLevelUp, tickVoiceCoinReward, cleanupVoiceCoinCounter } from "../util/economy/activityReward";
+import { getNotificationConfig, sendNotification } from "../services/notification/notificationService";
+import { buildLevelUpEmbed } from "../services/notification/notificationEmbeds";
+import { NotificationType } from "../models/guildNotificationConfig.model";
 
 const TTL_12H = 60 * 60 * 12;
 const NAME_PREFIX_TRIGGER = "3AT ";
@@ -221,6 +224,29 @@ setInterval(async () => {
                 if (newLevel > updated.level) {
                     await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
                     await rewardLevelUp(sUserId, sGuildId, newLevel);
+                    // Level-up notification
+                    try {
+                        const notifConfig = await getNotificationConfig(sGuildId, NotificationType.LevelUp);
+                        if (notifConfig.enabled && notifConfig.channelId) {
+                            const guild = client.guilds.cache.get(sGuildId);
+                            if (guild) {
+                                const user = await client.users.fetch(sUserId).catch(() => null);
+                                if (user) {
+                                    const notifLocale = await resolveGuildLocale(sGuildId);
+                                    const embed = buildLevelUpEmbed(
+                                        sUserId,
+                                        user.displayAvatarURL({ size: 256 }),
+                                        newLevel,
+                                        updated.xp,
+                                        notifLocale
+                                    );
+                                    await sendNotification(guild, notifConfig.channelId, embed);
+                                }
+                            }
+                        }
+                    } catch (err) {
+                        logger.error(`[voiceXP:levelNotif] ${err instanceof Error ? err.message : "Unknown error"}`);
+                    }
                 }
             } catch (error) {
                 logger.error(`[voiceXP:session] ${error instanceof Error ? error.message : "Unknown error"}`);
