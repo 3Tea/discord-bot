@@ -9,6 +9,10 @@ import { syncGlobalXP } from "../util/xp/globalXP";
 import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
 import { rewardLevelUp } from "../util/economy/activityReward";
+import { getNotificationConfig, sendNotification } from "../services/notification/notificationService";
+import { buildLevelUpEmbed } from "../services/notification/notificationEmbeds";
+import { NotificationType } from "../models/guildNotificationConfig.model";
+import { resolveGuildLocale } from "../util/i18n/locale";
 
 export default {
     name: Events.MessageCreate,
@@ -76,6 +80,25 @@ export default {
             if (newLevel > updated.level) {
                 await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
                 await rewardLevelUp(message.author.id, message.guild.id, newLevel);
+
+                // Level-up notification
+                try {
+                    const notifConfig = await getNotificationConfig(message.guild.id, NotificationType.LevelUp);
+                    if (notifConfig.enabled) {
+                        const notifLocale = await resolveGuildLocale(message.guild.id);
+                        const embed = buildLevelUpEmbed(
+                            message.author.id,
+                            message.author.displayAvatarURL({ size: 256 }),
+                            newLevel,
+                            updated.xp,
+                            notifLocale
+                        );
+                        const targetChannelId = notifConfig.channelId ?? message.channel.id;
+                        await sendNotification(message.guild, targetChannelId, embed);
+                    }
+                } catch (err) {
+                    logger.error(`[messageCreate:levelNotif] ${err instanceof Error ? err.message : "Unknown error"}`);
+                }
 
                 // Check global wallet level milestones
                 const levelMilestones = [10, 25, 50, 100] as const;
