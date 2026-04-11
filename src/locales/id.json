@@ -191,6 +191,8 @@
     "weather.wmo.unknown": "Tidak diketahui",
     "manga.nsfw_only": "Hanya channel NSFW",
     "manga.insufficient_funds": "Dana tidak cukup untuk memelihara server ini",
+    "manga.premium_only": "Fitur ini hanya untuk pengguna premium.",
+    "manga.support_server": "Server Dukungan",
     "manga.report_issue": "Laporkan masalah ini",
     "manga.read": "Baca",
     "manga.read_online": "Baca Online",

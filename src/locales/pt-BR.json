@@ -191,6 +191,8 @@
     "weather.wmo.unknown": "Desconhecido",
     "manga.nsfw_only": "Apenas canal NSFW",
     "manga.insufficient_funds": "Fundos insuficientes para manter este servidor.",
+    "manga.premium_only": "Este recurso é apenas para usuários premium.",
+    "manga.support_server": "Servidor de Suporte",
     "manga.report_issue": "Reportar este problema",
     "manga.read": "Ler",
     "manga.read_online": "Ler Online",

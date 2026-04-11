@@ -191,6 +191,8 @@
     "weather.wmo.unknown": "Bilinmiyor",
     "manga.nsfw_only": "Yalnızca NSFW kanalı",
     "manga.insufficient_funds": "Bu sunucuyu sürdürmek için yeterli bütçe yok.",
+    "manga.premium_only": "Bu özellik yalnızca premium kullanıcılar içindir.",
+    "manga.support_server": "Destek Sunucusu",
     "manga.report_issue": "Bu sorunu raporla",
     "manga.read": "Oku",
     "manga.read_online": "Çevrimiçi Oku",

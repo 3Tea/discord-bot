@@ -191,6 +191,8 @@
     "weather.wmo.unknown": "Onbekend",
     "manga.nsfw_only": "Alleen NSFW-kanaal",
     "manga.insufficient_funds": "Onvoldoende geld om deze server draaiende te houden.",
+    "manga.premium_only": "Deze functie is alleen voor premium gebruikers.",
+    "manga.support_server": "Ondersteuningsserver",
     "manga.report_issue": "Meld dit probleem",
     "manga.read": "Lees",
     "manga.read_online": "Lees Online",

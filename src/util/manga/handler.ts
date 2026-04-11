@@ -11,7 +11,7 @@ import {
 import { setTimeout as wait } from "node:timers/promises";
 
 import redis from "../../connector/redis/index";
-import { FOOTER, SERVER_HD, URL_REPORT_BUG } from "../../util/config";
+import { FOOTER, SERVER_HD, SUPPORT_SERVER_LINK, URL_REPORT_BUG } from "../../util/config";
 import { BUTTON_ID } from "../../util/config/button";
 import { resolveLocale } from "../i18n/locale";
 import { t } from "../i18n/t";
@@ -21,7 +21,7 @@ import type { MangaSource } from "./sources";
 
 const CACHE_TTL = 60 * 10; // 10 minutes
 const BUTTON_REMOVE_DELAY = 20_000; // 20 seconds
-const MAX_READ_PAGES = 50;
+const MAX_READ_PAGES = 30;
 
 export function mangaCommand(source: MangaSource) {
     return {
@@ -96,7 +96,7 @@ export function mangaCommand(source: MangaSource) {
                     row.addComponents(
                         new ButtonBuilder()
                             .setCustomId(BUTTON_ID.MANGA_READ)
-                            .setLabel(t(locale, "manga.too_many_pages"))
+                            .setLabel(t(locale, "manga.premium_only"))
                             .setStyle(ButtonStyle.Primary)
                             .setDisabled(true)
                     );
@@ -121,8 +121,16 @@ export function mangaCommand(source: MangaSource) {
                         .setLabel(t(locale, "manga.report_issue"))
                         .setStyle(ButtonStyle.Link)
                 );
+                if (SUPPORT_SERVER_LINK) {
+                    row.addComponents(
+                        new ButtonBuilder()
+                            .setURL(SUPPORT_SERVER_LINK)
+                            .setLabel(t(locale, "manga.support_server"))
+                            .setStyle(ButtonStyle.Link)
+                    );
+                }
                 await interaction.editReply({
-                    content: t(locale, "manga.insufficient_funds"),
+                    content: t(locale, "manga.premium_only"),
                     components: [row],
                 });
             }

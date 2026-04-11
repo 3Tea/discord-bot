@@ -191,6 +191,8 @@
     "weather.wmo.unknown": "Неизвестно",
     "manga.nsfw_only": "Только NSFW канал",
     "manga.insufficient_funds": "Недостаточно средств для поддержания этого сервера.",
+    "manga.premium_only": "Эта функция доступна только для премиум-пользователей.",
+    "manga.support_server": "Сервер поддержки",
     "manga.report_issue": "Сообщить о проблеме",
     "manga.read": "Читать",
     "manga.read_online": "Читать онлайн",

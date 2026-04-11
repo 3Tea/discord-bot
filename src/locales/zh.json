@@ -191,6 +191,8 @@
     "weather.wmo.unknown": "未知",
     "manga.nsfw_only": "仅限 NSFW 频道",
     "manga.insufficient_funds": "资金不足，无法维持此服务器。",
+    "manga.premium_only": "此功能仅限高级用户使用。",
+    "manga.support_server": "支持服务器",
     "manga.report_issue": "反馈问题",
     "manga.read": "阅读",
     "manga.read_online": "在线阅读",
