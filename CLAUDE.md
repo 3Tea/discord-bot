@@ -108,6 +108,12 @@ src/
       canvasRankCard.ts   # Canvas-based rank card image
       canvasServerRankCard.ts # Canvas-based server rank card image
       canvasHelpers.ts    # Shared canvas text rendering helpers
+    manga/              # Manga command handler, sources, reader
+      handler.ts        # mangaCommand() shared handler with star charge gate
+      sources.ts        # MangaSource interface + MANGA_SOURCES config
+      reader.ts         # Thread-based manga page reader
+    help/               # Help command utilities
+      commandCategories.ts # Command → help category mapping
   types/common/discord.d.ts  # Client type augmentation (commands, buttons)
 ```
 
@@ -277,59 +283,6 @@ Current: `Guilds`, `GuildMessages`, `GuildVoiceStates`. Add intents in `src/clie
   ```
 - Existing enums (Discord.js `Events`, `GatewayIntentBits`, etc.) — use as-is
 
-### Utility Types — Use When Appropriate
-
-| Type | Use case |
-|------|----------|
-| `Partial<T>` | Optional update objects |
-| `Required<T>` | Ensure all fields present |
-| `Pick<T, K>` | Select specific fields |
-| `Omit<T, K>` | Exclude specific fields |
-| `Record<K, V>` | Typed key-value maps |
-| `Awaited<T>` | Unwrap Promise types |
-| `ReturnType<T>` | Extract function return type |
-
-### Patterns to Follow
-
-```typescript
-// Good: satisfies + const for config objects
-const FOOTER = {
-    icon: process.env.FOOTER_ICON || "",
-    text: process.env.FOOTER_TEXT || "",
-} satisfies Record<string, string>;
-
-// Good: type narrowing
-function handleChannel(channel: TextBasedChannel) {
-    if ("nsfw" in channel) {
-        // TypeScript knows this is a guild text channel
-    }
-}
-
-// Good: discriminated unions for command responses
-type CommandResult =
-    | { success: true; data: unknown }
-    | { success: false; error: string };
-```
-
-### Patterns to Avoid
-
-```typescript
-// Bad: any
-const data: any = await response.json();
-
-// Good: unknown + validation
-const data: unknown = await response.json();
-if (isValidResponse(data)) { /* use data */ }
-
-// Bad: type assertion without check
-const member = interaction.member as GuildMember;
-member.voice.channel.setName("x"); // crashes if null
-
-// Good: assertion + null check
-const member = interaction.member as GuildMember;
-member.voice.channel?.setName("x");
-```
-
 ## Project Conventions
 
 ### Naming
@@ -489,6 +442,10 @@ Redis `setKeyNX` for atomic idempotency; `setKey` for cooldowns. Both keys clean
 
 `/economy set-coin|add-coin|set-gem|add-gem` — requires Administrator permission.
 
+## Manga System
+
+Shared handler pattern: `mangaCommand(source)` in `src/util/manga/handler.ts` generates slash commands from `MangaSource` config in `src/util/manga/sources.ts`. Each source file in `commands/slash/` is a one-liner: `export default mangaCommand(MANGA_SOURCES.key)`. Sources with `supportsRandom: false` only get the `read` subcommand. Star charge gate (3 free/day UTC reset, then 1 star via `WalletService.deductStar`) with refund on error is built into the handler.
+
 ## Database
 
 ### MongoDB (Mongoose v8)
@@ -498,13 +455,15 @@ Redis `setKeyNX` for atomic idempotency; `setKey` for cooldowns. Both keys clean
 - Error handler checks `MongoServerError` (not `MongoError`)
 - Timestamps auto-managed (`createdAt`, `updatedAt`)
 - Key indexes: `MemberXP(guildId, xp DESC)`, `XPSnapshot(userId, guildId, period, periodKey)`
+- **Transaction model two-place edit**: Adding a `TransactionType` requires updating BOTH the TypeScript union (line ~3) AND the schema `enum` array (line ~44) in `transaction.model.ts` — missing either causes runtime errors TypeScript won't catch
 
 ### Redis (ioredis)
 
 - Singleton: `import redis from "../connector/redis"`
 - Methods: `setJson`, `getJson`, `deleteKey`, `ttlKey`, `flushdb`
 - `setKeyNX(key, value, ttl)` — atomic set-if-not-exists (uses `SET NX EX`), returns `boolean`
-- Used for: image cache (10min TTL), voice channel ownership (12hr TTL), rate limiting (120s default), locale preferences (30-day TTL), XP anti-spam cooldowns
+- No native `incr` — for counters use `getJson`/`setJson`: `const n = await redis.getJson(key) as number | null; await redis.setJson(key, (n ?? 0) + 1, ttl);`
+- Used for: image cache (10min TTL), voice channel ownership (12hr TTL), rate limiting (120s default), locale preferences (30-day TTL), XP anti-spam cooldowns, manga free-use counter (UTC-midnight TTL)
 
 ## Environment
 

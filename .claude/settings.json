@@ -11,6 +11,10 @@
           {
             "type": "command",
             "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'landing/.*\\.astro\"?$'; then cd /Users/nguyenhuuhung/Documents/GitHub/discord-bot/landing && npx astro check 2>&1 | tail -15; fi"
+          },
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'locales/.*\\.json'; then EN_COUNT=$(grep -c '\"' src/locales/en.json 2>/dev/null); for f in src/locales/*.json; do F_COUNT=$(grep -c '\"' \"$f\" 2>/dev/null); if [ \"$F_COUNT\" != \"$EN_COUNT\" ]; then echo \"WARNING: $(basename $f) has $F_COUNT keys vs en.json has $EN_COUNT keys\"; fi; done; fi"
           }
         ]
       }
