@@ -8,6 +8,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import { tryStarDrop } from "../../util/economy/starDrop";
 
 const CONFIG_CACHE_TTL = 300;
 
@@ -67,16 +68,20 @@ export default {
             // Set cooldown
             await redis.setJson(cdKey, 1, config.workCooldown);
 
+            const gotStar = await tryStarDrop(userId, 0.04, "work");
+
             // Build embed
             const flavorText = t(locale, `work.texts.${textIndex}`);
+            const descLines = [
+                t(locale, "work.flavor", { username: interaction.user.username, text: flavorText }),
+                t(locale, "work.reward", { amount: String(reward) }),
+            ];
+            if (gotStar) {
+                descLines.push("\n⭐ " + t(locale, "star_drop.found"));
+            }
             const embed = new EmbedBuilder()
                 .setTitle(`💼 ${t(locale, "work.title")}`)
-                .setDescription(
-                    [
-                        t(locale, "work.flavor", { username: interaction.user.username, text: flavorText }),
-                        t(locale, "work.reward", { amount: String(reward) }),
-                    ].join("\n")
-                )
+                .setDescription(descLines.join("\n"))
                 .setColor(0x57f287);
 
             return Reply.embedEdit(interaction, embed);

@@ -5,6 +5,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import { tryStarDrop } from "../../util/economy/starDrop";
 
 function fallbackLocale(): SupportedLocale {
     return "en";
@@ -65,6 +66,10 @@ export default {
 
             const result = await PrayService.curse(userId, guildId, targetUser?.id);
             const embed = formatCurseEmbed(interaction, result, locale);
+            const gotStar = await tryStarDrop(userId, 0.05, "curse");
+            if (gotStar) {
+                embed.setDescription(embed.data.description + "\n\n⭐ " + t(locale, "star_drop.found"));
+            }
             await Reply.embedEdit(interaction, embed);
         } catch (error) {
             const locale = await resolveLocale(interaction).catch(fallbackLocale);

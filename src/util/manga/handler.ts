@@ -23,7 +23,7 @@ import type { MangaSource } from "./sources";
 
 const CACHE_TTL = 60 * 10; // 10 minutes
 const BUTTON_REMOVE_DELAY = 20_000; // 20 seconds
-const MAX_READ_PAGES = 30;
+const MAX_READ_PAGES = 50;
 const FREE_DAILY_USES = 3;
 const STAR_COST = 1;
 

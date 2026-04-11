@@ -25,7 +25,8 @@ export type TransactionType =
     | "global_spend"
     | "global_refund"
     | "command_charge"
-    | "command_refund";
+    | "command_refund"
+    | "star_drop";
 
 export interface ITransaction extends Document {
     userId: string;
@@ -69,6 +70,7 @@ const transactionSchema = new Schema(
                 "global_refund",
                 "command_charge",
                 "command_refund",
+                "star_drop",
             ],
             required: true,
         },

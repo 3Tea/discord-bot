@@ -8,6 +8,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import { tryStarDrop } from "../../util/economy/starDrop";
 
 const CONFIG_CACHE_TTL = 300;
 
@@ -71,17 +72,21 @@ export default {
             // Set cooldown
             await redis.setJson(cdKey, 1, config.fishCooldown);
 
+            const gotStar = await tryStarDrop(userId, 0.03, "fish");
+
             // Build embed
             const fishName = t(locale, fish.name);
             const rarityLabel = t(locale, `fish.rarity.${fish.rarity}`);
+            const descLines = [
+                t(locale, "fish.catch", { emoji: fish.emoji, fish: fishName, rarity: rarityLabel }),
+                t(locale, "fish.reward", { amount: String(reward) }),
+            ];
+            if (gotStar) {
+                descLines.push("\n⭐ " + t(locale, "star_drop.found"));
+            }
             const embed = new EmbedBuilder()
                 .setTitle(`🎣 ${t(locale, "fish.title")}`)
-                .setDescription(
-                    [
-                        t(locale, "fish.catch", { emoji: fish.emoji, fish: fishName, rarity: rarityLabel }),
-                        t(locale, "fish.reward", { amount: String(reward) }),
-                    ].join("\n")
-                )
+                .setDescription(descLines.join("\n"))
                 .setColor(WorkService.getRarityColor(fish.rarity));
 
             return Reply.embedEdit(interaction, embed);
