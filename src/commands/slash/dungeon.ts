@@ -91,7 +91,7 @@ export function buildMerchantEmbed(locale: SupportedLocale, merchantState: Merch
                 `💎 ${t(locale, "dungeon.merchant.exchange_option", { rate: String(merchantState.exchangeRate) })}`,
                 "",
                 `HP: **${merchantState.currentHp}**/100 | Coin: **${userCoin}**`,
-                t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.floor) }),
+                t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.checkpoint) }),
             ].join("\n"),
         )
         .setColor(0x9b59b6);
@@ -278,7 +278,7 @@ export async function processEncounter(
     }
 
     // NPC Merchant encounter
-    const merchantState = MerchantService.buildMerchantState(userId, guildId, runState.locale, floor, runState.hp);
+    const merchantState = MerchantService.buildMerchantState(userId, guildId, runState.locale, floor, checkpoint, runState.hp);
     const merchantKey = `dungeon_merchant:${userId}`;
     await redis.setJson(merchantKey, merchantState, MERCHANT_TTL);
 

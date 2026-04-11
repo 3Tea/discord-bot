@@ -12,6 +12,7 @@ export interface MerchantState {
     guildId: string;
     locale: string;
     floor: number;
+    checkpoint: number;
     healCost: number;
     healAmount: number;
     buffType: BuffType;
@@ -53,6 +54,7 @@ function buildMerchantState(
     guildId: string,
     locale: string,
     floor: number,
+    checkpoint: number,
     currentHp: number,
 ): MerchantState {
     const offer = generateOffer(floor);
@@ -61,6 +63,7 @@ function buildMerchantState(
         guildId,
         locale,
         floor,
+        checkpoint,
         healCost: offer.healCost,
         healAmount: offer.healAmount,
         buffType: offer.buffType,

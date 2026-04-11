@@ -30,7 +30,9 @@ export default {
 
         const locale = merchantState.locale as SupportedLocale;
 
-        // Check sufficient coin
+        await interaction.deferUpdate();
+
+        // Deduct coin
         try {
             await CurrencyService.deduct(userId, merchantState.guildId, merchantState.buffCost, 0, "dungeon", {
                 action: "merchant_buff",
@@ -38,12 +40,14 @@ export default {
                 cost: merchantState.buffCost,
                 buffType: merchantState.buffType,
             });
-        } catch {
-            await interaction.reply({ content: t(locale, "dungeon.merchant.no_coin"), ephemeral: true });
+        } catch (error) {
+            if (error instanceof Error && error.name === "InsufficientFundsError") {
+                await interaction.followUp({ content: t(locale, "dungeon.merchant.no_coin"), ephemeral: true });
+            } else {
+                await interaction.followUp({ content: t(locale, "common.error"), ephemeral: true });
+            }
             return;
         }
-
-        await interaction.deferUpdate();
 
         // Update run state with buff
         const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
@@ -68,7 +72,7 @@ export default {
 
         const encountersLeft = runState?.encountersLeft ?? 0;
         descLines.push(t(locale, "dungeon.merchant.buff_result", { buffType: buffLabel, turns: String(encountersLeft) }));
-        descLines.push("", t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.floor) }));
+        descLines.push("", t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.checkpoint) }));
 
         const embed = new EmbedBuilder()
             .setTitle(`✨ ${t(locale, "dungeon.title")}`)

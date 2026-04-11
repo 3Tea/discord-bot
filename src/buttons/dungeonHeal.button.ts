@@ -37,7 +37,9 @@ export default {
             return;
         }
 
-        // Check sufficient coin
+        await interaction.deferUpdate();
+
+        // Deduct coin
         try {
             await CurrencyService.deduct(userId, merchantState.guildId, merchantState.healCost, 0, "dungeon", {
                 action: "merchant_heal",
@@ -45,12 +47,14 @@ export default {
                 cost: merchantState.healCost,
                 healAmount: merchantState.healAmount,
             });
-        } catch {
-            await interaction.reply({ content: t(locale, "dungeon.merchant.no_coin"), ephemeral: true });
+        } catch (error) {
+            if (error instanceof Error && error.name === "InsufficientFundsError") {
+                await interaction.followUp({ content: t(locale, "dungeon.merchant.no_coin"), ephemeral: true });
+            } else {
+                await interaction.followUp({ content: t(locale, "common.error"), ephemeral: true });
+            }
             return;
         }
-
-        await interaction.deferUpdate();
 
         // Apply heal
         const actualHeal = MerchantService.calculateHeal(merchantState.currentHp, merchantState.healAmount);
@@ -72,7 +76,7 @@ export default {
                 [
                     t(locale, "dungeon.merchant.heal_result", { amount: String(actualHeal), hp: String(newHp) }),
                     "",
-                    t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.floor) }),
+                    t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.checkpoint) }),
                 ].join("\n"),
             )
             .setColor(0x2ecc71);

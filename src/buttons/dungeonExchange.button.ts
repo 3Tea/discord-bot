@@ -30,7 +30,9 @@ export default {
 
         const locale = merchantState.locale as SupportedLocale;
 
-        // Check sufficient coin and deduct
+        await interaction.deferUpdate();
+
+        // Deduct coin
         try {
             await CurrencyService.deduct(userId, merchantState.guildId, merchantState.exchangeRate, 0, "dungeon", {
                 action: "merchant_exchange",
@@ -38,12 +40,14 @@ export default {
                 cost: merchantState.exchangeRate,
                 gemGained: 1,
             });
-        } catch {
-            await interaction.reply({ content: t(locale, "dungeon.merchant.no_coin"), ephemeral: true });
+        } catch (error) {
+            if (error instanceof Error && error.name === "InsufficientFundsError") {
+                await interaction.followUp({ content: t(locale, "dungeon.merchant.no_coin"), ephemeral: true });
+            } else {
+                await interaction.followUp({ content: t(locale, "common.error"), ephemeral: true });
+            }
             return;
         }
-
-        await interaction.deferUpdate();
 
         // Add 1 gem
         await CurrencyService.addGem(userId, merchantState.guildId, 1, "dungeon", {
@@ -67,7 +71,7 @@ export default {
                 [
                     t(locale, "dungeon.merchant.exchange_result", { cost: String(merchantState.exchangeRate) }),
                     "",
-                    t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.floor) }),
+                    t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.checkpoint) }),
                 ].join("\n"),
             )
             .setColor(0x3498db);
