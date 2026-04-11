@@ -193,6 +193,7 @@
     "manga.insufficient_funds": "Nicht genug Geld, um diesen Server zu betreiben.",
     "manga.premium_only": "Diese Funktion ist nur für Premium-Nutzer verfügbar.",
     "manga.support_server": "Support-Server",
+    "manga.no_stars": "Du hast deine 3 kostenlosen Nutzungen heute aufgebraucht und hast nicht genug Sterne. Nutze /wallet daily um Sterne zu erhalten.",
     "manga.report_issue": "Problem melden",
     "manga.read": "Lesen",
     "manga.read_online": "Online lesen",

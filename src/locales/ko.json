@@ -193,6 +193,7 @@
     "manga.insufficient_funds": "이 서버를 유지할 자금이 부족합니다.",
     "manga.premium_only": "이 기능은 프리미엄 사용자만 이용할 수 있어요.",
     "manga.support_server": "지원 서버",
+    "manga.no_stars": "오늘의 무료 3회를 모두 사용했고 스타가 부족해요. /wallet daily로 스타를 받으세요.",
     "manga.report_issue": "문제 신고하기",
     "manga.read": "읽기",
     "manga.read_online": "온라인으로 읽기",

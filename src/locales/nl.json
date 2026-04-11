@@ -193,6 +193,7 @@
     "manga.insufficient_funds": "Onvoldoende geld om deze server draaiende te houden.",
     "manga.premium_only": "Deze functie is alleen voor premium gebruikers.",
     "manga.support_server": "Ondersteuningsserver",
+    "manga.no_stars": "Je hebt je 3 gratis gebruiken van vandaag opgebruikt en hebt niet genoeg sterren. Gebruik /wallet daily om sterren te claimen.",
     "manga.report_issue": "Meld dit probleem",
     "manga.read": "Lees",
     "manga.read_online": "Lees Online",
