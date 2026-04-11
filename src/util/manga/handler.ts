@@ -24,30 +24,35 @@ const BUTTON_REMOVE_DELAY = 20_000; // 20 seconds
 const MAX_READ_PAGES = 30;
 
 export function mangaCommand(source: MangaSource) {
+    const builder = new SlashCommandBuilder()
+        .setName(source.name)
+        .setDescription(source.description)
+        .setDescriptionLocalizations(descriptionLocales("cmd.manga.desc", { source: source.name }))
+        .addSubcommand((sub) =>
+            sub
+                .setName("read")
+                .setDescription("Read H manga and D")
+                .setDescriptionLocalizations(descriptionLocales("cmd.manga.read.desc"))
+                .addIntegerOption((opt) =>
+                    opt
+                        .setName("id")
+                        .setDescription("The ID you wanna read")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.manga.read.id.desc"))
+                        .setRequired(true)
+                )
+        );
+
+    if (source.supportsRandom) {
+        builder.addSubcommand((sub) =>
+            sub
+                .setName("random")
+                .setDescription(`Random H and D from ${source.name}`)
+                .setDescriptionLocalizations(descriptionLocales("cmd.manga.random.desc", { source: source.name }))
+        );
+    }
+
     return {
-        data: new SlashCommandBuilder()
-            .setName(source.name)
-            .setDescription(source.description)
-            .setDescriptionLocalizations(descriptionLocales("cmd.manga.desc", { source: source.name }))
-            .addSubcommand((sub) =>
-                sub
-                    .setName("read")
-                    .setDescription("Read H manga and D")
-                    .setDescriptionLocalizations(descriptionLocales("cmd.manga.read.desc"))
-                    .addIntegerOption((opt) =>
-                        opt
-                            .setName("id")
-                            .setDescription("The ID you wanna read")
-                            .setDescriptionLocalizations(descriptionLocales("cmd.manga.read.id.desc"))
-                            .setRequired(true)
-                    )
-            )
-            .addSubcommand((sub) =>
-                sub
-                    .setName("random")
-                    .setDescription(`Random H and D from ${source.name}`)
-                    .setDescriptionLocalizations(descriptionLocales("cmd.manga.random.desc", { source: source.name }))
-            ),
+        data: builder,
 
         async execute(interaction: ChatInputCommandInteraction): Promise<void> {
             const locale = await resolveLocale(interaction);

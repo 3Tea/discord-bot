@@ -5,6 +5,7 @@ export interface MangaSource {
     description: string;
     apiPath: string;
     urlBase: string;
+    supportsRandom: boolean;
     fields: (result: Record<string, unknown>) => APIEmbedField[];
 }
 
@@ -17,6 +18,7 @@ export const MANGA_SOURCES: Record<string, MangaSource> = {
         description: "H manga and D reader",
         apiPath: "nhentai",
         urlBase: "https://nhentai.net/g/",
+        supportsRandom: true,
         fields: (r) => [
             {
                 name: "Title: ",
@@ -42,6 +44,7 @@ export const MANGA_SOURCES: Record<string, MangaSource> = {
         description: "H manga and D from 3hentai",
         apiPath: "3hentai",
         urlBase: "http://3hentai.net/d/",
+        supportsRandom: true,
         fields: (r) => [
             { name: "Title: ", value: String(r.title), inline: false },
             { name: "Total of pages", value: String(r.total), inline: true },
@@ -55,6 +58,7 @@ export const MANGA_SOURCES: Record<string, MangaSource> = {
         description: "Gets random doujinshi on asmhentai",
         apiPath: "asmhentai",
         urlBase: "https://asmhentai.com/g/",
+        supportsRandom: true,
         fields: (r) => [
             { name: "Title: ", value: String(r.title), inline: false },
             { name: "Total of pages", value: String(r.total), inline: true },
@@ -68,6 +72,7 @@ export const MANGA_SOURCES: Record<string, MangaSource> = {
         description: "Gets random doujinshi on hentaifox",
         apiPath: "hentaifox",
         urlBase: "https://hentaifox.com/gallery/",
+        supportsRandom: true,
         fields: (r) => [
             { name: "Title: ", value: String(r.title), inline: false },
             { name: "Total of pages", value: String(r.total), inline: true },
@@ -81,6 +86,7 @@ export const MANGA_SOURCES: Record<string, MangaSource> = {
         description: "H manga and D reader nhentai lite",
         apiPath: "nhentaito",
         urlBase: "https://nhentai.to/g/",
+        supportsRandom: true,
         fields: (r) => [
             { name: "Title: ", value: String(r.title), inline: false },
             { name: "Total of pages", value: String(r.total), inline: true },
@@ -93,6 +99,33 @@ export const MANGA_SOURCES: Record<string, MangaSource> = {
         description: "Gets random doujinshi on pururin",
         apiPath: "pururin",
         urlBase: "https://pururin.to/gallery/",
+        supportsRandom: true,
+        fields: (r) => [
+            { name: "Title: ", value: String(r.title), inline: false },
+            { name: "Total of pages", value: String(r.total), inline: true },
+            { name: "Tags", value: fallback(r.tags, "Update..."), inline: true },
+        ],
+    },
+
+    hentai2read: {
+        name: "hentai2read",
+        description: "Read doujinshi on hentai2read",
+        apiPath: "hentai2read",
+        urlBase: "https://hentai2read.com/",
+        supportsRandom: false,
+        fields: (r) => [
+            { name: "Title: ", value: String(r.title), inline: false },
+            { name: "Total of pages", value: String(r.total), inline: true },
+            { name: "Tags", value: fallback(r.tags, "Update..."), inline: true },
+        ],
+    },
+
+    simplyHentai: {
+        name: "simply-hentai",
+        description: "Read doujinshi on simply-hentai",
+        apiPath: "simply-hentai",
+        urlBase: "https://simply-hentai.com/",
+        supportsRandom: false,
         fields: (r) => [
             { name: "Title: ", value: String(r.title), inline: false },
             { name: "Total of pages", value: String(r.total), inline: true },

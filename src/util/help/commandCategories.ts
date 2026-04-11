@@ -43,6 +43,8 @@ const COMMAND_TO_CATEGORY: Record<string, HelpCategoryId> = {
     hentaifox: "manga",
     "nhentai-lite": "manga",
     pururin: "manga",
+    hentai2read: "manga",
+    "simply-hentai": "manga",
 };
 
 /**
