@@ -32,6 +32,7 @@ const COMMAND_TO_CATEGORY: Record<string, HelpCategoryId> = {
     fish: "economy",
     gift: "economy",
     rob: "economy",
+    mine: "economy",
     // Voice
     voice: "voice",
     // Moderation

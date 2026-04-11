@@ -9,6 +9,8 @@ export interface IUserEconomy extends Document {
     lastCurse: Date | null;
     prayStreak: number;
     lastStreakDate: Date | null;
+    mineDepth: number;
+    mineCheckpoint: number;
 }
 
 const userEconomySchema = new Schema(
@@ -21,6 +23,8 @@ const userEconomySchema = new Schema(
         lastCurse: { type: Date, default: null },
         prayStreak: { type: Number, default: 0 },
         lastStreakDate: { type: Date, default: null },
+        mineDepth: { type: Number, default: 1 },
+        mineCheckpoint: { type: Number, default: 1 },
     },
     {
         timestamps: true,
