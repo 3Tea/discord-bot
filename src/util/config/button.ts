@@ -37,4 +37,8 @@ export const BUTTON_ID = {
     CONFESSION_REPLY: "confession_reply",
     // Confession reply modal
     CONFESSION_REPLY_MODAL: "confession_reply_modal",
+    // Dungeon combat buttons
+    DUNGEON_ATTACK: "dungeon_attack",
+    DUNGEON_DEFEND: "dungeon_defend",
+    DUNGEON_RUN: "dungeon_run",
 };

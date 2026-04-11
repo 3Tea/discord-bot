@@ -11,6 +11,8 @@ export interface IUserEconomy extends Document {
     lastStreakDate: Date | null;
     mineDepth: number;
     mineCheckpoint: number;
+    dungeonDepth: number;
+    dungeonCheckpoint: number;
 }
 
 const userEconomySchema = new Schema(
@@ -25,6 +27,8 @@ const userEconomySchema = new Schema(
         lastStreakDate: { type: Date, default: null },
         mineDepth: { type: Number, default: 1 },
         mineCheckpoint: { type: Number, default: 1 },
+        dungeonDepth: { type: Number, default: 1 },
+        dungeonCheckpoint: { type: Number, default: 1 },
     },
     {
         timestamps: true,

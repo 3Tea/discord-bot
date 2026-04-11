@@ -33,6 +33,7 @@ const COMMAND_TO_CATEGORY: Record<string, HelpCategoryId> = {
     gift: "economy",
     rob: "economy",
     mine: "economy",
+    dungeon: "economy",
     // Voice
     voice: "voice",
     // Moderation
