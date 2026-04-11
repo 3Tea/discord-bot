@@ -22,7 +22,8 @@ export type TransactionType =
     | "global_daily"
     | "global_streak_bonus"
     | "global_milestone"
-    | "global_spend";
+    | "global_spend"
+    | "global_refund";
 
 export interface ITransaction extends Document {
     userId: string;
@@ -63,6 +64,7 @@ const transactionSchema = new Schema(
                 "global_streak_bonus",
                 "global_milestone",
                 "global_spend",
+                "global_refund",
             ],
             required: true,
         },

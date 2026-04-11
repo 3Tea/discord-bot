@@ -151,6 +151,27 @@ export class RedisService {
         return "OK";
     }
 
+    /**
+     * Set key only if it does not already exist (atomic check-and-set).
+     * Returns true if the key was set, false if it already existed.
+     */
+    async setKeyNX(key: string, value: string, ttl: number): Promise<boolean> {
+        if (this.connected) {
+            try {
+                const result = await this.client.set(key, value, "EX", ttl, "NX");
+                return result === "OK";
+            } catch {
+                // fall through to in-memory
+            }
+        }
+
+        if (this.fallback.has(key)) {
+            return false;
+        }
+        this.fallback.set(key, value, ttl);
+        return true;
+    }
+
     async getKey(key: string): Promise<string | null> {
         if (this.connected) {
             try {

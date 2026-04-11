@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Discord bot "3AT - Endless Paradox" (v5.1.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
+Discord bot "3AT - Endless Paradox" (v5.4.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
 Runs on Node.js >= 24 via Gateway (WebSocket). Uses slash commands exclusively.
 
 ## Quick Reference
@@ -45,8 +45,30 @@ src/
     userEconomy.model.ts  # Per-guild currency (coin, gem, streak)
     shopItem.model.ts     # Server shop inventory
     transaction.model.ts  # Economy transaction history
+    userWallet.model.ts   # Global star wallet (cross-server)
+    globalShopItem.model.ts # Global shop item catalog
+    globalInventory.model.ts # Per-user global shop inventory
+    commandLog.model.ts   # Dev-only command usage analytics
+    confession.model.ts   # Anonymous confession posts
+    confessionVote.model.ts # Confession up/down votes
+    confessionReply.model.ts # Anonymous confession replies
+    confessionBan.model.ts # Confession-banned users
+    guildConfessionConfig.model.ts # Per-guild confession settings
+    guildNotificationConfig.model.ts # Welcome/goodbye/boost config
+    guildEconomyRewardConfig.model.ts # XP→coin reward settings
+    guildGamblingConfig.model.ts # Per-guild gambling settings
+    guildSocialConfig.model.ts # Social command toggles
+    guildWorkConfig.model.ts # Work command settings
   services/
-    economy/              # Currency, pray/curse, shop services
+    economy/              # Currency, pray/curse, shop, gambling, work services
+      currency.service.ts # Coin/gem balance operations
+      pray.service.ts     # Pray/curse daily actions
+      shop.service.ts     # Per-guild shop buy/sell
+      gambling.service.ts # Gambling games
+      work.service.ts     # Work command rewards
+      social.service.ts   # Social command toggles
+      wallet.service.ts   # Global star wallet operations
+      globalShop.service.ts # Global shop purchase flow
   connector/
     mongo/index.ts        # MongoDB connection
     redis/index.ts        # RedisService singleton class
@@ -242,6 +264,10 @@ Current: `Guilds`, `GuildMessages`, `GuildVoiceStates`. Add intents in `src/clie
   ```
 - Never `catch (error: any)` — use `catch (error)` (defaults to `unknown` in strict)
 
+### Linting
+
+- SonarQube rule `S3776`: max cognitive complexity 15 per function. Extract helpers to reduce branching.
+
 ### Enums & Constants
 
 - Prefer `as const` objects over `enum` for new code:
@@ -385,6 +411,7 @@ const locale = await resolveGuildLocale(guildId);
 - **Never hardcode user-facing strings** — always use `t(locale, "key")`
 - **English is the primary description** in `setDescription()`, localizations via `setDescriptionLocalizations(descriptionLocales("cmd.{command}.desc"))` — add `cmd.*` keys to all 15 locale files
 - **Add keys to ALL 15 locale files** (`en.json`, `vi.json`, `id.json`, `es.json`, `ja.json`, `zh.json`, `ko.json`, `pt-BR.json`, `fr.json`, `de.json`, `ru.json`, `tr.json`, `it.json`, `pl.json`, `nl.json`) when adding new strings
+- **Non-English locales must have native translations** — never commit English placeholder text in non-EN files
 - **Use interpolation** for dynamic values: `t(locale, "key", { name: value })` with `{{name}}` in JSON
 - **Error catch blocks**: resolve locale with fallback: `await resolveLocale(interaction).catch(() => "en" as const)`
 - **Event handlers**: use `resolveGuildLocale(guildId)` since there's no interaction
@@ -395,7 +422,7 @@ const locale = await resolveGuildLocale(guildId);
 ### Adding a New Translation Key
 
 1. Add the key to `src/locales/en.json` (English — primary)
-2. Add the same key to all other locale files (`vi.json`, `id.json`, `es.json`, `ja.json`, `zh.json`, `ko.json`)
+2. Add the same key with native translations to all other 14 locale files
 3. Use `t(locale, "your.new.key")` in code
 4. Keys must exist in all files — mismatches will show raw keys to users
 
@@ -452,6 +479,12 @@ Two currencies per guild: **coin** and **gem**. Tracked in `UserEconomy` model p
 
 Server-configurable shop items (`ShopItem` model) with types: role assignment, cosmetic, currency exchange. Transactions logged in `Transaction` model.
 
+### Global Shop (Cross-Server)
+
+Global wallet uses `guildId: "global"` in `Transaction` model, reusing `coinDelta` for star amounts.
+Purchase flow order: stock decrement → star deduction → inventory upsert (avoids refund noise on race).
+Redis `setKeyNX` for atomic idempotency; `setKey` for cooldowns. Both keys cleaned up on validation failure.
+
 ### Admin Commands
 
 `/economy set-coin|add-coin|set-gem|add-gem` — requires Administrator permission.
@@ -470,6 +503,7 @@ Server-configurable shop items (`ShopItem` model) with types: role assignment, c
 
 - Singleton: `import redis from "../connector/redis"`
 - Methods: `setJson`, `getJson`, `deleteKey`, `ttlKey`, `flushdb`
+- `setKeyNX(key, value, ttl)` — atomic set-if-not-exists (uses `SET NX EX`), returns `boolean`
 - Used for: image cache (10min TTL), voice channel ownership (12hr TTL), rate limiting (120s default), locale preferences (30-day TTL), XP anti-spam cooldowns
 
 ## Environment

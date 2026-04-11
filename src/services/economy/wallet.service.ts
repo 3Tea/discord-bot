@@ -69,6 +69,13 @@ const MILESTONES: Record<string, number> = {
     multi_server_10: 20,
 };
 
+/** Number of achievement milestone definitions in `MILESTONES` (for UI caps / progress). */
+export const GLOBAL_WALLET_MILESTONE_COUNT = Object.keys(MILESTONES).length;
+
+export function getMilestoneCount(): number {
+    return GLOBAL_WALLET_MILESTONE_COUNT;
+}
+
 // --- Internal helpers ---
 
 async function logTransaction(

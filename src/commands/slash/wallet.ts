@@ -4,13 +4,13 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
-import WalletService, { DailyClaimResult } from "../../services/economy/wallet.service";
+import WalletService, { DailyClaimResult, getMilestoneCount } from "../../services/economy/wallet.service";
+import GlobalShopService from "../../services/economy/globalShop.service";
 import TransactionModel from "../../models/transaction.model";
 import UserEconomyModel from "../../models/userEconomy.model";
 
 const GLOBAL_GUILD_ID = "global";
 const HISTORY_PAGE_SIZE = 10;
-const TOTAL_MILESTONES = 11;
 
 export default {
     data: new SlashCommandBuilder()
@@ -57,6 +57,7 @@ async function handleView(interaction: ChatInputCommandInteraction): Promise<voi
         const locale = await resolveLocale(interaction);
         const userId = interaction.user.id;
         const balance = await WalletService.getBalance(userId);
+        const invSummary = await GlobalShopService.getInventorySummary(userId);
 
         const embed = new EmbedBuilder()
             .setColor(0xffd700)
@@ -76,9 +77,22 @@ async function handleView(interaction: ChatInputCommandInteraction): Promise<voi
                     name: t(locale, "wallet.milestones_claimed"),
                     value: t(locale, "wallet.milestones_value", {
                         count: balance.claimedMilestones.length,
-                        total: TOTAL_MILESTONES,
+                        total: getMilestoneCount(),
                     }),
                     inline: true,
+                },
+                {
+                    name: t(locale, "wallet.inventory_overview"),
+                    value: t(locale, "wallet.inventory_overview_value", {
+                        items: String(invSummary.distinctItems),
+                        quantity: String(invSummary.totalQuantity),
+                    }),
+                    inline: true,
+                },
+                {
+                    name: t(locale, "wallet.spend_hint"),
+                    value: t(locale, "wallet.spend_hint_value"),
+                    inline: false,
                 }
             )
             .setTimestamp();
