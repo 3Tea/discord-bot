@@ -1,6 +1,7 @@
 import UserEconomyModel from "../../models/userEconomy.model";
 import CurrencyService from "./currency.service";
 import { tryStarDrop } from "../../util/economy/starDrop";
+import type { Buff } from "./merchant.service";
 
 // --- Types ---
 
@@ -69,6 +70,18 @@ export interface CombatLossResult {
     checkpoint: number;
 }
 
+export interface DungeonRunState {
+    userId: string;
+    guildId: string;
+    locale: string;
+    hp: number;
+    floor: number;
+    checkpoint: number;
+    encountersLeft: number;
+    activeBuff: Buff | null;
+    messageId: string;
+}
+
 // --- Monster tables ---
 
 const TIER_1 = [
@@ -117,8 +130,14 @@ function rollMonster(floor: number): { name: string; emoji: string } {
     return TIER_3[randomInRange(0, TIER_3.length - 1)];
 }
 
-function rollEncounterType(): EncounterType {
+function rollEncounterType(hasLuckBuff = false): EncounterType {
     const roll = Math.random();
+    if (hasLuckBuff) {
+        if (roll < 0.50) return "monster";
+        if (roll < 0.85) return "treasure";
+        if (roll < 0.90) return "trap";
+        return "npc";
+    }
     if (roll < 0.50) return "monster";
     if (roll < 0.75) return "treasure";
     if (roll < 0.90) return "trap";
@@ -215,7 +234,7 @@ async function rollEncounter(userId: string, guildId: string, locale: string): P
     return { type, floor, checkpoint };
 }
 
-function processCombatAction(state: CombatState, action: "attack" | "defend" | "run" | "timeout"): CombatActionResult {
+function processCombatAction(state: CombatState, action: "attack" | "defend" | "run" | "timeout", buff?: Buff | null): CombatActionResult {
     if (action === "run") {
         return {
             userDmg: 0,
@@ -259,6 +278,14 @@ function processCombatAction(state: CombatState, action: "attack" | "defend" | "
         // defend: 70% user damage, 50% monster damage
         userDmg = Math.floor(baseUserDmg * 0.7);
         monsterDmg = Math.floor(baseMonsterDmg * 0.5);
+    }
+
+    // Apply buff effects
+    if (buff?.type === "attack") {
+        userDmg = Math.floor(userDmg * 1.3);
+    }
+    if (buff?.type === "defense") {
+        monsterDmg = Math.floor(monsterDmg * 0.7);
     }
 
     const newMonsterHp = state.monsterHp - userDmg;
@@ -334,5 +361,58 @@ async function resolveCombatLoss(userId: string, guildId: string): Promise<Comba
     };
 }
 
-const DungeonService = { rollEncounter, processCombatAction, resolveCombatWin, resolveCombatLoss, isPrime };
+async function startRun(userId: string, guildId: string, locale: string): Promise<DungeonRunState> {
+    const economy = await UserEconomyModel.findOneAndUpdate(
+        { userId, guildId },
+        { $setOnInsert: { userId, guildId, coin: 0, gem: 0, prayStreak: 0, mineDepth: 1, mineCheckpoint: 1, dungeonDepth: 1, dungeonCheckpoint: 1 } },
+        { upsert: true, new: true }
+    );
+
+    return {
+        userId,
+        guildId,
+        locale,
+        hp: 100,
+        floor: economy.dungeonDepth ?? 1,
+        checkpoint: economy.dungeonCheckpoint ?? 1,
+        encountersLeft: 5,
+        activeBuff: null,
+        messageId: "",
+    };
+}
+
+function rollEncounterForRun(runState: DungeonRunState): EncounterType {
+    const hasLuck = runState.activeBuff?.type === "luck";
+    return rollEncounterType(hasLuck);
+}
+
+function tickBuff(runState: DungeonRunState): void {
+    if (runState.activeBuff) {
+        runState.activeBuff.encountersLeft -= 1;
+        if (runState.activeBuff.encountersLeft <= 0) {
+            runState.activeBuff = null;
+        }
+    }
+}
+
+async function endRun(userId: string, guildId: string): Promise<void> {
+    // Floor/checkpoint already persisted after each advance.
+    // This function is for cleanup only — Redis key deletion
+    // handled by the caller (button handler) since they have the keys.
+}
+
+const DungeonService = {
+    rollEncounter,
+    processCombatAction,
+    resolveCombatWin,
+    resolveCombatLoss,
+    isPrime,
+    startRun,
+    rollEncounterForRun,
+    rollEncounterType,
+    tickBuff,
+    endRun,
+    rollMonster,
+    randomInRange,
+};
 export default DungeonService;
