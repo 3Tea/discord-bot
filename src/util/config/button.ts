@@ -41,4 +41,11 @@ export const BUTTON_ID = {
     DUNGEON_ATTACK: "dungeon_attack",
     DUNGEON_DEFEND: "dungeon_defend",
     DUNGEON_RUN: "dungeon_run",
+    // Dungeon merchant buttons
+    DUNGEON_HEAL: "dungeon_heal",
+    DUNGEON_BUFF: "dungeon_buff",
+    DUNGEON_EXCHANGE: "dungeon_exchange",
+    // Dungeon run flow buttons
+    DUNGEON_CONTINUE: "dungeon_continue",
+    DUNGEON_LEAVE: "dungeon_leave",
 };
