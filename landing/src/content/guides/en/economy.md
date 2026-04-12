@@ -3,7 +3,7 @@ title: Economy System
 description: Learn how to earn coins and gems, build pray streaks, and spend in the shop.
 icon: "💰"
 order: 1
-relatedCommands: ["balance", "pray", "curse", "shop", "economy", "gamble", "work", "fish", "gift", "rob", "wallet"]
+relatedCommands: ["balance", "pray", "curse", "shop", "economy", "gamble", "work", "fish", "gift", "rob", "wallet", "mine", "dungeon"]
 ---
 
 ## Overview
@@ -82,6 +82,14 @@ Use `/gamble` to bet coins on mini-games:
 
 Gambling has a house edge (except coinflip) and acts as a coin sink. Min/max bets and cooldowns are configurable by admins.
 
+## Mining & Dungeon
+
+### /mine
+Dig underground for minerals every 2 hours. Five mineral tiers — from Stone (45%, 10–30 coins) to Emerald (4%, 500–800 coins). Rewards scale with depth: deeper = bigger bonuses. Risk of cave-in (5–15%) resets your depth to the last checkpoint. Checkpoints auto-save at prime-numbered floors. 4% chance to drop a star on each successful dig. See the [Mining Guide](/en/guide/mine) for full strategy.
+
+### /dungeon
+Enter a multi-encounter dungeon run every hour. Face up to 5 encounters — monster combat, treasure chests, traps, and NPC merchants — all via interactive buttons. Combat has attack, defend, and run options. Merchants sell healing, buffs, and coin-to-gem exchanges. HP persists across the run. Same checkpoint system as mining. See the [Dungeon Guide](/en/guide/dungeon) for full strategy.
+
 ## Social Economy
 
 ### /gift
@@ -136,6 +144,8 @@ Beyond coins and gems, there's a third currency: **Star** ⭐. Unlike coins and 
 | `/gamble dice` | Dice high/low bet | `/gamble dice bet:100 mode:high` |
 | `/gift` | Send coins to another user | `/gift user:@friend amount:500` |
 | `/rob` | Attempt to steal coins | `/rob user:@target` |
+| `/mine` | Mine for minerals (2h cooldown) | `/mine` |
+| `/dungeon` | Explore the dungeon (1h cooldown) | `/dungeon` |
 | `/wallet view` | View global star balance and milestones | `/wallet view` |
 | `/wallet daily` | Claim daily star reward | `/wallet daily` |
 | `/wallet history` | View global transaction history | `/wallet history` |

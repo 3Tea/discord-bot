@@ -15,4 +15,6 @@ export const guideMeta: Record<string, GuideMeta> = {
   utility: { slug: "utility", label: "Utility", color: "#3BA55C", bg: "rgba(59,165,92,0.15)" },
   info: { slug: "info", label: "Info & Help", color: "#FAA61A", bg: "rgba(250,166,26,0.15)" },
   settings: { slug: "settings", label: "Settings", color: "#7289DA", bg: "rgba(114,137,218,0.15)" },
+  mine: { slug: "mine", label: "Mining", color: "#95A5A6", bg: "rgba(149,165,166,0.15)" },
+  dungeon: { slug: "dungeon", label: "Dungeon", color: "#E91E63", bg: "rgba(233,30,99,0.15)" },
 };

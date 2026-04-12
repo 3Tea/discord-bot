@@ -133,6 +133,16 @@ export const commands: Command[] = [
     subcommands: ["view", "daily", "history"],
   },
   {
+    name: "mine",
+    description: "Mine for minerals at increasing depth — risk collapse but earn bigger rewards deeper",
+    category: "economy",
+  },
+  {
+    name: "dungeon",
+    description: "Explore a dungeon with combat, traps, treasure, and NPC merchants across multi-encounter runs",
+    category: "economy",
+  },
+  {
     name: "moderation",
     description:
       "Staff moderation — timeout (≤28 days), remove timeout, ban, kick, and unban by user ID (requires ModerateMembers / BanMembers)",

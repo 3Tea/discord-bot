@@ -494,6 +494,8 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/notification-system.md](docs/steering/notification-system.md) | Welcome, goodbye, boost, milestone: per-guild config, embeds, Redis caching |
 | [docs/steering/voice-system.md](docs/steering/voice-system.md) | Temporary voice channels: join-to-create, control panel, states, Redis ownership |
 | [docs/steering/global-wallet.md](docs/steering/global-wallet.md) | Global star currency: daily claims, streaks, milestones, cross-server |
+| [docs/steering/mine-system.md](docs/steering/mine-system.md) | Mining mini-game: minerals, depth progression, checkpoints, collapse risk, star drops |
+| [docs/steering/dungeon-system.md](docs/steering/dungeon-system.md) | Dungeon mini-game: multi-encounter runs, combat, NPC merchant, buffs, traps, floor progression |
 | [docs/steering/command-logging.md](docs/steering/command-logging.md) | Dev-only analytics: command stats, user/command history, buffered writes |
 
 ## Changelog & release notes

@@ -3,7 +3,7 @@ title: Hệ Thống Kinh Tế
 description: Tìm hiểu cách kiếm coin và gem, xây dựng chuỗi cầu nguyện, và mua sắm trong shop.
 icon: "💰"
 order: 1
-relatedCommands: ["balance", "pray", "curse", "shop", "economy", "gamble", "work", "fish", "gift", "rob", "wallet"]
+relatedCommands: ["balance", "pray", "curse", "shop", "economy", "gamble", "work", "fish", "gift", "rob", "wallet", "mine", "dungeon"]
 ---
 
 ## Tổng Quan
@@ -82,6 +82,14 @@ Dùng `/gamble` để đặt cược coin vào các mini-game:
 
 Thử vận may có lợi thế nhà cái (trừ coinflip) và là nơi tiêu coin. Cược tối thiểu/tối đa và thời gian chờ có thể tùy chỉnh bởi admin.
 
+## Khai Thác & Hầm Ngục
+
+### /mine
+Đào dưới lòng đất tìm khoáng sản mỗi 2 giờ. Năm cấp khoáng sản — từ Đá (45%, 10–30 coin) đến Ngọc lục bảo (4%, 500–800 coin). Phần thưởng tăng theo độ sâu: càng sâu = bonus càng lớn. Rủi ro sập hầm (5–15%) reset độ sâu về checkpoint cuối. Checkpoint tự lưu tại tầng nguyên tố. 4% cơ hội rơi star mỗi lần đào thành công. Xem [Hướng dẫn Khai thác](/vi/guide/mine) để biết chiến lược đầy đủ.
+
+### /dungeon
+Vào hầm ngục phiêu lưu nhiều lượt mỗi giờ. Đối mặt tối đa 5 lượt gặp — chiến đấu quái, rương kho báu, bẫy, và thương nhân NPC — tất cả qua nút bấm tương tác. Chiến đấu có tấn công, phòng thủ và chạy. Thương nhân bán hồi máu, buff, và đổi coin lấy gem. HP giữ nguyên suốt lượt chơi. Cùng hệ thống checkpoint như khai thác. Xem [Hướng dẫn Hầm ngục](/vi/guide/dungeon) để biết chiến lược đầy đủ.
+
 ## Kinh Tế Xã Hội
 
 ### /gift
@@ -136,6 +144,8 @@ Ngoài coin và gem, còn có một loại tiền thứ ba: **Star** ⭐. Khác 
 | `/gamble dice` | Đặt cược xúc xắc cao/thấp | `/gamble dice bet:100 mode:high` |
 | `/gift` | Gửi coin cho người dùng khác | `/gift user:@friend amount:500` |
 | `/rob` | Cố cướp coin của người khác | `/rob user:@target` |
+| `/mine` | Khai thác khoáng sản (thời gian chờ 2 giờ) | `/mine` |
+| `/dungeon` | Khám phá hầm ngục (thời gian chờ 1 giờ) | `/dungeon` |
 | `/wallet view` | Xem số dư star toàn cầu và mốc thành tích | `/wallet view` |
 | `/wallet daily` | Nhận phần thưởng star hàng ngày | `/wallet daily` |
 | `/wallet history` | Xem lịch sử giao dịch toàn cầu | `/wallet history` |
