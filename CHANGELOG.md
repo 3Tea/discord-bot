@@ -6,6 +6,43 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [5.5.0] - 2026-04-12
+
+### Added
+
+- **`/mine`** — mining mini-game with depth-based progression.
+  - 5 mineral tiers: Stone (45%), Iron (28%), Gold (15%), Diamond (8%), Emerald (4%) with scaling depth bonuses.
+  - Collapse risk (5–15% by depth) costs coins and resets to last checkpoint.
+  - Checkpoints auto-save at prime-numbered floors (2, 3, 5, 7, 11, 13…).
+  - 4% star drop chance on successful mine. 2-hour cooldown.
+- **`/dungeon`** — multi-encounter dungeon adventure with interactive buttons.
+  - Up to 5 encounters per run: monster combat (50%), treasure (25%), traps (15%), NPC merchant (10%).
+  - Turn-based combat with Attack (full damage), Defend (70% / 50%), and Run actions; 3-turn limit.
+  - **NPC merchant**: buy healing, buffs (Attack ×1.3 / Defense ×0.7 / Luck), or exchange coins for gems.
+  - Luck buff shifts encounter weights (treasure 25→35%, traps 15→5%).
+  - Same prime-number checkpoint system as `/mine`. 3% star drop on wins/treasure. 1-hour cooldown.
+  - `MerchantService` for dynamic pricing by floor.
+- **Star drops** — 4% chance on `/pray`, `/curse`, `/work`, `/fish`; 4% on `/mine`; 3% on `/dungeon` win/treasure. Awards 1 star to global wallet.
+- **Manga premium gate** — 3 free uses per day (UTC reset), then 1 star per use via global wallet. Refund on error.
+- **Manga sources** — added `hentai2read` and `simply-hentai` commands.
+- **Global shop** — cross-server shop using star currency (`/global-shop view`, `/global-shop buy`). Stock decrement → star deduction → inventory upsert with Redis idempotency.
+- **Notification system** — per-guild welcome, goodbye, boost, milestone, and level-up notifications.
+  - Events: `guildMemberAdd`, `guildMemberRemove`, `guildMemberUpdate` (boost), `messageCreate` / `voiceStateUpdate` (level-up).
+  - `/settings notifications` subcommands for channel, message template, and toggle config.
+  - `GuildNotificationConfig` model with Redis-cached config lookups.
+  - i18n keys for all 5 notification types across 15 locales.
+- **`/help`** — added support server button.
+- **Landing — Mine & Dungeon**: command pages (EN + VI), user guides with strategy sections (EN + VI), economy guide updated with mine/dungeon sections and commands reference.
+- **Steering docs** — `mine-system.md` and `dungeon-system.md` added to `docs/steering/`.
+
+### Fixed
+
+- **Dungeon**: prevent stale timeouts editing expired messages; clear merchant embed on purchase error; owner-check on all button handlers.
+
+### Changed
+
+- **Dependencies**: axios 1.14.0 → 1.15.0.
+
 ## [5.4.0] - 2026-04-09
 
 ### Added
