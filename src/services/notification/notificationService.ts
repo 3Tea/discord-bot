@@ -35,11 +35,7 @@ export async function invalidateNotificationCache(guildId: string, type: Notific
     await redis.deleteKey(cacheKey(guildId, type));
 }
 
-export async function sendNotification(
-    guild: Guild,
-    channelId: string,
-    embed: EmbedBuilder
-): Promise<boolean> {
+export async function sendNotification(guild: Guild, channelId: string, embed: EmbedBuilder): Promise<boolean> {
     try {
         const channel = guild.channels.cache.get(channelId);
         if (!channel || !channel.isTextBased()) return false;

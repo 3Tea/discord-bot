@@ -251,9 +251,7 @@ export default {
                 );
                 await invalidateNotificationCache(guildId, type);
 
-                const key = config!.enabled
-                    ? "notification.settings.toggled_on"
-                    : "notification.settings.toggled_off";
+                const key = config!.enabled ? "notification.settings.toggled_on" : "notification.settings.toggled_off";
                 await interaction.reply({
                     content: t(locale, key, { type }),
                     flags: MessageFlags.Ephemeral,

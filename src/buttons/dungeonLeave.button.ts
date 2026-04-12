@@ -44,8 +44,11 @@ export default {
                 [
                     t(locale, "dungeon.run.leave"),
                     "",
-                    t(locale, "dungeon.floor", { floor: String(runState.floor), checkpoint: String(runState.checkpoint) }),
-                ].join("\n"),
+                    t(locale, "dungeon.floor", {
+                        floor: String(runState.floor),
+                        checkpoint: String(runState.checkpoint),
+                    }),
+                ].join("\n")
             )
             .setColor(0x3498db);
 

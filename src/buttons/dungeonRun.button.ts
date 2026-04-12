@@ -39,7 +39,10 @@ export default {
 
         if (runState) {
             await redis.setJson(runKey, runState, RUN_TTL);
-            await interaction.editReply({ embeds: [embed], components: [buildContinueLeaveRow(locale, runState.encountersLeft)] });
+            await interaction.editReply({
+                embeds: [embed],
+                components: [buildContinueLeaveRow(locale, runState.encountersLeft)],
+            });
         } else {
             await interaction.editReply({ embeds: [embed], components: [] });
         }

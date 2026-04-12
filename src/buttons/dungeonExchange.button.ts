@@ -52,12 +52,18 @@ export default {
                 gemGained: 1,
             });
         } catch (error) {
-            const msg = error instanceof Error && error.name === "InsufficientFundsError"
-                ? t(locale, "dungeon.merchant.no_coin")
-                : t(locale, "common.error");
+            const msg =
+                error instanceof Error && error.name === "InsufficientFundsError"
+                    ? t(locale, "dungeon.merchant.no_coin")
+                    : t(locale, "common.error");
             await interaction.followUp({ content: msg, ephemeral: true });
             await interaction.editReply({
-                embeds: [new EmbedBuilder().setTitle(`🧙 ${t(locale, "dungeon.title")}`).setDescription(t(locale, "dungeon.merchant.timeout")).setColor(0x95a5a6)],
+                embeds: [
+                    new EmbedBuilder()
+                        .setTitle(`🧙 ${t(locale, "dungeon.title")}`)
+                        .setDescription(t(locale, "dungeon.merchant.timeout"))
+                        .setColor(0x95a5a6),
+                ],
                 components: runState ? [buildContinueLeaveRow(locale, runState.encountersLeft)] : [],
             });
             return;
@@ -78,11 +84,17 @@ export default {
                 [
                     t(locale, "dungeon.merchant.exchange_result", { cost: String(merchantState.exchangeRate) }),
                     "",
-                    t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.checkpoint) }),
-                ].join("\n"),
+                    t(locale, "dungeon.floor", {
+                        floor: String(merchantState.floor),
+                        checkpoint: String(merchantState.checkpoint),
+                    }),
+                ].join("\n")
             )
             .setColor(0x3498db);
 
-        await interaction.editReply({ embeds: [embed], components: [buildContinueLeaveRow(locale, runState.encountersLeft)] });
+        await interaction.editReply({
+            embeds: [embed],
+            components: [buildContinueLeaveRow(locale, runState.encountersLeft)],
+        });
     },
 };

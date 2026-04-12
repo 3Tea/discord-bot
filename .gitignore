@@ -110,8 +110,9 @@ landing/node_modules/
 landing/dist/
 landing/.astro/
 
-# Superpowers brainstorm
+# Superpowers working docs
 .superpowers/
+docs/superpowers/
 
 # Python (e.g. .github/scripts)
 **/__pycache__/

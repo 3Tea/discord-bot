@@ -58,7 +58,7 @@ function buildMerchantState(
     locale: string,
     floor: number,
     checkpoint: number,
-    currentHp: number,
+    currentHp: number
 ): MerchantState {
     const offer = generateOffer(floor);
     return {

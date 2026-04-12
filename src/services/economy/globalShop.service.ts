@@ -1,8 +1,5 @@
 import GlobalInventoryModel, { IGlobalInventory } from "../../models/globalInventory.model";
-import GlobalShopItemModel, {
-    type GlobalShopItemType,
-    type IGlobalShopItem,
-} from "../../models/globalShopItem.model";
+import GlobalShopItemModel, { type GlobalShopItemType, type IGlobalShopItem } from "../../models/globalShopItem.model";
 import redis from "../../connector/redis";
 import WalletService from "./wallet.service";
 

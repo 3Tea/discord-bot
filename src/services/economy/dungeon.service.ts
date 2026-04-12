@@ -113,20 +113,24 @@ function rollMonster(floor: number): { name: string; emoji: string } {
 function rollEncounterType(hasLuckBuff = false): EncounterType {
     const roll = Math.random();
     if (hasLuckBuff) {
-        if (roll < 0.50) return "monster";
+        if (roll < 0.5) return "monster";
         if (roll < 0.85) return "treasure";
-        if (roll < 0.90) return "trap";
+        if (roll < 0.9) return "trap";
         return "npc";
     }
-    if (roll < 0.50) return "monster";
+    if (roll < 0.5) return "monster";
     if (roll < 0.75) return "treasure";
-    if (roll < 0.90) return "trap";
+    if (roll < 0.9) return "trap";
     return "npc";
 }
 
 // --- Core functions ---
 
-function processCombatAction(state: CombatState, action: "attack" | "defend" | "run" | "timeout", buff?: Buff | null): CombatActionResult {
+function processCombatAction(
+    state: CombatState,
+    action: "attack" | "defend" | "run" | "timeout",
+    buff?: Buff | null
+): CombatActionResult {
     if (action === "run") {
         return {
             userDmg: 0,
@@ -204,7 +208,7 @@ function processCombatAction(state: CombatState, action: "attack" | "defend" | "
 
 async function resolveCombatWin(userId: string, guildId: string, floor: number): Promise<CombatResolveResult> {
     const coinReward = randomInRange(50, 150) + floor * 10;
-    const gemReward = Math.random() < 0.10 ? 1 : 0;
+    const gemReward = Math.random() < 0.1 ? 1 : 0;
     const starReward = await tryStarDrop(userId, 0.03, "dungeon");
 
     await CurrencyService.addCoin(userId, guildId, coinReward, "dungeon", { encounter: "monster_win", floor });
@@ -256,7 +260,19 @@ async function resolveCombatLoss(userId: string, guildId: string): Promise<Comba
 async function startRun(userId: string, guildId: string, locale: string): Promise<DungeonRunState> {
     const economy = await UserEconomyModel.findOneAndUpdate(
         { userId, guildId },
-        { $setOnInsert: { userId, guildId, coin: 0, gem: 0, prayStreak: 0, mineDepth: 1, mineCheckpoint: 1, dungeonDepth: 1, dungeonCheckpoint: 1 } },
+        {
+            $setOnInsert: {
+                userId,
+                guildId,
+                coin: 0,
+                gem: 0,
+                prayStreak: 0,
+                mineDepth: 1,
+                mineCheckpoint: 1,
+                dungeonDepth: 1,
+                dungeonCheckpoint: 1,
+            },
+        },
         { upsert: true, new: true }
     );
 

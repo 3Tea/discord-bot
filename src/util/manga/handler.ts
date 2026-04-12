@@ -102,10 +102,7 @@ function buildResultRow(
 function buildErrorRow(locale: SupportedLocale): ActionRowBuilder<ButtonBuilder> {
     const row = new ActionRowBuilder<ButtonBuilder>();
     row.addComponents(
-        new ButtonBuilder()
-            .setURL(URL_REPORT_BUG)
-            .setLabel(t(locale, "manga.report_issue"))
-            .setStyle(ButtonStyle.Link)
+        new ButtonBuilder().setURL(URL_REPORT_BUG).setLabel(t(locale, "manga.report_issue")).setStyle(ButtonStyle.Link)
     );
     if (SUPPORT_SERVER_LINK) {
         row.addComponents(
@@ -206,7 +203,10 @@ export function mangaCommand(source: MangaSource) {
                 try {
                     await refundCharge(interaction.user.id, source.name, charged);
                 } catch (refundError) {
-                    log(`[manga:${source.name}] refund failed: ${refundError instanceof Error ? refundError.message : "Unknown"}`, "error");
+                    log(
+                        `[manga:${source.name}] refund failed: ${refundError instanceof Error ? refundError.message : "Unknown"}`,
+                        "error"
+                    );
                 }
                 await interaction.editReply({
                     content: t(locale, "manga.premium_only"),

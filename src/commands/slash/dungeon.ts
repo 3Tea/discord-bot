@@ -33,9 +33,21 @@ export const COMBAT_TIMEOUT_MS = 30_000;
 
 export function buildCombatRow(locale: SupportedLocale): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder().setCustomId(BUTTON_ID.DUNGEON_ATTACK).setLabel(t(locale, "dungeon.btn.attack")).setEmoji("⚔️").setStyle(ButtonStyle.Danger),
-        new ButtonBuilder().setCustomId(BUTTON_ID.DUNGEON_DEFEND).setLabel(t(locale, "dungeon.btn.defend")).setEmoji("🛡️").setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId(BUTTON_ID.DUNGEON_RUN).setLabel(t(locale, "dungeon.btn.run")).setEmoji("🏃").setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.DUNGEON_ATTACK)
+            .setLabel(t(locale, "dungeon.btn.attack"))
+            .setEmoji("⚔️")
+            .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.DUNGEON_DEFEND)
+            .setLabel(t(locale, "dungeon.btn.defend"))
+            .setEmoji("🛡️")
+            .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.DUNGEON_RUN)
+            .setLabel(t(locale, "dungeon.btn.run"))
+            .setEmoji("🏃")
+            .setStyle(ButtonStyle.Secondary)
     );
 }
 
@@ -43,7 +55,10 @@ export function buildContinueLeaveText(locale: SupportedLocale, encountersLeft: 
     return t(locale, "dungeon.run.continue", { left: String(encountersLeft) });
 }
 
-export function buildContinueLeaveRow(locale: SupportedLocale, encountersLeft: number): ActionRowBuilder<ButtonBuilder> {
+export function buildContinueLeaveRow(
+    locale: SupportedLocale,
+    encountersLeft: number
+): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.DUNGEON_CONTINUE)
@@ -55,11 +70,15 @@ export function buildContinueLeaveRow(locale: SupportedLocale, encountersLeft: n
             .setCustomId(BUTTON_ID.DUNGEON_LEAVE)
             .setLabel(t(locale, "dungeon.btn.leave"))
             .setEmoji("🚪")
-            .setStyle(ButtonStyle.Secondary),
+            .setStyle(ButtonStyle.Secondary)
     );
 }
 
-export function buildMerchantRow(locale: SupportedLocale, merchantState: MerchantState, userCoin: number): ActionRowBuilder<ButtonBuilder> {
+export function buildMerchantRow(
+    locale: SupportedLocale,
+    merchantState: MerchantState,
+    userCoin: number
+): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.DUNGEON_HEAL)
@@ -78,11 +97,15 @@ export function buildMerchantRow(locale: SupportedLocale, merchantState: Merchan
             .setLabel(t(locale, "dungeon.btn.exchange"))
             .setEmoji("💎")
             .setStyle(ButtonStyle.Secondary)
-            .setDisabled(userCoin < merchantState.exchangeRate),
+            .setDisabled(userCoin < merchantState.exchangeRate)
     );
 }
 
-export function buildMerchantEmbed(locale: SupportedLocale, merchantState: MerchantState, userCoin: number): EmbedBuilder {
+export function buildMerchantEmbed(
+    locale: SupportedLocale,
+    merchantState: MerchantState,
+    userCoin: number
+): EmbedBuilder {
     const buffLabel = t(locale, `dungeon.buff.${merchantState.buffType}`);
     return new EmbedBuilder()
         .setTitle(`🏪 ${t(locale, "dungeon.title")}`)
@@ -96,8 +119,11 @@ export function buildMerchantEmbed(locale: SupportedLocale, merchantState: Merch
                 `💎 ${t(locale, "dungeon.merchant.exchange_option", { rate: String(merchantState.exchangeRate) })}`,
                 "",
                 `HP: **${merchantState.currentHp}**/100 | Coin: **${userCoin}**`,
-                t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.checkpoint) }),
-            ].join("\n"),
+                t(locale, "dungeon.floor", {
+                    floor: String(merchantState.floor),
+                    checkpoint: String(merchantState.checkpoint),
+                }),
+            ].join("\n")
         )
         .setColor(0x9b59b6);
 }
@@ -156,22 +182,26 @@ export function buildTrapEmbed(locale: SupportedLocale, opts: TrapEmbedOptions):
 
 export function buildCombatEmbed(locale: SupportedLocale, state: CombatState, checkpoint: number): EmbedBuilder {
     return new EmbedBuilder()
-        .setTitle(`${state.monsterEmoji} ${t(locale, "dungeon.encounter.monster", { monster: state.monsterName, floor: String(state.floor) })}`)
+        .setTitle(
+            `${state.monsterEmoji} ${t(locale, "dungeon.encounter.monster", { monster: state.monsterName, floor: String(state.floor) })}`
+        )
         .setDescription(
             [
-                t(locale, "dungeon.combat.hp", { userHp: String(state.userHp), monster: state.monsterName, monsterHp: String(state.monsterHp) }),
+                t(locale, "dungeon.combat.hp", {
+                    userHp: String(state.userHp),
+                    monster: state.monsterName,
+                    monsterHp: String(state.monsterHp),
+                }),
                 "",
                 t(locale, "dungeon.floor", { floor: String(state.floor), checkpoint: String(checkpoint) }),
-            ].join("\n"),
+            ].join("\n")
         )
         .setColor(0xe67e22);
 }
 
 // --- Encounter processing for a run ---
 
-export async function processEncounter(
-    runState: DungeonRunState,
-): Promise<{
+export async function processEncounter(runState: DungeonRunState): Promise<{
     embed: EmbedBuilder;
     row: ActionRowBuilder<ButtonBuilder>;
     runEnded: boolean;
@@ -226,13 +256,21 @@ export async function processEncounter(
 
         await UserEconomyModel.updateOne(
             { userId, guildId },
-            { $set: { dungeonDepth: newFloor, dungeonCheckpoint: newCheckpoint } },
+            { $set: { dungeonDepth: newFloor, dungeonCheckpoint: newCheckpoint } }
         );
 
         runState.floor = newFloor;
         runState.checkpoint = newCheckpoint;
 
-        const embed = buildTreasureEmbed(locale, { floor, checkpoint: newCheckpoint, coinReward, gemReward, starReward, newFloor, checkpointReached });
+        const embed = buildTreasureEmbed(locale, {
+            floor,
+            checkpoint: newCheckpoint,
+            coinReward,
+            gemReward,
+            starReward,
+            newFloor,
+            checkpointReached,
+        });
         embed.setFooter({ text: buildContinueLeaveText(locale, runState.encountersLeft) });
 
         return {
@@ -251,28 +289,42 @@ export async function processEncounter(
 
         if (runState.hp <= 0) {
             // Collapse: reset to checkpoint + additional coin loss
-            const additionalLoss = Math.min(DungeonService.randomInRange(100, 200), Math.max(balance.coin - coinLost, 0));
+            const additionalLoss = Math.min(
+                DungeonService.randomInRange(100, 200),
+                Math.max(balance.coin - coinLost, 0)
+            );
             const totalLoss = coinLost + additionalLoss;
 
             await UserEconomyModel.updateOne(
                 { userId, guildId },
-                { $inc: { coin: -totalLoss }, $set: { dungeonDepth: checkpoint } },
+                { $inc: { coin: -totalLoss }, $set: { dungeonDepth: checkpoint } }
             );
 
             runState.floor = checkpoint;
 
-            const embed = buildTrapEmbed(locale, { floor, checkpoint, hpLost, coinLost: totalLoss, collapsed: true, currentHp: 0 });
+            const embed = buildTrapEmbed(locale, {
+                floor,
+                checkpoint,
+                hpLost,
+                coinLost: totalLoss,
+                collapsed: true,
+                currentHp: 0,
+            });
             return { embed, row: new ActionRowBuilder<ButtonBuilder>(), runEnded: true };
         }
 
         if (coinLost > 0) {
-            await UserEconomyModel.updateOne(
-                { userId, guildId },
-                { $inc: { coin: -coinLost } },
-            );
+            await UserEconomyModel.updateOne({ userId, guildId }, { $inc: { coin: -coinLost } });
         }
 
-        const embed = buildTrapEmbed(locale, { floor, checkpoint, hpLost, coinLost, collapsed: false, currentHp: runState.hp });
+        const embed = buildTrapEmbed(locale, {
+            floor,
+            checkpoint,
+            hpLost,
+            coinLost,
+            collapsed: false,
+            currentHp: runState.hp,
+        });
         embed.setFooter({ text: buildContinueLeaveText(locale, runState.encountersLeft) });
         return {
             embed,
@@ -282,7 +334,14 @@ export async function processEncounter(
     }
 
     // NPC Merchant encounter
-    const merchantState = MerchantService.buildMerchantState(userId, guildId, runState.locale, floor, checkpoint, runState.hp);
+    const merchantState = MerchantService.buildMerchantState(
+        userId,
+        guildId,
+        runState.locale,
+        floor,
+        checkpoint,
+        runState.hp
+    );
     const merchantKey = `dungeon_merchant:${userId}`;
     await redis.setJson(merchantKey, merchantState, MERCHANT_TTL);
 
@@ -304,7 +363,7 @@ export function scheduleCombatTimeout(
     interaction: { editReply: ChatInputCommandInteraction["editReply"] },
     userId: string,
     locale: SupportedLocale,
-    encounterId: string,
+    encounterId: string
 ): void {
     const combatKey = `dungeon_combat:${userId}`;
     const runKey = `dungeon_run:${userId}`;
@@ -322,7 +381,10 @@ export function scheduleCombatTimeout(
                 .setColor(0x95a5a6);
 
             if (runState) {
-                await interaction.editReply({ embeds: [timeoutEmbed], components: [buildContinueLeaveRow(locale, runState.encountersLeft)] });
+                await interaction.editReply({
+                    embeds: [timeoutEmbed],
+                    components: [buildContinueLeaveRow(locale, runState.encountersLeft)],
+                });
             } else {
                 await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
             }
@@ -336,7 +398,7 @@ export function scheduleMerchantTimeout(
     interaction: { editReply: ChatInputCommandInteraction["editReply"] },
     userId: string,
     locale: SupportedLocale,
-    encounterId: string,
+    encounterId: string
 ): void {
     const merchantKey = `dungeon_merchant:${userId}`;
     const runKey = `dungeon_run:${userId}`;
@@ -354,7 +416,10 @@ export function scheduleMerchantTimeout(
                 .setColor(0x95a5a6);
 
             if (runState) {
-                await interaction.editReply({ embeds: [timeoutEmbed], components: [buildContinueLeaveRow(locale, runState.encountersLeft)] });
+                await interaction.editReply({
+                    embeds: [timeoutEmbed],
+                    components: [buildContinueLeaveRow(locale, runState.encountersLeft)],
+                });
             } else {
                 await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
             }
@@ -404,9 +469,7 @@ export default {
             const combatKey = `dungeon_combat:${userId}`;
             const existingCombat = await redis.getJson(combatKey);
             if (existingCombat) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "dungeon.in_combat"))
-                    .setColor(0xed4245);
+                const embed = new EmbedBuilder().setDescription(t(locale, "dungeon.in_combat")).setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
 

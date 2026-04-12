@@ -1,8 +1,4 @@
-import {
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 import Reply from "../../util/decorator/reply";
 import type { GlobalShopItemType } from "../../models/globalShopItem.model";
 import GlobalShopService from "../../services/economy/globalShop.service";

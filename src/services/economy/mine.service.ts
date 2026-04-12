@@ -28,7 +28,15 @@ const MINERAL_TABLE = [
     { threshold: 0.73, name: "iron", rarity: "uncommon", emoji: "⛓️", minCoin: 40, maxCoin: 80, depthMultiplier: 3 },
     { threshold: 0.88, name: "gold", rarity: "rare", emoji: "🥇", minCoin: 100, maxCoin: 200, depthMultiplier: 5 },
     { threshold: 0.96, name: "diamond", rarity: "epic", emoji: "💎", minCoin: 300, maxCoin: 500, depthMultiplier: 8 },
-    { threshold: 1.0, name: "emerald", rarity: "legendary", emoji: "🟢", minCoin: 500, maxCoin: 800, depthMultiplier: 12 },
+    {
+        threshold: 1.0,
+        name: "emerald",
+        rarity: "legendary",
+        emoji: "🟢",
+        minCoin: 500,
+        maxCoin: 800,
+        depthMultiplier: 12,
+    },
 ] as const;
 
 const COLLAPSE_PENALTY_MIN = 50;
@@ -52,7 +60,7 @@ function isPrime(n: number): boolean {
 
 function getCollapseRate(depth: number): number {
     if (depth <= 5) return 0.05;
-    if (depth <= 10) return 0.10;
+    if (depth <= 10) return 0.1;
     return 0.15;
 }
 
@@ -73,7 +81,14 @@ function rollMineral(depth: number): MineralRollResult {
         }
     }
     const baseCoin = randomInRange(10, 30);
-    return { name: "stone", rarity: "common", emoji: "🪨", baseCoin, depthBonus: depth * 2, totalReward: baseCoin + depth * 2 };
+    return {
+        name: "stone",
+        rarity: "common",
+        emoji: "🪨",
+        baseCoin,
+        depthBonus: depth * 2,
+        totalReward: baseCoin + depth * 2,
+    };
 }
 
 // --- Rarity colors ---
