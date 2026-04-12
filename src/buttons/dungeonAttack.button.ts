@@ -8,10 +8,7 @@ import type { CombatState, CombatActionResult, CombatResolveResult, DungeonRunSt
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { t } from "../util/i18n/t";
-import { buildContinueLeaveRow, buildCombatRow } from "../commands/slash/dungeon";
-
-const DUNGEON_COOLDOWN = 3600;
-const RUN_TTL = 900;
+import { buildContinueLeaveRow, buildCombatRow, DUNGEON_COOLDOWN, RUN_TTL } from "../commands/slash/dungeon";
 
 function buildWinDesc(locale: SupportedLocale, actionLine: string, state: CombatState, resolve: CombatResolveResult): string {
     const lines = [
@@ -76,11 +73,11 @@ async function handleLoss(
         ].join("\n"))
         .setColor(0xed4245);
 
-    if (runState) {
-        await redis.deleteKey(runKey);
-        const cdKey = `dungeon_cd:${state.guildId}:${state.userId}`;
-        await redis.setJson(cdKey, 1, DUNGEON_COOLDOWN);
-    }
+    // Always end run and set cooldown on death
+    await redis.deleteKey(runKey);
+    await redis.deleteKey(`dungeon_merchant:${state.userId}`);
+    const cdKey = `dungeon_cd:${state.guildId}:${state.userId}`;
+    await redis.setJson(cdKey, 1, DUNGEON_COOLDOWN);
     await interaction.editReply({ embeds: [embed], components: [] });
 }
 

@@ -4,10 +4,13 @@ import type { DungeonRunState } from "../services/economy/dungeon.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { t } from "../util/i18n/t";
-import { processEncounter } from "../commands/slash/dungeon";
-
-const RUN_TTL = 900;
-const DUNGEON_COOLDOWN = 3600;
+import {
+    processEncounter,
+    scheduleCombatTimeout,
+    scheduleMerchantTimeout,
+    DUNGEON_COOLDOWN,
+    RUN_TTL,
+} from "../commands/slash/dungeon";
 
 export default {
     id: BUTTON_ID.DUNGEON_CONTINUE,
@@ -33,6 +36,8 @@ export default {
         // Check if encounters exhausted
         if (runState.encountersLeft <= 0) {
             await redis.deleteKey(runKey);
+            await redis.deleteKey(`dungeon_combat:${userId}`);
+            await redis.deleteKey(`dungeon_merchant:${userId}`);
             const cdKey = `dungeon_cd:${runState.guildId}:${userId}`;
             await redis.setJson(cdKey, 1, DUNGEON_COOLDOWN);
 
@@ -52,12 +57,20 @@ export default {
 
         if (runEnded) {
             await redis.deleteKey(runKey);
+            await redis.deleteKey(`dungeon_combat:${userId}`);
+            await redis.deleteKey(`dungeon_merchant:${userId}`);
             const cdKey = `dungeon_cd:${runState.guildId}:${userId}`;
             await redis.setJson(cdKey, 1, DUNGEON_COOLDOWN);
             await interaction.editReply({ embeds: [embed], components: [] });
         } else {
             await redis.setJson(runKey, runState, RUN_TTL);
             await interaction.editReply({ embeds: [embed], components: [row] });
+            // Schedule timeouts for combat/merchant encounters
+            if (await redis.getJson(`dungeon_combat:${userId}`)) {
+                scheduleCombatTimeout(interaction, userId, locale);
+            } else if (await redis.getJson(`dungeon_merchant:${userId}`)) {
+                scheduleMerchantTimeout(interaction, userId, locale);
+            }
         }
     },
 };

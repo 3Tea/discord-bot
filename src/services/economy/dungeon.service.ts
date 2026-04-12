@@ -33,27 +33,6 @@ export interface CombatActionResult {
     turnsUp: boolean;
 }
 
-export interface EncounterResult {
-    type: EncounterType;
-    floor: number;
-    checkpoint: number;
-    // Monster
-    combatState?: CombatState;
-    // Treasure
-    coinReward?: number;
-    gemReward?: number;
-    starReward?: boolean;
-    // Shared
-    newFloor?: number;
-    floorAdvanced?: boolean;
-    checkpointReached?: boolean;
-    // Trap
-    hpLost?: number;
-    coinLost?: number;
-    collapsed?: boolean;
-    // NPC (flavor only — no extra fields needed)
-}
-
 export interface CombatResolveResult {
     coinReward: number;
     gemReward: number;
@@ -145,94 +124,6 @@ function rollEncounterType(hasLuckBuff = false): EncounterType {
 }
 
 // --- Core functions ---
-
-async function rollEncounter(userId: string, guildId: string, locale: string): Promise<EncounterResult> {
-    const economy = await UserEconomyModel.findOneAndUpdate(
-        { userId, guildId },
-        { $setOnInsert: { userId, guildId, coin: 0, gem: 0, prayStreak: 0, mineDepth: 1, mineCheckpoint: 1, dungeonDepth: 1, dungeonCheckpoint: 1 } },
-        { upsert: true, new: true }
-    );
-
-    const floor = economy.dungeonDepth ?? 1;
-    const checkpoint = economy.dungeonCheckpoint ?? 1;
-
-    const type = rollEncounterType();
-
-    if (type === "monster") {
-        const monster = rollMonster(floor);
-        const combatState: CombatState = {
-            userId,
-            monsterHp: 30 + floor * 5,
-            userHp: 100,
-            floor,
-            checkpoint,
-            turnsLeft: 3,
-            guildId,
-            locale,
-            monsterName: monster.name,
-            monsterEmoji: monster.emoji,
-        };
-        return { type, floor, checkpoint, combatState };
-    }
-
-    if (type === "treasure") {
-        const coinReward = randomInRange(30, 100) + floor * 8;
-        const gemReward = Math.random() < 0.15 ? 1 : 0;
-        let starReward = false;
-
-        await CurrencyService.addCoin(userId, guildId, coinReward, "dungeon", { encounter: "treasure", floor });
-        if (gemReward > 0) {
-            await CurrencyService.addGem(userId, guildId, gemReward, "dungeon", { encounter: "treasure", floor });
-        }
-        starReward = await tryStarDrop(userId, 0.03, "dungeon");
-
-        // Advance floor
-        const newFloor = floor + 1;
-        const checkpointReached = isPrime(newFloor);
-        const newCheckpoint = checkpointReached ? newFloor : checkpoint;
-
-        await UserEconomyModel.updateOne(
-            { userId, guildId },
-            { $set: { dungeonDepth: newFloor, dungeonCheckpoint: newCheckpoint } }
-        );
-
-        return { type, floor, checkpoint: newCheckpoint, coinReward, gemReward, starReward, newFloor, floorAdvanced: true, checkpointReached };
-    }
-
-    if (type === "trap") {
-        const hpLost = randomInRange(10, 20);
-        const coinLost = Math.min(randomInRange(30, 60), economy.coin);
-
-        // Defensive: collapse if HP ≤ 0. Currently unreachable (max trap damage 20, HP 100)
-        // but kept for spec compliance and future multi-encounter-per-run expansion.
-        const remainingHp = 100 - hpLost;
-        if (remainingHp <= 0) {
-            // Collapse: reset to checkpoint + additional coin loss
-            const additionalLoss = Math.min(randomInRange(100, 200), Math.max(economy.coin - coinLost, 0));
-            const totalLoss = coinLost + additionalLoss;
-
-            await UserEconomyModel.updateOne(
-                { userId, guildId },
-                { $inc: { coin: -totalLoss }, $set: { dungeonDepth: checkpoint } }
-            );
-
-            return { type, floor: checkpoint, checkpoint, hpLost, coinLost: totalLoss, collapsed: true };
-        }
-
-        // Stay on floor, just lose coin
-        if (coinLost > 0) {
-            await UserEconomyModel.updateOne(
-                { userId, guildId },
-                { $inc: { coin: -coinLost } }
-            );
-        }
-
-        return { type, floor, checkpoint, hpLost, coinLost, collapsed: false };
-    }
-
-    // NPC — flavor only, stay on floor
-    return { type, floor, checkpoint };
-}
 
 function processCombatAction(state: CombatState, action: "attack" | "defend" | "run" | "timeout", buff?: Buff | null): CombatActionResult {
     if (action === "run") {
@@ -395,14 +286,7 @@ function tickBuff(runState: DungeonRunState): void {
     }
 }
 
-async function endRun(userId: string, guildId: string): Promise<void> {
-    // Floor/checkpoint already persisted after each advance.
-    // This function is for cleanup only — Redis key deletion
-    // handled by the caller (button handler) since they have the keys.
-}
-
 const DungeonService = {
-    rollEncounter,
     processCombatAction,
     resolveCombatWin,
     resolveCombatLoss,
@@ -411,7 +295,6 @@ const DungeonService = {
     rollEncounterForRun,
     rollEncounterType,
     tickBuff,
-    endRun,
     rollMonster,
     randomInRange,
 };

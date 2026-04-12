@@ -6,9 +6,7 @@ import type { DungeonRunState } from "../services/economy/dungeon.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { t } from "../util/i18n/t";
-import { buildContinueLeaveRow } from "../commands/slash/dungeon";
-
-const RUN_TTL = 900;
+import { buildContinueLeaveRow, RUN_TTL } from "../commands/slash/dungeon";
 
 export default {
     id: BUTTON_ID.DUNGEON_EXCHANGE,
@@ -17,6 +15,7 @@ export default {
         const merchantKey = `dungeon_merchant:${userId}`;
         const runKey = `dungeon_run:${userId}`;
 
+        // Atomic claim: delete merchant key first to prevent double-spend
         const merchantState = (await redis.getJson(merchantKey)) as MerchantState | null;
         if (!merchantState) {
             await interaction.reply({ content: t("en", "dungeon.merchant.timeout"), ephemeral: true });
@@ -28,7 +27,17 @@ export default {
             return;
         }
 
+        // Delete immediately to prevent concurrent clicks
+        await redis.deleteKey(merchantKey);
+
         const locale = merchantState.locale as SupportedLocale;
+
+        // Validate run state exists before spending coin
+        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+        if (!runState) {
+            await interaction.reply({ content: t(locale, "dungeon.run.timeout"), ephemeral: true });
+            return;
+        }
 
         await interaction.deferUpdate();
 
@@ -55,15 +64,8 @@ export default {
             floor: merchantState.floor,
         });
 
-        // Cleanup merchant state
-        await redis.deleteKey(merchantKey);
-
-        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
-        const encountersLeft = runState?.encountersLeft ?? 0;
-
-        if (runState) {
-            await redis.setJson(runKey, runState, RUN_TTL);
-        }
+        // Refresh run TTL
+        await redis.setJson(runKey, runState, RUN_TTL);
 
         const embed = new EmbedBuilder()
             .setTitle(`💎 ${t(locale, "dungeon.title")}`)
@@ -76,6 +78,6 @@ export default {
             )
             .setColor(0x3498db);
 
-        await interaction.editReply({ embeds: [embed], components: [buildContinueLeaveRow(locale, encountersLeft)] });
+        await interaction.editReply({ embeds: [embed], components: [buildContinueLeaveRow(locale, runState.encountersLeft)] });
     },
 };

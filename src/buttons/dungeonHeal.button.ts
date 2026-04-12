@@ -7,9 +7,7 @@ import type { DungeonRunState } from "../services/economy/dungeon.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { t } from "../util/i18n/t";
-import { buildContinueLeaveRow } from "../commands/slash/dungeon";
-
-const RUN_TTL = 900;
+import { buildContinueLeaveRow, RUN_TTL } from "../commands/slash/dungeon";
 
 export default {
     id: BUTTON_ID.DUNGEON_HEAL,
@@ -18,6 +16,7 @@ export default {
         const merchantKey = `dungeon_merchant:${userId}`;
         const runKey = `dungeon_run:${userId}`;
 
+        // Atomic claim: delete merchant key first to prevent double-spend
         const merchantState = (await redis.getJson(merchantKey)) as MerchantState | null;
         if (!merchantState) {
             await interaction.reply({ content: t("en", "dungeon.merchant.timeout"), ephemeral: true });
@@ -29,11 +28,23 @@ export default {
             return;
         }
 
+        // Delete immediately to prevent concurrent clicks
+        await redis.deleteKey(merchantKey);
+
         const locale = merchantState.locale as SupportedLocale;
+
+        // Validate run state exists before spending coin
+        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+        if (!runState) {
+            await interaction.reply({ content: t(locale, "dungeon.run.timeout"), ephemeral: true });
+            return;
+        }
 
         // Check HP already full
         if (merchantState.currentHp >= 100) {
             await interaction.reply({ content: t(locale, "dungeon.merchant.hp_full"), ephemeral: true });
+            // Restore merchant state since no purchase happened
+            await redis.setJson(merchantKey, merchantState, 30);
             return;
         }
 
@@ -60,15 +71,8 @@ export default {
         const actualHeal = MerchantService.calculateHeal(merchantState.currentHp, merchantState.healAmount);
         const newHp = merchantState.currentHp + actualHeal;
 
-        // Update run state
-        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
-        if (runState) {
-            runState.hp = newHp;
-            await redis.setJson(runKey, runState, RUN_TTL);
-        }
-
-        // Cleanup merchant state
-        await redis.deleteKey(merchantKey);
+        runState.hp = newHp;
+        await redis.setJson(runKey, runState, RUN_TTL);
 
         const embed = new EmbedBuilder()
             .setTitle(`🧪 ${t(locale, "dungeon.title")}`)
@@ -81,7 +85,6 @@ export default {
             )
             .setColor(0x2ecc71);
 
-        const encountersLeft = runState?.encountersLeft ?? 0;
-        await interaction.editReply({ embeds: [embed], components: [buildContinueLeaveRow(locale, encountersLeft)] });
+        await interaction.editReply({ embeds: [embed], components: [buildContinueLeaveRow(locale, runState.encountersLeft)] });
     },
 };

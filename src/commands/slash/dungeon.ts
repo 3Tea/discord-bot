@@ -22,11 +22,11 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 
-const DUNGEON_COOLDOWN = 3600;
-const RUN_TTL = 900;
-const COMBAT_TTL = 60;
-const MERCHANT_TTL = 60;
-const COMBAT_TIMEOUT_MS = 30_000;
+export const DUNGEON_COOLDOWN = 3600;
+export const RUN_TTL = 900;
+export const COMBAT_TTL = 60;
+export const MERCHANT_TTL = 60;
+export const COMBAT_TIMEOUT_MS = 30_000;
 
 // --- Embed builders (exported for button handlers) ---
 
@@ -188,18 +188,6 @@ export async function processEncounter(
         const combatKey = `dungeon_combat:${userId}`;
         await redis.setJson(combatKey, combatState, COMBAT_TTL);
 
-        // Schedule auto-timeout
-        setTimeout(async () => {
-            try {
-                const active = await redis.getJson(combatKey);
-                if (active) {
-                    await redis.deleteKey(combatKey);
-                }
-            } catch {
-                // Silently ignore
-            }
-        }, COMBAT_TIMEOUT_MS);
-
         return {
             embed: buildCombatEmbed(locale, combatState, checkpoint),
             row: buildCombatRow(locale),
@@ -284,23 +272,78 @@ export async function processEncounter(
 
     const balance = await CurrencyService.getBalance(userId, guildId);
 
-    // Schedule merchant timeout
-    setTimeout(async () => {
-        try {
-            const active = await redis.getJson(merchantKey);
-            if (active) {
-                await redis.deleteKey(merchantKey);
-            }
-        } catch {
-            // Silently ignore
-        }
-    }, MERCHANT_TTL * 1000);
-
     return {
         embed: buildMerchantEmbed(locale, merchantState, balance.coin),
         row: buildMerchantRow(locale, merchantState, balance.coin),
         runEnded: false,
     };
+}
+
+/**
+ * Schedule combat/merchant auto-timeouts that update the Discord message.
+ * Must be called after processEncounter when the encounter type is monster or npc.
+ * Accepts any interaction with editReply (ChatInputCommandInteraction or ButtonInteraction).
+ */
+export function scheduleCombatTimeout(
+    interaction: { editReply: ChatInputCommandInteraction["editReply"] },
+    userId: string,
+    locale: SupportedLocale,
+): void {
+    const combatKey = `dungeon_combat:${userId}`;
+    const runKey = `dungeon_run:${userId}`;
+
+    setTimeout(async () => {
+        try {
+            const active = await redis.getJson(combatKey);
+            if (!active) return;
+            await redis.deleteKey(combatKey);
+
+            const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+            const timeoutEmbed = new EmbedBuilder()
+                .setTitle(`🏃 ${t(locale, "dungeon.title")}`)
+                .setDescription(t(locale, "dungeon.combat.timeout"))
+                .setColor(0x95a5a6);
+
+            if (runState) {
+                await interaction.editReply({ embeds: [timeoutEmbed], components: [buildContinueLeaveRow(locale, runState.encountersLeft)] });
+            } else {
+                await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
+            }
+        } catch {
+            // Interaction may have expired — silently ignore
+        }
+    }, COMBAT_TIMEOUT_MS);
+}
+
+export function scheduleMerchantTimeout(
+    interaction: { editReply: ChatInputCommandInteraction["editReply"] },
+    userId: string,
+    locale: SupportedLocale,
+): void {
+    const merchantKey = `dungeon_merchant:${userId}`;
+    const runKey = `dungeon_run:${userId}`;
+
+    setTimeout(async () => {
+        try {
+            const active = await redis.getJson(merchantKey);
+            if (!active) return;
+            await redis.deleteKey(merchantKey);
+
+            const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+            const timeoutEmbed = new EmbedBuilder()
+                .setTitle(`🧙 ${t(locale, "dungeon.title")}`)
+                .setDescription(t(locale, "dungeon.merchant.timeout"))
+                .setColor(0x95a5a6);
+
+            if (runState) {
+                await interaction.editReply({ embeds: [timeoutEmbed], components: [buildContinueLeaveRow(locale, runState.encountersLeft)] });
+            } else {
+                await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
+            }
+        } catch {
+            // Interaction may have expired — silently ignore
+        }
+    }, MERCHANT_TTL * 1000);
 }
 
 // --- Main command ---
@@ -364,6 +407,12 @@ export default {
                 await redis.setJson(cdKey, 1, DUNGEON_COOLDOWN);
             } else {
                 await redis.setJson(runKey, runState, RUN_TTL);
+                // Schedule timeouts for combat/merchant encounters
+                if (await redis.getJson(`dungeon_combat:${userId}`)) {
+                    scheduleCombatTimeout(interaction, userId, locale);
+                } else if (await redis.getJson(`dungeon_merchant:${userId}`)) {
+                    scheduleMerchantTimeout(interaction, userId, locale);
+                }
             }
         } catch {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");

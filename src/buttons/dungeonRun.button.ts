@@ -4,9 +4,7 @@ import type { CombatState, DungeonRunState } from "../services/economy/dungeon.s
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { t } from "../util/i18n/t";
-import { buildContinueLeaveRow } from "../commands/slash/dungeon";
-
-const RUN_TTL = 900;
+import { buildContinueLeaveRow, RUN_TTL } from "../commands/slash/dungeon";
 
 export default {
     id: BUTTON_ID.DUNGEON_RUN,

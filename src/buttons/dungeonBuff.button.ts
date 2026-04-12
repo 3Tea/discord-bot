@@ -6,9 +6,7 @@ import type { DungeonRunState } from "../services/economy/dungeon.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { t } from "../util/i18n/t";
-import { buildContinueLeaveRow } from "../commands/slash/dungeon";
-
-const RUN_TTL = 900;
+import { buildContinueLeaveRow, RUN_TTL } from "../commands/slash/dungeon";
 
 export default {
     id: BUTTON_ID.DUNGEON_BUFF,
@@ -17,6 +15,7 @@ export default {
         const merchantKey = `dungeon_merchant:${userId}`;
         const runKey = `dungeon_run:${userId}`;
 
+        // Atomic claim: delete merchant key first to prevent double-spend
         const merchantState = (await redis.getJson(merchantKey)) as MerchantState | null;
         if (!merchantState) {
             await interaction.reply({ content: t("en", "dungeon.merchant.timeout"), ephemeral: true });
@@ -28,7 +27,17 @@ export default {
             return;
         }
 
+        // Delete immediately to prevent concurrent clicks
+        await redis.deleteKey(merchantKey);
+
         const locale = merchantState.locale as SupportedLocale;
+
+        // Validate run state exists before spending coin
+        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+        if (!runState) {
+            await interaction.reply({ content: t(locale, "dungeon.run.timeout"), ephemeral: true });
+            return;
+        }
 
         await interaction.deferUpdate();
 
@@ -49,36 +58,32 @@ export default {
             return;
         }
 
-        // Update run state with buff
-        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+        // Apply buff
         const descLines: string[] = [];
         const buffLabel = t(locale, `dungeon.buff.${merchantState.buffType}`);
 
-        if (runState) {
-            if (runState.activeBuff) {
-                const oldBuffLabel = t(locale, `dungeon.buff.${runState.activeBuff.type}`);
-                descLines.push(t(locale, "dungeon.merchant.buff_replaced", { oldBuff: oldBuffLabel }));
-            }
-
-            runState.activeBuff = {
-                type: merchantState.buffType,
-                encountersLeft: runState.encountersLeft,
-            };
-            await redis.setJson(runKey, runState, RUN_TTL);
+        if (runState.activeBuff) {
+            const oldBuffLabel = t(locale, `dungeon.buff.${runState.activeBuff.type}`);
+            descLines.push(t(locale, "dungeon.merchant.buff_replaced", { oldBuff: oldBuffLabel }));
         }
 
-        // Cleanup merchant state
-        await redis.deleteKey(merchantKey);
+        runState.activeBuff = {
+            type: merchantState.buffType,
+            encountersLeft: runState.encountersLeft,
+        };
+        await redis.setJson(runKey, runState, RUN_TTL);
 
-        const encountersLeft = runState?.encountersLeft ?? 0;
-        descLines.push(t(locale, "dungeon.merchant.buff_result", { buffType: buffLabel, turns: String(encountersLeft) }));
-        descLines.push("", t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.checkpoint) }));
+        descLines.push(
+            t(locale, "dungeon.merchant.buff_result", { buffType: buffLabel, turns: String(runState.encountersLeft) }),
+            "",
+            t(locale, "dungeon.floor", { floor: String(merchantState.floor), checkpoint: String(merchantState.checkpoint) }),
+        );
 
         const embed = new EmbedBuilder()
             .setTitle(`✨ ${t(locale, "dungeon.title")}`)
             .setDescription(descLines.join("\n"))
             .setColor(0x9b59b6);
 
-        await interaction.editReply({ embeds: [embed], components: [buildContinueLeaveRow(locale, encountersLeft)] });
+        await interaction.editReply({ embeds: [embed], components: [buildContinueLeaveRow(locale, runState.encountersLeft)] });
     },
 };

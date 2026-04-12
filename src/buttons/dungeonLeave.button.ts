@@ -4,8 +4,7 @@ import type { DungeonRunState } from "../services/economy/dungeon.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { t } from "../util/i18n/t";
-
-const DUNGEON_COOLDOWN = 3600;
+import { DUNGEON_COOLDOWN } from "../commands/slash/dungeon";
 
 export default {
     id: BUTTON_ID.DUNGEON_LEAVE,
