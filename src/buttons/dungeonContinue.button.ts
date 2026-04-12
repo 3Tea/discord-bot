@@ -3,6 +3,7 @@ import redis from "../connector/redis";
 import type { DungeonRunState } from "../services/economy/dungeon.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
+import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
 import {
     processEncounter,
@@ -20,7 +21,8 @@ export default {
 
         const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
         if (!runState) {
-            await interaction.reply({ content: t("en", "dungeon.run.timeout"), ephemeral: true });
+            const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
+            await interaction.reply({ content: t(fallbackLocale, "dungeon.run.timeout"), ephemeral: true });
             return;
         }
 

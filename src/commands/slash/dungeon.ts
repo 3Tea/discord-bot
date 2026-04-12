@@ -38,6 +38,10 @@ export function buildCombatRow(locale: SupportedLocale): ActionRowBuilder<Button
     );
 }
 
+export function buildContinueLeaveText(locale: SupportedLocale, encountersLeft: number): string {
+    return t(locale, "dungeon.run.continue", { left: String(encountersLeft) });
+}
+
 export function buildContinueLeaveRow(locale: SupportedLocale, encountersLeft: number): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
@@ -124,17 +128,25 @@ export function buildTreasureEmbed(locale: SupportedLocale, opts: TreasureEmbedO
         .setColor(0xf1c40f);
 }
 
-export function buildTrapEmbed(locale: SupportedLocale, floor: number, checkpoint: number, hpLost: number, coinLost: number, collapsed: boolean, currentHp: number): EmbedBuilder {
+export interface TrapEmbedOptions {
+    floor: number;
+    checkpoint: number;
+    hpLost: number;
+    coinLost: number;
+    collapsed: boolean;
+    currentHp: number;
+}
+
+export function buildTrapEmbed(locale: SupportedLocale, opts: TrapEmbedOptions): EmbedBuilder {
+    const { floor, checkpoint, hpLost, coinLost, collapsed, currentHp } = opts;
     const descLines = [
         t(locale, "dungeon.encounter.trap", { floor: String(floor) }),
         t(locale, "dungeon.trap.damage", { hp: String(hpLost), coin: String(coinLost) }),
-    ];
-    descLines.push(
         ...(collapsed ? ["", t(locale, "dungeon.collapse", { checkpoint: String(checkpoint) })] : []),
         "",
         `HP: **${currentHp}**/100`,
         t(locale, "dungeon.floor", { floor: String(collapsed ? checkpoint : floor), checkpoint: String(checkpoint) }),
-    );
+    ];
     return new EmbedBuilder()
         .setTitle(`🪤 ${t(locale, "dungeon.title")}`)
         .setDescription(descLines.join("\n"))
@@ -219,6 +231,7 @@ export async function processEncounter(
         runState.checkpoint = newCheckpoint;
 
         const embed = buildTreasureEmbed(locale, { floor, checkpoint: newCheckpoint, coinReward, gemReward, starReward, newFloor, checkpointReached });
+        embed.setFooter({ text: buildContinueLeaveText(locale, runState.encountersLeft) });
 
         return {
             embed,
@@ -246,7 +259,7 @@ export async function processEncounter(
 
             runState.floor = checkpoint;
 
-            const embed = buildTrapEmbed(locale, floor, checkpoint, hpLost, totalLoss, true, 0);
+            const embed = buildTrapEmbed(locale, { floor, checkpoint, hpLost, coinLost: totalLoss, collapsed: true, currentHp: 0 });
             return { embed, row: new ActionRowBuilder<ButtonBuilder>(), runEnded: true };
         }
 
@@ -257,7 +270,8 @@ export async function processEncounter(
             );
         }
 
-        const embed = buildTrapEmbed(locale, floor, checkpoint, hpLost, coinLost, false, runState.hp);
+        const embed = buildTrapEmbed(locale, { floor, checkpoint, hpLost, coinLost, collapsed: false, currentHp: runState.hp });
+        embed.setFooter({ text: buildContinueLeaveText(locale, runState.encountersLeft) });
         return {
             embed,
             row: buildContinueLeaveRow(locale, runState.encountersLeft),

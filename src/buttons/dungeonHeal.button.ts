@@ -6,6 +6,7 @@ import type { MerchantState } from "../services/economy/merchant.service";
 import type { DungeonRunState } from "../services/economy/dungeon.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
+import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
 import { buildContinueLeaveRow, RUN_TTL } from "../commands/slash/dungeon";
 
@@ -19,7 +20,8 @@ export default {
         // Atomic claim: delete merchant key first to prevent double-spend
         const merchantState = (await redis.getJson(merchantKey)) as MerchantState | null;
         if (!merchantState) {
-            await interaction.reply({ content: t("en", "dungeon.merchant.timeout"), ephemeral: true });
+            const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
+            await interaction.reply({ content: t(fallbackLocale, "dungeon.merchant.timeout"), ephemeral: true });
             return;
         }
 
