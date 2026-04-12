@@ -8,6 +8,7 @@ import type { Buff } from "./merchant.service";
 export type EncounterType = "monster" | "treasure" | "trap" | "npc";
 
 export interface CombatState {
+    encounterId: string;
     userId: string;
     monsterHp: number;
     userHp: number;

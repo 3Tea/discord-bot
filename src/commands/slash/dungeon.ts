@@ -6,6 +6,7 @@ import {
     EmbedBuilder,
     SlashCommandBuilder,
 } from "discord.js";
+import crypto from "node:crypto";
 import redis from "../../connector/redis";
 import DungeonService from "../../services/economy/dungeon.service";
 import type { CombatState, DungeonRunState } from "../../services/economy/dungeon.service";
@@ -185,6 +186,7 @@ export async function processEncounter(
     if (encounterType === "monster") {
         const monster = DungeonService.rollMonster(floor);
         const combatState: CombatState = {
+            encounterId: crypto.randomUUID(),
             userId,
             monsterHp: 30 + floor * 5,
             userHp: runState.hp,
@@ -302,14 +304,15 @@ export function scheduleCombatTimeout(
     interaction: { editReply: ChatInputCommandInteraction["editReply"] },
     userId: string,
     locale: SupportedLocale,
+    encounterId: string,
 ): void {
     const combatKey = `dungeon_combat:${userId}`;
     const runKey = `dungeon_run:${userId}`;
 
     setTimeout(async () => {
         try {
-            const active = await redis.getJson(combatKey);
-            if (!active) return;
+            const active = (await redis.getJson(combatKey)) as CombatState | null;
+            if (!active || active.encounterId !== encounterId) return;
             await redis.deleteKey(combatKey);
 
             const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
@@ -333,14 +336,15 @@ export function scheduleMerchantTimeout(
     interaction: { editReply: ChatInputCommandInteraction["editReply"] },
     userId: string,
     locale: SupportedLocale,
+    encounterId: string,
 ): void {
     const merchantKey = `dungeon_merchant:${userId}`;
     const runKey = `dungeon_run:${userId}`;
 
     setTimeout(async () => {
         try {
-            const active = await redis.getJson(merchantKey);
-            if (!active) return;
+            const active = (await redis.getJson(merchantKey)) as MerchantState | null;
+            if (!active || active.encounterId !== encounterId) return;
             await redis.deleteKey(merchantKey);
 
             const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
@@ -422,10 +426,12 @@ export default {
             } else {
                 await redis.setJson(runKey, runState, RUN_TTL);
                 // Schedule timeouts for combat/merchant encounters
-                if (await redis.getJson(`dungeon_combat:${userId}`)) {
-                    scheduleCombatTimeout(interaction, userId, locale);
-                } else if (await redis.getJson(`dungeon_merchant:${userId}`)) {
-                    scheduleMerchantTimeout(interaction, userId, locale);
+                const combatState = (await redis.getJson(`dungeon_combat:${userId}`)) as CombatState | null;
+                const merchantState = (await redis.getJson(`dungeon_merchant:${userId}`)) as MerchantState | null;
+                if (combatState) {
+                    scheduleCombatTimeout(interaction, userId, locale, combatState.encounterId);
+                } else if (merchantState) {
+                    scheduleMerchantTimeout(interaction, userId, locale, merchantState.encounterId);
                 }
             }
         } catch {

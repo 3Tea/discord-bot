@@ -52,11 +52,14 @@ export default {
                 buffType: merchantState.buffType,
             });
         } catch (error) {
-            if (error instanceof Error && error.name === "InsufficientFundsError") {
-                await interaction.followUp({ content: t(locale, "dungeon.merchant.no_coin"), ephemeral: true });
-            } else {
-                await interaction.followUp({ content: t(locale, "common.error"), ephemeral: true });
-            }
+            const msg = error instanceof Error && error.name === "InsufficientFundsError"
+                ? t(locale, "dungeon.merchant.no_coin")
+                : t(locale, "common.error");
+            await interaction.followUp({ content: msg, ephemeral: true });
+            await interaction.editReply({
+                embeds: [new EmbedBuilder().setTitle(`🧙 ${t(locale, "dungeon.title")}`).setDescription(t(locale, "dungeon.merchant.timeout")).setColor(0x95a5a6)],
+                components: runState ? [buildContinueLeaveRow(locale, runState.encountersLeft)] : [],
+            });
             return;
         }
 

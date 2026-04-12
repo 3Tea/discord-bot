@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+
 // --- Types ---
 
 export type BuffType = "attack" | "defense" | "luck";
@@ -8,6 +10,7 @@ export interface Buff {
 }
 
 export interface MerchantState {
+    encounterId: string;
     userId: string;
     guildId: string;
     locale: string;
@@ -59,6 +62,7 @@ function buildMerchantState(
 ): MerchantState {
     const offer = generateOffer(floor);
     return {
+        encounterId: crypto.randomUUID(),
         userId,
         guildId,
         locale,

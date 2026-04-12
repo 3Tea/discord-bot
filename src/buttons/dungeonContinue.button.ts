@@ -1,6 +1,7 @@
 import { ButtonInteraction, EmbedBuilder } from "discord.js";
 import redis from "../connector/redis";
-import type { DungeonRunState } from "../services/economy/dungeon.service";
+import type { CombatState, DungeonRunState } from "../services/economy/dungeon.service";
+import type { MerchantState } from "../services/economy/merchant.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { resolveLocale } from "../util/i18n/locale";
@@ -68,10 +69,12 @@ export default {
             await redis.setJson(runKey, runState, RUN_TTL);
             await interaction.editReply({ embeds: [embed], components: [row] });
             // Schedule timeouts for combat/merchant encounters
-            if (await redis.getJson(`dungeon_combat:${userId}`)) {
-                scheduleCombatTimeout(interaction, userId, locale);
-            } else if (await redis.getJson(`dungeon_merchant:${userId}`)) {
-                scheduleMerchantTimeout(interaction, userId, locale);
+            const combatState = (await redis.getJson(`dungeon_combat:${userId}`)) as CombatState | null;
+            const merchantState = (await redis.getJson(`dungeon_merchant:${userId}`)) as MerchantState | null;
+            if (combatState) {
+                scheduleCombatTimeout(interaction, userId, locale, combatState.encounterId);
+            } else if (merchantState) {
+                scheduleMerchantTimeout(interaction, userId, locale, merchantState.encounterId);
             }
         }
     },
