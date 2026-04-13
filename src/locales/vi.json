@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}** star",
     "wallet.daily.streak": "Chuỗi: **{{streak}}** ngày",
     "wallet.daily.milestone": "Cột mốc **{{days}} ngày**! Bonus: +**{{bonus}}** star",
+    "wallet.daily.premium_bonus": "Bonus premium: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "Bạn đã nhận hôm nay rồi. Quay lại ngày mai nhé!",
     "wallet.history.title": "Lịch Sử Ví của {{username}}",
     "wallet.history.empty": "Chưa có giao dịch nào.",

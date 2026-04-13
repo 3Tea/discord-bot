@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}** estrela",
     "wallet.daily.streak": "Sequência: **{{streak}}** dias",
     "wallet.daily.milestone": "Marco de sequência **{{days}} dias**! Bônus: +**{{bonus}}** estrela",
+    "wallet.daily.premium_bonus": "Bônus premium: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "Você já reivindicou hoje. Volte amanhã!",
     "wallet.history.title": "Histórico de Carteira Global de {{username}}",
     "wallet.history.empty": "Nenhuma transação ainda.",

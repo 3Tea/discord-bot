@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}**スター",
     "wallet.daily.streak": "ストリーク: **{{streak}}**日",
     "wallet.daily.milestone": "ストリークマイルストーン **{{days}}日**！ボーナス: +**{{bonus}}**スター",
+    "wallet.daily.premium_bonus": "プレミアムボーナス: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "今日はすでに受け取りました。明日また来てください！",
     "wallet.history.title": "{{username}}のグローバルウォレット履歴",
     "wallet.history.empty": "まだ取引がありません。",

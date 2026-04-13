@@ -154,6 +154,10 @@ function formatDailyEmbed(
         description += "\n" + t(locale, "wallet.daily.streak", { streak: String(result.streak) });
     }
 
+    if (result.premiumBonus > 0) {
+        description += "\n" + t(locale, "wallet.daily.premium_bonus", { amount: String(result.premiumBonus) });
+    }
+
     if (result.milestoneHit) {
         description +=
             "\n" +

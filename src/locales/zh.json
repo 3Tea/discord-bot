@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}**星星",
     "wallet.daily.streak": "连续: **{{streak}}**天",
     "wallet.daily.milestone": "连续里程碑 **{{days}}天**！奖励: +**{{bonus}}**星星",
+    "wallet.daily.premium_bonus": "高级奖励: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "您今天已经领取了。明天再来！",
     "wallet.history.title": "{{username}}的全球钱包历史",
     "wallet.history.empty": "暂无交易记录。",

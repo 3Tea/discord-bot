@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}** ster",
     "wallet.daily.streak": "Serie: **{{streak}}** dagen",
     "wallet.daily.milestone": "Serie mijlpaal **{{days}} dagen**! Bonus: +**{{bonus}}** ster",
+    "wallet.daily.premium_bonus": "Premiumbonus: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "Je hebt vandaag al geclaimd. Kom morgen terug!",
     "wallet.history.title": "Globale Portemonneegeschiedenis van {{username}}",
     "wallet.history.empty": "Nog geen transacties.",

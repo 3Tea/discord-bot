@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}** étoile",
     "wallet.daily.streak": "Série: **{{streak}}** jours",
     "wallet.daily.milestone": "Jalon de série **{{days}} jours** ! Bonus: +**{{bonus}}** étoile",
+    "wallet.daily.premium_bonus": "Bonus premium : +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "Vous avez déjà réclamé aujourd'hui. Revenez demain !",
     "wallet.history.title": "Historique du Portefeuille Global de {{username}}",
     "wallet.history.empty": "Aucune transaction pour l'instant.",

@@ -1,5 +1,6 @@
 import UserWalletModel, { IUserWallet } from "../../models/userWallet.model";
 import TransactionModel, { TransactionType } from "../../models/transaction.model";
+import { getTierConfig } from "../premium/premium.config";
 
 const GLOBAL_GUILD_ID = "global";
 
@@ -23,6 +24,7 @@ export interface WalletBalance {
 export interface DailyClaimResult {
     baseReward: number;
     streakBonus: number;
+    premiumBonus: number;
     streak: number;
     milestoneHit: { days: number; bonus: number } | null;
 }
@@ -185,6 +187,7 @@ async function claimDaily(userId: string): Promise<DailyClaimResult> {
     }
 
     const baseReward = Math.floor(Math.random() * 3) + 1;
+    const premiumBonus = getTierConfig(wallet.premiumTier ?? null).dailyBonusStars;
 
     let milestoneHit: DailyClaimResult["milestoneHit"] = null;
     let streakBonus = 0;
@@ -196,7 +199,7 @@ async function claimDaily(userId: string): Promise<DailyClaimResult> {
         }
     }
 
-    const totalReward = baseReward + streakBonus;
+    const totalReward = baseReward + streakBonus + premiumBonus;
 
     // Update streak and star atomically
     await UserWalletModel.updateOne(
@@ -212,7 +215,7 @@ async function claimDaily(userId: string): Promise<DailyClaimResult> {
         await logTransaction(userId, "global_streak_bonus", streakBonus, { days: milestoneHit!.days });
     }
 
-    return { baseReward, streakBonus, streak: newStreak, milestoneHit };
+    return { baseReward, streakBonus, premiumBonus, streak: newStreak, milestoneHit };
 }
 
 async function checkAndAwardMilestone(

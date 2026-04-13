@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}** Stern",
     "wallet.daily.streak": "Serie: **{{streak}}** Tage",
     "wallet.daily.milestone": "Serienmeilenstein **{{days}} Tage**! Bonus: +**{{bonus}}** Stern",
+    "wallet.daily.premium_bonus": "Premium-Bonus: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "Du hast heute bereits eingefordert. Komm morgen wieder!",
     "wallet.history.title": "Globale Portemonnaie-Historie von {{username}}",
     "wallet.history.empty": "Noch keine Transaktionen.",

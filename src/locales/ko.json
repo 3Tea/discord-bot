@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}** 별",
     "wallet.daily.streak": "연속: **{{streak}}**일",
     "wallet.daily.milestone": "연속 마일스톤 **{{days}}일**! 보너스: +**{{bonus}}** 별",
+    "wallet.daily.premium_bonus": "프리미엄 보너스: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "오늘은 이미 받았습니다. 내일 다시 오세요!",
     "wallet.history.title": "{{username}}의 글로벌 지갑 기록",
     "wallet.history.empty": "아직 거래가 없습니다.",

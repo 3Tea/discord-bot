@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}** bintang",
     "wallet.daily.streak": "Streak: **{{streak}}** hari",
     "wallet.daily.milestone": "Pencapaian streak **{{days}} hari**! Bonus: +**{{bonus}}** bintang",
+    "wallet.daily.premium_bonus": "Bonus premium: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "Kamu sudah klaim hari ini. Kembali besok!",
     "wallet.history.title": "Riwayat Dompet Global milik {{username}}",
     "wallet.history.empty": "Belum ada transaksi.",

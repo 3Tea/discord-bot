@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}** звезда",
     "wallet.daily.streak": "Серия: **{{streak}}** дней",
     "wallet.daily.milestone": "Рубеж серии **{{days}} дней**! Бонус: +**{{bonus}}** звезда",
+    "wallet.daily.premium_bonus": "Премиум-бонус: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "Вы уже получили сегодня. Возвращайтесь завтра!",
     "wallet.history.title": "Глобальная история кошелька {{username}}",
     "wallet.history.empty": "Транзакций пока нет.",

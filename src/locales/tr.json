@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}** yıldız",
     "wallet.daily.streak": "Seri: **{{streak}}** gün",
     "wallet.daily.milestone": "Seri kilometre taşı **{{days}} gün**! Bonus: +**{{bonus}}** yıldız",
+    "wallet.daily.premium_bonus": "Premium bonus: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "Bugün zaten aldınız. Yarın tekrar gelin!",
     "wallet.history.title": "{{username}}'in Global Cüzdan Geçmişi",
     "wallet.history.empty": "Henüz işlem yok.",

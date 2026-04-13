@@ -612,6 +612,7 @@
     "wallet.daily.reward": "> +**{{star}}** estrella",
     "wallet.daily.streak": "Racha: **{{streak}}** días",
     "wallet.daily.milestone": "Hito de racha **{{days}} días**! Bonus: +**{{bonus}}** estrella",
+    "wallet.daily.premium_bonus": "Bonus premium: +**{{amount}}** ⭐",
     "wallet.daily.cooldown": "Ya reclamaste hoy. ¡Vuelve mañana!",
     "wallet.history.title": "Historial de Billetera Global de {{username}}",
     "wallet.history.empty": "Sin transacciones aún.",
