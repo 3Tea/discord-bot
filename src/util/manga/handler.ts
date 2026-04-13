@@ -19,12 +19,11 @@ import { descriptionLocales } from "../i18n/commandLocales";
 import type { SupportedLocale } from "../i18n/index";
 import log from "../../util/log/logger.mixed";
 import WalletService, { InsufficientStarError } from "../../services/economy/wallet.service";
+import PremiumService from "../../services/premium/premium.service";
 import type { MangaSource } from "./sources";
 
 const CACHE_TTL = 60 * 10; // 10 minutes
 const BUTTON_REMOVE_DELAY = 20_000; // 20 seconds
-const MAX_READ_PAGES = 50;
-const FREE_DAILY_USES = 3;
 const STAR_COST = 1;
 
 function secondsUntilUTCMidnight(): number {
@@ -39,10 +38,15 @@ function secondsUntilUTCMidnight(): number {
  * Throws `InsufficientStarError` when the user has no free uses and no stars.
  */
 async function applyStarCharge(userId: string, sourceName: string): Promise<boolean> {
+    const config = await PremiumService.getConfig(userId);
+    const freeLimit = config.mangaFreeUses;
+
+    if (!Number.isFinite(freeLimit)) return false;
+
     const freeKey = `manga_free:${userId}`;
     const usedToday = (await redis.getJson(freeKey)) as number | null;
 
-    if (usedToday !== null && usedToday >= FREE_DAILY_USES) {
+    if (usedToday !== null && usedToday >= freeLimit) {
         await WalletService.deductStar(userId, STAR_COST, "command_charge", { command: sourceName });
         return true;
     }
@@ -68,11 +72,12 @@ async function refundCharge(userId: string, sourceName: string, charged: boolean
 function buildResultRow(
     result: { total: number; id: string | number; image: string[] },
     source: MangaSource,
-    locale: SupportedLocale
+    locale: SupportedLocale,
+    maxPages: number
 ): ActionRowBuilder<ButtonBuilder> {
     const row = new ActionRowBuilder<ButtonBuilder>();
 
-    if (result.total < MAX_READ_PAGES) {
+    if (result.total <= maxPages) {
         row.addComponents(
             new ButtonBuilder()
                 .setCustomId(BUTTON_ID.MANGA_READ)
@@ -166,6 +171,8 @@ export function mangaCommand(source: MangaSource) {
                 throw error;
             }
 
+            const tierConfig = await PremiumService.getConfig(interaction.user.id);
+
             try {
                 const subcommand = interaction.options.getSubcommand(true);
                 await interaction.deferReply();
@@ -190,8 +197,8 @@ export function mangaCommand(source: MangaSource) {
                     .setTimestamp()
                     .setFooter(FOOTER.text ? { text: FOOTER.text, iconURL: FOOTER.icon } : null);
 
-                const row = buildResultRow(result, source, locale);
-                if (result.total < MAX_READ_PAGES) {
+                const row = buildResultRow(result, source, locale, tierConfig.mangaMaxPages);
+                if (result.total <= tierConfig.mangaMaxPages) {
                     await redis.setJson(`${BUTTON_ID.MANGA_READ}_${result.id}`, result.image, CACHE_TTL);
                 }
 
