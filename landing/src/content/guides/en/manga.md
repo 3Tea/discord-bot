@@ -38,6 +38,17 @@ When you open a doujinshi, the bot displays the cover with metadata (title, tags
 
 Use the `query` option to search by tag, artist, or language. Results are displayed as a list — select one to start reading.
 
+## Star Cost
+
+Manga commands use the **star charge system**:
+
+- **3 free uses per day** — resets at UTC midnight
+- After free uses are gone, each command costs **1 star** ⭐
+- All 6 manga sources **share the same daily counter** — using `/nhentai` counts toward the same 3 free uses as `/3hentai`
+- If the command fails (API error, timeout), your star or free use is **automatically refunded**
+
+Use `/wallet view` to check your star balance. See the [Star Guide](/en/guide/star) for all the ways to earn stars.
+
 ## NSFW Safety
 
 - All manga commands **only work in NSFW channels** — the bot checks `channel.nsfw` before responding
