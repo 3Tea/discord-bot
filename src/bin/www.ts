@@ -21,6 +21,9 @@ async function main(): Promise<void> {
     const { startGuildStatsAggregator } = await import("../util/xp/guildStatsAggregator");
     startGuildStatsAggregator();
 
+    const { startPremiumExpiry } = await import("../services/premium/premiumExpiry");
+    startPremiumExpiry();
+
     const { CommandLogService } = await import("../services/commandLog.service");
     CommandLogService.startFlusher();
 }
