@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Vertrek",
     "dungeon.buff.attack": "Aanval +30%",
     "dungeon.buff.defense": "Verdediging +30%",
-    "dungeon.buff.luck": "Geluk"
+    "dungeon.buff.luck": "Geluk",
+    "premium.no_permission": "Alleen de botontwikkelaar kan dit commando gebruiken.",
+    "premium.grant.success": "**{{tier}}** premium toegekend aan <@{{userId}}> voor **{{duration}}**.",
+    "premium.grant.extended": "**{{tier}}** premium verlengd voor <@{{userId}}>. Nieuwe vervaldatum: **{{until}}**.",
+    "premium.grant.upgraded": "<@{{userId}}> geüpgraded van **{{from}}** naar **{{tier}}**. Vervalt: **{{until}}**.",
+    "premium.grant.downgraded": "<@{{userId}}> gedowngraded van **{{from}}** naar **{{tier}}**. Vervalt: **{{until}}**.",
+    "premium.revoke.success": "Premium ingetrokken van <@{{userId}}>. Vorige tier: **{{tier}}**.",
+    "premium.revoke.not_active": "Deze gebruiker heeft geen actief premium-abonnement.",
+    "premium.lookup.title": "Premium Opzoeken: {{username}}",
+    "premium.lookup.no_premium": "Geen actief premium.",
+    "premium.lookup.tier": "Tier",
+    "premium.lookup.expires": "Vervalt",
+    "premium.lookup.lifetime": "Levenslang",
+    "premium.lookup.source": "Bron",
+    "premium.lookup.granted_by": "Toegekend Door",
+    "cmd.premium.desc": "Premiumbeheer (alleen botontwikkelaar)"
 }

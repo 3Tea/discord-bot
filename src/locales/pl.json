@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Wyjdź",
     "dungeon.buff.attack": "Atak +30%",
     "dungeon.buff.defense": "Obrona +30%",
-    "dungeon.buff.luck": "Szczęście"
+    "dungeon.buff.luck": "Szczęście",
+    "premium.no_permission": "Tylko deweloper bota może używać tego polecenia.",
+    "premium.grant.success": "Przyznano premium **{{tier}}** dla <@{{userId}}> na **{{duration}}**.",
+    "premium.grant.extended": "Przedłużono premium **{{tier}}** dla <@{{userId}}>. Nowy termin: **{{until}}**.",
+    "premium.grant.upgraded": "<@{{userId}}> awansowany z **{{from}}** na **{{tier}}**. Wygasa: **{{until}}**.",
+    "premium.grant.downgraded": "<@{{userId}}> zdegradowany z **{{from}}** na **{{tier}}**. Wygasa: **{{until}}**.",
+    "premium.revoke.success": "Odebrano premium od <@{{userId}}>. Poprzedni tier: **{{tier}}**.",
+    "premium.revoke.not_active": "Ten użytkownik nie ma aktywnej subskrypcji premium.",
+    "premium.lookup.title": "Wyszukiwanie Premium: {{username}}",
+    "premium.lookup.no_premium": "Brak aktywnego premium.",
+    "premium.lookup.tier": "Tier",
+    "premium.lookup.expires": "Wygasa",
+    "premium.lookup.lifetime": "Dożywotnio",
+    "premium.lookup.source": "Źródło",
+    "premium.lookup.granted_by": "Przyznane Przez",
+    "cmd.premium.desc": "Zarządzanie premium (tylko deweloper bota)"
 }

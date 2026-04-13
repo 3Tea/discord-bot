@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Уйти",
     "dungeon.buff.attack": "Атака +30%",
     "dungeon.buff.defense": "Защита +30%",
-    "dungeon.buff.luck": "Удача"
+    "dungeon.buff.luck": "Удача",
+    "premium.no_permission": "Только разработчик бота может использовать эту команду.",
+    "premium.grant.success": "Выдан **{{tier}}** премиум для <@{{userId}}> на **{{duration}}**.",
+    "premium.grant.extended": "Продлён **{{tier}}** премиум для <@{{userId}}>. Новый срок: **{{until}}**.",
+    "premium.grant.upgraded": "<@{{userId}}> повышен с **{{from}}** до **{{tier}}**. Истекает: **{{until}}**.",
+    "premium.grant.downgraded": "<@{{userId}}> понижен с **{{from}}** до **{{tier}}**. Истекает: **{{until}}**.",
+    "premium.revoke.success": "Премиум отозван у <@{{userId}}>. Предыдущий уровень: **{{tier}}**.",
+    "premium.revoke.not_active": "У этого пользователя нет активной премиум-подписки.",
+    "premium.lookup.title": "Поиск премиума: {{username}}",
+    "premium.lookup.no_premium": "Нет активного премиума.",
+    "premium.lookup.tier": "Уровень",
+    "premium.lookup.expires": "Истекает",
+    "premium.lookup.lifetime": "Навсегда",
+    "premium.lookup.source": "Источник",
+    "premium.lookup.granted_by": "Выдан",
+    "cmd.premium.desc": "Управление премиумом (только разработчик бота)"
 }

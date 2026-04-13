@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Esci",
     "dungeon.buff.attack": "Attacco +30%",
     "dungeon.buff.defense": "Difesa +30%",
-    "dungeon.buff.luck": "Fortuna"
+    "dungeon.buff.luck": "Fortuna",
+    "premium.no_permission": "Solo lo sviluppatore del bot può usare questo comando.",
+    "premium.grant.success": "Concesso premium **{{tier}}** a <@{{userId}}> per **{{duration}}**.",
+    "premium.grant.extended": "Esteso premium **{{tier}}** per <@{{userId}}>. Nuova scadenza: **{{until}}**.",
+    "premium.grant.upgraded": "<@{{userId}}> aggiornato da **{{from}}** a **{{tier}}**. Scade: **{{until}}**.",
+    "premium.grant.downgraded": "<@{{userId}}> declassato da **{{from}}** a **{{tier}}**. Scade: **{{until}}**.",
+    "premium.revoke.success": "Premium revocato per <@{{userId}}>. Tier precedente: **{{tier}}**.",
+    "premium.revoke.not_active": "Questo utente non ha un abbonamento premium attivo.",
+    "premium.lookup.title": "Ricerca Premium: {{username}}",
+    "premium.lookup.no_premium": "Nessun premium attivo.",
+    "premium.lookup.tier": "Tier",
+    "premium.lookup.expires": "Scade",
+    "premium.lookup.lifetime": "A vita",
+    "premium.lookup.source": "Fonte",
+    "premium.lookup.granted_by": "Concesso Da",
+    "cmd.premium.desc": "Gestione premium (solo sviluppatore del bot)"
 }

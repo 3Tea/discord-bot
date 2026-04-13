@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Sair",
     "dungeon.buff.attack": "Ataque +30%",
     "dungeon.buff.defense": "Defesa +30%",
-    "dungeon.buff.luck": "Sorte"
+    "dungeon.buff.luck": "Sorte",
+    "premium.no_permission": "Apenas o desenvolvedor do bot pode usar este comando.",
+    "premium.grant.success": "Concedido premium **{{tier}}** para <@{{userId}}> por **{{duration}}**.",
+    "premium.grant.extended": "Estendido premium **{{tier}}** para <@{{userId}}>. Nova expiração: **{{until}}**.",
+    "premium.grant.upgraded": "Atualizado <@{{userId}}> de **{{from}}** para **{{tier}}**. Expira: **{{until}}**.",
+    "premium.grant.downgraded": "Rebaixado <@{{userId}}> de **{{from}}** para **{{tier}}**. Expira: **{{until}}**.",
+    "premium.revoke.success": "Premium revogado de <@{{userId}}>. Tier anterior: **{{tier}}**.",
+    "premium.revoke.not_active": "Este usuário não possui uma assinatura premium ativa.",
+    "premium.lookup.title": "Consulta Premium: {{username}}",
+    "premium.lookup.no_premium": "Sem premium ativo.",
+    "premium.lookup.tier": "Tier",
+    "premium.lookup.expires": "Expira",
+    "premium.lookup.lifetime": "Vitalício",
+    "premium.lookup.source": "Fonte",
+    "premium.lookup.granted_by": "Concedido Por",
+    "cmd.premium.desc": "Gerenciamento de premium (apenas desenvolvedor do bot)"
 }

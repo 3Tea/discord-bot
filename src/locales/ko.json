@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "떠나기",
     "dungeon.buff.attack": "공격 +30%",
     "dungeon.buff.defense": "방어 +30%",
-    "dungeon.buff.luck": "행운"
+    "dungeon.buff.luck": "행운",
+    "premium.no_permission": "봇 개발자만 이 명령어를 사용할 수 있습니다.",
+    "premium.grant.success": "<@{{userId}}>에게 **{{tier}}** 프리미엄을 **{{duration}}** 동안 부여했습니다.",
+    "premium.grant.extended": "<@{{userId}}>의 **{{tier}}** 프리미엄을 연장했습니다. 새 만료일: **{{until}}**.",
+    "premium.grant.upgraded": "<@{{userId}}>를 **{{from}}**에서 **{{tier}}**로 업그레이드했습니다. 만료일: **{{until}}**.",
+    "premium.grant.downgraded": "<@{{userId}}>를 **{{from}}**에서 **{{tier}}**로 다운그레이드했습니다. 만료일: **{{until}}**.",
+    "premium.revoke.success": "<@{{userId}}>의 프리미엄을 취소했습니다. 이전 티어: **{{tier}}**.",
+    "premium.revoke.not_active": "이 사용자에게는 활성화된 프리미엄 구독이 없습니다.",
+    "premium.lookup.title": "프리미엄 조회: {{username}}",
+    "premium.lookup.no_premium": "활성 프리미엄이 없습니다.",
+    "premium.lookup.tier": "티어",
+    "premium.lookup.expires": "만료일",
+    "premium.lookup.lifetime": "영구",
+    "premium.lookup.source": "출처",
+    "premium.lookup.granted_by": "부여자",
+    "cmd.premium.desc": "프리미엄 관리 (봇 개발자 전용)"
 }

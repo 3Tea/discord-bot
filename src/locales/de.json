@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Verlassen",
     "dungeon.buff.attack": "Angriff +30%",
     "dungeon.buff.defense": "Verteidigung +30%",
-    "dungeon.buff.luck": "Glück"
+    "dungeon.buff.luck": "Glück",
+    "premium.no_permission": "Nur der Bot-Entwickler kann diesen Befehl verwenden.",
+    "premium.grant.success": "**{{tier}}** Premium an <@{{userId}}> für **{{duration}}** gewährt.",
+    "premium.grant.extended": "**{{tier}}** Premium für <@{{userId}}> verlängert. Neues Ablaufdatum: **{{until}}**.",
+    "premium.grant.upgraded": "<@{{userId}}> von **{{from}}** auf **{{tier}}** hochgestuft. Läuft ab: **{{until}}**.",
+    "premium.grant.downgraded": "<@{{userId}}> von **{{from}}** auf **{{tier}}** herabgestuft. Läuft ab: **{{until}}**.",
+    "premium.revoke.success": "Premium von <@{{userId}}> widerrufen. Vorheriger Tier: **{{tier}}**.",
+    "premium.revoke.not_active": "Dieser Benutzer hat kein aktives Premium-Abonnement.",
+    "premium.lookup.title": "Premium-Abfrage: {{username}}",
+    "premium.lookup.no_premium": "Kein aktives Premium.",
+    "premium.lookup.tier": "Tier",
+    "premium.lookup.expires": "Läuft ab",
+    "premium.lookup.lifetime": "Lebenslang",
+    "premium.lookup.source": "Quelle",
+    "premium.lookup.granted_by": "Gewährt Von",
+    "cmd.premium.desc": "Premium-Verwaltung (nur Bot-Entwickler)"
 }

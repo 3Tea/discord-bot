@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Rời đi",
     "dungeon.buff.attack": "Tấn công +30%",
     "dungeon.buff.defense": "Phòng thủ +30%",
-    "dungeon.buff.luck": "May mắn"
+    "dungeon.buff.luck": "May mắn",
+    "premium.no_permission": "Chỉ nhà phát triển bot mới có thể sử dụng lệnh này.",
+    "premium.grant.success": "Đã cấp premium **{{tier}}** cho <@{{userId}}> trong **{{duration}}**.",
+    "premium.grant.extended": "Đã gia hạn premium **{{tier}}** cho <@{{userId}}>. Hết hạn mới: **{{until}}**.",
+    "premium.grant.upgraded": "Đã nâng cấp <@{{userId}}> từ **{{from}}** lên **{{tier}}**. Hết hạn: **{{until}}**.",
+    "premium.grant.downgraded": "Đã hạ cấp <@{{userId}}> từ **{{from}}** xuống **{{tier}}**. Hết hạn: **{{until}}**.",
+    "premium.revoke.success": "Đã thu hồi premium của <@{{userId}}>. Tier trước: **{{tier}}**.",
+    "premium.revoke.not_active": "Người dùng này không có premium đang hoạt động.",
+    "premium.lookup.title": "Tra cứu Premium: {{username}}",
+    "premium.lookup.no_premium": "Không có premium.",
+    "premium.lookup.tier": "Tier",
+    "premium.lookup.expires": "Hết hạn",
+    "premium.lookup.lifetime": "Vĩnh viễn",
+    "premium.lookup.source": "Nguồn",
+    "premium.lookup.granted_by": "Được cấp bởi",
+    "cmd.premium.desc": "Quản lý premium (chỉ nhà phát triển bot)"
 }

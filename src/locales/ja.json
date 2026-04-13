@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "去る",
     "dungeon.buff.attack": "攻撃+30%",
     "dungeon.buff.defense": "防御+30%",
-    "dungeon.buff.luck": "幸運"
+    "dungeon.buff.luck": "幸運",
+    "premium.no_permission": "このコマンドはボット開発者のみが使用できます。",
+    "premium.grant.success": "<@{{userId}}>に**{{tier}}**プレミアムを**{{duration}}**間付与しました。",
+    "premium.grant.extended": "<@{{userId}}>の**{{tier}}**プレミアムを延長しました。新しい有効期限: **{{until}}**。",
+    "premium.grant.upgraded": "<@{{userId}}>を**{{from}}**から**{{tier}}**にアップグレードしました。有効期限: **{{until}}**。",
+    "premium.grant.downgraded": "<@{{userId}}>を**{{from}}**から**{{tier}}**にダウングレードしました。有効期限: **{{until}}**。",
+    "premium.revoke.success": "<@{{userId}}>のプレミアムを取り消しました。以前のティア: **{{tier}}**。",
+    "premium.revoke.not_active": "このユーザーにはアクティブなプレミアムサブスクリプションがありません。",
+    "premium.lookup.title": "プレミアム検索: {{username}}",
+    "premium.lookup.no_premium": "アクティブなプレミアムはありません。",
+    "premium.lookup.tier": "ティア",
+    "premium.lookup.expires": "有効期限",
+    "premium.lookup.lifetime": "永久",
+    "premium.lookup.source": "ソース",
+    "premium.lookup.granted_by": "付与者",
+    "cmd.premium.desc": "プレミアム管理（ボット開発者専用）"
 }

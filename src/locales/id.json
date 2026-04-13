@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Keluar",
     "dungeon.buff.attack": "Serangan +30%",
     "dungeon.buff.defense": "Pertahanan +30%",
-    "dungeon.buff.luck": "Keberuntungan"
+    "dungeon.buff.luck": "Keberuntungan",
+    "premium.no_permission": "Hanya pengembang bot yang dapat menggunakan perintah ini.",
+    "premium.grant.success": "Memberikan premium **{{tier}}** kepada <@{{userId}}> selama **{{duration}}**.",
+    "premium.grant.extended": "Memperpanjang premium **{{tier}}** untuk <@{{userId}}>. Kedaluwarsa baru: **{{until}}**.",
+    "premium.grant.upgraded": "Meningkatkan <@{{userId}}> dari **{{from}}** ke **{{tier}}**. Kedaluwarsa: **{{until}}**.",
+    "premium.grant.downgraded": "Menurunkan <@{{userId}}> dari **{{from}}** ke **{{tier}}**. Kedaluwarsa: **{{until}}**.",
+    "premium.revoke.success": "Mencabut premium dari <@{{userId}}>. Tier sebelumnya: **{{tier}}**.",
+    "premium.revoke.not_active": "Pengguna ini tidak memiliki langganan premium aktif.",
+    "premium.lookup.title": "Pencarian Premium: {{username}}",
+    "premium.lookup.no_premium": "Tidak ada premium aktif.",
+    "premium.lookup.tier": "Tier",
+    "premium.lookup.expires": "Kedaluwarsa",
+    "premium.lookup.lifetime": "Seumur hidup",
+    "premium.lookup.source": "Sumber",
+    "premium.lookup.granted_by": "Diberikan Oleh",
+    "cmd.premium.desc": "Manajemen premium (khusus pengembang bot)"
 }

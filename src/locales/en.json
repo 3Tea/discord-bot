@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Leave",
     "dungeon.buff.attack": "Attack +30%",
     "dungeon.buff.defense": "Defense +30%",
-    "dungeon.buff.luck": "Luck"
+    "dungeon.buff.luck": "Luck",
+    "premium.no_permission": "Only the bot developer can use this command.",
+    "premium.grant.success": "Granted **{{tier}}** premium to <@{{userId}}> for **{{duration}}**.",
+    "premium.grant.extended": "Extended **{{tier}}** premium for <@{{userId}}>. New expiry: **{{until}}**.",
+    "premium.grant.upgraded": "Upgraded <@{{userId}}> from **{{from}}** to **{{tier}}**. Expires: **{{until}}**.",
+    "premium.grant.downgraded": "Downgraded <@{{userId}}> from **{{from}}** to **{{tier}}**. Expires: **{{until}}**.",
+    "premium.revoke.success": "Revoked premium from <@{{userId}}>. Previous tier: **{{tier}}**.",
+    "premium.revoke.not_active": "This user does not have an active premium subscription.",
+    "premium.lookup.title": "Premium Lookup: {{username}}",
+    "premium.lookup.no_premium": "No active premium.",
+    "premium.lookup.tier": "Tier",
+    "premium.lookup.expires": "Expires",
+    "premium.lookup.lifetime": "Lifetime",
+    "premium.lookup.source": "Source",
+    "premium.lookup.granted_by": "Granted By",
+    "cmd.premium.desc": "Premium management (bot developer only)"
 }

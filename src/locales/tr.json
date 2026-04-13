@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Ayrıl",
     "dungeon.buff.attack": "Saldırı +%30",
     "dungeon.buff.defense": "Savunma +%30",
-    "dungeon.buff.luck": "Şans"
+    "dungeon.buff.luck": "Şans",
+    "premium.no_permission": "Bu komutu yalnızca bot geliştiricisi kullanabilir.",
+    "premium.grant.success": "<@{{userId}}> kullanıcısına **{{duration}}** süreyle **{{tier}}** premium verildi.",
+    "premium.grant.extended": "<@{{userId}}> kullanıcısının **{{tier}}** premium süresi uzatıldı. Yeni bitiş tarihi: **{{until}}**.",
+    "premium.grant.upgraded": "<@{{userId}}> kullanıcısı **{{from}}** seviyesinden **{{tier}}** seviyesine yükseltildi. Bitiş tarihi: **{{until}}**.",
+    "premium.grant.downgraded": "<@{{userId}}> kullanıcısı **{{from}}** seviyesinden **{{tier}}** seviyesine düşürüldü. Bitiş tarihi: **{{until}}**.",
+    "premium.revoke.success": "<@{{userId}}> kullanıcısının premium'u iptal edildi. Önceki seviye: **{{tier}}**.",
+    "premium.revoke.not_active": "Bu kullanıcının aktif bir premium aboneliği yok.",
+    "premium.lookup.title": "Premium Sorgulama: {{username}}",
+    "premium.lookup.no_premium": "Aktif premium yok.",
+    "premium.lookup.tier": "Seviye",
+    "premium.lookup.expires": "Bitiş Tarihi",
+    "premium.lookup.lifetime": "Ömür boyu",
+    "premium.lookup.source": "Kaynak",
+    "premium.lookup.granted_by": "Veren",
+    "cmd.premium.desc": "Premium yönetimi (yalnızca bot geliştiricisi)"
 }

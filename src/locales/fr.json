@@ -716,5 +716,20 @@
     "dungeon.btn.leave": "Quitter",
     "dungeon.buff.attack": "Attaque +30%",
     "dungeon.buff.defense": "Défense +30%",
-    "dungeon.buff.luck": "Chance"
+    "dungeon.buff.luck": "Chance",
+    "premium.no_permission": "Seul le développeur du bot peut utiliser cette commande.",
+    "premium.grant.success": "Premium **{{tier}}** accordé à <@{{userId}}> pour **{{duration}}**.",
+    "premium.grant.extended": "Premium **{{tier}}** prolongé pour <@{{userId}}>. Nouvelle expiration : **{{until}}**.",
+    "premium.grant.upgraded": "<@{{userId}}> mis à niveau de **{{from}}** à **{{tier}}**. Expire : **{{until}}**.",
+    "premium.grant.downgraded": "<@{{userId}}> rétrogradé de **{{from}}** à **{{tier}}**. Expire : **{{until}}**.",
+    "premium.revoke.success": "Premium révoqué pour <@{{userId}}>. Tier précédent : **{{tier}}**.",
+    "premium.revoke.not_active": "Cet utilisateur n'a pas d'abonnement premium actif.",
+    "premium.lookup.title": "Recherche Premium : {{username}}",
+    "premium.lookup.no_premium": "Aucun premium actif.",
+    "premium.lookup.tier": "Tier",
+    "premium.lookup.expires": "Expire",
+    "premium.lookup.lifetime": "À vie",
+    "premium.lookup.source": "Source",
+    "premium.lookup.granted_by": "Accordé Par",
+    "cmd.premium.desc": "Gestion du premium (développeur du bot uniquement)"
 }
