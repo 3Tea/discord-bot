@@ -10,6 +10,7 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import Reply from "../../util/decorator/reply";
 import PremiumService, { DurationKey } from "../../services/premium/premium.service";
+import { getTierConfig } from "../../services/premium/premium.config";
 import type { PremiumTier } from "../../models/userWallet.model";
 import type { SupportedLocale } from "../../util/i18n/index";
 
@@ -24,7 +25,7 @@ const DURATION_LABELS: Record<DurationKey, string> = {
 export default {
     data: new SlashCommandBuilder()
         .setName("premium")
-        .setDescription("Premium management (bot developer only)")
+        .setDescription("Premium status and management")
         .setDescriptionLocalizations(descriptionLocales("cmd.premium.desc"))
         .addSubcommand((sub) =>
             sub
@@ -75,9 +76,34 @@ export default {
                 .addUserOption((opt) =>
                     opt.setName("user").setDescription("Target user").setRequired(true)
                 )
+        )
+        .addSubcommand((sub) =>
+            sub.setName("status").setDescription("View your premium status and benefits")
+        )
+        .addSubcommand((sub) =>
+            sub.setName("compare").setDescription("Compare Free vs Star vs Galaxy benefits")
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
+        const subcommand = interaction.options.getSubcommand(true);
+
+        // Public subcommands — no permission check
+        if (subcommand === "status" || subcommand === "compare") {
+            await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+            const locale = await resolveLocale(interaction).catch(() => "en" as const);
+            try {
+                if (subcommand === "status") {
+                    await handleStatus(interaction, locale);
+                } else {
+                    await handleCompare(interaction, locale);
+                }
+            } catch {
+                await interaction.editReply(t(locale, "common.error"));
+            }
+            return;
+        }
+
+        // Admin subcommands — DEV_USER_ID only
         if (interaction.user.id !== DEV_USER_ID) {
             await interaction.reply({
                 content: t(await resolveLocale(interaction).catch(() => "en" as const), "premium.no_permission"),
@@ -90,8 +116,6 @@ export default {
         const locale = await resolveLocale(interaction).catch(() => "en" as const);
 
         try {
-            const subcommand = interaction.options.getSubcommand(true);
-
             switch (subcommand) {
                 case "grant":
                     await handleGrant(interaction, locale);
@@ -200,6 +224,91 @@ async function handleLookup(
     } else {
         embed.setDescription(t(locale, "premium.lookup.no_premium"));
     }
+
+    await Reply.embedEdit(interaction, embed);
+}
+
+async function handleStatus(
+    interaction: ChatInputCommandInteraction,
+    locale: SupportedLocale
+): Promise<void> {
+    const status = await PremiumService.getPremiumStatus(interaction.user.id);
+
+    const embed = new EmbedBuilder()
+        .setTitle(t(locale, "premium.status.title"))
+        .setTimestamp();
+
+    if (status.isActive) {
+        const config = getTierConfig(status.tier);
+        const untilStr = status.until
+            ? `<t:${Math.floor(status.until.getTime() / 1000)}:R>`
+            : t(locale, "premium.lookup.lifetime");
+
+        embed
+            .setColor(status.tier === "galaxy" ? 0x9b59b6 : 0xf39c12)
+            .setDescription(t(locale, "premium.status.active", { tier: (status.tier ?? "").toUpperCase() }))
+            .addFields(
+                { name: t(locale, "premium.status.expires"), value: untilStr, inline: true },
+                { name: t(locale, "premium.compare.manga_free"), value: Number.isFinite(config.mangaFreeUses) ? `${config.mangaFreeUses}/day` : t(locale, "premium.compare.unlimited"), inline: true },
+                { name: t(locale, "premium.compare.manga_pages"), value: `${config.mangaMaxPages}`, inline: true },
+                { name: t(locale, "premium.compare.star_drop"), value: `\u00d7${config.starDropMultiplier}`, inline: true },
+                { name: t(locale, "premium.compare.daily_bonus"), value: `+${config.dailyBonusStars}`, inline: true },
+            );
+    } else {
+        embed
+            .setColor(0x95a5a6)
+            .setDescription(t(locale, "premium.status.free"))
+            .addFields({ name: "\u200b", value: t(locale, "premium.status.free_desc") });
+    }
+
+    await Reply.embedEdit(interaction, embed);
+}
+
+function formatCd(ms: number): string {
+    const h = ms / (60 * 60 * 1000);
+    if (h >= 1) return `${h}h`;
+    return `${ms / (60 * 1000)}m`;
+}
+
+async function handleCompare(
+    interaction: ChatInputCommandInteraction,
+    locale: SupportedLocale
+): Promise<void> {
+    const free = getTierConfig(null);
+    const star = getTierConfig("star");
+    const galaxy = getTierConfig("galaxy");
+
+    const yes = t(locale, "premium.compare.yes");
+    const no = t(locale, "premium.compare.no");
+    const unlimited = t(locale, "premium.compare.unlimited");
+
+    const rows = [
+        [t(locale, "premium.compare.manga_free"), `${free.mangaFreeUses}`, `${star.mangaFreeUses}`, unlimited],
+        [t(locale, "premium.compare.manga_pages"), `${free.mangaMaxPages}`, `${star.mangaMaxPages}`, `${galaxy.mangaMaxPages}`],
+        [t(locale, "premium.compare.work_cd"), formatCd(free.workCooldownMs), formatCd(star.workCooldownMs), formatCd(galaxy.workCooldownMs)],
+        [t(locale, "premium.compare.fish_cd"), formatCd(free.fishCooldownMs), formatCd(star.fishCooldownMs), formatCd(galaxy.fishCooldownMs)],
+        [t(locale, "premium.compare.mine_cd"), formatCd(free.mineCooldownMs), formatCd(star.mineCooldownMs), formatCd(galaxy.mineCooldownMs)],
+        [t(locale, "premium.compare.dungeon_cd"), formatCd(free.dungeonCooldownMs), formatCd(star.dungeonCooldownMs), formatCd(galaxy.dungeonCooldownMs)],
+        [t(locale, "premium.compare.star_drop"), "\u00d71.0", "\u00d71.5", "\u00d72.0"],
+        [t(locale, "premium.compare.confession_skip"), no, yes, yes],
+        [t(locale, "premium.compare.confession_vip"), no, no, yes],
+        [t(locale, "premium.compare.daily_bonus"), "0", "0", "+2"],
+        [t(locale, "premium.compare.badge"), no, "\u2b50", "\ud83c\udf0c"],
+    ];
+
+    const freeLabel = t(locale, "premium.compare.free_tier");
+    const starLabel = t(locale, "premium.compare.star_tier");
+    const galaxyLabel = t(locale, "premium.compare.galaxy_tier");
+
+    const description = rows.map(([label, f, s, g]) =>
+        `**${label}**\n${freeLabel}: ${f} | ${starLabel}: ${s} | ${galaxyLabel}: ${g}`
+    ).join("\n\n");
+
+    const embed = new EmbedBuilder()
+        .setTitle(t(locale, "premium.compare.title"))
+        .setDescription(description)
+        .setColor(0xf39c12)
+        .setTimestamp();
 
     await Reply.embedEdit(interaction, embed);
 }
