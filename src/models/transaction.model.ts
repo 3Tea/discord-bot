@@ -28,7 +28,13 @@ export type TransactionType =
     | "command_refund"
     | "star_drop"
     | "mine"
-    | "dungeon";
+    | "dungeon"
+    | "premium_activate"
+    | "premium_expire"
+    | "premium_revoke"
+    | "premium_upgrade"
+    | "premium_downgrade"
+    | "premium_extend";
 
 export interface ITransaction extends Document {
     userId: string;
@@ -75,6 +81,12 @@ const transactionSchema = new Schema(
                 "star_drop",
                 "mine",
                 "dungeon",
+                "premium_activate",
+                "premium_expire",
+                "premium_revoke",
+                "premium_upgrade",
+                "premium_downgrade",
+                "premium_extend",
             ],
             required: true,
         },
