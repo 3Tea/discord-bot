@@ -8,6 +8,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import PremiumService from "../../services/premium/premium.service";
 import { tryStarDrop } from "../../util/economy/starDrop";
 
 const CONFIG_CACHE_TTL = 300;
@@ -42,6 +43,7 @@ export default {
 
         try {
             const config = await getWorkConfig(guildId);
+            const tierConfig = await PremiumService.getConfig(userId);
 
             if (!config.enabled) {
                 const embed = new EmbedBuilder().setDescription(t(locale, "work.disabled")).setColor(0xed4245);
@@ -70,7 +72,8 @@ export default {
             });
 
             // Set cooldown
-            await redis.setJson(cdKey, 1, config.fishCooldown);
+            const effectiveCooldown = Math.min(config.fishCooldown, tierConfig.fishCooldownMs / 1000);
+            await redis.setJson(cdKey, 1, effectiveCooldown);
 
             const gotStar = await tryStarDrop(userId, 0.03, "fish");
 
