@@ -100,30 +100,11 @@ Cố cướp 10–30% coin của người dùng khác. Tỉ lệ thành công 40
 
 ## Ví Toàn Cầu & Tiền Tệ Star
 
-Ngoài coin và gem, còn có một loại tiền thứ ba: **Star** ⭐. Khác với coin và gem, star là **toàn cầu** — số dư của bạn giống nhau trên tất cả các server, và không admin nào có thể thêm hoặc xóa chúng.
+Ngoài coin và gem, còn có loại tiền thứ ba: **Star** ⭐ — tiền tệ **toàn cầu** hoạt động trên tất cả server. Star không thể bị admin chỉnh sửa hay chuyển cho người dùng khác.
 
-### Kiếm Star
+Kiếm star qua nhận hàng ngày, rơi ngẫu nhiên từ hoạt động, và mốc thành tích. Tiêu star cho lệnh manga và shop toàn cầu.
 
-**Nhận hàng ngày:** Dùng `/wallet daily` mỗi ngày để kiếm 1–3 star. Nhận vào các ngày liên tiếp sẽ xây dựng streak với phần thưởng bonus:
-
-| Streak | Star Bonus |
-|--------|------------|
-| 3 ngày | +2 |
-| 7 ngày | +5 |
-| 14 ngày | +10 |
-| 30 ngày | +20 |
-
-**Mốc thành tích:** Nhận phần thưởng star một lần khi đạt các mốc như lên cấp (5–50 star), duy trì streak cầu nguyện (3–20 star), hoặc hoạt động tích cực trong nhiều server (5–20 star). Dùng `/wallet view` để xem những mốc nào bạn đã nhận.
-
-### Xem Ví
-
-| Lệnh | Mô Tả |
-|------|--------|
-| `/wallet view` | Xem số dư star, streak và các mốc thành tích |
-| `/wallet daily` | Nhận phần thưởng star hàng ngày |
-| `/wallet history` | Xem lịch sử giao dịch toàn cầu |
-
-> **Lưu ý:** Star không thể đổi sang coin/gem, không thể chuyển cho người dùng khác, và không thể bị admin chỉnh sửa. Chúng chỉ có thể kiếm được thông qua các hoạt động trong bot.
+Để biết chi tiết đầy đủ, xem [Hướng dẫn Star](/vi/guide/star).
 
 ## Bảng Lệnh
 

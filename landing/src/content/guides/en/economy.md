@@ -100,30 +100,11 @@ Attempt to steal 10–30% of another user's coins. 40% success rate — but fail
 
 ## Global Wallet & Star Currency
 
-Beyond coins and gems, there's a third currency: **Star** ⭐. Unlike coins and gems, stars are **global** — your balance is the same across all servers, and no admin can add or remove them.
+Beyond coins and gems, there's a third currency: **Star** ⭐ — a **global** currency that works across all servers. Stars cannot be modified by admins or traded between users.
 
-### Earning Stars
+Earn stars through daily claims, activity drops, and achievement milestones. Spend them on manga commands and the global shop.
 
-**Daily claim:** Use `/wallet daily` once per day to earn 1–3 stars. Claiming on consecutive days builds a streak with bonus rewards:
-
-| Streak | Bonus Stars |
-|--------|-------------|
-| 3 days | +2 |
-| 7 days | +5 |
-| 14 days | +10 |
-| 30 days | +20 |
-
-**Achievement milestones:** Earn one-time star rewards for reaching milestones like leveling up (5–50 stars), maintaining pray streaks (3–20 stars), or being active in multiple servers (5–20 stars). Use `/wallet view` to see which milestones you've claimed.
-
-### Checking Your Wallet
-
-| Command | Description |
-|---------|-------------|
-| `/wallet view` | See your star balance, streak, and milestones |
-| `/wallet daily` | Claim daily star reward |
-| `/wallet history` | View global transaction history |
-
-> **Note:** Stars cannot be exchanged for coins/gems, cannot be transferred between users, and cannot be modified by admins. They are earned purely through bot activities.
+For the full breakdown, see the [Star Guide](/en/guide/star).
 
 ## Commands Reference
 
