@@ -5,7 +5,7 @@ import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
-import { DUNGEON_COOLDOWN } from "../commands/slash/dungeon";
+import PremiumService from "../services/premium/premium.service";
 
 export default {
     id: BUTTON_ID.DUNGEON_LEAVE,
@@ -35,8 +35,9 @@ export default {
         await redis.deleteKey(`dungeon_merchant:${userId}`);
 
         // Set cooldown
+        const tierConfig = await PremiumService.getConfig(userId);
         const cdKey = `dungeon_cd:${runState.guildId}:${userId}`;
-        await redis.setJson(cdKey, 1, DUNGEON_COOLDOWN);
+        await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
 
         const embed = new EmbedBuilder()
             .setTitle(`🚪 ${t(locale, "dungeon.title")}`)

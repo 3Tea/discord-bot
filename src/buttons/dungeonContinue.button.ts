@@ -6,11 +6,11 @@ import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
+import PremiumService from "../services/premium/premium.service";
 import {
     processEncounter,
     scheduleCombatTimeout,
     scheduleMerchantTimeout,
-    DUNGEON_COOLDOWN,
     RUN_TTL,
 } from "../commands/slash/dungeon";
 
@@ -35,6 +35,7 @@ export default {
         await interaction.deferUpdate();
 
         const locale = runState.locale as SupportedLocale;
+        const tierConfig = await PremiumService.getConfig(userId);
 
         // Check if encounters exhausted
         if (runState.encountersLeft <= 0) {
@@ -42,7 +43,7 @@ export default {
             await redis.deleteKey(`dungeon_combat:${userId}`);
             await redis.deleteKey(`dungeon_merchant:${userId}`);
             const cdKey = `dungeon_cd:${runState.guildId}:${userId}`;
-            await redis.setJson(cdKey, 1, DUNGEON_COOLDOWN);
+            await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
 
             const embed = new EmbedBuilder()
                 .setTitle(`🏰 ${t(locale, "dungeon.title")}`)
@@ -63,7 +64,7 @@ export default {
             await redis.deleteKey(`dungeon_combat:${userId}`);
             await redis.deleteKey(`dungeon_merchant:${userId}`);
             const cdKey = `dungeon_cd:${runState.guildId}:${userId}`;
-            await redis.setJson(cdKey, 1, DUNGEON_COOLDOWN);
+            await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
             await interaction.editReply({ embeds: [embed], components: [] });
         } else {
             await redis.setJson(runKey, runState, RUN_TTL);

@@ -13,6 +13,7 @@ import type { CombatState, DungeonRunState } from "../../services/economy/dungeo
 import MerchantService from "../../services/economy/merchant.service";
 import type { MerchantState } from "../../services/economy/merchant.service";
 import CurrencyService from "../../services/economy/currency.service";
+import PremiumService from "../../services/premium/premium.service";
 import WorkService from "../../services/economy/work.service";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import UserEconomyModel from "../../models/userEconomy.model";
@@ -23,7 +24,6 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 
-export const DUNGEON_COOLDOWN = 3600;
 export const RUN_TTL = 900;
 export const COMBAT_TTL = 60;
 export const MERCHANT_TTL = 60;
@@ -445,6 +445,8 @@ export default {
         const userId = interaction.user.id;
 
         try {
+            const tierConfig = await PremiumService.getConfig(userId);
+
             // Check cooldown
             const cdKey = `dungeon_cd:${guildId}:${userId}`;
             const remaining = await redis.ttlKey(cdKey);
@@ -485,7 +487,7 @@ export default {
             runState.messageId = reply.id;
 
             if (runEnded) {
-                await redis.setJson(cdKey, 1, DUNGEON_COOLDOWN);
+                await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
             } else {
                 await redis.setJson(runKey, runState, RUN_TTL);
                 // Schedule timeouts for combat/merchant encounters

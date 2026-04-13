@@ -11,7 +11,8 @@ import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
-import { buildContinueLeaveRow, buildCombatRow, DUNGEON_COOLDOWN, RUN_TTL } from "../commands/slash/dungeon";
+import PremiumService from "../services/premium/premium.service";
+import { buildContinueLeaveRow, buildCombatRow, RUN_TTL } from "../commands/slash/dungeon";
 
 function buildWinDesc(
     locale: SupportedLocale,
@@ -91,8 +92,9 @@ async function handleLoss(
     // Always end run and set cooldown on death
     await redis.deleteKey(runKey);
     await redis.deleteKey(`dungeon_merchant:${state.userId}`);
+    const tierConfig = await PremiumService.getConfig(state.userId);
     const cdKey = `dungeon_cd:${state.guildId}:${state.userId}`;
-    await redis.setJson(cdKey, 1, DUNGEON_COOLDOWN);
+    await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
     await interaction.editReply({ embeds: [embed], components: [] });
 }
 
