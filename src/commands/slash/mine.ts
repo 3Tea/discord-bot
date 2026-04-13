@@ -8,8 +8,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
-
-const MINE_COOLDOWN = 7200; // 2 hours
+import PremiumService from "../../services/premium/premium.service";
 
 export default {
     data: new SlashCommandBuilder()
@@ -25,6 +24,8 @@ export default {
         const userId = interaction.user.id;
 
         try {
+            const tierConfig = await PremiumService.getConfig(userId);
+
             // Check cooldown
             const cdKey = `mine_cd:${guildId}:${userId}`;
             const remaining = await redis.ttlKey(cdKey);
@@ -39,7 +40,7 @@ export default {
             const result = await MineService.mine(userId, guildId);
 
             // Set cooldown
-            await redis.setJson(cdKey, 1, MINE_COOLDOWN);
+            await redis.setJson(cdKey, 1, tierConfig.mineCooldownMs / 1000);
 
             if (result.collapsed) {
                 const embed = new EmbedBuilder()
