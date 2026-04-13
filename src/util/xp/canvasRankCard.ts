@@ -7,6 +7,7 @@ import {
     drawDivider,
     drawLevelBox,
     drawNameBlock,
+    drawPremiumBadge,
     drawRankBadge,
     drawStatCard,
     drawXPBar,
@@ -35,6 +36,7 @@ export interface RankCardOptions {
     reactionCount: number;
     totalXP?: number;
     periodStats?: { daily: number; weekly: number; monthly: number };
+    premiumBadge?: string | null;
 }
 
 export async function renderRankCard(options: RankCardOptions): Promise<Buffer> {
@@ -53,6 +55,7 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
         reactionCount,
         totalXP = xp,
         periodStats,
+        premiumBadge = null,
     } = options;
 
     // Taller canvas when period stats are present
@@ -129,6 +132,11 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
     const globalLabel = `GLOBAL  #${globalRank || "—"}`;
     const badgeH = drawRankBadge(ctx, serverLabel, AV_CX, badgeStartY, [C.pink, C.purple]);
     drawRankBadge(ctx, globalLabel, AV_CX, badgeStartY + badgeH + 6, [C.gold, "#ff8c00"]);
+
+    // Premium badge
+    if (premiumBadge) {
+        drawPremiumBadge(ctx, premiumBadge, AV_CX - 35, badgeStartY + badgeH + 6 + 30 + 8);
+    }
 
     // --- Level box (top right) ---
     drawLevelBox(ctx, level, LV_X, LV_Y, LV_W, LV_H);

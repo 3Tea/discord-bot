@@ -742,3 +742,28 @@ export function drawDivider(ctx: Ctx, x: number, y: number, w: number): void {
     ctx.lineTo(x + w, y);
     ctx.stroke();
 }
+
+export function drawPremiumBadge(ctx: Ctx, badge: string, x: number, y: number): void {
+    if (!badge) return;
+
+    const label = badge === "galaxy" ? "🌌 GALAXY" : "⭐ STAR";
+    const colors: [string, string] = badge === "galaxy" ? ["#9b59b6", "#6a0dad"] : ["#f39c12", "#e67e22"];
+
+    ctx.font = '12px "Inter Bold"';
+    const tw = ctx.measureText(label).width;
+    const bw = tw + 16;
+    const bh = 22;
+
+    const grad = ctx.createLinearGradient(x, y, x + bw, y);
+    grad.addColorStop(0, colors[0]);
+    grad.addColorStop(1, colors[1]);
+
+    roundRect(ctx, x, y, bw, bh, 6);
+    ctx.fillStyle = grad;
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, x + bw / 2, y + bh / 2);
+}

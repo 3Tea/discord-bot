@@ -5,6 +5,7 @@ import { progressToNextLevel, xpForLevel } from "../../util/xp/calculator";
 import { buildRankEmbed, getPeriodStats } from "../../util/xp/rankCard";
 import { renderRankCard } from "../../util/xp/canvasRankCard";
 import { getGlobalRank } from "../../util/xp/globalXP";
+import PremiumService from "../../services/premium/premium.service";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
@@ -51,6 +52,8 @@ export default {
 
             const progress = progressToNextLevel(member?.xp ?? 0);
 
+            const tierConfig = await PremiumService.getConfig(target.id);
+
             // Try canvas render, fallback to embed
             try {
                 const avatarURL = target.displayAvatarURL({ extension: "png", size: 256 });
@@ -68,6 +71,7 @@ export default {
                     reactionCount: member?.reactionCount ?? 0,
                     totalXP: globalXP,
                     periodStats,
+                    premiumBadge: tierConfig.badge,
                 });
 
                 const attachment = new AttachmentBuilder(pngBuffer, { name: "rank.png" });
