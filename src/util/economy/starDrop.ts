@@ -1,15 +1,19 @@
 import WalletService from "../../services/economy/wallet.service";
+import PremiumService from "../../services/premium/premium.service";
 import log from "../log/logger.mixed";
 
 /**
- * Rolls for a star drop. If successful, awards 1 star to the user's global wallet.
+ * Rolls for a star drop with premium multiplier.
  * @param userId - The user to potentially award
- * @param rate - Drop probability (0.0 to 1.0)
+ * @param rate - Base drop probability (0.0 to 1.0)
  * @param source - Command name for transaction metadata
  * @returns true if a star was awarded
  */
 export async function tryStarDrop(userId: string, rate: number, source: string): Promise<boolean> {
-    if (Math.random() >= rate) return false;
+    const config = await PremiumService.getConfig(userId);
+    const effectiveRate = Math.min(rate * config.starDropMultiplier, 1);
+
+    if (Math.random() >= effectiveRate) return false;
 
     try {
         await WalletService.addStar(userId, 1, "star_drop", { source });
