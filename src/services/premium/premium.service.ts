@@ -11,6 +11,7 @@ export interface PremiumStatus {
     isActive: boolean;
     until: Date | null;
     source: PremiumSource | null;
+    grantedBy: string | null;
 }
 
 function cacheKey(userId: string): string {
@@ -65,7 +66,7 @@ async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
 
     const wallet = await UserWalletModel.findOne({ userId }).lean();
     if (!wallet || !wallet.premiumTier) {
-        const status: PremiumStatus = { tier: null, isActive: false, until: null, source: null };
+        const status: PremiumStatus = { tier: null, isActive: false, until: null, source: null, grantedBy: null };
         await cacheSet(userId, status);
         return status;
     }
@@ -77,7 +78,7 @@ async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
             expiredTier: wallet.premiumTier,
             expiredAt: wallet.premiumUntil,
         });
-        const status: PremiumStatus = { tier: null, isActive: false, until: null, source: null };
+        const status: PremiumStatus = { tier: null, isActive: false, until: null, source: null, grantedBy: null };
         await cacheSet(userId, status);
         return status;
     }
@@ -87,6 +88,7 @@ async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
         isActive: true,
         until: wallet.premiumUntil,
         source: wallet.premiumSource as PremiumSource | null,
+        grantedBy: wallet.premiumGrantedBy ?? null,
     };
     await cacheSet(userId, status);
     return status;

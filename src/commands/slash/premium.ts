@@ -8,6 +8,7 @@ import { DEV_USER_ID } from "../../util/config/index";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
+import Reply from "../../util/decorator/reply";
 import PremiumService, { DurationKey } from "../../services/premium/premium.service";
 import type { PremiumTier } from "../../models/userWallet.model";
 import type { SupportedLocale } from "../../util/i18n/index";
@@ -141,7 +142,7 @@ async function handleGrant(
     }
 
     const embed = new EmbedBuilder().setDescription(t(locale, key, params)).setColor(0xf39c12).setTimestamp();
-    await interaction.editReply({ embeds: [embed] });
+    await Reply.embedEdit(interaction, embed);
 }
 
 async function handleRevoke(
@@ -163,7 +164,7 @@ async function handleRevoke(
         .setDescription(t(locale, "premium.revoke.success", { userId: target.id, tier: status.tier ?? "none" }))
         .setColor(0xe74c3c)
         .setTimestamp();
-    await interaction.editReply({ embeds: [embed] });
+    await Reply.embedEdit(interaction, embed);
 }
 
 async function handleLookup(
@@ -188,9 +189,17 @@ async function handleLookup(
             { name: t(locale, "premium.lookup.expires"), value: untilStr, inline: true },
             { name: t(locale, "premium.lookup.source"), value: status.source ?? "—", inline: true }
         );
+
+        if (status.grantedBy) {
+            embed.addFields({
+                name: t(locale, "premium.lookup.granted_by"),
+                value: `<@${status.grantedBy}>`,
+                inline: true,
+            });
+        }
     } else {
         embed.setDescription(t(locale, "premium.lookup.no_premium"));
     }
 
-    await interaction.editReply({ embeds: [embed] });
+    await Reply.embedEdit(interaction, embed);
 }
