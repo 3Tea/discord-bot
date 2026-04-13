@@ -38,6 +38,7 @@ import {
     CONFESSION_TAGS,
 } from "../../services/confession/confession.service";
 import CurrencyService from "../../services/economy/currency.service";
+import PremiumService from "../../services/premium/premium.service";
 import { logger } from "../../util/log/logger.mixed";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -535,6 +536,9 @@ async function executeSubmit(
     const userId = interaction.user.id;
     const guildId = interaction.guildId;
 
+    // --- Premium tier config (fetched once, used for skip-cd and VIP checks) ---
+    const tierConfig = await PremiumService.getConfig(userId);
+
     // --- Ban check ---
     const banResult = await checkConfessionBan(guildId, userId);
     if (banResult.banned) {
@@ -569,52 +573,60 @@ async function executeSubmit(
     }
 
     if (onCooldown && wantSkipCd) {
-        try {
-            await CurrencyService.deduct(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, 0, "confession_skip_cd", {
-                action: "skip_cooldown",
-            });
-            coinDeducted = true;
-        } catch (error) {
-            if (error instanceof CurrencyService.InsufficientFundsError) {
-                const balance = (await CurrencyService.getBalance(userId, guildId)).coin;
-                await interaction.editReply({
-                    content: t(locale, "confession.insufficient_coin", {
-                        cost: CONFESSION_SKIP_CD_COST_COIN,
-                        balance,
-                    }),
+        if (!tierConfig.confessionSkipCdFree) {
+            try {
+                await CurrencyService.deduct(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, 0, "confession_skip_cd", {
+                    action: "skip_cooldown",
                 });
-                return;
+                coinDeducted = true;
+            } catch (error) {
+                if (error instanceof CurrencyService.InsufficientFundsError) {
+                    const balance = (await CurrencyService.getBalance(userId, guildId)).coin;
+                    await interaction.editReply({
+                        content: t(locale, "confession.insufficient_coin", {
+                            cost: CONFESSION_SKIP_CD_COST_COIN,
+                            balance,
+                        }),
+                    });
+                    return;
+                }
+                throw error;
             }
-            throw error;
         }
     }
 
     // --- VIP economy integration ---
     let gemDeducted = false;
     if (wantVip) {
-        try {
-            await CurrencyService.deduct(userId, guildId, 0, CONFESSION_VIP_COST_GEM, "confession_vip", {
-                action: "vip_confession",
-            });
-            gemDeducted = true;
-        } catch (error) {
-            if (error instanceof CurrencyService.InsufficientFundsError) {
-                // Refund coin if it was already deducted
-                if (coinDeducted) {
-                    await CurrencyService.addCoin(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, "confession_refund", {
-                        reason: "vip_gem_insufficient",
-                    });
-                }
-                const balance = (await CurrencyService.getBalance(userId, guildId)).gem;
-                await interaction.editReply({
-                    content: t(locale, "confession.insufficient_gem", {
-                        cost: CONFESSION_VIP_COST_GEM,
-                        balance,
-                    }),
+        if (!tierConfig.confessionVipFree) {
+            try {
+                await CurrencyService.deduct(userId, guildId, 0, CONFESSION_VIP_COST_GEM, "confession_vip", {
+                    action: "vip_confession",
                 });
-                return;
+                gemDeducted = true;
+            } catch (error) {
+                if (error instanceof CurrencyService.InsufficientFundsError) {
+                    // Refund coin if it was already deducted
+                    if (coinDeducted) {
+                        await CurrencyService.addCoin(
+                            userId,
+                            guildId,
+                            CONFESSION_SKIP_CD_COST_COIN,
+                            "confession_refund",
+                            { reason: "vip_gem_insufficient" }
+                        );
+                    }
+                    const balance = (await CurrencyService.getBalance(userId, guildId)).gem;
+                    await interaction.editReply({
+                        content: t(locale, "confession.insufficient_gem", {
+                            cost: CONFESSION_VIP_COST_GEM,
+                            balance,
+                        }),
+                    });
+                    return;
+                }
+                throw error;
             }
-            throw error;
         }
     }
 
@@ -639,7 +651,7 @@ async function executeSubmit(
     }
 
     const authorId = userId;
-    const isVip = wantVip && gemDeducted;
+    const isVip = wantVip && (gemDeducted || tierConfig.confessionVipFree);
 
     // --- Helper to refund all deducted currency ---
     async function refundAll(reason: string): Promise<void> {
