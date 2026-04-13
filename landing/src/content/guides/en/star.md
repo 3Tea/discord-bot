@@ -3,7 +3,7 @@ title: Star Currency
 description: Everything about stars — how to earn, spend, and manage your global currency.
 icon: "⭐"
 order: 2
-relatedCommands: ["wallet", "pray", "curse", "work", "fish", "mine", "dungeon", "nhentai", "3hentai", "asmhentai", "hentaifox", "nhentai-lite", "pururin"]
+relatedCommands: ["wallet", "pray", "curse", "work", "fish", "mine", "dungeon", "nhentai", "3hentai", "asmhentai", "hentaifox", "nhentai-lite", "pururin", "hentai2read", "simply-hentai"]
 ---
 
 ## Overview
@@ -85,11 +85,11 @@ Use `/wallet view` to see which milestones you've already claimed and which are 
 
 ### Manga Commands
 
-All manga commands (`/nhentai`, `/3hentai`, `/asmhentai`, `/hentaifox`, `/nhentai-lite`, `/pururin`) use the **star charge system**:
+All manga commands (`/nhentai`, `/3hentai`, `/asmhentai`, `/hentaifox`, `/nhentai-lite`, `/pururin`, `/hentai2read`, `/simply-hentai`) use the **star charge system**:
 
 - **3 free uses per day** — resets at UTC midnight
 - After free uses are gone, each command costs **1 star**
-- All 6 manga sources **share the same daily counter** — using `/nhentai` counts toward the same 3 free uses as `/3hentai`
+- All 8 manga sources **share the same daily counter** — using `/nhentai` counts toward the same 3 free uses as `/3hentai`
 - If the command fails (API error, timeout), your star or free use is **automatically refunded**
 
 > **Tip:** Spread your 3 free uses across different sources to explore variety, then spend stars on your favorites.

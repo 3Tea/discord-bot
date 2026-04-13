@@ -3,12 +3,12 @@ title: Manga & NSFW
 description: Duyệt manga và doujinshi từ nhiều nguồn với tìm kiếm, phân trang và chọn ngẫu nhiên.
 icon: "📚"
 order: 6
-relatedCommands: ["nhentai", "3hentai", "asmhentai", "hentaifox", "nhentai-lite", "pururin"]
+relatedCommands: ["nhentai", "3hentai", "asmhentai", "hentaifox", "nhentai-lite", "pururin", "hentai2read", "simply-hentai"]
 ---
 
 ## Tổng Quan
 
-3AT có **6 lệnh nguồn manga** để duyệt doujinshi và manga. Tất cả lệnh manga là **chỉ NSFW** — chỉ hoạt động trong kênh được đánh dấu NSFW trong cài đặt Discord.
+3AT có **8 lệnh nguồn manga** để duyệt doujinshi và manga. Tất cả lệnh manga là **chỉ NSFW** — chỉ hoạt động trong kênh được đánh dấu NSFW trong cài đặt Discord.
 
 ## Các Nguồn
 
@@ -20,10 +20,12 @@ relatedCommands: ["nhentai", "3hentai", "asmhentai", "hentaifox", "nhentai-lite"
 | `/hentaifox` | hentaifox | Doujinshi ngẫu nhiên |
 | `/nhentai-lite` | nhentai (lite) | Phiên bản nhẹ — phản hồi nhanh hơn, cùng nội dung |
 | `/pururin` | pururin | Doujinshi ngẫu nhiên |
+| `/hentai2read` | hentai2read | Tìm kiếm và đọc (không có ngẫu nhiên) |
+| `/simply-hentai` | simply-hentai | Tìm kiếm và đọc (không có ngẫu nhiên) |
 
 ## Cách Sử Dụng
 
-Mỗi lệnh hỗ trợ hai lệnh con:
+Hầu hết các lệnh hỗ trợ hai lệnh con. Các nguồn đánh dấu "không có ngẫu nhiên" chỉ hỗ trợ `read`:
 
 | Lệnh Con | Mô Tả | Ví Dụ |
 |----------|--------|--------|
@@ -44,7 +46,7 @@ Các lệnh manga sử dụng **hệ thống tính phí star**:
 
 - **3 lượt miễn phí mỗi ngày** — reset lúc nửa đêm UTC
 - Sau khi hết lượt miễn phí, mỗi lệnh tốn **1 star** ⭐
-- Cả 6 nguồn manga **dùng chung bộ đếm** — dùng `/nhentai` tính cùng 3 lượt miễn phí với `/3hentai`
+- Cả 8 nguồn manga **dùng chung bộ đếm** — dùng `/nhentai` tính cùng 3 lượt miễn phí với `/3hentai`
 - Nếu lệnh lỗi (API error, timeout), star hoặc lượt miễn phí sẽ được **hoàn tự động**
 
 Dùng `/wallet view` để xem số dư star. Xem [Hướng dẫn Star](/vi/guide/star) để biết tất cả cách kiếm star.

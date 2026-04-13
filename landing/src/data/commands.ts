@@ -186,6 +186,18 @@ export const commands: Command[] = [
     category: "manga",
     subcommands: ["read", "random"],
   },
+  {
+    name: "hentai2read",
+    description: "Read doujinshi from hentai2read — search and read only",
+    category: "manga",
+    subcommands: ["read"],
+  },
+  {
+    name: "simply-hentai",
+    description: "Read doujinshi from simply-hentai — search and read only",
+    category: "manga",
+    subcommands: ["read"],
+  },
   // Utility
   {
     name: "trans",
