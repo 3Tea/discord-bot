@@ -16,13 +16,15 @@ export default {
         console.log(`Ready! Logged in as ${client.user.tag}`);
 
         const numberOfDays = getNumberOfDays(new Date("2019/08/25"), new Date());
-        client.user.setPresence({
-            activities: [
-                {
-                    name: `/help v${botInfo.version}, ${numberOfDays} days of uptime: `,
-                    type: ActivityType.Watching,
-                },
-            ],
-        });
+        setTimeout(() => {
+            client.user.setPresence({
+                activities: [
+                    {
+                        name: `/help v${botInfo.version}, ${numberOfDays} days of uptime: `,
+                        type: ActivityType.Watching,
+                    },
+                ],
+            });
+        }, 5_000);
     },
 };
