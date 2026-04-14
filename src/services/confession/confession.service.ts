@@ -25,6 +25,8 @@ import ConfessionBanModel from "../../models/confessionBan.model";
 import { FOOTER } from "../../util/config/index";
 import { BUTTON_ID } from "../../util/config/button";
 import { logger } from "../../util/log/logger.mixed";
+import { resolveGuildLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
 import {
     CONFESSION_CONTENT_MAX,
     CONFESSION_COOLDOWN_MAX,
@@ -270,6 +272,7 @@ export async function buildConfessionAttachmentFiles(
             const res = await axios.get<ArrayBuffer>(image.url, {
                 responseType: "arraybuffer",
                 timeout: 15_000,
+                maxContentLength: 8 * 1024 * 1024,
             });
             const buf = Buffer.from(res.data);
             const name = image.name && image.name.length > 0 ? image.name : "image.png";
@@ -286,6 +289,7 @@ export async function buildConfessionAttachmentFiles(
             const res = await axios.get<ArrayBuffer>(audio.url, {
                 responseType: "arraybuffer",
                 timeout: 15_000,
+                maxContentLength: 8 * 1024 * 1024,
             });
             const buf = Buffer.from(res.data);
             const name = audio.name && audio.name.length > 0 ? audio.name : "audio.mp3";
@@ -315,8 +319,10 @@ export async function sendAnonymousConfessionToChannel(
             ? buildVipPublicConfessionEmbed(confessionNumber, content, tag)
             : buildPublicConfessionEmbed(confessionNumber, content, tag);
         if (audio) {
+            const guildLocale = await resolveGuildLocale(channel.guildId);
+            const audioLabel = t(guildLocale, "confession.audio_label");
             const currentDesc = embed.data.description ?? content;
-            embed.setDescription(`🎙️ **Voice Confession**\n\n${currentDesc}`);
+            embed.setDescription(`${audioLabel}\n\n${currentDesc}`);
         }
         const files = await buildConfessionAttachmentFiles(image, audio);
         const components = mongoId ? [buildConfessionInteractionRow(mongoId)] : [];

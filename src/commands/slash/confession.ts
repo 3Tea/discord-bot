@@ -527,12 +527,6 @@ async function executeSubmit(
 
     const audioAttachment = interaction.options.getAttachment("audio");
 
-    // Mutual exclusion: image or audio, not both
-    if (image && audioAttachment) {
-        await interaction.editReply({ content: t(locale, "confession.audio_or_image") });
-        return;
-    }
-
     const wantVip = interaction.options.getBoolean("vip") ?? false;
     const wantSkipCd = interaction.options.getBoolean("skip_cooldown") ?? false;
     const tag = interaction.options.getString("tag") ?? null;
@@ -563,6 +557,11 @@ async function executeSubmit(
     if (audioAttachment) {
         if (!tierConfig.confessionAudioEnabled) {
             await interaction.editReply({ content: t(locale, "confession.audio_premium_only") });
+            return;
+        }
+
+        if (image) {
+            await interaction.editReply({ content: t(locale, "confession.audio_or_image") });
             return;
         }
 
