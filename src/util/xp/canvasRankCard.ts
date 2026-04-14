@@ -37,7 +37,20 @@ export interface RankCardOptions {
     totalXP?: number;
     periodStats?: { daily: number; weekly: number; monthly: number };
     premiumBadge?: string | null;
+    rankCardTheme?: string;
 }
+
+// Galaxy theme accent colors
+const GALAXY = {
+    accentA: "#ffd700",    // gold
+    accentB: "#6a0dad",    // deep purple
+    stat1: "#ffd700",      // gold
+    stat2: "#00d4ff",      // cyan
+    stat3: "#c44dff",      // purple
+    stat4: "#ffd700",      // gold
+    borderGlow: "rgba(255,215,0,0.15)",
+    tint: "rgba(106,13,173,0.08)",
+} as const;
 
 export async function renderRankCard(options: RankCardOptions): Promise<Buffer> {
     const {
@@ -56,7 +69,10 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
         totalXP = xp,
         periodStats,
         premiumBadge = null,
+        rankCardTheme = "standard",
     } = options;
+
+    const isGalaxy = rankCardTheme === "galaxy";
 
     // Taller canvas when period stats are present
     const cardH = periodStats ? 400 : H;
@@ -72,10 +88,17 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
     ctx.fillStyle = C.bgDeep;
     ctx.fillRect(0, 0, W, cardH);
     drawAnimeBackground(ctx);
+
+    // Galaxy theme: subtle gold tint overlay
+    if (isGalaxy) {
+        ctx.fillStyle = GALAXY.tint;
+        ctx.fillRect(0, 0, W, cardH);
+    }
+
     // Extend accent stripe to full card height
     const stripeG = gradientV(ctx, 0, cardH, 0, [
-        [0, C.pink],
-        [1, C.purple],
+        [0, isGalaxy ? GALAXY.accentA : C.pink],
+        [1, isGalaxy ? GALAXY.accentB : C.purple],
     ]);
     ctx.fillStyle = stripeG;
     ctx.fillRect(0, 0, 5, cardH);
@@ -153,12 +176,19 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
     drawXPBar(ctx, xp, xpForNextLevel, percentage, CONTENT_X, XP_Y, CONTENT_W);
 
     // --- Stat cards ---
-    const statItems: { label: string; value: string; color: string }[] = [
-        { label: "MESSAGES", value: messageCount.toLocaleString(), color: C.pink },
-        { label: "VOICE", value: formatVoice(voiceMinutes), color: C.purple },
-        { label: "REACTIONS", value: reactionCount.toLocaleString(), color: C.pink },
-        { label: "TOTAL XP", value: totalXP.toLocaleString(), color: C.gold },
-    ];
+    const statItems: { label: string; value: string; color: string }[] = isGalaxy
+        ? [
+              { label: "MESSAGES", value: messageCount.toLocaleString(), color: GALAXY.stat1 },
+              { label: "VOICE", value: formatVoice(voiceMinutes), color: GALAXY.stat2 },
+              { label: "REACTIONS", value: reactionCount.toLocaleString(), color: GALAXY.stat3 },
+              { label: "TOTAL XP", value: totalXP.toLocaleString(), color: GALAXY.stat4 },
+          ]
+        : [
+              { label: "MESSAGES", value: messageCount.toLocaleString(), color: C.pink },
+              { label: "VOICE", value: formatVoice(voiceMinutes), color: C.purple },
+              { label: "REACTIONS", value: reactionCount.toLocaleString(), color: C.pink },
+              { label: "TOTAL XP", value: totalXP.toLocaleString(), color: C.gold },
+          ];
 
     for (let i = 0; i < statItems.length; i++) {
         const { label, value, color } = statItems[i];
@@ -174,11 +204,17 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
         const PERIOD_GAP = 12;
         const PERIOD_W = (CONTENT_W - (PERIOD_N - 1) * PERIOD_GAP) / PERIOD_N;
 
-        const periodItems: { label: string; value: string; color: string }[] = [
-            { label: "TODAY", value: `+${periodStats.daily.toLocaleString()}`, color: C.pink },
-            { label: "THIS WEEK", value: `+${periodStats.weekly.toLocaleString()}`, color: C.purple },
-            { label: "THIS MONTH", value: `+${periodStats.monthly.toLocaleString()}`, color: C.gold },
-        ];
+        const periodItems: { label: string; value: string; color: string }[] = isGalaxy
+            ? [
+                  { label: "TODAY", value: `+${periodStats.daily.toLocaleString()}`, color: GALAXY.stat1 },
+                  { label: "THIS WEEK", value: `+${periodStats.weekly.toLocaleString()}`, color: GALAXY.stat2 },
+                  { label: "THIS MONTH", value: `+${periodStats.monthly.toLocaleString()}`, color: GALAXY.stat4 },
+              ]
+            : [
+                  { label: "TODAY", value: `+${periodStats.daily.toLocaleString()}`, color: C.pink },
+                  { label: "THIS WEEK", value: `+${periodStats.weekly.toLocaleString()}`, color: C.purple },
+                  { label: "THIS MONTH", value: `+${periodStats.monthly.toLocaleString()}`, color: C.gold },
+              ];
 
         for (let i = 0; i < periodItems.length; i++) {
             const { label, value, color } = periodItems[i];
@@ -188,10 +224,20 @@ export async function renderRankCard(options: RankCardOptions): Promise<Buffer> 
     }
 
     // --- Outer card border ---
-    ctx.strokeStyle = "rgba(255,255,255,0.06)";
-    ctx.lineWidth = 1;
-    roundRect(ctx, 0.5, 0.5, W - 1, cardH - 1, 14);
-    ctx.stroke();
+    if (isGalaxy) {
+        // Galaxy: golden glow border
+        shadow(ctx, GALAXY.borderGlow, 12);
+        ctx.strokeStyle = "rgba(255,215,0,0.25)";
+        ctx.lineWidth = 2;
+        roundRect(ctx, 1, 1, W - 2, cardH - 2, 14);
+        ctx.stroke();
+        clearShadow(ctx);
+    } else {
+        ctx.strokeStyle = "rgba(255,255,255,0.06)";
+        ctx.lineWidth = 1;
+        roundRect(ctx, 0.5, 0.5, W - 1, cardH - 1, 14);
+        ctx.stroke();
+    }
 
     return canvas.toBuffer("image/png");
 }

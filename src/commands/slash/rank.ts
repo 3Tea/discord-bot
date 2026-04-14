@@ -72,6 +72,7 @@ export default {
                     totalXP: globalXP,
                     periodStats,
                     premiumBadge: tierConfig.badge,
+                    rankCardTheme: tierConfig.rankCardTheme,
                 });
 
                 const attachment = new AttachmentBuilder(pngBuffer, { name: "rank.png" });
