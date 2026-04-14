@@ -340,6 +340,7 @@ export async function createPublishedConfessionRecord(input: {
     authorId: string;
     content: string;
     image: IConfessionImage | null;
+    audio?: IConfessionAudio | null;
     publicMessageId: string;
     isVip?: boolean;
     tag?: string | null;
@@ -350,6 +351,7 @@ export async function createPublishedConfessionRecord(input: {
         authorId: input.authorId,
         content: input.content,
         image: input.image,
+        audio: input.audio ?? null,
         isVip: input.isVip ?? false,
         tag: input.tag ?? null,
         status: "published",
@@ -365,6 +367,7 @@ export async function createPendingConfessionRecord(input: {
     authorId: string;
     content: string;
     image: IConfessionImage | null;
+    audio?: IConfessionAudio | null;
     isVip?: boolean;
     tag?: string | null;
 }): Promise<IConfession> {
@@ -374,6 +377,7 @@ export async function createPendingConfessionRecord(input: {
         authorId: input.authorId,
         content: input.content,
         image: input.image,
+        audio: input.audio ?? null,
         isVip: input.isVip ?? false,
         tag: input.tag ?? null,
         status: "pending",

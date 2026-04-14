@@ -28,6 +28,9 @@ import {
     setConfessionReviewMessageId,
     upsertGuildConfessionConfig,
     validateConfessionAttachment,
+    validateConfessionAudio,
+    checkAndIncrementAudioLimit,
+    decrementAudioLimit,
     banConfessionUser,
     checkConfessionBan,
     unbanConfessionUser,
@@ -37,6 +40,7 @@ import {
     checkKeywordFilter,
     CONFESSION_TAGS,
 } from "../../services/confession/confession.service";
+import type { IConfessionAudio } from "../../models/confession.model";
 import CurrencyService from "../../services/economy/currency.service";
 import PremiumService from "../../services/premium/premium.service";
 import { logger } from "../../util/log/logger.mixed";
@@ -113,6 +117,13 @@ export default {
                         .setName("image")
                         .setDescription("Optional single image")
                         .setDescriptionLocalizations(descriptionLocales("cmd.confession.submit.image.desc"))
+                        .setRequired(false)
+                )
+                .addAttachmentOption((opt) =>
+                    opt
+                        .setName("audio")
+                        .setDescription("Optional voice note (premium only)")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.confession.submit.audio.desc"))
                         .setRequired(false)
                 )
                 .addBooleanOption((opt) =>
@@ -514,6 +525,14 @@ async function executeSubmit(
     }
     const image = validated.image;
 
+    const audioAttachment = interaction.options.getAttachment("audio");
+
+    // Mutual exclusion: image or audio, not both
+    if (image && audioAttachment) {
+        await interaction.editReply({ content: t(locale, "confession.audio_or_image") });
+        return;
+    }
+
     const wantVip = interaction.options.getBoolean("vip") ?? false;
     const wantSkipCd = interaction.options.getBoolean("skip_cooldown") ?? false;
     const tag = interaction.options.getString("tag") ?? null;
@@ -536,12 +555,42 @@ async function executeSubmit(
     const userId = interaction.user.id;
     const guildId = interaction.guildId;
 
-    // --- Premium tier config (fetched once, used for skip-cd and VIP checks) ---
+    // --- Premium tier config (fetched once, used for skip-cd, VIP, and audio checks) ---
     const tierConfig = await PremiumService.getConfig(userId);
+
+    // --- Audio validation (premium-gated) ---
+    let confessionAudio: IConfessionAudio | null = null;
+    if (audioAttachment) {
+        if (!tierConfig.confessionAudioEnabled) {
+            await interaction.editReply({ content: t(locale, "confession.audio_premium_only") });
+            return;
+        }
+
+        const audioValidated = validateConfessionAudio(audioAttachment);
+        if (!audioValidated.ok) {
+            await interaction.editReply({ content: t(locale, "confession.audio_invalid_format") });
+            return;
+        }
+
+        if (audioAttachment.size > tierConfig.confessionAudioMaxSize) {
+            const maxMB = Math.round(tierConfig.confessionAudioMaxSize / 1_048_576);
+            await interaction.editReply({ content: t(locale, "confession.audio_too_large", { max: String(maxMB) }) });
+            return;
+        }
+
+        const allowed = await checkAndIncrementAudioLimit(userId, tierConfig.confessionAudioDailyLimit);
+        if (!allowed) {
+            await interaction.editReply({ content: t(locale, "confession.audio_daily_limit") });
+            return;
+        }
+
+        confessionAudio = audioValidated.audio;
+    }
 
     // --- Ban check ---
     const banResult = await checkConfessionBan(guildId, userId);
     if (banResult.banned) {
+        if (confessionAudio) await decrementAudioLimit(userId).catch(() => {});
         if (banResult.expiresAt) {
             await interaction.editReply({
                 content: t(locale, "confession.banned_until", {
@@ -556,6 +605,7 @@ async function executeSubmit(
 
     // --- Keyword filter ---
     if (checkKeywordFilter(content, config.blockedKeywords ?? [])) {
+        if (confessionAudio) await decrementAudioLimit(userId).catch(() => {});
         await interaction.editReply({ content: t(locale, "confession.keyword_blocked") });
         return;
     }
@@ -565,6 +615,7 @@ async function executeSubmit(
     const onCooldown = await isConfessionOnCooldown(guildId, userId);
 
     if (onCooldown && !wantSkipCd) {
+        if (confessionAudio) await decrementAudioLimit(userId).catch(() => {});
         const sec = await getConfessionCooldownRemainingSeconds(guildId, userId);
         await interaction.editReply({
             content: t(locale, "confession.cooldown", { seconds: Math.max(1, sec) }),
@@ -581,6 +632,7 @@ async function executeSubmit(
                 coinDeducted = true;
             } catch (error) {
                 if (error instanceof CurrencyService.InsufficientFundsError) {
+                    if (confessionAudio) await decrementAudioLimit(userId).catch(() => {});
                     const balance = (await CurrencyService.getBalance(userId, guildId)).coin;
                     await interaction.editReply({
                         content: t(locale, "confession.insufficient_coin", {
@@ -616,6 +668,7 @@ async function executeSubmit(
                             { reason: "vip_gem_insufficient" }
                         );
                     }
+                    if (confessionAudio) await decrementAudioLimit(userId).catch(() => {});
                     const balance = (await CurrencyService.getBalance(userId, guildId)).gem;
                     await interaction.editReply({
                         content: t(locale, "confession.insufficient_gem", {
@@ -646,6 +699,9 @@ async function executeSubmit(
                 reason: "reserve_failed",
             });
         }
+        if (confessionAudio) {
+            await decrementAudioLimit(userId).catch(() => {});
+        }
         await interaction.editReply({ content: t(locale, "confession.not_configured") });
         return;
     }
@@ -653,7 +709,7 @@ async function executeSubmit(
     const authorId = userId;
     const isVip = wantVip && (gemDeducted || tierConfig.confessionVipFree);
 
-    // --- Helper to refund all deducted currency ---
+    // --- Helper to refund all deducted currency and audio limit ---
     async function refundAll(reason: string): Promise<void> {
         if (coinDeducted) {
             await CurrencyService.addCoin(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, "confession_refund", {
@@ -662,6 +718,9 @@ async function executeSubmit(
         }
         if (gemDeducted) {
             await CurrencyService.addGem(userId, guildId, CONFESSION_VIP_COST_GEM, "confession_refund", { reason });
+        }
+        if (confessionAudio) {
+            await decrementAudioLimit(userId).catch(() => {});
         }
     }
 
@@ -683,6 +742,7 @@ async function executeSubmit(
                 authorId,
                 content,
                 image,
+                audio: confessionAudio,
                 publicMessageId: "pending",
                 isVip,
                 tag,
@@ -702,7 +762,7 @@ async function executeSubmit(
             confessionNumber,
             content,
             image,
-            null,
+            confessionAudio,
             isVip,
             mongoId,
             tag
@@ -731,6 +791,7 @@ async function executeSubmit(
             authorId,
             content,
             image,
+            audio: confessionAudio,
             isVip,
             tag,
         });
@@ -763,7 +824,7 @@ async function executeSubmit(
         isVip,
         tag,
     });
-    const files = await buildConfessionAttachmentFiles(image, null);
+    const files = await buildConfessionAttachmentFiles(image, confessionAudio);
     const row = buildConfessionReviewComponents(mongoId, {
         approve: t(locale, "btn.confession.approve"),
         reject: t(locale, "btn.confession.reject"),
