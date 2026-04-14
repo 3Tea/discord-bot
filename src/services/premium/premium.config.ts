@@ -10,6 +10,10 @@ export interface TierConfig {
     starDropMultiplier: number;
     confessionSkipCdFree: boolean;
     confessionVipFree: boolean;
+    confessionAudioEnabled: boolean;
+    confessionAudioMaxSize: number;
+    confessionAudioMaxDuration: number;
+    confessionAudioDailyLimit: number;
     dailyBonusStars: number;
     badge: string | null;
     rankCardTheme: string;
@@ -29,6 +33,10 @@ export const TIER_CONFIG: Record<"free" | PremiumTier, TierConfig> = {
         starDropMultiplier: 1.0,
         confessionSkipCdFree: false,
         confessionVipFree: false,
+        confessionAudioEnabled: false,
+        confessionAudioMaxSize: 0,
+        confessionAudioMaxDuration: 0,
+        confessionAudioDailyLimit: 0,
         dailyBonusStars: 0,
         badge: null,
         rankCardTheme: "standard",
@@ -43,6 +51,10 @@ export const TIER_CONFIG: Record<"free" | PremiumTier, TierConfig> = {
         starDropMultiplier: 1.5,
         confessionSkipCdFree: true,
         confessionVipFree: false,
+        confessionAudioEnabled: true,
+        confessionAudioMaxSize: 2_097_152,
+        confessionAudioMaxDuration: 30,
+        confessionAudioDailyLimit: 1,
         dailyBonusStars: 0,
         badge: "star",
         rankCardTheme: "standard",
@@ -57,6 +69,10 @@ export const TIER_CONFIG: Record<"free" | PremiumTier, TierConfig> = {
         starDropMultiplier: 2.0,
         confessionSkipCdFree: true,
         confessionVipFree: true,
+        confessionAudioEnabled: true,
+        confessionAudioMaxSize: 5_242_880,
+        confessionAudioMaxDuration: 60,
+        confessionAudioDailyLimit: Infinity,
         dailyBonusStars: 2,
         badge: "galaxy",
         rankCardTheme: "galaxy",
