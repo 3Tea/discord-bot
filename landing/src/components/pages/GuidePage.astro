@@ -14,14 +14,21 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const allGuides = await getCollection("guides");
+const getGuideSortOrder = (id: string, defaultOrder: number): number => {
+  const guideSlug = id.split("/").pop() ?? "";
+  return guideMeta[guideSlug]?.order ?? defaultOrder;
+};
+
 const langGuides = allGuides
   .filter((g) => g.id.startsWith(`${lang}/`))
-  .sort((a, b) => a.data.order - b.data.order);
+  .sort((a, b) => getGuideSortOrder(a.id, a.data.order) - getGuideSortOrder(b.id, b.data.order));
 
 // Fallback to EN if no guides exist for this locale
 const guides = langGuides.length > 0
   ? langGuides
-  : allGuides.filter((g) => g.id.startsWith("en/")).sort((a, b) => a.data.order - b.data.order);
+  : allGuides
+      .filter((g) => g.id.startsWith("en/"))
+      .sort((a, b) => getGuideSortOrder(a.id, a.data.order) - getGuideSortOrder(b.id, b.data.order));
 
 const hreflang = [
   { lang: "en", href: "/guide" },
