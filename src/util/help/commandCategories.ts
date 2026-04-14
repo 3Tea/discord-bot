@@ -38,6 +38,7 @@ const COMMAND_TO_CATEGORY: Record<string, HelpCategoryId> = {
     "global-shop": "economy",
     "global-inventory": "economy",
     premium: "economy",
+    quest: "economy",
     // Voice
     voice: "voice",
     // Moderation
