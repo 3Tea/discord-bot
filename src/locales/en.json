@@ -786,7 +786,7 @@
     "quest.name.h_dungeon": "Complete a dungeon run",
     "quest.name.h_mine2": "Mine twice",
     "quest.name.h_gamble_win": "Win a gamble",
-    "quest.name.h_pray_curse": "Pray and curse (2 total)",
+    "quest.name.h_pray_curse": "Pray or Curse twice",
     "quest.name.h_fish2": "Fish twice",
     "quest.name.h_rob_success": "Successfully rob someone",
     "quest.view.title": "Daily Quests — {{date}}",

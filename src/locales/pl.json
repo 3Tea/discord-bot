@@ -786,7 +786,7 @@
     "quest.name.h_dungeon": "Ukończ loch",
     "quest.name.h_mine2": "Wydobądź dwa razy",
     "quest.name.h_gamble_win": "Wygraj zakład",
-    "quest.name.h_pray_curse": "Módl się i przeklinaj (łącznie 2)",
+    "quest.name.h_pray_curse": "Módl się lub przeklnij 2 razy",
     "quest.name.h_fish2": "Łów ryby dwa razy",
     "quest.name.h_rob_success": "Okradnij z powodzeniem",
     "quest.view.title": "Codzienne Zadania — {{date}}",

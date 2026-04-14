@@ -786,7 +786,7 @@
     "quest.name.h_dungeon": "던전 완료하기",
     "quest.name.h_mine2": "두 번 채굴하기",
     "quest.name.h_gamble_win": "도박에서 이기기",
-    "quest.name.h_pray_curse": "기도와 저주 (총 2회)",
+    "quest.name.h_pray_curse": "기도 또는 저주 2회",
     "quest.name.h_fish2": "두 번 낚시하기",
     "quest.name.h_rob_success": "강도 성공하기",
     "quest.view.title": "일일 퀘스트 — {{date}}",

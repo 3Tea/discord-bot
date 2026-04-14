@@ -33,7 +33,7 @@ const HARD_QUESTS: QuestTemplate[] = [
     { id: "h_dungeon", difficulty: "hard", triggers: ["dungeon"], target: 1, nameKey: "quest.name.h_dungeon" },
     { id: "h_mine2", difficulty: "hard", triggers: ["mine"], target: 2, nameKey: "quest.name.h_mine2" },
     { id: "h_gamble_win", difficulty: "hard", triggers: ["gamble_win"], target: 1, nameKey: "quest.name.h_gamble_win" },
-    { id: "h_pray_curse", difficulty: "hard", triggers: ["pray", "curse"], target: 2, nameKey: "quest.name.h_pray_curse" },
+    { id: "h_pray_curse", difficulty: "hard", triggers: ["pray", "pray_target", "curse", "curse_target"], target: 2, nameKey: "quest.name.h_pray_curse" },
     { id: "h_fish2", difficulty: "hard", triggers: ["fish"], target: 2, nameKey: "quest.name.h_fish2" },
     { id: "h_rob_success", difficulty: "hard", triggers: ["rob_success"], target: 1, nameKey: "quest.name.h_rob_success" },
 ];
@@ -84,8 +84,12 @@ export function getQuestStarReward(tier: PremiumTier | null): number {
     return QUEST_REWARDS[tier ?? "free"].allComplete;
 }
 
+const QUEST_MAP = new Map<string, QuestTemplate>(
+    [...EASY_QUESTS, ...MEDIUM_QUESTS, ...HARD_QUESTS].map((q) => [q.id, q])
+);
+
 export function getQuestTemplate(questId: string): QuestTemplate | undefined {
-    return [...EASY_QUESTS, ...MEDIUM_QUESTS, ...HARD_QUESTS].find((q) => q.id === questId);
+    return QUEST_MAP.get(questId);
 }
 
 export function getTodayDateKey(): string {

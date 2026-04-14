@@ -786,7 +786,7 @@
     "quest.name.h_dungeon": "Completar uma masmorra",
     "quest.name.h_mine2": "Minerar duas vezes",
     "quest.name.h_gamble_win": "Vencer uma aposta",
-    "quest.name.h_pray_curse": "Rezar e amaldiçoar (2 no total)",
+    "quest.name.h_pray_curse": "Rezar ou Amaldiçoar 2 vezes",
     "quest.name.h_fish2": "Pescar duas vezes",
     "quest.name.h_rob_success": "Roubar com sucesso",
     "quest.view.title": "Missões Diárias — {{date}}",

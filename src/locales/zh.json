@@ -786,7 +786,7 @@
     "quest.name.h_dungeon": "完成一次地牢探险",
     "quest.name.h_mine2": "开采两次",
     "quest.name.h_gamble_win": "赢得一次赌博",
-    "quest.name.h_pray_curse": "祈祷和诅咒（共2次）",
+    "quest.name.h_pray_curse": "祈祷或诅咒2次",
     "quest.name.h_fish2": "钓鱼两次",
     "quest.name.h_rob_success": "成功抢劫某人",
     "quest.view.title": "每日任务 — {{date}}",

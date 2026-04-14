@@ -786,7 +786,7 @@
     "quest.name.h_dungeon": "Пройти подземелье",
     "quest.name.h_mine2": "Добыть дважды",
     "quest.name.h_gamble_win": "Выиграть в азартной игре",
-    "quest.name.h_pray_curse": "Молитва и проклятие (всего 2)",
+    "quest.name.h_pray_curse": "Помолиться или проклясть 2 раза",
     "quest.name.h_fish2": "Порыбачить дважды",
     "quest.name.h_rob_success": "Успешно ограбить",
     "quest.view.title": "Ежедневные задания — {{date}}",

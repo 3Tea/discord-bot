@@ -786,7 +786,7 @@
     "quest.name.h_dungeon": "ダンジョンをクリアする",
     "quest.name.h_mine2": "2回採掘する",
     "quest.name.h_gamble_win": "ギャンブルに勝つ",
-    "quest.name.h_pray_curse": "祈りと呪い（合計2回）",
+    "quest.name.h_pray_curse": "祈りまたは呪いを2回",
     "quest.name.h_fish2": "2回釣りをする",
     "quest.name.h_rob_success": "強盗に成功する",
     "quest.view.title": "デイリークエスト — {{date}}",

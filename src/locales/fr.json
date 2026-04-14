@@ -786,7 +786,7 @@
     "quest.name.h_dungeon": "Terminer un donjon",
     "quest.name.h_mine2": "Miner deux fois",
     "quest.name.h_gamble_win": "Gagner un pari",
-    "quest.name.h_pray_curse": "Prier et maudire (2 au total)",
+    "quest.name.h_pray_curse": "Prier ou Maudire 2 fois",
     "quest.name.h_fish2": "Pêcher deux fois",
     "quest.name.h_rob_success": "Voler avec succès",
     "quest.view.title": "Quêtes Quotidiennes — {{date}}",

@@ -32,17 +32,9 @@ function isConsecutiveDate(prev: string, current: string): boolean {
 async function getOrCreateToday(userId: string): Promise<IUserQuest> {
     const date = getTodayDateKey();
 
-    const cached = await redis.getJson(cacheKey(userId, date));
-    if (cached) {
-        const doc = await UserQuestModel.findOne({ userId, date });
-        if (doc) return doc;
-    }
-
+    // Check DB for existing record (single query, no misleading cache-then-DB pattern)
     const existing = await UserQuestModel.findOne({ userId, date });
-    if (existing) {
-        await redis.setJson(cacheKey(userId, date), existing.quests, secondsUntilUTCMidnight());
-        return existing;
-    }
+    if (existing) return existing;
 
     const templates = generateDailyQuests(userId, date);
     const quests: IQuestProgress[] = templates.map((t) => ({
@@ -63,14 +55,24 @@ async function getOrCreateToday(userId: string): Promise<IUserQuest> {
         lastQuestDate = prev.lastQuestDate ?? null;
     }
 
-    const doc = await UserQuestModel.create({
-        userId,
-        date,
-        quests,
-        claimed: false,
-        questStreak,
-        lastQuestDate,
-    });
+    let doc;
+    try {
+        doc = await UserQuestModel.create({
+            userId,
+            date,
+            quests,
+            claimed: false,
+            questStreak,
+            lastQuestDate,
+        });
+    } catch (error) {
+        // Handle race condition: concurrent first access creates duplicate key
+        if (error instanceof Error && "code" in error && (error as Record<string, unknown>).code === 11000) {
+            const existing = await UserQuestModel.findOne({ userId, date });
+            if (existing) return existing;
+        }
+        throw error;
+    }
 
     await redis.setJson(cacheKey(userId, date), doc.quests, secondsUntilUTCMidnight());
     return doc;

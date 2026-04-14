@@ -786,7 +786,7 @@
     "quest.name.h_dungeon": "Bir zindan tamamla",
     "quest.name.h_mine2": "İki kez maden çıkar",
     "quest.name.h_gamble_win": "Kumar kazan",
-    "quest.name.h_pray_curse": "Dua et ve lanet oku (toplam 2)",
+    "quest.name.h_pray_curse": "2 kez dua et veya lanet oku",
     "quest.name.h_fish2": "İki kez balık tut",
     "quest.name.h_rob_success": "Başarıyla soy",
     "quest.view.title": "Günlük Görevler — {{date}}",

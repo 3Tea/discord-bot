@@ -786,7 +786,7 @@
     "quest.name.h_dungeon": "Einen Dungeon abschließen",
     "quest.name.h_mine2": "Zweimal abbauen",
     "quest.name.h_gamble_win": "Eine Wette gewinnen",
-    "quest.name.h_pray_curse": "Beten und verfluchen (2 insgesamt)",
+    "quest.name.h_pray_curse": "2 Mal beten oder verfluchen",
     "quest.name.h_fish2": "Zweimal angeln",
     "quest.name.h_rob_success": "Erfolgreich ausrauben",
     "quest.view.title": "Tägliche Quests — {{date}}",
