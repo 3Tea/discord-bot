@@ -28,6 +28,7 @@ const { page } = Astro.props;
 const { Content } = await render(page);
 
 const meta = categoryMeta[page.data.category as Category];
+const categoryLabel = meta ? t(meta.labelKey) : page.data.category;
 const pageTitle = `${page.data.title} Guide — 3AT Bot`;
 const altLang = lang === "en" ? "vi" : "en";
 const hreflang = [
@@ -37,7 +38,7 @@ const hreflang = [
 
 const breadcrumbItems = [
   { label: t("nav.commands"), href: tp("/commands") },
-  { label: meta?.label ?? page.data.category, href: tp("/commands") },
+  { label: categoryLabel, href: tp("/commands") },
   { label: `/${page.data.command}` },
 ];
 
@@ -49,7 +50,7 @@ const showTranslationNotice = lang === "vi" && !altExists;
 
 <BaseLayout title={pageTitle} description={page.data.description} hreflang={hreflang} lang={lang as Lang}>
   <div class="container guide-page">
-    <Breadcrumb items={breadcrumbItems} />
+    <Breadcrumb items={breadcrumbItems} lang={lang as Lang} />
 
     <div class="guide-header">
       <div class="guide-header-top">
@@ -60,7 +61,7 @@ const showTranslationNotice = lang === "vi" && !altExists;
               class="guide-category-badge"
               style={`color: ${meta.color}; background: ${meta.bg};`}
             >
-              {meta.label}
+              {categoryLabel}
             </span>
           )}
         </div>

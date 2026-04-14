@@ -9,6 +9,7 @@ export const showDefaultLang = false;
 export const ui = {
   en: {
     // Meta
+    "meta.home.title": "3AT - Endless Paradox | Discord Bot",
     "meta.description": "Discord bot for voice channel management, manga reading, translation, and more.",
 
     // Navigation
@@ -25,6 +26,7 @@ export const ui = {
     "hero.add": "Add to Server",
     "hero.commands": "View Commands",
     "hero.trust": "Free to use · Slash commands · Online since 2019",
+    "hero.scroll": "Scroll to features",
 
     // Features section
     "features.label": "What it does",
@@ -115,6 +117,15 @@ export const ui = {
     "commands.guide": "Guide →",
     "commands.categories": "Categories",
     "commands.search.label": "Search",
+    "commands.category.voice": "Voice",
+    "commands.category.xp": "XP & Leveling",
+    "commands.category.economy": "Economy",
+    "commands.category.moderation": "Moderation",
+    "commands.category.manga": "Manga",
+    "commands.category.utility": "Utility",
+    "commands.category.info": "Info",
+    "commands.category.settings": "Settings",
+    "commands.category.confession": "Confession",
 
     // Guide page
     "guide.section": "User Guide",
@@ -124,15 +135,18 @@ export const ui = {
     "guide.related": "Related Commands",
     "guide.related.guides": "Related Guides",
     "guide.read": "Read guide →",
+    "guide.toc": "On this page",
 
     // Legal
     "legal.lastUpdated": "Last updated",
 
     // Shared
+    "breadcrumb.aria": "Breadcrumb",
     "translation.notice": "Translation is being updated. Content is currently displayed in English.",
   },
   vi: {
     // Meta
+    "meta.home.title": "3AT - Endless Paradox | Bot Discord",
     "meta.description": "Bot Discord quản lý kênh voice, đọc manga, dịch thuật và nhiều tính năng khác.",
 
     // Navigation
@@ -149,6 +163,7 @@ export const ui = {
     "hero.add": "Thêm vào Server",
     "hero.commands": "Xem lệnh",
     "hero.trust": "Miễn phí · Slash commands · Hoạt động từ 2019",
+    "hero.scroll": "Cuộn xuống phần tính năng",
 
     // Features section
     "features.label": "Tính năng",
@@ -239,6 +254,15 @@ export const ui = {
     "commands.guide": "Hướng dẫn →",
     "commands.categories": "Danh mục",
     "commands.search.label": "Tìm kiếm",
+    "commands.category.voice": "Voice",
+    "commands.category.xp": "XP & Cấp độ",
+    "commands.category.economy": "Kinh tế",
+    "commands.category.moderation": "Kiểm duyệt",
+    "commands.category.manga": "Manga",
+    "commands.category.utility": "Tiện ích",
+    "commands.category.info": "Thông tin",
+    "commands.category.settings": "Cài đặt",
+    "commands.category.confession": "Tâm sự",
 
     // Guide page
     "guide.section": "Hướng dẫn",
@@ -248,11 +272,13 @@ export const ui = {
     "guide.related": "Lệnh liên quan",
     "guide.related.guides": "Hướng dẫn liên quan",
     "guide.read": "Đọc hướng dẫn →",
+    "guide.toc": "Mục lục trang",
 
     // Legal
     "legal.lastUpdated": "Cập nhật lần cuối",
 
     // Shared
+    "breadcrumb.aria": "Điều hướng đường dẫn",
     "translation.notice": "Bản dịch đang được cập nhật. Nội dung hiện tại hiển thị bằng tiếng Anh.",
   },
 } as const;

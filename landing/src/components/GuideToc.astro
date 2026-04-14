@@ -1,9 +1,14 @@
 ---
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
 interface Props {
   headings: Array<{ depth: number; slug: string; text: string }>;
+  lang?: Lang;
 }
 
-const { headings } = Astro.props;
+const { headings, lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 const tocItems = headings.filter((h) => h.depth === 2);
 ---
 
@@ -11,7 +16,7 @@ const tocItems = headings.filter((h) => h.depth === 2);
   <>
     {/* Mobile: collapsible ToC */}
     <details class="toc-mobile">
-      <summary class="toc-mobile-toggle">On this page</summary>
+      <summary class="toc-mobile-toggle">{t("guide.toc")}</summary>
       <nav class="toc-mobile-nav">
         {tocItems.map((item) => (
           <a href={`#${item.slug}`} class="toc-link">{item.text}</a>
@@ -21,7 +26,7 @@ const tocItems = headings.filter((h) => h.depth === 2);
 
     {/* Desktop: sticky sidebar */}
     <aside class="toc-sidebar">
-      <p class="toc-label">On this page</p>
+      <p class="toc-label">{t("guide.toc")}</p>
       <nav class="toc-nav">
         {tocItems.map((item) => (
           <a href={`#${item.slug}`} class="toc-link" data-heading={item.slug}>

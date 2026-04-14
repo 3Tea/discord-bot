@@ -1,12 +1,17 @@
 ---
+import { useTranslations } from "../i18n/utils";
+import type { Lang } from "../i18n/utils";
+
 interface Props {
   items: Array<{ label: string; href?: string }>;
+  lang?: Lang;
 }
 
-const { items } = Astro.props;
+const { items, lang = "en" } = Astro.props;
+const t = useTranslations(lang);
 ---
 
-<nav class="breadcrumb" aria-label="Breadcrumb">
+<nav class="breadcrumb" aria-label={t("breadcrumb.aria")}>
   {items.map((item, i) => (
     <>
       {i > 0 && <span class="breadcrumb-sep">/</span>}

@@ -7,10 +7,12 @@ import VoiceDemo from "../VoiceDemo.astro";
 import Stats from "../Stats.astro";
 import Testimonials from "../Testimonials.astro";
 import FAQ from "../FAQ.astro";
+import { useTranslations } from "../../i18n/utils";
 import type { Lang } from "../../i18n/utils";
 
 interface Props { lang: Lang; }
 const { lang } = Astro.props;
+const t = useTranslations(lang);
 
 const hreflang = [
   { lang: "en", href: "/" },
@@ -18,7 +20,7 @@ const hreflang = [
 ];
 ---
 
-<BaseLayout title="3AT - Endless Paradox | Discord Bot" lang={lang} hreflang={hreflang}>
+<BaseLayout title={t("meta.home.title")} lang={lang} hreflang={hreflang}>
   <Hero lang={lang} />
   <Features lang={lang} />
   <CommandsShowcase lang={lang} />

@@ -11,14 +11,14 @@ const t = useTranslations(lang);
 
 const categories = [
   { key: "all", label: t("commands.title") },
-  { key: "voice", label: "🎙️ Voice" },
-  { key: "xp", label: "📊 XP & Leveling" },
-  { key: "economy", label: "💰 Economy" },
-  { key: "moderation", label: "🛡️ Moderation" },
-  { key: "manga", label: "📖 Manga" },
-  { key: "utility", label: "🛠️ Utility" },
-  { key: "info", label: "ℹ️ Info" },
-  { key: "settings", label: "⚙️ Settings" },
+  { key: "voice", label: `🎙️ ${t("commands.category.voice")}` },
+  { key: "xp", label: `📊 ${t("commands.category.xp")}` },
+  { key: "economy", label: `💰 ${t("commands.category.economy")}` },
+  { key: "moderation", label: `🛡️ ${t("commands.category.moderation")}` },
+  { key: "manga", label: `📖 ${t("commands.category.manga")}` },
+  { key: "utility", label: `🛠️ ${t("commands.category.utility")}` },
+  { key: "info", label: `ℹ️ ${t("commands.category.info")}` },
+  { key: "settings", label: `⚙️ ${t("commands.category.settings")}` },
 ];
 ---
 
@@ -30,6 +30,7 @@ const categories = [
         <button
           class:list={["sidebar-btn", { active: c.key === "all" }]}
           data-category={c.key}
+          data-title={c.label}
         >
           {c.label}
         </button>

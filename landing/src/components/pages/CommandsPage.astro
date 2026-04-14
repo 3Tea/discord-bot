@@ -127,10 +127,7 @@ const hreflang = [
       btn.classList.add("active");
       activeCategory = (btn as HTMLElement).dataset.category || "all";
 
-      const label =
-        activeCategory === "all"
-          ? btn.textContent?.trim() || "Commands"
-          : btn.textContent?.trim() || "Commands";
+      const label = (btn as HTMLElement).dataset.title || btn.textContent?.trim() || "Commands";
       if (titleEl) titleEl.textContent = label;
 
       filterCards();
