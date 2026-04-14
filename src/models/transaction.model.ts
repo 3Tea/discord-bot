@@ -34,7 +34,10 @@ export type TransactionType =
     | "premium_revoke"
     | "premium_upgrade"
     | "premium_downgrade"
-    | "premium_extend";
+    | "premium_extend"
+    | "quest_reward"
+    | "quest_complete"
+    | "quest_streak";
 
 export interface ITransaction extends Document {
     userId: string;
@@ -87,6 +90,9 @@ const transactionSchema = new Schema(
                 "premium_upgrade",
                 "premium_downgrade",
                 "premium_extend",
+                "quest_reward",
+                "quest_complete",
+                "quest_streak",
             ],
             required: true,
         },
