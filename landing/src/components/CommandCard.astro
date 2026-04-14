@@ -48,6 +48,7 @@ const overflow = items.length - maxShow;
     display: block;
     text-decoration: none;
     color: inherit;
+    height: 100%;
   }
 
   .command-card {
@@ -62,7 +63,9 @@ const overflow = items.length - maxShow;
       transform 0.2s ease,
       box-shadow 0.2s ease;
     cursor: pointer;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   .command-card:hover {
@@ -109,6 +112,11 @@ const overflow = items.length - maxShow;
     font-size: 12px;
     line-height: 1.5;
     margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .command-pills {
@@ -134,11 +142,10 @@ const overflow = items.length - maxShow;
     color: var(--accent);
     font-size: 12px;
     font-weight: 500;
-    opacity: 0;
+    margin-top: auto;
+    opacity: 0.85;
     transition: opacity 0.2s;
-    position: absolute;
-    bottom: 12px;
-    right: 16px;
+    align-self: flex-end;
   }
 
   .command-card:hover .guide-link-text {

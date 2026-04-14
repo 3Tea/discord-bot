@@ -31,13 +31,35 @@ const hreflang = [
         </p>
       </div>
 
+      <div class="commands-search-panel">
+        <p class="commands-search-label">{t("commands.search.label")}</p>
+        <div class="commands-search-wrap">
+          <input
+            type="text"
+            class="commands-search"
+            placeholder={`🔍 ${t("commands.search")}`}
+            id="command-search"
+          />
+          <button
+            type="button"
+            class="search-clear"
+            id="command-search-clear"
+            aria-label={t("commands.search.clear")}
+          >
+            ×
+          </button>
+        </div>
+        <p class="commands-search-hint">{t("commands.search.hint")}</p>
+      </div>
+
       <div class="commands-grid" id="commands-grid">
         {commands.map((cmd) => (
-          <div data-category={cmd.category} data-name={cmd.name} data-desc={cmd.description}>
+          <div class="command-item" data-category={cmd.category} data-name={cmd.name} data-desc={cmd.description}>
             <CommandCard command={cmd} href={`/${lang}/commands/${cmd.name}`} lang={lang} />
           </div>
         ))}
       </div>
+      <p id="commands-empty" class="commands-empty" hidden>{t("commands.search.empty")}</p>
     </div>
   </div>
 </BaseLayout>
@@ -79,6 +101,89 @@ const hreflang = [
     gap: 12px;
   }
 
+  .commands-search-panel {
+    margin-bottom: 16px;
+  }
+
+  .commands-search-label {
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .commands-search-wrap {
+    position: relative;
+    max-width: 440px;
+  }
+
+  .commands-search {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 36px 10px 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+  }
+
+  .commands-search::placeholder {
+    color: var(--text-muted);
+  }
+
+  .commands-search:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.2);
+  }
+
+  .commands-search-hint {
+    margin-top: 6px;
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+
+  .search-clear {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .search-clear:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .search-clear.visible {
+    display: inline-flex;
+  }
+
+  .command-item {
+    height: 100%;
+  }
+
+  .commands-empty {
+    margin-top: 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
   @media (max-width: 768px) {
     .commands-page {
       flex-direction: column;
@@ -87,6 +192,10 @@ const hreflang = [
     .commands-grid {
       grid-template-columns: 1fr;
     }
+
+    .commands-search-wrap {
+      max-width: 100%;
+    }
   }
 </style>
 
@@ -94,7 +203,9 @@ const hreflang = [
   const sidebar = document.getElementById("commands-sidebar");
   const grid = document.getElementById("commands-grid");
   const searchInput = document.getElementById("command-search") as HTMLInputElement | null;
+  const searchClear = document.getElementById("command-search-clear") as HTMLButtonElement | null;
   const countEl = document.getElementById("commands-count");
+  const emptyEl = document.getElementById("commands-empty");
   const titleEl = document.querySelector(".commands-title");
   const cards = grid ? Array.from(grid.children) as HTMLElement[] : [];
 
@@ -119,6 +230,8 @@ const hreflang = [
     });
 
     if (countEl) countEl.textContent = String(visible);
+    if (emptyEl) emptyEl.hidden = visible !== 0;
+    if (searchClear) searchClear.classList.toggle("visible", Boolean(searchInput?.value));
   }
 
   sidebar?.querySelectorAll("[data-category]").forEach((btn) => {
@@ -139,4 +252,28 @@ const hreflang = [
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(filterCards, 200);
   });
+
+  searchClear?.addEventListener("click", () => {
+    if (!searchInput) return;
+    searchInput.value = "";
+    searchInput.focus();
+    filterCards();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "/" || !searchInput) return;
+    const target = event.target;
+    if (
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLSelectElement ||
+      (target instanceof HTMLElement && target.isContentEditable)
+    ) {
+      return;
+    }
+    event.preventDefault();
+    searchInput.focus();
+  });
+
+  filterCards();
 </script>

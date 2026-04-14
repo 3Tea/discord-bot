@@ -37,16 +37,6 @@ const categories = [
       ))}
     </div>
   </div>
-
-  <div class="sidebar-section">
-    <p class="sidebar-label">{t("commands.search.label")}</p>
-    <input
-      type="text"
-      class="sidebar-search"
-      placeholder={`🔍 ${t("commands.search")}`}
-      id="command-search"
-    />
-  </div>
 </aside>
 
 <style>
@@ -104,35 +94,13 @@ const categories = [
     box-shadow: inset 3px 0 0 rgba(255, 255, 255, 0.35);
   }
 
-  .sidebar-search {
-    width: 100%;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    color: var(--text-primary);
-    font-size: 13px;
-    font-family: inherit;
-    outline: none;
-  }
-
-  .sidebar-search::placeholder {
-    color: var(--text-muted);
-  }
-
-  .sidebar-search:focus {
-    border-color: var(--accent);
-  }
-
   @media (max-width: 768px) {
     .sidebar {
       width: 100%;
       position: static;
       padding: 16px;
-      display: flex;
-      gap: 16px;
+      display: block;
       overflow-x: auto;
-      flex-wrap: wrap;
     }
 
     .sidebar-section {
