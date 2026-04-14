@@ -6,6 +6,7 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import { tryStarDrop } from "../../util/economy/starDrop";
+import QuestService from "../../services/quest/quest.service";
 
 function fallbackLocale(): SupportedLocale {
     return "en";
@@ -93,6 +94,8 @@ export default {
                 embed.setDescription(embed.data.description + "\n\n⭐ " + t(locale, "star_drop.found"));
             }
             await Reply.embedEdit(interaction, embed);
+            const questTrigger = targetUser ? "pray_target" : "pray";
+            await QuestService.trackProgress(userId, guildId, questTrigger).catch(() => {});
         } catch (error) {
             const locale = await resolveLocale(interaction).catch(fallbackLocale);
             if (error instanceof Error && error.message === "PRAY_COOLDOWN") {
