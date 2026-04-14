@@ -766,4 +766,7 @@ export function drawPremiumBadge(ctx: Ctx, badge: string, x: number, y: number):
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(label, x + bw / 2, y + bh / 2);
+
+    ctx.textAlign = "left";
+    ctx.textBaseline = "alphabetic";
 }

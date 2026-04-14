@@ -142,7 +142,9 @@ async function handleGrant(
     const duration = interaction.options.getString("duration", true) as DurationKey;
 
     const result = await PremiumService.activate(target.id, tier, duration, "manual", interaction.user.id);
-    const untilStr = result.until ? `<t:${Math.floor(result.until.getTime() / 1000)}:F>` : "Lifetime";
+    const untilStr = result.until
+        ? `<t:${Math.floor(result.until.getTime() / 1000)}:F>`
+        : t(locale, "premium.lookup.lifetime");
 
     let key: string;
     const params: Record<string, string> = { userId: target.id, tier, until: untilStr };
