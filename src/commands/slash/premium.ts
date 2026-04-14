@@ -1,9 +1,4 @@
-import {
-    ChatInputCommandInteraction,
-    EmbedBuilder,
-    MessageFlags,
-    SlashCommandBuilder,
-} from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
 import { DEV_USER_ID } from "../../util/config/index";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -31,18 +26,13 @@ export default {
             sub
                 .setName("grant")
                 .setDescription("Grant premium to a user")
-                .addUserOption((opt) =>
-                    opt.setName("user").setDescription("Target user").setRequired(true)
-                )
+                .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
                 .addStringOption((opt) =>
                     opt
                         .setName("tier")
                         .setDescription("Premium tier")
                         .setRequired(true)
-                        .addChoices(
-                            { name: "Star", value: "star" },
-                            { name: "Galaxy", value: "galaxy" }
-                        )
+                        .addChoices({ name: "Star", value: "star" }, { name: "Galaxy", value: "galaxy" })
                 )
                 .addStringOption((opt) =>
                     opt
@@ -62,9 +52,7 @@ export default {
             sub
                 .setName("revoke")
                 .setDescription("Revoke premium from a user")
-                .addUserOption((opt) =>
-                    opt.setName("user").setDescription("Target user").setRequired(true)
-                )
+                .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
                 .addStringOption((opt) =>
                     opt.setName("reason").setDescription("Reason for revocation").setRequired(false)
                 )
@@ -73,16 +61,10 @@ export default {
             sub
                 .setName("lookup")
                 .setDescription("Check a user's premium status")
-                .addUserOption((opt) =>
-                    opt.setName("user").setDescription("Target user").setRequired(true)
-                )
+                .addUserOption((opt) => opt.setName("user").setDescription("Target user").setRequired(true))
         )
-        .addSubcommand((sub) =>
-            sub.setName("status").setDescription("View your premium status and benefits")
-        )
-        .addSubcommand((sub) =>
-            sub.setName("compare").setDescription("Compare Free vs Star vs Galaxy benefits")
-        ),
+        .addSubcommand((sub) => sub.setName("status").setDescription("View your premium status and benefits"))
+        .addSubcommand((sub) => sub.setName("compare").setDescription("Compare Free vs Star vs Galaxy benefits")),
 
     async execute(interaction: ChatInputCommandInteraction) {
         const subcommand = interaction.options.getSubcommand(true);
@@ -133,10 +115,7 @@ export default {
     },
 };
 
-async function handleGrant(
-    interaction: ChatInputCommandInteraction,
-    locale: SupportedLocale
-): Promise<void> {
+async function handleGrant(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
     const target = interaction.options.getUser("user", true);
     const tier = interaction.options.getString("tier", true) as PremiumTier;
     const duration = interaction.options.getString("duration", true) as DurationKey;
@@ -167,14 +146,14 @@ async function handleGrant(
             break;
     }
 
-    const embed = new EmbedBuilder().setDescription(t(locale, key, params)).setColor(0xf39c12).setTimestamp();
+    const embed = new EmbedBuilder()
+        .setDescription(t(locale, key, params))
+        .setColor(0xf39c12)
+        .setTimestamp();
     await Reply.embedEdit(interaction, embed);
 }
 
-async function handleRevoke(
-    interaction: ChatInputCommandInteraction,
-    locale: SupportedLocale
-): Promise<void> {
+async function handleRevoke(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
     const target = interaction.options.getUser("user", true);
     const reason = interaction.options.getString("reason") ?? undefined;
 
@@ -193,10 +172,7 @@ async function handleRevoke(
     await Reply.embedEdit(interaction, embed);
 }
 
-async function handleLookup(
-    interaction: ChatInputCommandInteraction,
-    locale: SupportedLocale
-): Promise<void> {
+async function handleLookup(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
     const target = interaction.options.getUser("user", true);
     const status = await PremiumService.getPremiumStatus(target.id);
 
@@ -230,15 +206,10 @@ async function handleLookup(
     await Reply.embedEdit(interaction, embed);
 }
 
-async function handleStatus(
-    interaction: ChatInputCommandInteraction,
-    locale: SupportedLocale
-): Promise<void> {
+async function handleStatus(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
     const status = await PremiumService.getPremiumStatus(interaction.user.id);
 
-    const embed = new EmbedBuilder()
-        .setTitle(t(locale, "premium.status.title"))
-        .setTimestamp();
+    const embed = new EmbedBuilder().setTitle(t(locale, "premium.status.title")).setTimestamp();
 
     if (status.isActive) {
         const config = getTierConfig(status.tier);
@@ -251,10 +222,20 @@ async function handleStatus(
             .setDescription(t(locale, "premium.status.active", { tier: (status.tier ?? "").toUpperCase() }))
             .addFields(
                 { name: t(locale, "premium.status.expires"), value: untilStr, inline: true },
-                { name: t(locale, "premium.compare.manga_free"), value: Number.isFinite(config.mangaFreeUses) ? `${config.mangaFreeUses}/day` : t(locale, "premium.compare.unlimited"), inline: true },
+                {
+                    name: t(locale, "premium.compare.manga_free"),
+                    value: Number.isFinite(config.mangaFreeUses)
+                        ? `${config.mangaFreeUses}/day`
+                        : t(locale, "premium.compare.unlimited"),
+                    inline: true,
+                },
                 { name: t(locale, "premium.compare.manga_pages"), value: `${config.mangaMaxPages}`, inline: true },
-                { name: t(locale, "premium.compare.star_drop"), value: `\u00d7${config.starDropMultiplier}`, inline: true },
-                { name: t(locale, "premium.compare.daily_bonus"), value: `+${config.dailyBonusStars}`, inline: true },
+                {
+                    name: t(locale, "premium.compare.star_drop"),
+                    value: `\u00d7${config.starDropMultiplier}`,
+                    inline: true,
+                },
+                { name: t(locale, "premium.compare.daily_bonus"), value: `+${config.dailyBonusStars}`, inline: true }
             );
     } else {
         embed
@@ -272,10 +253,7 @@ function formatCd(ms: number): string {
     return `${ms / (60 * 1000)}m`;
 }
 
-async function handleCompare(
-    interaction: ChatInputCommandInteraction,
-    locale: SupportedLocale
-): Promise<void> {
+async function handleCompare(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
     const free = getTierConfig(null);
     const star = getTierConfig("star");
     const galaxy = getTierConfig("galaxy");
@@ -286,11 +264,36 @@ async function handleCompare(
 
     const rows = [
         [t(locale, "premium.compare.manga_free"), `${free.mangaFreeUses}`, `${star.mangaFreeUses}`, unlimited],
-        [t(locale, "premium.compare.manga_pages"), `${free.mangaMaxPages}`, `${star.mangaMaxPages}`, `${galaxy.mangaMaxPages}`],
-        [t(locale, "premium.compare.work_cd"), formatCd(free.workCooldownMs), formatCd(star.workCooldownMs), formatCd(galaxy.workCooldownMs)],
-        [t(locale, "premium.compare.fish_cd"), formatCd(free.fishCooldownMs), formatCd(star.fishCooldownMs), formatCd(galaxy.fishCooldownMs)],
-        [t(locale, "premium.compare.mine_cd"), formatCd(free.mineCooldownMs), formatCd(star.mineCooldownMs), formatCd(galaxy.mineCooldownMs)],
-        [t(locale, "premium.compare.dungeon_cd"), formatCd(free.dungeonCooldownMs), formatCd(star.dungeonCooldownMs), formatCd(galaxy.dungeonCooldownMs)],
+        [
+            t(locale, "premium.compare.manga_pages"),
+            `${free.mangaMaxPages}`,
+            `${star.mangaMaxPages}`,
+            `${galaxy.mangaMaxPages}`,
+        ],
+        [
+            t(locale, "premium.compare.work_cd"),
+            formatCd(free.workCooldownMs),
+            formatCd(star.workCooldownMs),
+            formatCd(galaxy.workCooldownMs),
+        ],
+        [
+            t(locale, "premium.compare.fish_cd"),
+            formatCd(free.fishCooldownMs),
+            formatCd(star.fishCooldownMs),
+            formatCd(galaxy.fishCooldownMs),
+        ],
+        [
+            t(locale, "premium.compare.mine_cd"),
+            formatCd(free.mineCooldownMs),
+            formatCd(star.mineCooldownMs),
+            formatCd(galaxy.mineCooldownMs),
+        ],
+        [
+            t(locale, "premium.compare.dungeon_cd"),
+            formatCd(free.dungeonCooldownMs),
+            formatCd(star.dungeonCooldownMs),
+            formatCd(galaxy.dungeonCooldownMs),
+        ],
         [t(locale, "premium.compare.star_drop"), "\u00d71.0", "\u00d71.5", "\u00d72.0"],
         [t(locale, "premium.compare.confession_skip"), no, yes, yes],
         [t(locale, "premium.compare.confession_vip"), no, no, yes],
@@ -302,9 +305,9 @@ async function handleCompare(
     const starLabel = t(locale, "premium.compare.star_tier");
     const galaxyLabel = t(locale, "premium.compare.galaxy_tier");
 
-    const description = rows.map(([label, f, s, g]) =>
-        `**${label}**\n${freeLabel}: ${f} | ${starLabel}: ${s} | ${galaxyLabel}: ${g}`
-    ).join("\n\n");
+    const description = rows
+        .map(([label, f, s, g]) => `**${label}**\n${freeLabel}: ${f} | ${starLabel}: ${s} | ${galaxyLabel}: ${g}`)
+        .join("\n\n");
 
     const embed = new EmbedBuilder()
         .setTitle(t(locale, "premium.compare.title"))

@@ -7,12 +7,7 @@ import type { SupportedLocale } from "../util/i18n/index";
 import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
 import PremiumService from "../services/premium/premium.service";
-import {
-    processEncounter,
-    scheduleCombatTimeout,
-    scheduleMerchantTimeout,
-    RUN_TTL,
-} from "../commands/slash/dungeon";
+import { processEncounter, scheduleCombatTimeout, scheduleMerchantTimeout, RUN_TTL } from "../commands/slash/dungeon";
 
 export default {
     id: BUTTON_ID.DUNGEON_CONTINUE,

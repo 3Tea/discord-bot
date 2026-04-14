@@ -42,12 +42,12 @@ export interface RankCardOptions {
 
 // Galaxy theme accent colors
 const GALAXY = {
-    accentA: "#ffd700",    // gold
-    accentB: "#6a0dad",    // deep purple
-    stat1: "#ffd700",      // gold
-    stat2: "#00d4ff",      // cyan
-    stat3: "#c44dff",      // purple
-    stat4: "#ffd700",      // gold
+    accentA: "#ffd700", // gold
+    accentB: "#6a0dad", // deep purple
+    stat1: "#ffd700", // gold
+    stat2: "#00d4ff", // cyan
+    stat3: "#c44dff", // purple
+    stat4: "#ffd700", // gold
     borderGlow: "rgba(255,215,0,0.15)",
     tint: "rgba(106,13,173,0.08)",
 } as const;

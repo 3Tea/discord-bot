@@ -54,7 +54,9 @@ async function expireStale(): Promise<void> {
                 const user = await client.users.fetch(wallet.userId);
                 const embed = new EmbedBuilder()
                     .setTitle(t(locale, "premium.expire.title"))
-                    .setDescription(t(locale, "premium.expire.notice", { tier: String(wallet.premiumTier).toUpperCase() }))
+                    .setDescription(
+                        t(locale, "premium.expire.notice", { tier: String(wallet.premiumTier).toUpperCase() })
+                    )
                     .setColor(0x95a5a6)
                     .setTimestamp();
                 await user.send({ embeds: [embed] });
