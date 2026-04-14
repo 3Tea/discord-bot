@@ -192,6 +192,7 @@
     "manga.nsfw_only": "NSFW 채널에서만 사용 가능해요",
     "manga.insufficient_funds": "이 서버를 유지할 자금이 부족합니다.",
     "manga.premium_only": "프리미엄 전용.",
+    "manga.load_failed": "만화를 불러오지 못했습니다. 나중에 다시 시도해주세요.",
     "manga.support_server": "지원 서버",
     "manga.no_stars": "오늘의 무료 3회를 모두 사용했고 스타가 부족해요. /wallet daily로 스타를 받으세요.",
     "star_drop.found": "스타를 발견했어요!",

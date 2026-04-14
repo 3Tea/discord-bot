@@ -192,6 +192,7 @@
     "manga.nsfw_only": "NSFWチャンネルのみ",
     "manga.insufficient_funds": "このサーバーを維持する資金が足りません。",
     "manga.premium_only": "プレミアム限定。",
+    "manga.load_failed": "マンガの読み込みに失敗しました。後でもう一度お試しください。",
     "manga.support_server": "サポートサーバー",
     "manga.no_stars": "本日の無料3回を使い切り、スターが不足しています。/wallet daily でスターを受け取ってください。",
     "star_drop.found": "スターを見つけた!",

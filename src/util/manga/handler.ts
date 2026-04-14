@@ -216,7 +216,7 @@ export function mangaCommand(source: MangaSource) {
                     );
                 }
                 await interaction.editReply({
-                    content: t(locale, "manga.premium_only"),
+                    content: t(locale, "manga.load_failed"),
                     components: [buildErrorRow(locale)],
                 });
             }

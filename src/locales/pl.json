@@ -192,6 +192,7 @@
     "manga.nsfw_only": "Tylko kanał NSFW",
     "manga.insufficient_funds": "Za mało środków na utrzymanie tego serwera.",
     "manga.premium_only": "Tylko premium.",
+    "manga.load_failed": "Nie udało się załadować mangi. Spróbuj ponownie później.",
     "manga.support_server": "Serwer wsparcia",
     "manga.no_stars": "Wykorzystałeś 3 darmowe użycia na dziś i nie masz wystarczająco gwiazd. Użyj /wallet daily aby odebrać gwiazdy.",
     "star_drop.found": "Znalazłeś gwiazdę!",
