@@ -29,6 +29,8 @@ relatedCommands: ["premium", "wallet"]
 
 > **Note:** Free users can access every feature. Premium makes things faster, more generous, and adds exclusive cosmetics — it never locks content.
 
+> **⚠️ Manga features are currently unstable** and not fully supported. Manga-related benefits (free uses, max pages) may not work as expected. Please consider this before purchasing premium primarily for manga features.
+
 ## Pricing
 
 | Tier | Monthly | Annual | You Save |

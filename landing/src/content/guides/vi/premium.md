@@ -29,6 +29,8 @@ relatedCommands: ["premium", "wallet"]
 
 > **Lưu ý:** Người dùng miễn phí có thể sử dụng mọi tính năng. Premium giúp mọi thứ nhanh hơn, nhiều hơn, và đẹp hơn — không bao giờ khóa nội dung.
 
+> **⚠️ Tính năng manga hiện chưa ổn định** và chưa được hỗ trợ đầy đủ. Các quyền lợi liên quan đến manga (lượt miễn phí, số trang tối đa) có thể chưa hoạt động đúng. Vui lòng cân nhắc trước khi mua premium chủ yếu vì tính năng manga.
+
 ## Bảng Giá
 
 ### Việt Nam
