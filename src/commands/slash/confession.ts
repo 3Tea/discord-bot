@@ -702,6 +702,7 @@ async function executeSubmit(
             confessionNumber,
             content,
             image,
+            null,
             isVip,
             mongoId,
             tag
@@ -762,7 +763,7 @@ async function executeSubmit(
         isVip,
         tag,
     });
-    const files = await buildConfessionAttachmentFiles(image);
+    const files = await buildConfessionAttachmentFiles(image, null);
     const row = buildConfessionReviewComponents(mongoId, {
         approve: t(locale, "btn.confession.approve"),
         reject: t(locale, "btn.confession.reject"),

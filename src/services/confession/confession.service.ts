@@ -14,7 +14,7 @@ import {
 import { isValidObjectId } from "mongoose";
 
 import redis from "../../connector/redis";
-import ConfessionModel, { IConfession, IConfessionImage } from "../../models/confession.model";
+import ConfessionModel, { IConfession, IConfessionAudio, IConfessionImage } from "../../models/confession.model";
 import GuildConfessionConfigModel, {
     ConfessionMode,
     IGuildConfessionConfig,
@@ -36,7 +36,9 @@ import {
     CONFESSION_KEYWORD_MAX_LENGTH,
     CONFESSION_KEYWORDS_MAX_COUNT,
     CONFESSION_TAGS,
+    AUDIO_CONTENT_TYPES,
     confessionCooldownRedisKey,
+    confessionAudioRedisKey,
 } from "./constants";
 
 export type { ConfessionMode } from "../../models/guildConfessionConfig.model";
@@ -143,6 +145,45 @@ export function validateConfessionAttachment(
     };
 }
 
+export function validateConfessionAudio(
+    att: { url: string; name: string | null; contentType: string | null; size: number } | null | undefined
+): { ok: true; audio: IConfessionAudio | null } | { ok: false } {
+    if (!att) return { ok: true, audio: null };
+    const ct = att.contentType ?? "";
+    if (!ct.startsWith("audio/")) return { ok: false };
+    if (!AUDIO_CONTENT_TYPES.includes(ct as (typeof AUDIO_CONTENT_TYPES)[number])) return { ok: false };
+    return {
+        ok: true,
+        audio: { url: att.url, name: att.name, contentType: att.contentType },
+    };
+}
+
+function secondsUntilUTCMidnight(): number {
+    const now = new Date();
+    const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
+    return Math.floor((endOfDay.getTime() - now.getTime()) / 1000);
+}
+
+export async function checkAndIncrementAudioLimit(userId: string, dailyLimit: number): Promise<boolean> {
+    if (!Number.isFinite(dailyLimit)) return true;
+
+    const key = confessionAudioRedisKey(userId);
+    const used = (await redis.getJson(key)) as number | null;
+
+    if (used !== null && used >= dailyLimit) return false;
+
+    await redis.setJson(key, (used ?? 0) + 1, secondsUntilUTCMidnight());
+    return true;
+}
+
+export async function decrementAudioLimit(userId: string): Promise<void> {
+    const key = confessionAudioRedisKey(userId);
+    const current = (await redis.getJson(key)) as number | null;
+    if (current && current > 0) {
+        await redis.setJson(key, current - 1, secondsUntilUTCMidnight());
+    }
+}
+
 export function buildPublicConfessionEmbed(
     confessionNumber: number,
     content: string,
@@ -218,23 +259,45 @@ export function buildReviewResolvedEmbed(
     return embed;
 }
 
-export async function buildConfessionAttachmentFiles(image: IConfessionImage | null): Promise<AttachmentBuilder[]> {
-    if (!image) return [];
-    try {
-        const res = await axios.get<ArrayBuffer>(image.url, {
-            responseType: "arraybuffer",
-            timeout: 15_000,
-            maxContentLength: 8 * 1024 * 1024,
-        });
-        const buf = Buffer.from(res.data);
-        const name = image.name && image.name.length > 0 ? image.name : "image.png";
-        return [new AttachmentBuilder(buf, { name })];
-    } catch (error) {
-        logger.warn(
-            `confession: failed to download image for attachment: ${error instanceof Error ? error.message : String(error)}`
-        );
-        return [];
+export async function buildConfessionAttachmentFiles(
+    image: IConfessionImage | null,
+    audio: IConfessionAudio | null
+): Promise<AttachmentBuilder[]> {
+    const files: AttachmentBuilder[] = [];
+
+    if (image) {
+        try {
+            const res = await axios.get<ArrayBuffer>(image.url, {
+                responseType: "arraybuffer",
+                timeout: 15_000,
+            });
+            const buf = Buffer.from(res.data);
+            const name = image.name && image.name.length > 0 ? image.name : "image.png";
+            files.push(new AttachmentBuilder(buf, { name }));
+        } catch (error) {
+            logger.warn(
+                `confession: failed to download image for attachment: ${error instanceof Error ? error.message : String(error)}`
+            );
+        }
     }
+
+    if (audio) {
+        try {
+            const res = await axios.get<ArrayBuffer>(audio.url, {
+                responseType: "arraybuffer",
+                timeout: 15_000,
+            });
+            const buf = Buffer.from(res.data);
+            const name = audio.name && audio.name.length > 0 ? audio.name : "audio.mp3";
+            files.push(new AttachmentBuilder(buf, { name }));
+        } catch (error) {
+            logger.warn(
+                `confession: failed to download audio for attachment: ${error instanceof Error ? error.message : String(error)}`
+            );
+        }
+    }
+
+    return files;
 }
 
 export async function sendAnonymousConfessionToChannel(
@@ -242,6 +305,7 @@ export async function sendAnonymousConfessionToChannel(
     confessionNumber: number,
     content: string,
     image: IConfessionImage | null,
+    audio: IConfessionAudio | null,
     isVip = false,
     mongoId?: string,
     tag?: string | null
@@ -250,7 +314,11 @@ export async function sendAnonymousConfessionToChannel(
         const embed = isVip
             ? buildVipPublicConfessionEmbed(confessionNumber, content, tag)
             : buildPublicConfessionEmbed(confessionNumber, content, tag);
-        const files = await buildConfessionAttachmentFiles(image);
+        if (audio) {
+            const currentDesc = embed.data.description ?? content;
+            embed.setDescription(`🎙️ **Voice Confession**\n\n${currentDesc}`);
+        }
+        const files = await buildConfessionAttachmentFiles(image, audio);
         const components = mongoId ? [buildConfessionInteractionRow(mongoId)] : [];
         const msg = await channel.send({
             embeds: [embed],
@@ -357,6 +425,7 @@ export async function approveConfession(interaction: ButtonInteraction): Promise
         doc.number,
         doc.content,
         doc.image,
+        doc.audio,
         doc.isVip,
         rawId,
         doc.tag
