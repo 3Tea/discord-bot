@@ -19,12 +19,13 @@
 
 | Command | Description | Options |
 |---------|-------------|---------|
-| `settings language` | Set personal language preference (en/vi/id/es/ja/zh/ko) | `locale` (String choice), `reset` (Boolean) |
+| `settings language` | Set personal language preference | `locale` (String choice), `reset` (Boolean) |
 | `settings server-language` | Set server default language (requires Manage Guild) | `locale` (String choice), `reset` (Boolean) |
+| `settings notifications` | Configure welcome/goodbye/boost/milestone notifications (Manage Guild) | `type`, `enabled`, `channel`, etc. |
 
 ### Voice Channel Management (`voice`)
 
-Full temporary voice channel system. Users join a trigger channel (prefix `TEST `), bot auto-creates a personal channel (prefix `* `), and the creator becomes the owner.
+Full temporary voice channel system. Users join a trigger channel (prefix `3AT `), bot auto-creates a personal channel (prefix `* `), and the creator becomes the owner.
 
 | Subcommand | Description | Cooldown |
 |------------|-------------|----------|
@@ -59,7 +60,7 @@ See [xp-system.md](xp-system.md) for full system documentation.
 
 | Command | Description | Options |
 |---------|-------------|---------|
-| `rank` | View rank card — level, XP progress, server & global rank, activity stats | `user` (User, optional) |
+| `rank` | View rank card — level, XP progress, server & global rank, activity stats, premium badge | `user` (User, optional) |
 | `leaderboard` | Paginated XP leaderboard with period filtering and mode selection | `mode` (server/global/servers) |
 | `server-rank` | View server's total XP, ranking among all servers, activity breakdown | None |
 | `xp set` | Set user's XP to exact amount (Admin, requires Manage Guild) | `user`, `amount` |
@@ -77,6 +78,11 @@ See [economy-system.md](economy-system.md) for full system documentation.
 | `balance` | View coin/gem balance, pray streak, last activity | `user` (User, optional) |
 | `pray` | Daily prayer for coins — streak bonuses at 3/7/14/30 days | `target` (User, optional) |
 | `curse` | Daily curse for coins (lower rewards, no streak/gems) | `target` (User, optional) |
+| `work` | Work for coins (cooldown: 4h free / 2h Star / 1h Galaxy) | None |
+| `fish` | Fish for coins (cooldown: 1h free / 30m Star / 15m Galaxy) | None |
+| `gamble` | Gamble coins with risk/reward | `amount` (Number, required) |
+| `gift` | Gift coins to another user | `user`, `amount` |
+| `rob` | Attempt to steal coins from another user | `user` |
 | `shop view` | Browse server shop items (paginated, 5 per page) | None |
 | `shop buy` | Purchase a shop item | `item-id` (String, required) |
 | `shop add` | Add item to server shop (Admin) | `item-id`, `name`, `description`, `type`, `price`, `currency`, `role?`, `stock?` |
@@ -85,48 +91,108 @@ See [economy-system.md](economy-system.md) for full system documentation.
 | `economy add-coin` | Add/subtract coins (Admin) | `user`, `amount` |
 | `economy set-gem` | Set user's gem balance (Admin) | `user`, `amount` |
 | `economy add-gem` | Add/subtract gems (Admin) | `user`, `amount` |
-| `moderation timeout` | Timeout member — mute text and voice (≤28 days) | `user`, `duration`, `unit`, `reason?` |
-| `moderation untimeout` | Remove an active timeout | `user` |
-| `moderation ban` | Ban a member from the server | `user`, `reason?`, `delete_messages?` |
-| `moderation kick` | Kick a member from the server (not banned) | `user`, `reason?` |
-| `moderation unban` | Unban by user snowflake ID | `user_id`, `reason?` |
 
-### Anonymous confessions (`confession`)
+### Global Wallet & Shop
+
+See [global-wallet.md](global-wallet.md) for full wallet documentation.
 
 | Command | Description | Options |
 |---------|-------------|---------|
-| `confession setup` | Configure anonymous confessions per server (**Manage Server**) | `enabled`, `mode` (`instant` \| `review`), `public_channel`, `review_channel` (required if `review`), `cooldown_minutes` (1–120, optional; default 10) |
-| `confession submit` | Send text + optional one image; **instant** posts anonymously to `public_channel`; **review** posts to `review_channel` for mods (author visible to mods only) | `content` (max 3500), `image` (attachment, optional) |
+| `wallet view` | Display star balance, streak, milestone progress | None |
+| `wallet daily` | Claim daily star reward (once per UTC day) | None |
+| `wallet history` | View paginated global transaction log | `page` (Integer, optional) |
+| `global-shop view` | Browse global shop items | None |
+| `global-shop buy` | Purchase a global shop item with stars | `item-id` (String, required) |
+| `global-inventory` | View purchased global shop items | None |
+
+### Premium
+
+See [premium-system.md](premium-system.md) for full documentation.
+
+| Command | Description | Access |
+|---------|-------------|--------|
+| `premium status` | View your premium tier, expiry, and active benefits | Public (ephemeral) |
+| `premium compare` | Side-by-side Free vs Star vs Galaxy benefits table | Public (ephemeral) |
+| `premium grant` | Grant/extend/upgrade premium to a user | `DEV_USER_ID` only |
+| `premium revoke` | Revoke premium with optional reason | `DEV_USER_ID` only |
+| `premium lookup` | Inspect any user's premium status | `DEV_USER_ID` only |
+
+### Mini-Games
+
+| Command | Description | Cooldown | Reference |
+|---------|-------------|----------|-----------|
+| `mine` | Mining mini-game — minerals, depth, collapse risk | 2h / 1h / 30m (free/Star/Galaxy) | [mine-system.md](mine-system.md) |
+| `dungeon` | Dungeon exploration — combat, treasure, traps, merchants | 1h / 30m / 15m (free/Star/Galaxy) | [dungeon-system.md](dungeon-system.md) |
+
+### Moderation
+
+See [moderation.md](moderation.md) for full documentation.
+
+| Command | Description | Permission |
+|---------|-------------|-----------|
+| `moderation timeout` | Timeout member — mute text and voice (<=28 days) | Moderate Members |
+| `moderation untimeout` | Remove an active timeout | Moderate Members |
+| `moderation ban` | Ban a member from the server (supports hackban) | Ban Members |
+| `moderation kick` | Kick a member from the server | Kick Members |
+| `moderation unban` | Unban by user snowflake ID | Ban Members |
+
+### Anonymous Confessions (`confession`)
+
+See [confession-system.md](confession-system.md) for full documentation.
+
+| Command | Description | Options |
+|---------|-------------|---------|
+| `confession setup` | Configure anonymous confessions per server (**Manage Server**) | `enabled`, `mode` (`instant` \| `review`), `public_channel`, `review_channel`, `cooldown_minutes` (1-120) |
+| `confession submit` | Send text + optional image; mode determines flow | `content` (max 3500), `image` (attachment, optional) |
+| `confession keywords add` | Add keyword filter (Manage Server) | `keyword` (max 50 chars) |
+| `confession keywords remove` | Remove keyword filter (Manage Server) | `keyword` |
+| `confession keywords list` | List all keyword filters (Manage Server) | None |
+| `confession ban` | Ban a user from confessions (Manage Server) | `confession-number`, `duration` |
+| `confession unban` | Unban a user from confessions (Manage Server) | `confession-number` |
 
 **Business rules:**
 - **MongoDB**: `GuildConfessionConfig` + `Confession` collections; confession numbers increment per guild via `lastConfessionNumber`.
-- **Cooldown**: Redis key `confession:cd:{guildId}:{userId}`, TTL = configured minutes × 60 seconds.
+- **Cooldown**: Redis key `confession:cd:{guildId}:{userId}`, TTL = configured minutes x 60 seconds.
+- **Premium**: Star+ users skip cooldown cost free; Galaxy users get VIP status free.
 - **Moderation buttons** (review mode): `confession_approve` / `confession_reject` with `customId` `prefix:<mongoId>`; `interactionCreateButton.ts` resolves handlers by **prefix** before the first `:`.
 - **Permissions**: `setup` — **Manage Guild** (checked in handler); Approve/Reject — **Manage Messages**.
 
 ### Manga Commands (NSFW)
 
-Six sources sharing the same handler (`src/util/manga/handler.ts`). All require NSFW channel.
+11 sources sharing the same handler (`src/util/manga/handler.ts`). All require NSFW channel. Free uses and max pages are premium-tier dependent (see [premium-system.md](premium-system.md)).
 
-| Command | Source | Unique metadata fields |
-|---------|--------|----------------------|
-| `nhentai` | nhentai.net | Title (EN/JP/Pretty), Language, Artist, Group, Parodies, Characters, Last updated |
-| `3hentai` | 3hentai.net | Title, Tags, Upload date |
-| `asmhentai` | asmhentai.com | Title, Tags, Upload date |
-| `hentaifox` | hentaifox.com | Title, Tags, Upload date |
-| `nhentai-lite` | nhentai.to | Title, Tags |
-| `pururin` | pururin.to | Title, Tags |
+| Command | Source | Has `random` |
+|---------|--------|-------------|
+| `nhentai` | nhentai.net | Yes |
+| `3hentai` | 3hentai.net | Yes |
+| `asmhentai` | asmhentai.com | Yes |
+| `hentaifox` | hentaifox.com | Yes |
+| `nhentai-lite` | nhentai.to | Yes |
+| `pururin` | pururin.to | Yes |
+| `simply-hentai` | simply-hentai.org | No (`read` only) |
+| `hentai2read` | hentai2read.com | No (`read` only) |
 
-Each command has two subcommands:
+Each command has up to two subcommands:
 - `read` — Read by ID (Integer, required)
-- `random` — Get random manga
+- `random` — Get random manga (if source supports it)
 
 **Business rules:**
 - **NSFW guard**: Channel must be NSFW, else ephemeral error
 - **External API**: Calls `SERVER_HD` backend (`/{source}/random` or `/{source}/get?book={id}`)
 - **Redis cache**: Images cached 10 min (key: `manga_read_{id}`)
-- **Page limit**: Max 50 pages for in-Discord reading. Over 50 -> "Read Online" only
+- **Star charge gate**: Free uses per day from premium tier config (3/10/unlimited), then 1 star per use
+- **Page limit**: Tier-dependent (35/70/100 pages). Over limit -> "Read Online" only
 - **Button auto-removal**: 20 seconds after display
+
+### Dev-Only
+
+| Command | Description | Access |
+|---------|-------------|--------|
+| `commandlog stats` | Command usage analytics for a time period | `DEV_USER_ID` + `GUILD_ID` |
+| `commandlog user` | Command history for a specific user | `DEV_USER_ID` + `GUILD_ID` |
+| `commandlog command` | Usage history for a specific command | `DEV_USER_ID` + `GUILD_ID` |
+
+See [command-logging.md](command-logging.md) for full documentation.
 
 ## Button Handlers
 
@@ -162,6 +228,31 @@ Displayed in the voice channel control panel. All validate channel ownership.
 | `VOICE_KICK_ONLY` | Kick without blocking |
 | `VOICE_KICK_BLOCK` | Kick and block |
 
+### Dungeon System Buttons
+
+All validate the user matches the dungeon run owner.
+
+| Button ID | Action |
+|-----------|--------|
+| `dungeon_attack` | Attack monster (combat encounter) |
+| `dungeon_defend` | Defend against monster (reduces incoming damage) |
+| `dungeon_heal` | Heal during combat (costs coins) |
+| `dungeon_run` | Start a new dungeon run |
+| `dungeon_continue` | Continue to next encounter |
+| `dungeon_leave` | Leave dungeon, bank rewards, set cooldown |
+| `dungeon_buff` | Purchase buff from NPC merchant |
+| `dungeon_exchange` | Exchange gems at NPC merchant |
+
+### Confession Buttons
+
+| Button ID | Action |
+|-----------|--------|
+| `confession_approve` | Approve pending confession; posts to public channel (`customId`: `confession_approve:<Confession _id>`) |
+| `confession_reject` | Reject pending confession (`customId`: `confession_reject:<Confession _id>`) |
+| `confession_upvote` | Upvote a confession (toggle) |
+| `confession_downvote` | Downvote a confession (toggle) |
+| `confession_reply` | Open reply modal for anonymous reply |
+
 ### Leaderboard Buttons
 
 | Button ID | Action |
@@ -181,37 +272,33 @@ Leaderboard buttons auto-disable after 60s idle timeout.
 |-----------|--------|
 | `manga_read` | Paginated manga reader (images from Redis cache) |
 
-### Confession (review mode)
-
-| Button ID | Action |
-|-----------|--------|
-| `confession_approve` | Approve pending confession; posts anonymous copy to public channel (`customId`: `confession_approve:<Confession _id>`) |
-| `confession_reject` | Reject pending confession (`customId`: `confession_reject:<Confession _id>`) |
-
 ## Events
 
 | Event | File | Purpose |
 |-------|------|---------|
 | `ClientReady` | `ready.ts` | Log guild/user count, set "Watching" presence with version + uptime |
-| `InteractionCreate` | `interactionCreate.ts` | Route slash commands to handlers |
+| `InteractionCreate` | `interactionCreate.ts` | Route slash commands to handlers, log command usage |
 | `InteractionCreate` | `interactionCreateButton.ts` | Route button clicks to handlers |
 | `InteractionCreate` | `interactionCreateSelectMenu.ts` | Route user select menus to handlers |
 | `InteractionCreate` | `interactionCreateModal.ts` | Handle modal submissions (voice rename + limit) |
 | `VoiceStateUpdate` | `voiceStateUpdate.ts` | Auto-create temp channels, track voice XP, auto-delete on leave |
 | `MessageCreate` | `messageCreate.ts` | Award message XP (anti-spam, cooldown, level-up detection) |
 | `MessageReactionAdd` | `messageReactionAdd.ts` | Award reaction XP (30s cooldown per user per guild) |
+| `GuildMemberAdd` | `guildMemberAdd.ts` | Send welcome notification, check member-count milestones |
+| `GuildMemberRemove` | `guildMemberRemove.ts` | Send goodbye notification |
+| `GuildMemberUpdate` | `guildMemberUpdate.ts` | Detect new server boosts, send boost notification |
 
 ### Voice State Update Details
 
-- **Join trigger channel** (prefix `TEST `): Creates temp channel with `* ` prefix, inherits bitrate, 23 user limit, owner stored in Redis, sends control panel
+- **Join trigger channel** (prefix `3AT `): Creates temp channel with `* ` prefix, inherits bitrate, 23 user limit, owner stored in Redis, sends control panel
 - **Leave temp channel** (prefix `* `): Deletes channel if empty/bots-only, cleans up Redis keys
-- **Voice XP sessions**: Tracked in Redis set `voice_xp_sessions`, checked every 60s, requires 2+ non-bot members and not server-deafened
+- **Voice XP sessions**: Tracked in Redis set `voice_xp_sessions`, checked every 60s, requires 2+ non-bot members (or 1+ with bot present) and not server-deafened
 
 ### Message Create Details
 
 - Validates: guild context, non-bot author, no webhooks, config enabled, channel not blacklisted
 - Anti-spam: message hash dedup (MD5), 60s cooldown, minimum 3 characters
-- Awards 15-25 XP (base 20, variance ±5), increments messageCount
+- Awards 15-25 XP (base 20, variance +/-5), increments messageCount
 - Syncs to period snapshots and guild stats
 - Triggers level-up detection
 
@@ -225,12 +312,12 @@ Leaderboard buttons auto-disable after 60s idle timeout.
 
 ## i18n (Multi-Language)
 
-All user-facing strings are translated via i18next. Supported languages: English (`en`, fallback), Vietnamese (`vi`), Indonesian (`id`), Spanish (`es`), Japanese (`ja`), Chinese (`zh`), Korean (`ko`).
+All user-facing strings are translated via i18next. Supported languages: English (`en`, fallback), Vietnamese (`vi`), Indonesian (`id`), Spanish (`es`), Japanese (`ja`), Chinese (`zh`), Korean (`ko`), Portuguese Brazil (`pt-BR`), French (`fr`), German (`de`), Russian (`ru`), Turkish (`tr`), Italian (`it`), Polish (`pl`), Dutch (`nl`) — **15 total**.
 
 **Locale resolution**: per-user > per-guild > Discord client locale > `"en"` fallback.
 
 **Settings**: Users set language via `/settings language`, guild admins via `/settings server-language` (requires Manage Guild). Preferences cached in Redis (30-day TTL).
 
-**Translation files**: `src/locales/{en,vi,id,es,ja,zh,ko}.json`. All commands, button labels, error messages, embed titles/fields, voice panel, weather descriptions, XP/economy messages, and manga handler use `t(locale, "key")`.
+**Translation files**: `src/locales/{locale}.json` for all 15 locales. All commands, button labels, error messages, embed titles/fields, voice panel, weather descriptions, XP/economy messages, premium messages, and manga handler use `t(locale, "key")`.
 
 **What is NOT translated**: Command names, option names, internal logs.

@@ -119,6 +119,12 @@ Transaction type: `"admin"` with metadata `{ action: "set-coin" | "add-coin" | .
 | `lastCurse` | Date | null |
 | `prayStreak` | Number | 0 |
 | `lastStreakDate` | Date | null |
+| `mineDepth` | Number | 1 |
+| `mineCheckpoint` | Number | 1 |
+| `dungeonDepth` | Number | 1 |
+| `dungeonCheckpoint` | Number | 1 |
+
+Mine/dungeon depth and checkpoint fields track per-user per-guild progression for the mini-game systems. See [mine-system.md](mine-system.md) and [dungeon-system.md](dungeon-system.md).
 
 **Indexes**: Unique `(userId, guildId)`, `(guildId, coin: -1)` for coin leaderboard.
 

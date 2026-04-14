@@ -9,7 +9,7 @@
 ## Run Lifecycle
 
 1. User runs `/dungeon`
-2. Check 1-hour cooldown (`dungeon_cd:{guildId}:{userId}`)
+2. Check cooldown (`dungeon_cd:{guildId}:{userId}`) — duration varies by premium tier (free: 1h, Star: 30m, Galaxy: 15m)
 3. Check no existing run (`dungeon_run:{userId}`) or combat (`dungeon_combat:{userId}`)
 4. Create `DungeonRunState` in Redis (TTL: 900s / 15 minutes)
 5. Roll first encounter, display embed with action buttons
@@ -18,7 +18,7 @@
    - If encounters exhausted (5 used) → run ends normally
    - Otherwise → show **Continue** / **Leave** buttons
 7. **Continue**: decrement `encountersLeft`, roll next encounter, edit same message
-8. **Leave**: end run, set 1-hour cooldown
+8. **Leave**: end run, set cooldown (tier-dependent: 1h / 30m / 15m)
 9. Run also ends on 15-minute timeout (progress already persisted per-encounter)
 
 ## Encounter Types
@@ -71,7 +71,7 @@ Floor advances by 1. Checkpoint auto-saved if new floor is prime.
 
 - Reset `dungeonDepth` to `dungeonCheckpoint`
 - Coin penalty: `min(random(100-200), userBalance)` — no debt
-- Run ends immediately, cooldown set
+- Run ends immediately, tier-dependent cooldown set
 
 ## Treasure Chest
 
@@ -92,7 +92,7 @@ Floor advances by 1. Checkpoint auto-saved if new floor is prime.
 **If HP ≤ 0 after trap (collapse)**:
 - Reset `dungeonDepth` to `dungeonCheckpoint`
 - Additional coin penalty: `random(100-200)`
-- Run ends, cooldown set
+- Run ends, tier-dependent cooldown set
 
 ## NPC Merchant
 
@@ -187,7 +187,7 @@ Monster names are cosmetic — HP and damage are calculated by floor formula, no
 | `exchangeRate` | Number | Coin cost for 1 gem |
 | `currentHp` | Number | User HP at time of merchant |
 
-### Cooldown (`dungeon_cd:{guildId}:{userId}`, TTL: 3600s)
+### Cooldown (`dungeon_cd:{guildId}:{userId}`, TTL: 3600s free / 1800s Star / 900s Galaxy)
 
 Simple flag. 1-hour expiry.
 
@@ -250,7 +250,7 @@ NPC merchant pricing and mechanics — heal amount calculation, buff assignment,
 ## Command (`/dungeon`)
 
 - **File**: `src/commands/slash/dungeon.ts`
-- **Cooldown**: 1 hour
+- **Cooldown**: 1 hour (free), 30 minutes (Star), 15 minutes (Galaxy) — via `PremiumService.getConfig(userId)`
 - **Category**: Economy (in help system)
 - **Single-message pattern**: All encounters edit the same Discord message (stored as `messageId` in run state)
 - **i18n**: Full localization via `resolveLocale()` + `t()`

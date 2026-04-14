@@ -48,8 +48,8 @@ Page files are thin wrappers (3-5 lines) that delegate to a shared component wit
 
 | Route pattern | Page file | Content collection | Pages generated |
 |---------------|-----------|-------------------|-----------------|
-| `/{lang}/commands/{slug}` | `pages/[lang]/commands/[...slug].astro` | `commands` | 31 EN + 31 VI = 62 |
-| `/{lang}/guide/{slug}` | `pages/[lang]/guide/[...slug].astro` | `guides` | 9 EN + 9 VI = 18 |
+| `/{lang}/commands/{slug}` | `pages/[lang]/commands/[...slug].astro` | `commands` | 38 EN + 38 VI = 76 |
+| `/{lang}/guide/{slug}` | `pages/[lang]/guide/[...slug].astro` | `guides` | 14 EN + 14 VI = 28 |
 
 Both use `getStaticPaths()` to enumerate all content entries. Each generates pages for both `en/` and `vi/` from the content collection.
 
@@ -58,9 +58,9 @@ Both use `getStaticPaths()` to enumerate all content entries. Each generates pag
 | Type | EN | VI | Total |
 |------|----|----|-------|
 | Static (home, commands index, guide index, privacy, terms) | 5 | 5 | 10 |
-| Command detail | 31 | 31 | 62 |
-| Guide detail | 9 | 9 | 18 |
-| **Total** | **45** | **45** | **~90** |
+| Command detail | 38 | 38 | 76 |
+| Guide detail | 14 | 14 | 28 |
+| **Total** | **57** | **57** | **~114** |
 
 ## i18n System
 

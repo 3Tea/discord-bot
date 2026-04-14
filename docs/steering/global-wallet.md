@@ -25,8 +25,9 @@ All subcommands defer the reply before processing.
 1. **Cooldown check** (atomic) — `findOneAndUpdate` matches if `lastDaily` is `null` or `< startOfToday` (UTC midnight). Sets `lastDaily = now`. If no document matches and `lastDaily` is today, throws `DAILY_COOLDOWN`.
 2. **Streak calculation** — if `lastStreakDate` was the previous UTC day (`isConsecutiveUTCDay`), increment `dailyStreak`; otherwise reset to 1.
 3. **Base reward** — random 1-3 star (`Math.floor(Math.random() * 3) + 1`).
-4. **Streak milestone check** — if `newStreak` matches a milestone threshold exactly, add bonus star on top of base.
-5. **Atomic update** — `$inc star` by total (base + streak bonus), `$set dailyStreak` and `lastStreakDate`.
+4. **Premium bonus** — Galaxy tier users receive `dailyBonusStars` (currently +2) on top of base reward via `getTierConfig(wallet.premiumTier)`.
+5. **Streak milestone check** — if `newStreak` matches a milestone threshold exactly, add bonus star on top of base.
+6. **Atomic update** — `$inc star` by total (base + premium bonus + streak bonus), `$set dailyStreak` and `lastStreakDate`.
 6. **Transaction logging** — one `global_daily` entry for base reward; a separate `global_streak_bonus` entry if a milestone was hit.
 7. **Multi-server milestone check** — after the daily claim, the command queries `UserEconomy.distinct("guildId", { userId })` to count how many servers the user is active in, then calls `checkAndAwardMilestone` for each reached threshold.
 
@@ -128,6 +129,10 @@ Collection: `UserWallets`
 | `dailyStreak` | Number | 0 | Current consecutive daily claim count |
 | `lastStreakDate` | Date / null | null | Date used for consecutive-day detection |
 | `claimedMilestones` | String[] | [] | Array of claimed milestone keys |
+| `premiumTier` | String / null | null | `"star"` or `"galaxy"` (see [premium-system.md](premium-system.md)) |
+| `premiumUntil` | Date / null | null | Expiry timestamp, `null` = lifetime |
+| `premiumSource` | String / null | null | `"auto"` or `"manual"` |
+| `premiumGrantedBy` | String / null | null | Admin userId who granted |
 | `createdAt` | Date | auto | Mongoose timestamp |
 | `updatedAt` | Date | auto | Mongoose timestamp |
 
@@ -164,7 +169,7 @@ Global wallet transactions reuse the shared `Transaction` model with `guildId = 
 | Type | Fields |
 |------|--------|
 | `WalletBalance` | `star`, `dailyStreak`, `lastDaily`, `claimedMilestones` |
-| `DailyClaimResult` | `baseReward`, `streakBonus`, `streak`, `milestoneHit` |
+| `DailyClaimResult` | `baseReward`, `premiumBonus`, `streakBonus`, `streak`, `milestoneHit` |
 | `InsufficientStarError` | Error with `available` and `required` properties |
 
 ### Internal Helpers

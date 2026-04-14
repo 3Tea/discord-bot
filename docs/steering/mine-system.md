@@ -9,13 +9,13 @@
 ## Gameplay Loop
 
 1. User runs `/mine`
-2. Check 2-hour cooldown (`mine_cd:{guildId}:{userId}`)
+2. Check cooldown (`mine_cd:{guildId}:{userId}`) — duration varies by premium tier (free: 2h, Star: 1h, Galaxy: 30m)
 3. Roll collapse chance (scales with depth)
 4. **On collapse**: lose coins, reset depth to last checkpoint
 5. **On success**: roll mineral by rarity, award coins (base + depth bonus), advance depth by 1
 6. If new depth is prime → auto-save checkpoint
 7. Roll 4% star drop on success only
-8. Set 2-hour cooldown
+8. Set cooldown (tier-dependent: 2h / 1h / 30m)
 
 ## Mineral Table
 
@@ -61,7 +61,7 @@
 
 | Key | Value | TTL | Purpose |
 |-----|-------|-----|---------|
-| `mine_cd:{guildId}:{userId}` | `true` | 7200s (2h) | Mine cooldown per user per guild |
+| `mine_cd:{guildId}:{userId}` | `true` | 7200s free / 3600s Star / 1800s Galaxy | Mine cooldown per user per guild (premium-tier dependent) |
 
 ## Data Model
 
@@ -100,7 +100,7 @@ Part of `UserEconomy` model — per-guild, per-user (compound unique index `(use
 ## Command (`/mine`)
 
 - **File**: `src/commands/slash/mine.ts`
-- **Cooldown**: 2 hours
+- **Cooldown**: 2 hours (free), 1 hour (Star), 30 minutes (Galaxy) — via `PremiumService.getConfig(userId)`
 - **Category**: Economy (in help system)
 - **Embeds**:
   - Collapse: red (0xed4245), "💥 Mining" title, penalty and checkpoint info

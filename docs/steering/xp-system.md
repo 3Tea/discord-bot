@@ -29,12 +29,12 @@ Members earn XP from three sources: messages, voice activity, and reactions. XP 
 |---------|---------|-------------|
 | XP per minute | 5 | Yes (`xpPerVoiceMinute`) |
 | Check interval | 60 seconds | No (hardcoded) |
-| Min members | 2 non-bot members | No (hardcoded) |
+| Min members | 2+ non-bot OR 1+ non-bot with bot present | No (hardcoded) |
 
 **Session tracking**: Redis set `voice_xp_sessions` with entries `guildId:userId:channelId`.
 
-**Session starts when**: User joins voice with 2+ non-bot members AND is not server-deafened.
-**Session stops when**: User leaves, becomes server-deafened, or channel drops below 2 non-bot members.
+**Session starts when**: User joins voice with 2+ non-bot members (or 1+ non-bot with a bot present) AND is not server-deafened.
+**Session stops when**: User leaves, becomes server-deafened, or channel drops below eligibility threshold.
 
 Every 60 seconds, all active sessions receive XP. Level-up checked on each award.
 
@@ -121,8 +121,11 @@ Displays canvas rank card (image) with embed fallback. Shows:
 - User level and XP progress bar
 - Server rank (#N of M members)
 - Global rank
+- Premium badge (Star/Galaxy) if user has active premium subscription
 - Message count, voice minutes, reaction count
 - Period activity stats (daily, weekly, monthly)
+
+Premium users get a tier badge on the card and Galaxy tier uses an alternate gold/purple color theme. See [canvas-rendering.md](canvas-rendering.md) for rendering details.
 
 ### `/leaderboard`
 

@@ -57,6 +57,31 @@ Canvas: 934 x 360 px (934 x 400 when period stats present). Output: PNG buffer a
 | `reactionCount` | number | Yes | — |
 | `totalXP` | number | No | `xp` |
 | `periodStats` | `{ daily, weekly, monthly }` | No | — |
+| `premiumBadge` | string \| null | No | `null` |
+| `rankCardTheme` | string | No | `"standard"` |
+
+### Galaxy Theme
+
+When `rankCardTheme === "galaxy"`, the card uses an alternate color scheme defined in the `GALAXY` constant:
+
+| Key | Value | Replaces |
+|-----|-------|----------|
+| `accentA` | `#ffd700` (gold) | `C.pink` in name gradient, XP bar start |
+| `accentB` | `#6a0dad` (deep purple) | `C.purple` in name gradient, XP bar end |
+| `stat1` | `#ffd700` (gold) | Pink accent on MESSAGES stat |
+| `stat2` | `#00d4ff` (cyan) | Purple accent on VOICE stat |
+| `stat3` | `#c44dff` (purple) | Gold accent on REACTIONS stat |
+| `stat4` | `#ffd700` (gold) | Gold accent on TOTAL XP stat |
+| `borderGlow` | `rgba(255,215,0,0.15)` | Standard border glow |
+| `tint` | `rgba(106,13,173,0.08)` | No tint in standard theme |
+
+Galaxy theme applies a purple tint overlay on the background and uses a gold outer glow on the card border.
+
+### Premium Badge
+
+When `premiumBadge` is set (e.g., `"star"` or `"galaxy"`), `drawPremiumBadge()` renders a small pill badge below the rank badges:
+- **Star**: `"⭐ STAR"` with orange gradient (`#f39c12` → `#e67e22`)
+- **Galaxy**: `"🌌 GALAXY"` with purple gradient (`#9b59b6` → `#6a0dad`)
 
 ## Server Rank Card (`/server-rank`)
 
