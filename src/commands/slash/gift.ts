@@ -7,6 +7,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import QuestService from "../../services/quest/quest.service";
 
 const CONFIG_CACHE_TTL = 300;
 
@@ -125,6 +126,8 @@ export default {
                     ].join("\n")
                 )
                 .setColor(0x57f287);
+
+            await QuestService.trackProgress(giverId, guildId, "gift").catch(() => {});
 
             return Reply.embedEdit(interaction, embed);
         } catch {

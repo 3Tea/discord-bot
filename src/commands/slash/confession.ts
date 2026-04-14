@@ -44,6 +44,7 @@ import type { IConfessionAudio } from "../../models/confession.model";
 import CurrencyService from "../../services/economy/currency.service";
 import PremiumService from "../../services/premium/premium.service";
 import { logger } from "../../util/log/logger.mixed";
+import QuestService from "../../services/quest/quest.service";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
@@ -778,6 +779,7 @@ async function executeSubmit(
 
         await setConfessionCooldown(guildId, userId, config.cooldownMinutes);
         await interaction.editReply({ content: t(locale, "confession.submit_success_instant") });
+        await QuestService.trackProgress(userId, guildId, "confession").catch(() => {});
         return;
     }
 
@@ -846,4 +848,5 @@ async function executeSubmit(
 
     await setConfessionCooldown(guildId, userId, config.cooldownMinutes);
     await interaction.editReply({ content: t(locale, "confession.submit_success_review") });
+    await QuestService.trackProgress(userId, guildId, "confession").catch(() => {});
 }
