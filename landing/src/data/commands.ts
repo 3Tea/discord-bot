@@ -161,6 +161,12 @@ export const commands: Command[] = [
     subcommands: ["view"],
   },
   {
+    name: "quest",
+    description: "Daily quests — complete tasks for coin and star rewards",
+    category: "economy",
+    subcommands: ["view", "claim"],
+  },
+  {
     name: "moderation",
     description:
       "Staff moderation — timeout (≤28 days), remove timeout, ban, kick, and unban by user ID (requires ModerateMembers / BanMembers)",

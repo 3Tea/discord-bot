@@ -8,6 +8,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- **Daily quest system** — 3 random quests per day (1 easy + 1 medium + 1 hard) with hybrid rewards.
+  - 18 quest templates across 3 difficulty tiers, deterministic generation via `SHA-256(userId + date)`.
+  - `/quest view` shows today's quests + progress, `/quest claim` collects all-3-complete star bonus.
+  - Coin rewards (per-server) paid automatically per quest. Star rewards (global) on claim.
+  - Premium-tiered: Free (10/20/35 coin, +1 star), Star (15/30/50, +2), Galaxy (20/40/70, +3).
+  - Quest streak: consecutive days → bonus stars at 3/7/14/30 day milestones.
+  - 14 commands integrated for auto-tracking: pray, curse, rank, balance, wallet, work, fish, mine, gift, confession, shop, dungeon, gamble, rob.
 - **Audio confession** — premium-only voice note attachment for confessions.
   - Star tier: 1 audio/day, 30s max, 2MB. Galaxy tier: unlimited, 60s max, 5MB.
   - Mutually exclusive with image attachment. Accepted formats: MP3, OGG, WAV, M4A, WebM.

@@ -48,6 +48,7 @@ src/
     userWallet.model.ts   # Global star wallet + premium subscription fields
     globalShopItem.model.ts # Global shop item catalog
     globalInventory.model.ts # Per-user global shop inventory
+    userQuest.model.ts    # Daily quest progress + streak
     commandLog.model.ts   # Dev-only command usage analytics
     confession.model.ts   # Anonymous confession posts (text + optional image or audio)
     confessionVote.model.ts # Confession up/down votes
@@ -76,6 +77,9 @@ src/
       premium.config.ts   # Tier definitions (free/star/galaxy) and benefit values
       premium.service.ts  # CRUD, status lookup, Redis caching (5min TTL)
       premiumExpiry.ts    # Background job: expires stale subscriptions every 10min
+    quest/                # Daily quest system
+      quest.config.ts     # Quest pool (18 templates), rewards, deterministic generation
+      quest.service.ts    # trackProgress, claim, streak logic
     confession/           # Confession system service
       confession.service.ts # Submit, vote, reply logic
     notification/         # Welcome/goodbye/boost notifications
@@ -526,6 +530,7 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/global-wallet.md](docs/steering/global-wallet.md) | Global star currency: daily claims, streaks, milestones, cross-server |
 | [docs/steering/mine-system.md](docs/steering/mine-system.md) | Mining mini-game: minerals, depth progression, checkpoints, collapse risk, star drops |
 | [docs/steering/dungeon-system.md](docs/steering/dungeon-system.md) | Dungeon mini-game: multi-encounter runs, combat, NPC merchant, buffs, traps, floor progression |
+| [docs/steering/quest-system.md](docs/steering/quest-system.md) | Daily quests: 18 templates, deterministic generation, rewards, streaks, 14 command integrations |
 | [docs/steering/command-logging.md](docs/steering/command-logging.md) | Dev-only analytics: command stats, user/command history, buffered writes |
 | [docs/steering/premium-system.md](docs/steering/premium-system.md) | Premium tiers (Star/Galaxy): benefits, integration points, caching, expiry, admin commands |
 
