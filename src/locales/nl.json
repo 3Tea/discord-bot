@@ -726,6 +726,8 @@
     "premium.grant.downgraded": "<@{{userId}}> gedowngraded van **{{from}}** naar **{{tier}}**. Vervalt: **{{until}}**.",
     "premium.revoke.success": "Premium ingetrokken van <@{{userId}}>. Vorige tier: **{{tier}}**.",
     "premium.revoke.not_active": "Deze gebruiker heeft geen actief premium-abonnement.",
+    "premium.expire.title": "Premium Verlopen",
+    "premium.expire.notice": "Je **{{tier}}** premium is verlopen. Gebruik `/premium compare` om verlengingsopties te bekijken.",
     "premium.lookup.title": "Premium Opzoeken: {{username}}",
     "premium.lookup.no_premium": "Geen actief premium.",
     "premium.lookup.tier": "Tier",

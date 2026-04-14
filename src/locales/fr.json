@@ -726,6 +726,8 @@
     "premium.grant.downgraded": "<@{{userId}}> rétrogradé de **{{from}}** à **{{tier}}**. Expire : **{{until}}**.",
     "premium.revoke.success": "Premium révoqué pour <@{{userId}}>. Tier précédent : **{{tier}}**.",
     "premium.revoke.not_active": "Cet utilisateur n'a pas d'abonnement premium actif.",
+    "premium.expire.title": "Premium Expiré",
+    "premium.expire.notice": "Votre premium **{{tier}}** a expiré. Utilisez `/premium compare` pour voir les options de renouvellement.",
     "premium.lookup.title": "Recherche Premium : {{username}}",
     "premium.lookup.no_premium": "Aucun premium actif.",
     "premium.lookup.tier": "Tier",

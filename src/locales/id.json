@@ -726,6 +726,8 @@
     "premium.grant.downgraded": "Menurunkan <@{{userId}}> dari **{{from}}** ke **{{tier}}**. Kedaluwarsa: **{{until}}**.",
     "premium.revoke.success": "Mencabut premium dari <@{{userId}}>. Tier sebelumnya: **{{tier}}**.",
     "premium.revoke.not_active": "Pengguna ini tidak memiliki langganan premium aktif.",
+    "premium.expire.title": "Premium Kedaluwarsa",
+    "premium.expire.notice": "Premium **{{tier}}** Anda telah kedaluwarsa. Gunakan `/premium compare` untuk melihat opsi perpanjangan.",
     "premium.lookup.title": "Pencarian Premium: {{username}}",
     "premium.lookup.no_premium": "Tidak ada premium aktif.",
     "premium.lookup.tier": "Tier",

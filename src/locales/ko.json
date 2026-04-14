@@ -726,6 +726,8 @@
     "premium.grant.downgraded": "<@{{userId}}>를 **{{from}}**에서 **{{tier}}**로 다운그레이드했습니다. 만료일: **{{until}}**.",
     "premium.revoke.success": "<@{{userId}}>의 프리미엄을 취소했습니다. 이전 티어: **{{tier}}**.",
     "premium.revoke.not_active": "이 사용자에게는 활성화된 프리미엄 구독이 없습니다.",
+    "premium.expire.title": "프리미엄 만료",
+    "premium.expire.notice": "**{{tier}}** 프리미엄이 만료되었습니다. `/premium compare`를 사용하여 갱신 옵션을 확인하세요.",
     "premium.lookup.title": "프리미엄 조회: {{username}}",
     "premium.lookup.no_premium": "활성 프리미엄이 없습니다.",
     "premium.lookup.tier": "티어",

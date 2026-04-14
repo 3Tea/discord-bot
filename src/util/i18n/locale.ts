@@ -100,6 +100,18 @@ export async function resolveGuildLocale(guildId: string): Promise<SupportedLoca
     return guildLocale ?? DEFAULT_LOCALE;
 }
 
+/**
+ * Resolve locale for a user without an interaction context (e.g. DMs from cron jobs).
+ * Falls back to DEFAULT_LOCALE if user has no preference.
+ */
+export async function resolveUserLocale(userId: string): Promise<SupportedLocale> {
+    const userLocale = await resolveFromRedisOrDb(`locale:user:${userId}`, async () => {
+        const user = await UserModel.findOne({ userID: userId }).select("locale").lean();
+        return user?.locale;
+    });
+    return userLocale ?? DEFAULT_LOCALE;
+}
+
 export async function setUserLocale(userId: string, locale: SupportedLocale): Promise<void> {
     await UserModel.findOneAndUpdate({ userID: userId }, { $set: { locale } }, { upsert: true });
     await redis.setKey(`locale:user:${userId}`, locale, LOCALE_TTL);

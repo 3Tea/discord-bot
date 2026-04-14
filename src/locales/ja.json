@@ -726,6 +726,8 @@
     "premium.grant.downgraded": "<@{{userId}}>を**{{from}}**から**{{tier}}**にダウングレードしました。有効期限: **{{until}}**。",
     "premium.revoke.success": "<@{{userId}}>のプレミアムを取り消しました。以前のティア: **{{tier}}**。",
     "premium.revoke.not_active": "このユーザーにはアクティブなプレミアムサブスクリプションがありません。",
+    "premium.expire.title": "プレミアム期限切れ",
+    "premium.expire.notice": "**{{tier}}** プレミアムの有効期限が切れました。`/premium compare` で更新オプションを確認してください。",
     "premium.lookup.title": "プレミアム検索: {{username}}",
     "premium.lookup.no_premium": "アクティブなプレミアムはありません。",
     "premium.lookup.tier": "ティア",

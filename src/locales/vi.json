@@ -726,6 +726,8 @@
     "premium.grant.downgraded": "Đã hạ cấp <@{{userId}}> từ **{{from}}** xuống **{{tier}}**. Hết hạn: **{{until}}**.",
     "premium.revoke.success": "Đã thu hồi premium của <@{{userId}}>. Tier trước: **{{tier}}**.",
     "premium.revoke.not_active": "Người dùng này không có premium đang hoạt động.",
+    "premium.expire.title": "Premium Đã Hết Hạn",
+    "premium.expire.notice": "Premium **{{tier}}** của bạn đã hết hạn. Dùng `/premium compare` để xem các gói gia hạn.",
     "premium.lookup.title": "Tra cứu Premium: {{username}}",
     "premium.lookup.no_premium": "Không có premium.",
     "premium.lookup.tier": "Tier",

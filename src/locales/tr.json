@@ -726,6 +726,8 @@
     "premium.grant.downgraded": "<@{{userId}}> kullanıcısı **{{from}}** seviyesinden **{{tier}}** seviyesine düşürüldü. Bitiş tarihi: **{{until}}**.",
     "premium.revoke.success": "<@{{userId}}> kullanıcısının premium'u iptal edildi. Önceki seviye: **{{tier}}**.",
     "premium.revoke.not_active": "Bu kullanıcının aktif bir premium aboneliği yok.",
+    "premium.expire.title": "Premium Süresi Doldu",
+    "premium.expire.notice": "**{{tier}}** premium süreniz doldu. Yenileme seçenekleri için `/premium compare` kullanın.",
     "premium.lookup.title": "Premium Sorgulama: {{username}}",
     "premium.lookup.no_premium": "Aktif premium yok.",
     "premium.lookup.tier": "Seviye",

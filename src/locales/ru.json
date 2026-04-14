@@ -726,6 +726,8 @@
     "premium.grant.downgraded": "<@{{userId}}> понижен с **{{from}}** до **{{tier}}**. Истекает: **{{until}}**.",
     "premium.revoke.success": "Премиум отозван у <@{{userId}}>. Предыдущий уровень: **{{tier}}**.",
     "premium.revoke.not_active": "У этого пользователя нет активной премиум-подписки.",
+    "premium.expire.title": "Премиум истёк",
+    "premium.expire.notice": "Ваш **{{tier}}** премиум истёк. Используйте `/premium compare` для просмотра вариантов продления.",
     "premium.lookup.title": "Поиск премиума: {{username}}",
     "premium.lookup.no_premium": "Нет активного премиума.",
     "premium.lookup.tier": "Уровень",

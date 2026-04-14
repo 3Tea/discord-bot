@@ -726,6 +726,8 @@
     "premium.grant.downgraded": "已将 <@{{userId}}> 从 **{{from}}** 降级为 **{{tier}}**。到期时间：**{{until}}**。",
     "premium.revoke.success": "已撤销 <@{{userId}}> 的高级会员。之前的等级：**{{tier}}**。",
     "premium.revoke.not_active": "此用户没有活跃的高级会员订阅。",
+    "premium.expire.title": "Premium 已过期",
+    "premium.expire.notice": "您的 **{{tier}}** Premium 已过期。使用 `/premium compare` 查看续订选项。",
     "premium.lookup.title": "高级会员查询：{{username}}",
     "premium.lookup.no_premium": "没有活跃的高级会员。",
     "premium.lookup.tier": "等级",

@@ -1,7 +1,10 @@
+import { EmbedBuilder } from "discord.js";
 import UserWalletModel from "../../models/userWallet.model";
 import TransactionModel from "../../models/transaction.model";
 import redis from "../../connector/redis/index";
 import { logger } from "../../util/log/logger.mixed";
+import { resolveUserLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
 
 const INTERVAL_MS = 10 * 60 * 1000;
 const GLOBAL_GUILD_ID = "global";
@@ -41,6 +44,27 @@ async function expireStale(): Promise<void> {
     await TransactionModel.insertMany(transactions);
 
     await Promise.all(userIds.map((id) => redis.deleteKey(`premium:${id}`)));
+
+    // Best-effort DM notification — failures do not affect the expiry process
+    try {
+        const client = (await import("../../client")).default;
+        for (const wallet of expired) {
+            try {
+                const locale = await resolveUserLocale(wallet.userId);
+                const user = await client.users.fetch(wallet.userId);
+                const embed = new EmbedBuilder()
+                    .setTitle(t(locale, "premium.expire.title"))
+                    .setDescription(t(locale, "premium.expire.notice", { tier: String(wallet.premiumTier).toUpperCase() }))
+                    .setColor(0x95a5a6)
+                    .setTimestamp();
+                await user.send({ embeds: [embed] });
+            } catch {
+                // DM may fail if user has DMs closed — silently skip
+            }
+        }
+    } catch {
+        // Client not ready or import failed — skip DM notifications
+    }
 
     logger.info(`[premiumExpiry] Expired ${expired.length} premium subscription(s)`);
 }
