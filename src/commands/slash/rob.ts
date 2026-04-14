@@ -8,6 +8,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import QuestService from "../../services/quest/quest.service";
 
 const CONFIG_CACHE_TTL = 300;
 
@@ -124,6 +125,7 @@ export default {
                 }
                 // Set target immunity
                 await redis.setJson(immunityKey, 1, config.robImmunityDuration);
+                await QuestService.trackProgress(robberId, guildId, "rob_success").catch(() => {});
 
                 embed = new EmbedBuilder()
                     .setTitle(`💰 ${t(locale, "rob.title.success")}`)

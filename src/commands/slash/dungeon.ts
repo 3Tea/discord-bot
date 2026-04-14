@@ -24,6 +24,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import QuestService from "../../services/quest/quest.service";
 
 export const RUN_TTL = 900;
 export const COMBAT_TTL = 60;
@@ -495,6 +496,7 @@ export default {
 
             if (runEnded) {
                 await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
+                await QuestService.trackProgress(userId, guildId, "dungeon").catch(() => {});
             } else {
                 await redis.setJson(runKey, runState, RUN_TTL);
                 // Schedule timeouts for combat/merchant encounters

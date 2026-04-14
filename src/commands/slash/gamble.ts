@@ -8,6 +8,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import QuestService from "../../services/quest/quest.service";
 
 const CONFIG_CACHE_TTL = 300;
 
@@ -146,6 +147,7 @@ export default {
                             won: true,
                             payout,
                         });
+                        await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
                     }
 
                     const resultText =
@@ -181,6 +183,7 @@ export default {
                             won: result.won,
                             payout,
                         });
+                        await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
                     }
 
                     const comboText = t(locale, `gamble.slots.combo.${result.combo}`);
@@ -226,6 +229,7 @@ export default {
                             won: true,
                             payout,
                         });
+                        await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
                     }
 
                     const modeText = mode === "high" ? t(locale, "gamble.dice.high") : t(locale, "gamble.dice.low");
