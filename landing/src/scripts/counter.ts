@@ -1,9 +1,9 @@
-function animateCounter(el: Element): void {
-  const text = el.getAttribute("data-target") || el.textContent || "";
-  const suffix = text.replace(/[\d.]/g, "");
-  const target = parseFloat(text.replace(/[^\d.]/g, ""));
+function animateCounter(el: HTMLElement): void {
+  const text = el.dataset.target ?? el.textContent ?? "";
+  const suffix = text.replaceAll(/[\d.]/g, "");
+  const target = Number.parseFloat(text.replaceAll(/[^\d.]/g, ""));
 
-  if (isNaN(target)) return;
+  if (Number.isNaN(target)) return;
 
   const duration = 1500;
   const start = performance.now();
@@ -28,18 +28,28 @@ function animateCounter(el: Element): void {
   requestAnimationFrame(step);
 }
 
-const counterObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        animateCounter(entry.target);
-        counterObserver.unobserve(entry.target);
-      }
-    });
-  },
-  { threshold: 0.5 },
-);
+const prefersReducedMotion = globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const counterElements = document.querySelectorAll(".stat-value");
 
-document.querySelectorAll(".stat-value").forEach((el) => {
-  counterObserver.observe(el);
-});
+if (prefersReducedMotion) {
+  counterElements.forEach((el) => {
+    const targetText = (el as HTMLElement).dataset.target ?? el.textContent ?? "";
+    el.textContent = targetText;
+  });
+} else {
+  const counterObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.target instanceof HTMLElement) {
+          animateCounter(entry.target);
+          counterObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.5 },
+  );
+
+  counterElements.forEach((el) => {
+    counterObserver.observe(el);
+  });
+}

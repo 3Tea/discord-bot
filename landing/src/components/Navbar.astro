@@ -35,11 +35,16 @@ const inviteUrl =
       <span class="navbar-name">3AT - Endless Paradox</span>
     </a>
 
-    <button class="navbar-toggle" aria-label="Toggle menu" aria-expanded="false">
+    <button
+      class="navbar-toggle"
+      aria-label={t("nav.menuToggle")}
+      aria-expanded="false"
+      aria-controls="navbar-menu"
+    >
       <span class="hamburger"></span>
     </button>
 
-    <div class="navbar-menu">
+    <div class="navbar-menu" id="navbar-menu">
       <ul class="navbar-links">
         {navLinks.map((link) => (
           <li>
@@ -227,13 +232,88 @@ const inviteUrl =
       padding: 12px 16px;
     }
   }
+
+  :global(body.nav-open) {
+    overflow: hidden;
+  }
 </style>
 
 <script>
+  const navbar = document.querySelector(".navbar");
   const toggle = document.querySelector(".navbar-toggle");
   const menu = document.querySelector(".navbar-menu");
+  let previousFocus = null;
+
+  function getFocusableElements() {
+    if (!menu) return [];
+    return Array.from(
+      menu.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+    );
+  }
+
+  function setMenuOpen(isOpen) {
+    if (!toggle || !menu) return;
+    menu.classList.toggle("open", isOpen);
+    toggle.setAttribute("aria-expanded", String(isOpen));
+    document.body.classList.toggle("nav-open", isOpen);
+
+    if (isOpen) {
+      previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      const focusables = getFocusableElements();
+      focusables[0]?.focus();
+      return;
+    }
+
+    if (previousFocus instanceof HTMLElement) {
+      previousFocus.focus();
+    } else {
+      toggle.focus();
+    }
+  }
+
   toggle?.addEventListener("click", () => {
-    const open = menu?.classList.toggle("open");
-    toggle.setAttribute("aria-expanded", String(open));
+    const isOpen = menu?.classList.contains("open") ?? false;
+    setMenuOpen(!isOpen);
+  });
+
+  menu?.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (target.closest("a")) setMenuOpen(false);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    const isOpen = menu?.classList.contains("open") ?? false;
+    if (!isOpen) return;
+
+    if (event.key === "Escape") {
+      setMenuOpen(false);
+      return;
+    }
+
+    if (event.key === "Tab") {
+      const focusables = getFocusableElements();
+      if (focusables.length === 0) return;
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && active === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    const isOpen = menu?.classList.contains("open") ?? false;
+    if (!isOpen || !navbar) return;
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    if (!navbar.contains(target)) setMenuOpen(false);
   });
 </script>

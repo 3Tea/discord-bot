@@ -20,6 +20,8 @@ export const ui = {
     "nav.premium": "Premium",
     "nav.support": "Support",
     "nav.add": "Add to Server",
+    "nav.skip": "Skip to main content",
+    "nav.menuToggle": "Toggle navigation menu",
 
     // Hero
     "hero.subtitle": "A Discord bot packed with XP leveling, economy, voice management, manga reader, and 15-language support. Slash commands only, always up.",
@@ -157,6 +159,8 @@ export const ui = {
     "nav.premium": "Premium",
     "nav.support": "Hỗ trợ",
     "nav.add": "Thêm vào Server",
+    "nav.skip": "Bỏ qua đến nội dung chính",
+    "nav.menuToggle": "Bật hoặc tắt menu điều hướng",
 
     // Hero
     "hero.subtitle": "Bot Discord với hệ thống XP, kinh tế, quản lý voice, đọc manga, hỗ trợ 15 ngôn ngữ. Chỉ dùng slash commands, luôn hoạt động.",
