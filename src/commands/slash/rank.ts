@@ -9,6 +9,7 @@ import PremiumService from "../../services/premium/premium.service";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
+import QuestService from "../../services/quest/quest.service";
 
 export default {
     data: new SlashCommandBuilder()
@@ -88,6 +89,7 @@ export default {
                 const embed = buildRankEmbed(member, target.username, rank, globalRank, globalXP, locale, periodStats);
                 await interaction.editReply({ embeds: [embed] });
             }
+            await QuestService.trackProgress(interaction.user.id, guildId, "rank").catch(() => {});
         } catch {
             await interaction.editReply(t(locale, "rank.error"));
         }

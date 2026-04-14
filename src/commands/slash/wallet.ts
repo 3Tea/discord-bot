@@ -4,6 +4,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import QuestService from "../../services/quest/quest.service";
 import WalletService, { DailyClaimResult, getMilestoneCount } from "../../services/economy/wallet.service";
 import GlobalShopService from "../../services/economy/globalShop.service";
 import TransactionModel from "../../models/transaction.model";
@@ -106,6 +107,7 @@ async function handleView(interaction: ChatInputCommandInteraction): Promise<voi
         }
 
         await Reply.embedEdit(interaction, embed);
+        await QuestService.trackProgress(userId, interaction.guildId!, "wallet_view").catch(() => {});
     } catch {
         const locale = await resolveLocale(interaction).catch(() => "en" as const);
         await interaction.editReply(t(locale, "common.error"));
@@ -131,6 +133,7 @@ async function handleDaily(interaction: ChatInputCommandInteraction): Promise<vo
 
         const embed = formatDailyEmbed(interaction, result, locale);
         await Reply.embedEdit(interaction, embed);
+        await QuestService.trackProgress(userId, interaction.guildId!, "wallet_daily").catch(() => {});
     } catch (error) {
         const locale = await resolveLocale(interaction).catch(() => "en" as const);
         if (error instanceof Error && error.message === "DAILY_COOLDOWN") {

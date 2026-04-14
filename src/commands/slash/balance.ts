@@ -5,6 +5,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import QuestService from "../../services/quest/quest.service";
 
 function fallbackLocale(): SupportedLocale {
     return "en";
@@ -60,6 +61,7 @@ export default {
             }
 
             await Reply.embedEdit(interaction, embed);
+            await QuestService.trackProgress(interaction.user.id, interaction.guildId!, "balance").catch(() => {});
         } catch {
             const locale = await resolveLocale(interaction).catch(fallbackLocale);
             await interaction.editReply(t(locale, "common.error"));

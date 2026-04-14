@@ -11,6 +11,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import QuestService from "../../services/quest/quest.service";
 
 function currencyEmoji(type: string): string {
     return type === "gem" ? "gem" : "coin";
@@ -47,6 +48,7 @@ async function handleView(interaction: ChatInputCommandInteraction, guildId: str
 
         embed.setFooter({ text: t(locale, "shop.page_footer", { page, totalPages }) });
         await interaction.editReply({ embeds: [embed] });
+        await QuestService.trackProgress(interaction.user.id, guildId, "shop_view").catch(() => {});
     } catch {
         const locale = await resolveLocale(interaction).catch(fallbackLocale);
         await interaction.editReply(t(locale, "common.error"));
