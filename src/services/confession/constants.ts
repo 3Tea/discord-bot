@@ -15,3 +15,16 @@ export type ConfessionTag = (typeof CONFESSION_TAGS)[number];
 export function confessionCooldownRedisKey(guildId: string, userId: string): string {
     return `confession:cd:${guildId}:${userId}`;
 }
+
+export const AUDIO_CONTENT_TYPES = [
+    "audio/mpeg",
+    "audio/ogg",
+    "audio/wav",
+    "audio/mp4",
+    "audio/x-m4a",
+    "audio/webm",
+] as const;
+
+export function confessionAudioRedisKey(userId: string): string {
+    return `confession_audio:${userId}`;
+}

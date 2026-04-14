@@ -8,12 +8,19 @@ export interface IConfessionImage {
     contentType: string | null;
 }
 
+export interface IConfessionAudio {
+    url: string;
+    name: string | null;
+    contentType: string | null;
+}
+
 export interface IConfession extends Document {
     guildId: string;
     number: number;
     authorId: string;
     content: string;
     image: IConfessionImage | null;
+    audio: IConfessionAudio | null;
     isVip: boolean;
     upvotes: number;
     downvotes: number;
@@ -33,6 +40,14 @@ const confessionSchema = new Schema(
         authorId: { type: String, required: true },
         content: { type: String, required: true },
         image: {
+            type: {
+                url: { type: String, required: true },
+                name: { type: String, default: null },
+                contentType: { type: String, default: null },
+            },
+            default: null,
+        },
+        audio: {
             type: {
                 url: { type: String, required: true },
                 name: { type: String, default: null },
