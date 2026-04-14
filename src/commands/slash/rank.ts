@@ -1,4 +1,4 @@
-import { AttachmentBuilder, ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { AttachmentBuilder, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import MemberXPModel from "../../models/memberXP.model";
 import { progressToNextLevel, xpForLevel } from "../../util/xp/calculator";
@@ -22,6 +22,12 @@ export default {
                 .setDescriptionLocalizations(descriptionLocales("cmd.rank.user.desc"))
         ),
     async execute(interaction: ChatInputCommandInteraction) {
+        if (!interaction.inGuild()) {
+            const locale = await resolveLocale(interaction).catch(() => "en" as const);
+            await interaction.reply({ content: t(locale, "common.guild_only"), flags: MessageFlags.Ephemeral });
+            return;
+        }
+
         await interaction.deferReply();
 
         const locale = await resolveLocale(interaction).catch(() => "en" as const);

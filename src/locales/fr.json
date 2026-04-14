@@ -2,6 +2,7 @@
     "common.error": "Une erreur est survenue. Veuillez réessayer plus tard.",
     "common.no_permission": "Vous avez besoin de la permission Administrateur.",
     "common.unknown_subcommand": "Sous-commande inconnue.",
+    "common.guild_only": "Cette commande ne peut être utilisée que dans un serveur.",
     "balance.title": "Portefeuille de {{username}}",
     "balance.coin": "Coin",
     "balance.gem": "Gem",

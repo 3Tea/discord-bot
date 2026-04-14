@@ -229,7 +229,7 @@ export default {
         const locale = await resolveLocale(interaction).catch(fallbackLocale);
 
         if (!interaction.inGuild() || !interaction.guild) {
-            return ephemeralError(interaction, locale, "moderation.guild_only");
+            return ephemeralError(interaction, locale, "common.guild_only");
         }
 
         const sub = interaction.options.getSubcommand(true);

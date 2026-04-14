@@ -1,5 +1,5 @@
 // src/commands/slash/server-rank.ts
-import { AttachmentBuilder, ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { AttachmentBuilder, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import GuildStatsModel from "../../models/guildStats.model";
 import GuildStatsSnapshotModel from "../../models/guildStatsSnapshot.model";
@@ -31,9 +31,9 @@ export default {
         .setDescription("View this server's XP stats and ranking")
         .setDescriptionLocalizations(descriptionLocales("cmd.server-rank.desc")),
     async execute(interaction: ChatInputCommandInteraction) {
-        if (!interaction.guildId) {
+        if (!interaction.inGuild()) {
             const locale = await resolveLocale(interaction).catch(() => "en" as const);
-            return interaction.reply({ content: t(locale, "server_rank.guild_only"), ephemeral: true });
+            return interaction.reply({ content: t(locale, "common.guild_only"), flags: MessageFlags.Ephemeral });
         }
 
         await interaction.deferReply();

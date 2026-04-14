@@ -2,6 +2,7 @@
     "common.error": "Ein Fehler ist aufgetreten. Bitte versuche es später erneut.",
     "common.no_permission": "Du benötigst Administrator-Berechtigung.",
     "common.unknown_subcommand": "Unbekannter Unterbefehl.",
+    "common.guild_only": "Dieser Befehl kann nur in einem Server verwendet werden.",
     "balance.title": "Geldbeutel von {{username}}",
     "balance.coin": "Coin",
     "balance.gem": "Gem",

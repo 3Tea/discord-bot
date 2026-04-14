@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
 import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
 import SocialService from "../../services/economy/social.service";
@@ -34,6 +34,12 @@ export default {
         .addUserOption((opt) => opt.setName("user").setDescription("User to rob").setRequired(true)),
 
     async execute(interaction: ChatInputCommandInteraction) {
+        if (!interaction.inGuild()) {
+            const locale = await resolveLocale(interaction).catch(() => "en" as const);
+            await interaction.reply({ content: t(locale, "common.guild_only"), flags: MessageFlags.Ephemeral });
+            return;
+        }
+
         await interaction.deferReply();
 
         const locale = await resolveLocale(interaction).catch((): SupportedLocale => "en");

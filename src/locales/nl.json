@@ -2,6 +2,7 @@
     "common.error": "Er is een fout opgetreden. Probeer het later opnieuw.",
     "common.no_permission": "Je hebt Beheerder-rechten nodig.",
     "common.unknown_subcommand": "Onbekend subcommando.",
+    "common.guild_only": "Dit commando kan alleen in een server worden gebruikt.",
     "balance.title": "Portemonnee van {{username}}",
     "balance.coin": "Coin",
     "balance.gem": "Gem",

@@ -2,6 +2,7 @@
     "common.error": "发生错误，请稍后再试。",
     "common.no_permission": "你需要管理员权限。",
     "common.unknown_subcommand": "未知的子命令。",
+    "common.guild_only": "此命令只能在服务器中使用。",
     "balance.title": "{{username}} 的钱包",
     "balance.coin": "金币",
     "balance.gem": "宝石",

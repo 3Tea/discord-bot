@@ -2,6 +2,7 @@
     "common.error": "Có lỗi xảy ra. Vui lòng thử lại sau.",
     "common.no_permission": "Bạn cần quyền Administrator.",
     "common.unknown_subcommand": "Lệnh con không xác định.",
+    "common.guild_only": "Lệnh này chỉ có thể sử dụng trong máy chủ.",
     "balance.title": "Ví của {{username}}",
     "balance.coin": "Coin",
     "balance.gem": "Gem",

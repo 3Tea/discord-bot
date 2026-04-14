@@ -4,6 +4,7 @@ import {
     ButtonStyle,
     ChatInputCommandInteraction,
     EmbedBuilder,
+    MessageFlags,
     SlashCommandBuilder,
 } from "discord.js";
 import crypto from "node:crypto";
@@ -438,6 +439,12 @@ export default {
         .setDescriptionLocalizations(descriptionLocales("cmd.dungeon.desc")),
 
     async execute(interaction: ChatInputCommandInteraction) {
+        if (!interaction.inGuild()) {
+            const locale = await resolveLocale(interaction).catch(() => "en" as const);
+            await interaction.reply({ content: t(locale, "common.guild_only"), flags: MessageFlags.Ephemeral });
+            return;
+        }
+
         await interaction.deferReply();
 
         const locale = await resolveLocale(interaction).catch((): SupportedLocale => "en");

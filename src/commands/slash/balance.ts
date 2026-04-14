@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
 import CurrencyService from "../../services/economy/currency.service";
 import Reply from "../../util/decorator/reply";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
@@ -22,6 +22,12 @@ export default {
                 .setDescriptionLocalizations(descriptionLocales("cmd.balance.user.desc"))
         ),
     async execute(interaction: ChatInputCommandInteraction) {
+        if (!interaction.inGuild()) {
+            const locale = await resolveLocale(interaction).catch(() => "en" as const);
+            await interaction.reply({ content: t(locale, "common.guild_only"), flags: MessageFlags.Ephemeral });
+            return;
+        }
+
         await interaction.deferReply();
 
         try {

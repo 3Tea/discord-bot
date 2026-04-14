@@ -187,6 +187,11 @@ export default {
         const locale = await resolveLocale(interaction);
 
         if (subcommandGroup === "notifications") {
+            if (!interaction.inGuild()) {
+                await interaction.reply({ content: t(locale, "common.guild_only"), flags: MessageFlags.Ephemeral });
+                return;
+            }
+
             // Require ManageGuild
             if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
                 await interaction.reply({
@@ -380,6 +385,11 @@ export default {
         }
 
         if (subcommand === "server-language") {
+            if (!interaction.inGuild()) {
+                await interaction.reply({ content: t(locale, "common.guild_only"), flags: MessageFlags.Ephemeral });
+                return;
+            }
+
             const memberPerms = interaction.memberPermissions;
             if (!memberPerms?.has(PermissionFlagsBits.ManageGuild)) {
                 await interaction.reply({

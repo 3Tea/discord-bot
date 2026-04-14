@@ -2,6 +2,7 @@
     "common.error": "An error occurred. Please try again later.",
     "common.no_permission": "You need Administrator permission.",
     "common.unknown_subcommand": "Unknown subcommand.",
+    "common.guild_only": "This command can only be used in a server.",
     "balance.title": "Wallet of {{username}}",
     "balance.coin": "Coin",
     "balance.gem": "Gem",

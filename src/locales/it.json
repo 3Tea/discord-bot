@@ -2,6 +2,7 @@
     "common.error": "Si è verificato un errore. Riprova più tardi.",
     "common.no_permission": "Hai bisogno del permesso di Amministratore.",
     "common.unknown_subcommand": "Sottocomando sconosciuto.",
+    "common.guild_only": "Questo comando può essere usato solo in un server.",
     "balance.title": "Portafoglio di {{username}}",
     "balance.coin": "Coin",
     "balance.gem": "Gem",

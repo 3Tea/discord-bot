@@ -245,7 +245,7 @@ async function executeSetup(
     if (!interaction.inGuild() || !interaction.guildId) {
         await interaction.reply({
             flags: MessageFlags.Ephemeral,
-            content: t(locale, "confession.guild_only"),
+            content: t(locale, "common.guild_only"),
         });
         return;
     }
@@ -330,7 +330,7 @@ async function executeBan(
     locale: Awaited<ReturnType<typeof resolveLocale>>
 ): Promise<void> {
     if (!interaction.inGuild() || !interaction.guildId) {
-        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.guild_only") });
+        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "common.guild_only") });
         return;
     }
     if (!hasModPermission(interaction)) {
@@ -367,7 +367,7 @@ async function executeUnban(
     locale: Awaited<ReturnType<typeof resolveLocale>>
 ): Promise<void> {
     if (!interaction.inGuild() || !interaction.guildId) {
-        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.guild_only") });
+        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "common.guild_only") });
         return;
     }
     if (!hasModPermission(interaction)) {
@@ -397,7 +397,7 @@ async function executeFilterAdd(
     locale: Awaited<ReturnType<typeof resolveLocale>>
 ): Promise<void> {
     if (!interaction.inGuild() || !interaction.guildId) {
-        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.guild_only") });
+        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "common.guild_only") });
         return;
     }
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
@@ -426,7 +426,7 @@ async function executeFilterRemove(
     locale: Awaited<ReturnType<typeof resolveLocale>>
 ): Promise<void> {
     if (!interaction.inGuild() || !interaction.guildId) {
-        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.guild_only") });
+        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "common.guild_only") });
         return;
     }
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
@@ -454,7 +454,7 @@ async function executeFilterList(
     locale: Awaited<ReturnType<typeof resolveLocale>>
 ): Promise<void> {
     if (!interaction.inGuild() || !interaction.guildId) {
-        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.guild_only") });
+        await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "common.guild_only") });
         return;
     }
     if (!interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)) {
@@ -488,7 +488,7 @@ async function executeSubmit(
     if (!interaction.inGuild() || !interaction.guildId || !interaction.guild) {
         await interaction.reply({
             flags: MessageFlags.Ephemeral,
-            content: t(locale, "confession.guild_only"),
+            content: t(locale, "common.guild_only"),
         });
         return;
     }

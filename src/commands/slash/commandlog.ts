@@ -3,6 +3,8 @@ import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBu
 import CommandLogModel from "../../models/commandLog.model";
 import { DEV_USER_ID, GUILD_ID } from "../../util/config/index";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
 
 function isDevAuthorized(interaction: ChatInputCommandInteraction): boolean {
     return interaction.guildId === GUILD_ID && interaction.user.id === DEV_USER_ID;
@@ -94,6 +96,12 @@ export default {
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
+        if (!interaction.inGuild()) {
+            const locale = await resolveLocale(interaction).catch(() => "en" as const);
+            await interaction.reply({ content: t(locale, "common.guild_only"), flags: MessageFlags.Ephemeral });
+            return;
+        }
+
         if (!isDevAuthorized(interaction)) {
             await interaction.reply({ content: "No permission.", flags: MessageFlags.Ephemeral });
             return;

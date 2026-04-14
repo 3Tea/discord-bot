@@ -268,6 +268,12 @@ export default {
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
+        if (!interaction.inGuild()) {
+            const locale = await resolveLocale(interaction).catch(() => "en" as const);
+            await interaction.reply({ content: t(locale, "common.guild_only"), flags: MessageFlags.Ephemeral });
+            return;
+        }
+
         const subcommand = interaction.options.getSubcommand(true);
         const guildId = interaction.guildId!;
 
