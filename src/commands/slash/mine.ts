@@ -9,6 +9,7 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import PremiumService from "../../services/premium/premium.service";
+import QuestService from "../../services/quest/quest.service";
 
 export default {
     data: new SlashCommandBuilder()
@@ -88,6 +89,7 @@ export default {
                 .setDescription(descLines.join("\n"))
                 .setColor(MineService.getRarityColor(mineral.rarity));
 
+            await QuestService.trackProgress(userId, guildId, "mine").catch(() => {});
             return Reply.embedEdit(interaction, embed);
         } catch {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");

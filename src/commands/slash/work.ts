@@ -10,6 +10,7 @@ import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import PremiumService from "../../services/premium/premium.service";
 import { tryStarDrop } from "../../util/economy/starDrop";
+import QuestService from "../../services/quest/quest.service";
 
 const CONFIG_CACHE_TTL = 300;
 
@@ -93,6 +94,7 @@ export default {
                 .setDescription(descLines.join("\n"))
                 .setColor(0x57f287);
 
+            await QuestService.trackProgress(userId, guildId, "work").catch(() => {});
             return Reply.embedEdit(interaction, embed);
         } catch {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
