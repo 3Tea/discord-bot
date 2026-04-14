@@ -23,6 +23,7 @@ relatedCommands: ["premium", "wallet"]
 | Bonus tỉ lệ rơi star | — | +50% | +100% |
 | Bỏ qua CD confession | 50 coin | Miễn phí | Miễn phí |
 | Confession VIP | 5 gem | 5 gem | Miễn phí |
+| Confession thoại | — | 1/ngày (30 giây, 2MB) | Không giới hạn (60 giây, 5MB) |
 | Star bonus hàng ngày | — | — | +2 |
 | Huy hiệu rank card | — | ⭐ Star | 🌌 Galaxy |
 | Theme rank card | Tiêu chuẩn | Tiêu chuẩn | Galaxy độc quyền |

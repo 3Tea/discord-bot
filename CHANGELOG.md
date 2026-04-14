@@ -6,6 +6,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+
+- **Audio confession** — premium-only voice note attachment for confessions.
+  - Star tier: 1 audio/day, 30s max, 2MB. Galaxy tier: unlimited, 60s max, 5MB.
+  - Mutually exclusive with image attachment. Accepted formats: MP3, OGG, WAV, M4A, WebM.
+  - Discord renders inline audio player. `🎙️ Voice Confession` label in embed.
+  - Daily limit tracked via Redis with UTC midnight reset. Auto-refund on error.
+
 ## [5.6.0] - 2026-04-14
 
 ### Added

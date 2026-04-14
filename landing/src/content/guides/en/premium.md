@@ -23,6 +23,7 @@ relatedCommands: ["premium", "wallet"]
 | Star drop rate bonus | — | +50% | +100% |
 | Confession skip cooldown | 50 coins | Free | Free |
 | Confession VIP embed | 5 gems | 5 gems | Free |
+| Audio confession | — | 1/day (30s, 2MB) | Unlimited (60s, 5MB) |
 | Daily bonus stars | — | — | +2 |
 | Rank card badge | — | ⭐ Star | 🌌 Galaxy |
 | Rank card theme | Standard | Standard | Exclusive Galaxy |

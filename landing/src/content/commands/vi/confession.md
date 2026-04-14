@@ -25,6 +25,7 @@ description: Hệ thống confession ẩn danh với embed VIP, voting, reply th
 | `image` | Không | Ảnh đính kèm tùy chọn |
 | `vip` | Không | Confession VIP với embed vàng — tốn **5 gem** |
 | `skip_cooldown` | Không | Bỏ qua cooldown — tốn **50 coin** |
+| `audio` | Không | Ghi âm tùy chọn (chỉ premium, MP3/OGG/WAV/M4A/WebM) |
 | `tag` | Không | Danh mục: Tâm sự, Hài hước, Hỏi đáp, Chia sẻ, Khác |
 
 ## Cách sử dụng

@@ -35,7 +35,8 @@ All subcommands are guild-only. Setup and filter commands require `ManageGuild`.
 | Option | Type | Required | Description |
 |--------|------|----------|-------------|
 | `content` | String | Yes | Confession text (max 3500 chars) |
-| `image` | Attachment | No | Single image; validated by content-type prefix `image/` |
+| `image` | Attachment | No | Single image; validated by content-type prefix `image/`. Mutually exclusive with `audio`. |
+| `audio` | Attachment | No | Voice note (premium only). Mutually exclusive with `image`. Accepted: MP3, OGG, WAV, M4A, WebM. Star: 1/day, 30s, 2MB. Galaxy: unlimited, 60s, 5MB. |
 | `vip` | Boolean | No | Golden embed, costs 5 gems |
 | `skip_cooldown` | Boolean | No | Skip active cooldown, costs 50 coins |
 | `tag` | String choice | No | Category tag (see Tags section) |
@@ -49,9 +50,11 @@ Submission always defers the reply (ephemeral). Validation runs in this order:
 3. Review mode has a `reviewChannelId` configured
 4. Ban check (`ConfessionBan` with `active: true`, auto-expires if `expiresAt` is past)
 5. Keyword filter (case-insensitive substring match against `blockedKeywords`)
-6. Cooldown check (Redis TTL); if on cooldown and `skip_cooldown` not set, reject with remaining seconds
-7. Economy deductions (skip-cooldown coins first, then VIP gems)
-8. Reserve next confession number (atomic `$inc` on `lastConfessionNumber`)
+6. Image/audio mutual exclusion (cannot attach both)
+7. Audio validation (premium gate, format whitelist, size limit, daily limit)
+8. Cooldown check (Redis TTL); if on cooldown and `skip_cooldown` not set, reject with remaining seconds
+9. Economy deductions (skip-cooldown coins first, then VIP gems)
+10. Reserve next confession number (atomic `$inc` on `lastConfessionNumber`)
 
 If any economy deduction fails partway through, all prior deductions are refunded. If the send or DB save fails after deductions, a full refund is issued.
 
@@ -85,7 +88,11 @@ All economy operations use `CurrencyService` from the economy system. See [econo
 | Skip cooldown | Coin | 50 | `confession_skip_cd` | `{ action: "skip_cooldown" }` |
 | Anonymous reply (2nd+ per confession) | Coin | 5 | `confession_reply` | `{ confessionNumber }` |
 
-**Refund logic**: If VIP gem deduction fails after a successful cooldown-skip coin deduction, the coins are refunded with transaction type `confession_refund`. The same applies if the confession number reservation or channel send fails after any deduction.
+**Premium perks**: Star+ tier gets free confession cooldown skip. Galaxy tier also gets free VIP embed. See [premium system spec](../superpowers/specs/2026-04-13-premium-system-design.md).
+
+**Audio confession (premium only)**: Star tier: 1 audio/day, 30s max, 2MB. Galaxy tier: unlimited, 60s max, 5MB. Daily limit tracked via Redis key `confession_audio:{userId}` with UTC midnight TTL. Accepted formats: MP3, OGG, WAV, M4A, WebM. Audio is mutually exclusive with image. Embed shows `🎙️ Voice Confession` label. Audio limit is decremented on refund.
+
+**Refund logic**: If VIP gem deduction fails after a successful cooldown-skip coin deduction, the coins are refunded with transaction type `confession_refund`. Audio daily limit is also decremented on any refund. The same applies if the confession number reservation or channel send fails after any deduction.
 
 ## Voting System
 
@@ -196,6 +203,7 @@ Collection: `Confessions`
 | `authorId` | String | required |
 | `content` | String | required |
 | `image` | `{ url, name, contentType }` / null | null |
+| `audio` | `{ url, name, contentType }` / null | null |
 | `isVip` | Boolean | false |
 | `upvotes` | Number | 0 |
 | `downvotes` | Number | 0 |
@@ -291,6 +299,7 @@ Defined in `src/services/confession/constants.ts`:
 | Key Pattern | Value | TTL | Purpose |
 |-------------|-------|-----|---------|
 | `confession:cd:{guildId}:{userId}` | `"1"` | `cooldownMinutes * 60` seconds | Per-user submission cooldown |
+| `confession_audio:{userId}` | count (number) | Seconds until UTC midnight | Star tier daily audio counter |
 
 Cooldown is checked via both `redis.getKey()` and `redis.ttlKey()`. Remaining seconds are returned to the user when blocked. Cooldown is set after a successful submission (both instant and review modes), even if the confession has not yet been approved.
 

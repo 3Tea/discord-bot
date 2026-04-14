@@ -25,6 +25,7 @@ description: Full-featured anonymous confession system with VIP embeds, communit
 | `image` | No | Optional image attachment |
 | `vip` | No | VIP confession with gold embed — costs **5 gems** |
 | `skip_cooldown` | No | Skip active cooldown — costs **50 coins** |
+| `audio` | No | Optional voice note (premium only, MP3/OGG/WAV/M4A/WebM) |
 | `tag` | No | Category: Heartfelt, Funny, Question, Sharing, Other |
 
 ## How to Use

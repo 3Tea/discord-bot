@@ -62,6 +62,20 @@ Every published confession has **upvote** and **downvote** buttons. You can also
 - **First reply** to any confession is **free**
 - **Subsequent replies** cost **5 coins** each
 
+## Audio Confessions
+
+Audio confessions are a **premium feature** available to **Star** and **Galaxy** tier subscribers. Instead of attaching an image, you can attach a **voice note** file to your confession — image and audio are mutually exclusive.
+
+| | ⭐ Star | 🌌 Galaxy |
+|---|---------|-----------|
+| Audio confessions/day | 1 | Unlimited |
+| Max duration | 30 seconds | 60 seconds |
+| Max file size | 2 MB | 5 MB |
+
+**Accepted formats:** MP3, OGG, WAV, M4A, WebM
+
+Discord renders a built-in audio player directly in the confession embed, so listeners can play the voice note without downloading. Audio confessions display a `🎙️ Voice Confession` label on the embed.
+
 ## Commands Reference
 
 | Command | Description |

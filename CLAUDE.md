@@ -49,7 +49,7 @@ src/
     globalShopItem.model.ts # Global shop item catalog
     globalInventory.model.ts # Per-user global shop inventory
     commandLog.model.ts   # Dev-only command usage analytics
-    confession.model.ts   # Anonymous confession posts
+    confession.model.ts   # Anonymous confession posts (text + optional image or audio)
     confessionVote.model.ts # Confession up/down votes
     confessionReply.model.ts # Anonymous confession replies
     confessionBan.model.ts # Confession-banned users

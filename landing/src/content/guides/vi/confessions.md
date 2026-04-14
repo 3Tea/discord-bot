@@ -62,6 +62,20 @@ Mỗi confession đã đăng có nút **upvote** và **downvote**. Bạn cũng c
 - **Lần trả lời đầu tiên** cho mỗi confession là **miễn phí**
 - **Các lần trả lời tiếp theo** tốn **5 coin** mỗi lần
 
+## Confession Thoại
+
+Confession thoại là **tính năng premium** dành cho người dùng gói **Star** và **Galaxy**. Thay vì đính kèm hình ảnh, bạn có thể đính kèm **file ghi âm** vào confession — hình ảnh và âm thanh không thể đính kèm cùng lúc.
+
+| | ⭐ Star | 🌌 Galaxy |
+|---|---------|-----------|
+| Số lượt confession thoại/ngày | 1 | Không giới hạn |
+| Thời lượng tối đa | 30 giây | 60 giây |
+| Dung lượng tối đa | 2 MB | 5 MB |
+
+**Định dạng hỗ trợ:** MP3, OGG, WAV, M4A, WebM
+
+Discord hiển thị trình phát âm thanh trực tiếp trong embed confession, người nghe có thể phát ghi âm mà không cần tải xuống. Confession thoại hiển thị nhãn `🎙️ Voice Confession` trên embed.
+
 ## Bảng Lệnh
 
 | Lệnh | Mô Tả |
