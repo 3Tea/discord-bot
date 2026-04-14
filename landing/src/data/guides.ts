@@ -9,6 +9,7 @@ export const guideMeta: Record<string, GuideMeta> = {
   economy: { slug: "economy", label: "Economy", color: "#F1C40F", bg: "rgba(241,196,15,0.15)" },
   star: { slug: "star", label: "Star Currency", color: "#F39C12", bg: "rgba(243,156,18,0.15)" },
   premium: { slug: "premium", label: "Premium", color: "#F39C12", bg: "rgba(243,156,18,0.15)" },
+  "global-shop": { slug: "global-shop", label: "Global Shop", color: "#FFEB3B", bg: "rgba(255,235,59,0.15)" },
   xp: { slug: "xp", label: "XP & Leveling", color: "#9B59B6", bg: "rgba(155,89,182,0.15)" },
   voice: { slug: "voice", label: "Voice Channels", color: "#5865F2", bg: "rgba(88,101,242,0.15)" },
   confessions: { slug: "confessions", label: "Confessions", color: "#E67E22", bg: "rgba(230,126,34,0.15)" },

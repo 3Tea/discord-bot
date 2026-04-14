@@ -143,6 +143,24 @@ export const commands: Command[] = [
     category: "economy",
   },
   {
+    name: "premium",
+    description: "View your premium status or compare tier benefits",
+    category: "economy",
+    subcommands: ["status", "compare"],
+  },
+  {
+    name: "global-shop",
+    description: "Browse and buy exclusive items with stars",
+    category: "economy",
+    subcommands: ["view", "buy"],
+  },
+  {
+    name: "global-inventory",
+    description: "View your purchased global items",
+    category: "economy",
+    subcommands: ["view"],
+  },
+  {
     name: "moderation",
     description:
       "Staff moderation — timeout (≤28 days), remove timeout, ban, kick, and unban by user ID (requires ModerateMembers / BanMembers)",
