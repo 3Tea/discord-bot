@@ -2,7 +2,6 @@
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import Breadcrumb from "../../../components/Breadcrumb.astro";
-import LanguageSwitcher from "../../../components/LanguageSwitcher.astro";
 import RelatedCommands from "../../../components/RelatedCommands.astro";
 import { categoryMeta } from "../../../data/commands";
 import type { Category } from "../../../data/commands";
@@ -65,7 +64,6 @@ const showTranslationNotice = lang === "vi" && !altExists;
             </span>
           )}
         </div>
-        <LanguageSwitcher lang={lang as Lang} />
       </div>
       <p class="guide-description">{page.data.description}</p>
       {(page.data.permissions?.length || page.data.cooldown) && (

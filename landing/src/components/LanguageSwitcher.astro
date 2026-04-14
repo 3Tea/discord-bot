@@ -21,7 +21,11 @@ function getBasePath(path: string): string {
 
 const basePath = getBasePath(pathname);
 
+// Content detail pages ([lang]/guide/slug, [lang]/commands/slug) always need lang prefix
+const isDetailPage = basePath.startsWith("/guide/") || basePath.startsWith("/commands/");
+
 function buildHref(lang: string): string {
+  if (isDetailPage) return `/${lang}${basePath}`;
   if (lang === defaultLang) return basePath;
   return `/${lang}${basePath === "/" ? "" : basePath}`;
 }

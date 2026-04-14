@@ -29,9 +29,51 @@ relatedCommands: ["premium", "wallet"]
 
 > **Lưu ý:** Người dùng miễn phí có thể sử dụng mọi tính năng. Premium giúp mọi thứ nhanh hơn, nhiều hơn, và đẹp hơn — không bao giờ khóa nội dung.
 
+## Bảng Giá
+
+### Việt Nam
+
+| Gói | Hàng tháng | Hàng năm | Tiết kiệm |
+|-----|-----------|----------|-----------|
+| ⭐ Star | 29,000 VND | 290,000 VND | ~17% |
+| 🌌 Galaxy | 59,000 VND | 590,000 VND | ~17% |
+
+### Quốc tế
+
+| Gói | Hàng tháng | Hàng năm | Tiết kiệm |
+|-----|-----------|----------|-----------|
+| ⭐ Star | $1.99 | $19.99 | ~16% |
+| 🌌 Galaxy | $3.99 | $39.99 | ~16% |
+
+> **Gói năm** sắp ra mắt — giá hiển thị để tham khảo. Hiện tại chỉ có thanh toán hàng tháng. Bạn có thể mua bằng VND hoặc USD — cả hai đều được hỗ trợ.
+
 ## Cách Mua Premium
 
-Premium có thể mua thông qua chủ bot. Liên hệ server hỗ trợ để biết các tùy chọn mua. Sau khi kích hoạt, premium của bạn hoạt động trên **mọi server** có 3AT.
+### Thanh toán qua Ko-fi (cho mọi user)
+
+**Mua một lần** (kích hoạt thủ công):
+
+| Gói | Liên kết |
+|-----|----------|
+| ⭐ Star | [Mua Star – Tier 1](https://ko-fi.com/s/d46298013d) |
+| 🌌 Galaxy | [Mua Galaxy – Tier 2](https://ko-fi.com/s/e903c72e58) |
+
+**Đăng ký hàng tháng** (tự động gia hạn):
+
+Đăng ký tại [trang Ko-fi](https://ko-fi.com/3atendlessparadox) để tự động gia hạn mỗi tháng — không cần mua lại.
+
+### Thanh toán bằng VND
+
+> Hiện tại chưa hỗ trợ thanh toán bằng VND. Vui lòng sử dụng Ko-fi ở trên để mua premium.
+
+### Sau Khi Mua
+
+1. Chụp ảnh màn hình xác nhận đơn hàng
+2. Tham gia [Server Hỗ Trợ](https://discord.gg/JFFCsv773E)
+3. Vào kênh `#premium-support`
+4. Gửi ảnh chụp và tên Discord của bạn — chúng tôi sẽ kích hoạt premium sớm nhất
+
+Sau khi kích hoạt, premium của bạn hoạt động trên **mọi server** có 3AT.
 
 ## Quản Lý Premium
 

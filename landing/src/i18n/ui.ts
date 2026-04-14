@@ -16,6 +16,7 @@ export const ui = {
     "nav.commands": "Commands",
     "nav.guide": "Guide",
     "nav.faq": "FAQ",
+    "nav.premium": "Premium",
     "nav.support": "Support",
     "nav.add": "Add to Server",
 
@@ -139,6 +140,7 @@ export const ui = {
     "nav.commands": "Lệnh",
     "nav.guide": "Hướng dẫn",
     "nav.faq": "Câu hỏi",
+    "nav.premium": "Premium",
     "nav.support": "Hỗ trợ",
     "nav.add": "Thêm vào Server",
 

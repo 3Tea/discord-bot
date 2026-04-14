@@ -34,6 +34,10 @@ const COMMAND_TO_CATEGORY: Record<string, HelpCategoryId> = {
     rob: "economy",
     mine: "economy",
     dungeon: "economy",
+    wallet: "economy",
+    "global-shop": "economy",
+    "global-inventory": "economy",
+    premium: "economy",
     // Voice
     voice: "voice",
     // Moderation

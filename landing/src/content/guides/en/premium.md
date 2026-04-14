@@ -29,9 +29,38 @@ relatedCommands: ["premium", "wallet"]
 
 > **Note:** Free users can access every feature. Premium makes things faster, more generous, and adds exclusive cosmetics — it never locks content.
 
+## Pricing
+
+| Tier | Monthly | Annual | You Save |
+|------|---------|--------|----------|
+| ⭐ Star | $1.99 | $19.99 | ~16% |
+| 🌌 Galaxy | $3.99 | $39.99 | ~16% |
+
+> **Annual plans** are coming soon — prices shown for reference. Currently only monthly billing is available.
+
 ## How to Get Premium
 
-Premium is available through the bot owner. Contact the support server for purchasing options. Once activated, your premium works on **every server** with 3AT.
+### Payment via Ko-fi (for all users)
+
+**One-time purchase** (manual activation):
+
+| Tier | Link |
+|------|------|
+| ⭐ Star | [Buy Star – Tier 1](https://ko-fi.com/s/d46298013d) |
+| 🌌 Galaxy | [Buy Galaxy – Tier 2](https://ko-fi.com/s/e903c72e58) |
+
+**Monthly subscription** (auto-renewing):
+
+Subscribe on our [Ko-fi page](https://ko-fi.com/3atendlessparadox) for automatic monthly renewal — no need to repurchase each month.
+
+### After Purchase
+
+1. Take a screenshot of your order confirmation
+2. Join our [Support Server](https://discord.gg/JFFCsv773E)
+3. Go to the `#premium-support` channel
+4. Send your screenshot and Discord username — we'll activate your premium shortly
+
+Once activated, your premium works on **every server** with 3AT.
 
 ## Managing Your Premium
 
