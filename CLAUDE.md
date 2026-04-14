@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Discord bot "3AT - Endless Paradox" (v5.4.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
+Discord bot "3AT - Endless Paradox" (v5.6.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
 Runs on Node.js >= 24 via Gateway (WebSocket). Uses slash commands exclusively.
 
 ## Quick Reference
@@ -45,7 +45,7 @@ src/
     userEconomy.model.ts  # Per-guild currency (coin, gem, streak)
     shopItem.model.ts     # Server shop inventory
     transaction.model.ts  # Economy transaction history
-    userWallet.model.ts   # Global star wallet (cross-server)
+    userWallet.model.ts   # Global star wallet + premium subscription fields
     globalShopItem.model.ts # Global shop item catalog
     globalInventory.model.ts # Per-user global shop inventory
     commandLog.model.ts   # Dev-only command usage analytics
@@ -62,6 +62,9 @@ src/
   services/
     economy/              # Currency, pray/curse, shop, gambling, work services
       currency.service.ts # Coin/gem balance operations
+      dungeon.service.ts  # Dungeon encounter/combat logic
+      merchant.service.ts # NPC merchant shop in dungeon
+      mine.service.ts     # Mining depth/mineral logic
       pray.service.ts     # Pray/curse daily actions
       shop.service.ts     # Per-guild shop buy/sell
       gambling.service.ts # Gambling games
@@ -69,6 +72,16 @@ src/
       social.service.ts   # Social command toggles
       wallet.service.ts   # Global star wallet operations
       globalShop.service.ts # Global shop purchase flow
+    premium/              # Subscription tier system
+      premium.config.ts   # Tier definitions (free/star/galaxy) and benefit values
+      premium.service.ts  # CRUD, status lookup, Redis caching (5min TTL)
+      premiumExpiry.ts    # Background job: expires stale subscriptions every 10min
+    confession/           # Confession system service
+      confession.service.ts # Submit, vote, reply logic
+    notification/         # Welcome/goodbye/boost notifications
+      notificationService.ts  # Config lookup + send logic
+      notificationEmbeds.ts   # Embed builders for notification types
+    commandLog.service.ts # Buffered command usage analytics
   connector/
     mongo/index.ts        # MongoDB connection
     redis/index.ts        # RedisService singleton class
@@ -114,6 +127,12 @@ src/
       reader.ts         # Thread-based manga page reader
     help/               # Help command utilities
       commandCategories.ts # Command → help category mapping
+    economy/            # Economy utilities
+      starDrop.ts       # Star drop chance with premium multiplier
+      activityReward.ts # XP→coin activity rewards
+    voice/              # Voice system utilities
+      helpers.ts        # Voice channel helper functions
+      kick.ts           # Voice kick logic
   types/common/discord.d.ts  # Client type augmentation (commands, buttons)
 ```
 
@@ -192,7 +211,7 @@ export default {
 - **After `deferReply()`**: Use `editReply()` only — never `reply()` again
 - **Always `await`** all interaction methods: `reply()`, `deferReply()`, `editReply()`, `followUp()`
 - **Error responses**: Check `interaction.replied || interaction.deferred` before choosing `reply()` vs `editReply()`
-- **Ephemeral**: Set on first response — cannot change after. Use `{ ephemeral: true }` for error messages
+- **Ephemeral**: Set on first response — cannot change after. Use `{ flags: MessageFlags.Ephemeral }` for error messages
 
 ### Types — MUST use
 
@@ -217,7 +236,7 @@ export default {
 
 ### Intents
 
-Current: `Guilds`, `GuildMessages`, `GuildVoiceStates`. Add intents in `src/client.ts` if needed. Privileged intents (`MessageContent`, `GuildMembers`, `GuildPresences`) require Developer Portal approval.
+Current: `Guilds`, `GuildMessages`, `GuildVoiceStates`, `GuildMessageReactions`. Add intents in `src/client.ts` if needed. Privileged intents (`MessageContent`, `GuildMembers`, `GuildPresences`) require Developer Portal approval.
 
 ## TypeScript v5 Rules
 
@@ -298,7 +317,7 @@ Current: `Guilds`, `GuildMessages`, `GuildVoiceStates`. Add intents in `src/clie
 ### Patterns
 
 - **One export per file**: Commands, buttons, events each export one `default`
-- **Reply utility**: Use `Reply.embed()` / `Reply.embedButtons()` — auto-adds footer
+- **Reply utility**: Use `Reply.embed()` / `Reply.embedButtons()` / `Reply.embedEdit()` — auto-adds footer
 - **Config**: All env vars in `src/util/config/index.ts` — never read `process.env` directly in commands
 - **Redis caching**: Use `redis.setJson(key, value, ttlSeconds)` / `redis.getJson(key)` — default TTL 120s
 - **Rate limiting**: Use `redis.ttlKey(key)` to check cooldown before action
@@ -358,6 +377,7 @@ const locale = await resolveGuildLocale(guildId);
 | `voice.*` | Voice system | `voice.locked`, `voice.panel.title` |
 | `rank.*` / `leaderboard.*` | XP system | `rank.level_up`, `leaderboard.empty` |
 | `btn.*` | Shared button labels | `btn.homepage`, `btn.report_bug` |
+| `premium.*` | Premium system | `premium.status.title`, `premium.compare.yes` |
 
 ### Rules — MUST follow
 
@@ -442,9 +462,19 @@ Redis `setKeyNX` for atomic idempotency; `setKey` for cooldowns. Both keys clean
 
 `/economy set-coin|add-coin|set-gem|add-gem` — requires Administrator permission.
 
+## Premium Subscription System
+
+Two paid tiers (**Star**, **Galaxy**) on `UserWallet` model. `PremiumService.getConfig(userId)` returns a `TierConfig` with benefit values (cooldowns, limits, multipliers, flags). All premium-dependent code reads from this config — falls back to free-tier defaults for non-subscribers. Background job expires stale subscriptions every 10min. See [docs/steering/premium-system.md](docs/steering/premium-system.md) for full details.
+
+### Background Jobs
+
+- **Premium expiry**: `startPremiumExpiry()` in `src/bin/www.ts` — runs every 10min, clears expired subscriptions, DMs users, logs `premium_expire` transaction
+- **Guild stats aggregator**: `startGuildStatsAggregator()` — runs every 10min, aggregates GuildStats
+- **Command log flusher**: `CommandLogService` — flushes buffered writes every 10s or at 50-entry threshold
+
 ## Manga System
 
-Shared handler pattern: `mangaCommand(source)` in `src/util/manga/handler.ts` generates slash commands from `MangaSource` config in `src/util/manga/sources.ts`. Each source file in `commands/slash/` is a one-liner: `export default mangaCommand(MANGA_SOURCES.key)`. Sources with `supportsRandom: false` only get the `read` subcommand. Star charge gate (3 free/day UTC reset, then 1 star via `WalletService.deductStar`) with refund on error is built into the handler.
+Shared handler pattern: `mangaCommand(source)` in `src/util/manga/handler.ts` generates slash commands from `MangaSource` config in `src/util/manga/sources.ts`. Each source file in `commands/slash/` is a one-liner: `export default mangaCommand(MANGA_SOURCES.key)`. Sources with `supportsRandom: false` only get the `read` subcommand. Star charge gate (free uses/day from premium tier config, then 1 star via `WalletService.deductStar`) with refund on error is built into the handler. Max pages also tier-dependent.
 
 ## Database
 
@@ -455,7 +485,7 @@ Shared handler pattern: `mangaCommand(source)` in `src/util/manga/handler.ts` ge
 - Error handler checks `MongoServerError` (not `MongoError`)
 - Timestamps auto-managed (`createdAt`, `updatedAt`)
 - Key indexes: `MemberXP(guildId, xp DESC)`, `XPSnapshot(userId, guildId, period, periodKey)`
-- **Transaction model two-place edit**: Adding a `TransactionType` requires updating BOTH the TypeScript union (line ~3) AND the schema `enum` array (line ~44) in `transaction.model.ts` — missing either causes runtime errors TypeScript won't catch
+- **Transaction model two-place edit**: Adding a `TransactionType` requires updating BOTH the TypeScript union (line ~3) AND the schema `enum` array (line ~44) in `transaction.model.ts` — missing either causes runtime errors TypeScript won't catch. Current premium types: `premium_activate`, `premium_extend`, `premium_upgrade`, `premium_downgrade`, `premium_expire`, `premium_revoke`
 
 ### Redis (ioredis)
 
@@ -463,7 +493,7 @@ Shared handler pattern: `mangaCommand(source)` in `src/util/manga/handler.ts` ge
 - Methods: `setJson`, `getJson`, `deleteKey`, `ttlKey`, `flushdb`
 - `setKeyNX(key, value, ttl)` — atomic set-if-not-exists (uses `SET NX EX`), returns `boolean`
 - No native `incr` — for counters use `getJson`/`setJson`: `const n = await redis.getJson(key) as number | null; await redis.setJson(key, (n ?? 0) + 1, ttl);`
-- Used for: image cache (10min TTL), voice channel ownership (12hr TTL), rate limiting (120s default), locale preferences (30-day TTL), XP anti-spam cooldowns, manga free-use counter (UTC-midnight TTL)
+- Used for: image cache (10min TTL), voice channel ownership (12hr TTL), rate limiting (120s default), locale preferences (30-day TTL), XP anti-spam cooldowns, manga free-use counter (UTC-midnight TTL), premium status cache (5min TTL)
 
 ## Environment
 
@@ -497,6 +527,7 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/mine-system.md](docs/steering/mine-system.md) | Mining mini-game: minerals, depth progression, checkpoints, collapse risk, star drops |
 | [docs/steering/dungeon-system.md](docs/steering/dungeon-system.md) | Dungeon mini-game: multi-encounter runs, combat, NPC merchant, buffs, traps, floor progression |
 | [docs/steering/command-logging.md](docs/steering/command-logging.md) | Dev-only analytics: command stats, user/command history, buffered writes |
+| [docs/steering/premium-system.md](docs/steering/premium-system.md) | Premium tiers (Star/Galaxy): benefits, integration points, caching, expiry, admin commands |
 
 ## Changelog & release notes
 

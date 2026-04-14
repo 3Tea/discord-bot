@@ -2,7 +2,7 @@
 
 ## Overview
 
-Static landing site for the 3AT Discord bot. Built with Astro 6, TypeScript strict, LightningCSS. Generates ~68 static pages.
+Static landing site for the 3AT Discord bot. Built with Astro 6, TypeScript strict, LightningCSS. Generates ~115 static pages.
 
 ## Quick Reference
 
@@ -27,6 +27,7 @@ landing/src/
       HomePage.astro
       CommandsPage.astro
       GuidePage.astro
+      LegalPage.astro
     Navbar.astro        # Global nav with LanguageSwitcher
     Footer.astro
     Hero.astro          # Homepage sections — all accept lang prop
@@ -47,9 +48,9 @@ landing/src/
       commands/[...slug].astro
       guide/[...slug].astro
   content/
-    commands/{lang}/    # 25 command guides per language
-    guides/{lang}/      # 5 user guides per language
-    pages/en/           # Legal pages (EN only)
+    commands/{lang}/    # 38 command guides per language
+    guides/{lang}/      # 14 user guides per language
+    pages/{lang}/       # Legal pages (EN + VI)
   data/
     commands.ts         # Command metadata (names, categories, colors)
     features.ts         # Feature icons + keys (text in ui.ts)
