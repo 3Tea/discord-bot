@@ -6,6 +6,45 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [5.6.0] - 2026-04-14
+
+### Added
+
+- **Premium subscription system** — two-tier premium (Star ⭐ + Galaxy 🌌) with per-user global benefits.
+  - **Star tier**: 10 manga free uses/day (vs 3), 70 max pages (vs 35), halved cooldowns (work 2h, fish 30m, mine 1h, dungeon 30m), +50% star drop rate, free confession skip cooldown, Star badge on rank card.
+  - **Galaxy tier**: Unlimited manga uses, 100 max pages, fastest cooldowns (work 1h, fish 15m, mine 30m, dungeon 15m), +100% star drop rate, free confession skip CD + VIP, +2 daily bonus stars, exclusive Galaxy badge + rank card theme.
+  - Admin commands: `/premium grant`, `/premium revoke`, `/premium lookup` (bot owner only).
+  - User commands: `/premium status`, `/premium compare`.
+  - Premium expiry cron (10-minute interval) with DM notification on expiry.
+  - Redis-cached premium status (5-minute TTL) for performance.
+  - Supports flexible duration: 7d, 30d, 90d, 365d, lifetime.
+- **Galaxy rank card theme** — exclusive visual for Galaxy tier: gold-to-purple accent stripe, gold/cyan stat accents, golden glow border.
+- **Premium badge on rank card** — Star (⭐) or Galaxy (🌌) badge rendered below rank badges.
+- **Landing — Star Currency guide** — comprehensive guide covering all star earning methods (daily claim, streaks, star drops, milestones) and spending (manga, global shop).
+- **Landing — Premium guide** — tier comparison, pricing (USD + VND), Ko-fi purchase links, after-purchase instructions with support server invite.
+- **Landing — Global Shop guide** — item types, purchasing flow, inventory management.
+- **Landing — Missing command pages** — added `/premium`, `/global-shop`, `/global-inventory` command pages (EN + VI).
+- **Landing — Manga source pages** — added `/hentai2read` and `/simply-hentai` command pages (EN + VI).
+- **Landing — Navbar** — added Premium link to navigation.
+- **`/help`** — added wallet, global-shop, global-inventory, premium to help categories.
+
+### Fixed
+
+- **LanguageSwitcher** — fixed broken URLs on guide/command detail pages (EN link was generating `/guide/slug` instead of `/en/guide/slug`). Removed duplicate switcher from detail page headers.
+- **Manga error message** — replaced misleading `manga.premium_only` with new `manga.load_failed` i18n key for API errors.
+- **Canvas rendering** — `drawPremiumBadge` now resets `textBaseline`/`textAlign` to prevent text corruption in subsequent renders.
+- **Premium command** — localized hardcoded "Lifetime" string in grant response.
+
+### Changed
+
+- **Manga handler** — free daily uses and max pages now driven by premium tier config instead of hardcoded constants.
+- **Cooldowns** — work, fish, mine, dungeon cooldowns now tier-aware. Work/fish use `Math.min(guildConfig, tierConfig)` to respect server settings.
+- **Star drops** — drop rate multiplied by premium tier multiplier (1.0×/1.5×/2.0×), capped at 1.0.
+- **Confession** — skip cooldown free for Star+, VIP embed free for Galaxy.
+- **Wallet daily** — Galaxy tier receives +2 bonus stars per daily claim.
+- **Economy guide** — star section simplified with link to dedicated Star guide.
+- **Manga guide** — updated from 6 to 8 sources, added star cost section.
+
 ## [5.5.0] - 2026-04-12
 
 ### Added
