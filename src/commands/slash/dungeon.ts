@@ -25,6 +25,7 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import QuestService from "../../services/quest/quest.service";
+import EconomyAdminService from "../../services/economy/economyAdmin.service";
 
 export const RUN_TTL = 900;
 export const COMBAT_TTL = 60;
@@ -449,6 +450,12 @@ export default {
         await interaction.deferReply();
 
         const locale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
+
+        if (await EconomyAdminService.isFrozen(interaction.user.id, interaction.guildId!)) {
+            await interaction.editReply(t(locale, "common.frozen"));
+            return;
+        }
+
         const guildId = interaction.guildId ?? "";
         const userId = interaction.user.id;
 

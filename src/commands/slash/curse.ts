@@ -7,6 +7,7 @@ import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import QuestService from "../../services/quest/quest.service";
+import EconomyAdminService from "../../services/economy/economyAdmin.service";
 
 function fallbackLocale(): SupportedLocale {
     return "en";
@@ -57,6 +58,12 @@ export default {
 
         try {
             const locale = await resolveLocale(interaction);
+
+            if (await EconomyAdminService.isFrozen(interaction.user.id, interaction.guildId!)) {
+                await interaction.editReply(t(locale, "common.frozen"));
+                return;
+            }
+
             const targetUser = interaction.options.getUser("target");
             const guildId = interaction.guildId!;
             const userId = interaction.user.id;

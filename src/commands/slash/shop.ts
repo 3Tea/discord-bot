@@ -12,6 +12,7 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import QuestService from "../../services/quest/quest.service";
+import EconomyAdminService from "../../services/economy/economyAdmin.service";
 
 function currencyEmoji(type: string): string {
     return type === "gem" ? "gem" : "coin";
@@ -66,6 +67,12 @@ async function handleBuy(interaction: ChatInputCommandInteraction, guildId: stri
     await interaction.deferReply();
     try {
         const locale = await resolveLocale(interaction);
+
+        if (await EconomyAdminService.isFrozen(interaction.user.id, guildId)) {
+            await interaction.editReply(t(locale, "common.frozen"));
+            return;
+        }
+
         const itemId = interaction.options.getString("item-id", true);
         const result = await ShopService.buyItem(interaction.user.id, guildId, itemId, interaction.guild!);
 

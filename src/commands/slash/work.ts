@@ -8,6 +8,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import EconomyAdminService from "../../services/economy/economyAdmin.service";
 import PremiumService from "../../services/premium/premium.service";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import QuestService from "../../services/quest/quest.service";
@@ -45,6 +46,12 @@ export default {
         await interaction.deferReply();
 
         const locale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
+
+        if (await EconomyAdminService.isFrozen(interaction.user.id, interaction.guildId!)) {
+            await interaction.editReply(t(locale, "common.frozen"));
+            return;
+        }
+
         const guildId = interaction.guildId!;
         const userId = interaction.user.id;
 
