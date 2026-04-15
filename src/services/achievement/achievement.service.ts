@@ -60,7 +60,7 @@ export async function fetchUserStats(userId: string, guildId: string): Promise<U
         UserWalletModel.findOne({ userId }).lean(),
         UserQuestModel.findOne({ userId }).sort({ date: -1 }).lean(),
         TransactionModel.aggregate<TypeCount>([
-            { $match: { userId, type: { $in: [...COUNTED_TYPES] } } },
+            { $match: { userId, guildId, type: { $in: [...COUNTED_TYPES] } } },
             { $group: { _id: "$type", count: { $sum: 1 } } },
         ]),
     ]);
@@ -107,15 +107,29 @@ export async function checkAndUnlock(userId: string, guildId: string): Promise<C
     // Step 1: Fetch stats (uses cache if available)
     const stats = await fetchUserStats(userId, guildId);
 
-    // Step 2: Fetch already-unlocked achievement IDs
-    const unlockedDocs = await UserAchievementModel
-        .find({ userId, guildId })
-        .select("achievementId unlockedAt")
-        .lean();
-
-    const unlockedMap = new Map<string, Date>(
-        unlockedDocs.map((doc) => [doc.achievementId, doc.unlockedAt])
-    );
+    // Step 2: Fetch already-unlocked achievement IDs (cache-first)
+    const cachedUnlocked = await redis.getJson(unlockedKey(guildId, userId));
+    let unlockedMap: Map<string, Date>;
+    if (cachedUnlocked) {
+        unlockedMap = new Map(
+            Object.entries(cachedUnlocked as Record<string, string>).map(
+                ([k, v]) => [k, new Date(v)]
+            )
+        );
+    } else {
+        const unlockedDocs = await UserAchievementModel
+            .find({ userId, guildId })
+            .select("achievementId unlockedAt")
+            .lean();
+        unlockedMap = new Map<string, Date>(
+            unlockedDocs.map((doc) => [doc.achievementId, doc.unlockedAt])
+        );
+        await redis.setJson(
+            unlockedKey(guildId, userId),
+            Object.fromEntries(unlockedMap),
+            60
+        );
+    }
 
     // Step 3: Find newly qualifying achievements
     const newUnlockDefs: AchievementDef[] = [];
@@ -125,22 +139,44 @@ export async function checkAndUnlock(userId: string, guildId: string): Promise<C
         }
     }
 
-    // Step 4: Persist new unlocks
+    // Step 4: Persist new unlocks (upsert to avoid duplicates in race conditions)
+    const actuallyUnlockedDefs: AchievementDef[] = [];
     if (newUnlockDefs.length > 0) {
         const now = new Date();
-        await UserAchievementModel.insertMany(
+        const bulkResult = await UserAchievementModel.bulkWrite(
             newUnlockDefs.map((def) => ({
-                userId,
-                guildId,
-                achievementId: def.id,
-                unlockedAt: now,
-                rewardPaid: true,
+                updateOne: {
+                    filter: { userId, guildId, achievementId: def.id },
+                    update: {
+                        $setOnInsert: {
+                            userId,
+                            guildId,
+                            achievementId: def.id,
+                            unlockedAt: now,
+                            rewardPaid: true,
+                        },
+                    },
+                    upsert: true,
+                },
             })),
             { ordered: false }
         );
 
-        // Step 5: Pay rewards for each new unlock
+        // Build set of achievement IDs that were actually inserted (not already present)
+        const actuallyInserted = new Set<string>();
+        if (bulkResult.upsertedCount > 0) {
+            for (let i = 0; i < newUnlockDefs.length; i++) {
+                if (bulkResult.upsertedIds[i] !== undefined) {
+                    actuallyInserted.add(newUnlockDefs[i].id);
+                }
+            }
+        }
+
+        // Step 5: Pay rewards only for achievements actually inserted this run
         for (const def of newUnlockDefs) {
+            if (!actuallyInserted.has(def.id)) continue;
+
+            actuallyUnlockedDefs.push(def);
             const meta: Record<string, unknown> = {
                 achievementId: def.id,
                 achievementName: def.nameKey,
@@ -191,7 +227,7 @@ export async function checkAndUnlock(userId: string, guildId: string): Promise<C
         return { def, unlocked: false, progress };
     });
 
-    return { all, newUnlocks: newUnlockDefs, stats };
+    return { all, newUnlocks: actuallyUnlockedDefs, stats };
 }
 
 // ── 3. getUnlockedCount ──────────────────────────────────────────────────────

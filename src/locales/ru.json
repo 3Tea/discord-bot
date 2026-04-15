@@ -913,6 +913,7 @@
     "profile.voice": "{{time}} голос",
     "profile.reactions": "{{total}} реакций",
     "profile.member_since": "Участник с {{date}}",
+    "profile.achievements": "🏆 Достижения",
     "profile.no_data": "Данных пока нет. Начни использовать команды, чтобы создать свой профиль!",
     "cmd.achievements.desc": "Посмотреть свои достижения и прогресс",
     "achievement.title": "Достижения — {{username}} ({{unlocked}}/{{total}})",

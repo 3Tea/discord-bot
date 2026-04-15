@@ -104,33 +104,37 @@ interface ActivityStats {
     reactionCount: number;
 }
 
-function drawActivityRow(ctx: Ctx2D, actColor: string, contentX: number, contentW: number, actY: number, stats: ActivityStats): void {
-    const activities = [
-        { label: `${stats.messageCount.toLocaleString()} MSG`, color: actColor },
-        { label: `${formatVoice(stats.voiceMinutes)} VOICE`, color: actColor },
-        { label: `${stats.reactionCount.toLocaleString()} REACT`, color: actColor },
+interface ActivityRowParams {
+    ctx: Ctx2D;
+    actColor: string;
+    achColor: string;
+    contentX: number;
+    contentW: number;
+    actY: number;
+    stats: ActivityStats;
+    achievementCount?: { unlocked: number; total: number };
+}
+
+function drawActivityRow(p: ActivityRowParams): void {
+    const items: Array<{ label: string; color: string }> = [
+        { label: `${p.stats.messageCount.toLocaleString()} MSG`, color: p.actColor },
+        { label: `${formatVoice(p.stats.voiceMinutes)} VOICE`, color: p.actColor },
+        { label: `${p.stats.reactionCount.toLocaleString()} REACT`, color: p.actColor },
     ];
-    const segW = contentW / activities.length;
-    ctx.font = '14px "Inter Bold"';
-    for (let i = 0; i < activities.length; i++) {
-        const { label, color } = activities[i];
-        shadow(ctx, `${color}66`, 4);
-        ctx.fillStyle = color;
-        ctx.fillText(label, contentX + i * segW, actY);
-        clearShadow(ctx);
+    if (p.achievementCount) {
+        items.push({ label: `\uD83C\uDFC6 ${p.achievementCount.unlocked}/${p.achievementCount.total}`, color: p.achColor });
+    }
+    const segW = p.contentW / items.length;
+    p.ctx.font = '14px "Inter Bold"';
+    for (let i = 0; i < items.length; i++) {
+        const { label, color } = items[i];
+        shadow(p.ctx, `${color}66`, 4);
+        p.ctx.fillStyle = color;
+        p.ctx.fillText(label, p.contentX + i * segW, p.actY);
+        clearShadow(p.ctx);
     }
 }
 
-function drawAchievementRow(ctx: Ctx2D, achColor: string, contentX: number, achY: number, unlocked: number, total: number): void {
-    ctx.font = '14px "Inter Bold"';
-    ctx.fillStyle = C.muted;
-    ctx.fillText("\uD83C\uDFC6 ACHIEVEMENTS", contentX, achY);
-    shadow(ctx, `${achColor}88`, 6);
-    ctx.fillStyle = achColor;
-    ctx.font = '18px "Inter Bold"';
-    ctx.fillText(`${unlocked}/${total}`, contentX + 132, achY);
-    clearShadow(ctx);
-}
 
 function drawTextBlock(p: TextBlockParams): void {
     if (p.textAvail < 16) return;
@@ -145,15 +149,16 @@ function drawTextBlock(p: TextBlockParams): void {
 
     const ACT_Y = p.textY + 34;
 
-    if (p.achievementCount) {
-        drawAchievementRow(p.ctx, achColor, p.contentX, ACT_Y, p.achievementCount.unlocked, p.achievementCount.total);
-    } else {
-        drawActivityRow(p.ctx, actColor, p.contentX, p.contentW, ACT_Y, {
-            messageCount: p.messageCount,
-            voiceMinutes: p.voiceMinutes,
-            reactionCount: p.reactionCount,
-        });
-    }
+    drawActivityRow({
+        ctx: p.ctx,
+        actColor,
+        achColor,
+        contentX: p.contentX,
+        contentW: p.contentW,
+        actY: ACT_Y,
+        stats: { messageCount: p.messageCount, voiceMinutes: p.voiceMinutes, reactionCount: p.reactionCount },
+        achievementCount: p.achievementCount,
+    });
 }
 
 interface EconItem { label: string; value: string; color: string }

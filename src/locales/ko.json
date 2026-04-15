@@ -913,6 +913,7 @@
     "profile.voice": "{{time}} 음성",
     "profile.reactions": "{{total}}개 반응",
     "profile.member_since": "가입일: {{date}}",
+    "profile.achievements": "🏆 업적",
     "profile.no_data": "아직 데이터가 없어요. 명령어를 사용해서 프로필을 만들어 보세요!",
     "cmd.achievements.desc": "업적과 진행 상황을 확인하세요",
     "achievement.title": "업적 — {{username}} ({{unlocked}}/{{total}})",

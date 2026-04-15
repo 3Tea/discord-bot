@@ -913,6 +913,7 @@
     "profile.voice": "{{time}} voz",
     "profile.reactions": "{{total}} reações",
     "profile.member_since": "Membro desde {{date}}",
+    "profile.achievements": "🏆 Conquistas",
     "profile.no_data": "Sem dados ainda. Comece a usar os comandos para construir seu perfil!",
     "cmd.achievements.desc": "Veja suas conquistas e progresso",
     "achievement.title": "Conquistas — {{username}} ({{unlocked}}/{{total}})",

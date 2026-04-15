@@ -77,7 +77,7 @@ export function buildProfileEmbed(data: ProfileData, locale: SupportedLocale): E
             ...(achievementCount
                 ? [
                       {
-                          name: "🏆 Achievements",
+                          name: t(locale, "profile.achievements"),
                           value: `${achievementCount.unlocked}/${achievementCount.total}`,
                           inline: true,
                       },

@@ -913,6 +913,7 @@
     "profile.voice": "{{time}} thoại",
     "profile.reactions": "{{total}} cảm xúc",
     "profile.member_since": "Thành viên từ {{date}}",
+    "profile.achievements": "🏆 Thành tựu",
     "profile.no_data": "Chưa có dữ liệu. Hãy bắt đầu sử dụng các lệnh để xây dựng hồ sơ của bạn!",
     "cmd.achievements.desc": "Xem thành tựu và tiến trình của bạn",
     "achievement.title": "Thành Tựu — {{username}} ({{unlocked}}/{{total}})",

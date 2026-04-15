@@ -913,6 +913,7 @@
     "profile.voice": "{{time}} suara",
     "profile.reactions": "{{total}} reaksi",
     "profile.member_since": "Anggota sejak {{date}}",
+    "profile.achievements": "🏆 Pencapaian",
     "profile.no_data": "Belum ada data. Mulailah menggunakan perintah untuk membangun profilmu!",
     "cmd.achievements.desc": "Lihat pencapaian dan progresmu",
     "achievement.title": "Pencapaian — {{username}} ({{unlocked}}/{{total}})",

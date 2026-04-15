@@ -913,6 +913,7 @@
     "profile.voice": "{{time}} ボイス",
     "profile.reactions": "{{total}} リアクション",
     "profile.member_since": "参加日: {{date}}",
+    "profile.achievements": "🏆 実績",
     "profile.no_data": "まだデータがありません。コマンドを使い始めてプロフィールを作りましょう！",
     "cmd.achievements.desc": "実績と進捗を確認する",
     "achievement.title": "実績 — {{username}} ({{unlocked}}/{{total}})",

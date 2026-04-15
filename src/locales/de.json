@@ -913,6 +913,7 @@
     "profile.voice": "{{time}} Sprache",
     "profile.reactions": "{{total}} Reaktionen",
     "profile.member_since": "Mitglied seit {{date}}",
+    "profile.achievements": "🏆 Erfolge",
     "profile.no_data": "Noch keine Daten. Fang an, Befehle zu verwenden, um dein Profil aufzubauen!",
     "cmd.achievements.desc": "Deine Errungenschaften und Fortschritte ansehen",
     "achievement.title": "Errungenschaften — {{username}} ({{unlocked}}/{{total}})",

@@ -913,6 +913,7 @@
     "profile.voice": "{{time}} spraak",
     "profile.reactions": "{{total}} reacties",
     "profile.member_since": "Lid sinds {{date}}",
+    "profile.achievements": "🏆 Prestaties",
     "profile.no_data": "Nog geen gegevens. Begin commando's te gebruiken om je profiel op te bouwen!",
     "cmd.achievements.desc": "Bekijk je prestaties en voortgang",
     "achievement.title": "Prestaties — {{username}} ({{unlocked}}/{{total}})",

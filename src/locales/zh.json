@@ -913,6 +913,7 @@
     "profile.voice": "{{time}} 语音",
     "profile.reactions": "{{total}} 个反应",
     "profile.member_since": "加入于 {{date}}",
+    "profile.achievements": "🏆 成就",
     "profile.no_data": "暂无数据。开始使用命令来建立你的个人资料吧！",
     "cmd.achievements.desc": "查看你的成就与进度",
     "achievement.title": "成就 — {{username}} ({{unlocked}}/{{total}})",
