@@ -18,6 +18,7 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import { logger } from "../../util/log/logger.mixed";
+import AchievementService from "../../services/achievement/achievement.service";
 
 function fallbackLocale(): SupportedLocale {
     return "en";
@@ -58,7 +59,7 @@ export default {
             const memberXP = await MemberXPModel.findOne({ guildId, userId: targetUser.id });
 
             // Parallel fetch of remaining data + rank count
-            const [economy, wallet, questDoc, premiumConfig, tier, rankCount] = await Promise.all([
+            const [economy, wallet, questDoc, premiumConfig, tier, rankCount, achievementCount] = await Promise.all([
                 UserEconomyModel.findOne({ guildId, userId: targetUser.id }),
                 UserWalletModel.findOne({ userId: targetUser.id }),
                 UserQuestModel.findOne({ userId: targetUser.id }).sort({ date: -1 }).lean(),
@@ -67,6 +68,7 @@ export default {
                 memberXP
                     ? MemberXPModel.countDocuments({ guildId, xp: { $gt: memberXP.xp } })
                     : Promise.resolve(0),
+                AchievementService.getUnlockedCount(targetUser.id, guildId),
             ]);
 
             // Check if user has any data
@@ -94,6 +96,7 @@ export default {
                 questStreak: questDoc?.questStreak ?? 0,
                 member,
                 premiumBadge: premiumConfig.badge,
+                achievementCount,
             };
 
             // Route by premium tier: Star and Galaxy get canvas card
@@ -118,6 +121,7 @@ export default {
                         joinDate: member.joinedAt?.toISOString().slice(0, 10) ?? "Unknown",
                         premiumBadge: premiumConfig.badge,
                         rankCardTheme: premiumConfig.rankCardTheme,
+                        achievementCount,
                     });
                     const attachment = new AttachmentBuilder(canvasBuffer, { name: "profile.png" });
                     await interaction.editReply({ files: [attachment] });

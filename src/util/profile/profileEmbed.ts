@@ -22,12 +22,13 @@ export interface ProfileData {
     // Meta
     member: GuildMember;
     premiumBadge: string | null;
+    achievementCount?: { unlocked: number; total: number };
 }
 
 export function buildProfileEmbed(data: ProfileData, locale: SupportedLocale): EmbedBuilder {
     const {
         xp, level, messageCount, voiceMinutes, reactionCount, serverRank,
-        coin, gem, star, prayStreak, questStreak, member, premiumBadge,
+        coin, gem, star, prayStreak, questStreak, member, premiumBadge, achievementCount,
     } = data;
 
     const progress = progressToNextLevel(xp);
@@ -73,6 +74,15 @@ export function buildProfileEmbed(data: ProfileData, locale: SupportedLocale): E
                 value: `${t(locale, "profile.messages", { total: messageCount.toLocaleString() })}\n${t(locale, "profile.voice", { time: voiceStr })}\n${t(locale, "profile.reactions", { total: reactionCount.toLocaleString() })}`,
                 inline: true,
             },
+            ...(achievementCount
+                ? [
+                      {
+                          name: "🏆 Achievements",
+                          value: `${achievementCount.unlocked}/${achievementCount.total}`,
+                          inline: true,
+                      },
+                  ]
+                : []),
         )
         .setFooter({ text: t(locale, "profile.member_since", { date: joinDate }) })
         .setTimestamp();
