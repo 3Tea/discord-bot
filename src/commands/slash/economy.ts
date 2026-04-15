@@ -223,8 +223,7 @@ async function handleConfig(
                         inline: true,
                     },
                     { name: t(locale, "gambling_config.min_bet"), value: String(config.minBet), inline: true },
-                    { name: t(locale, "gambling_config.max_bet"), value: String(config.maxBet), inline: true },
-                    { name: t(locale, "gambling_config.cooldown"), value: `${config.cooldown}s`, inline: true }
+                    { name: t(locale, "gambling_config.max_bet"), value: String(config.maxBet), inline: true }
                 )
                 .setColor(0x5865f2);
         }
@@ -258,8 +257,6 @@ async function handleConfig(
                 { $setOnInsert: { guildId } },
                 { upsert: true, new: true }
             );
-            const workCdText = `${Math.floor(wConfig.workCooldown / 3600)}h ${Math.floor((wConfig.workCooldown % 3600) / 60)}m`;
-            const fishCdText = `${Math.floor(wConfig.fishCooldown / 3600)}h ${Math.floor((wConfig.fishCooldown % 3600) / 60)}m`;
             return new EmbedBuilder()
                 .setTitle(t(locale, "work_config.title"))
                 .addFields(
@@ -268,7 +265,6 @@ async function handleConfig(
                         value: wConfig.enabled ? "✅" : "❌",
                         inline: true,
                     },
-                    { name: t(locale, "work_config.work_cooldown"), value: workCdText, inline: true },
                     {
                         name: t(locale, "work_config.work_min"),
                         value: String(wConfig.workMinReward),
@@ -279,7 +275,6 @@ async function handleConfig(
                         value: String(wConfig.workMaxReward),
                         inline: true,
                     },
-                    { name: t(locale, "work_config.fish_cooldown"), value: fishCdText, inline: true },
                     {
                         name: t(locale, "work_config.fish_multiplier"),
                         value: `×${wConfig.fishRewardMultiplier}`,
@@ -318,8 +313,6 @@ async function handleConfig(
                 { $setOnInsert: { guildId } },
                 { upsert: true, new: true }
             );
-            const robCdText = `${Math.floor(sConfig.robCooldown / 3600)}h ${Math.floor((sConfig.robCooldown % 3600) / 60)}m`;
-            const immunityText = `${Math.floor(sConfig.robImmunityDuration / 3600)}h ${Math.floor((sConfig.robImmunityDuration % 3600) / 60)}m`;
             return new EmbedBuilder()
                 .setTitle(t(locale, "social_config.title"))
                 .addFields(
@@ -333,7 +326,6 @@ async function handleConfig(
                         value: String(sConfig.giftMaxAmount),
                         inline: true,
                     },
-                    { name: t(locale, "social_config.rob_cooldown"), value: robCdText, inline: true },
                     {
                         name: t(locale, "social_config.rob_success_rate"),
                         value: `${Math.round(sConfig.robSuccessRate * 100)}%`,
@@ -353,8 +345,7 @@ async function handleConfig(
                         name: t(locale, "social_config.rob_min_balance"),
                         value: String(sConfig.robMinBalance),
                         inline: true,
-                    },
-                    { name: t(locale, "social_config.rob_immunity"), value: immunityText, inline: true }
+                    }
                 )
                 .setColor(0x5865f2);
         }
@@ -1235,8 +1226,7 @@ export default {
                                 .setRequired(true)
                                 .addChoices(
                                     { name: "min-bet", value: "minBet" },
-                                    { name: "max-bet", value: "maxBet" },
-                                    { name: "cooldown", value: "cooldown" }
+                                    { name: "max-bet", value: "maxBet" }
                                 )
                         )
                         .addIntegerOption((opt) =>
@@ -1257,10 +1247,8 @@ export default {
                                 .setDescription("Setting to change")
                                 .setRequired(true)
                                 .addChoices(
-                                    { name: "work-cooldown", value: "workCooldown" },
                                     { name: "work-min-reward", value: "workMinReward" },
-                                    { name: "work-max-reward", value: "workMaxReward" },
-                                    { name: "fish-cooldown", value: "fishCooldown" }
+                                    { name: "work-max-reward", value: "workMaxReward" }
                                 )
                         )
                         .addIntegerOption((opt) =>
@@ -1282,9 +1270,7 @@ export default {
                                 .setRequired(true)
                                 .addChoices(
                                     { name: "gift-max-amount", value: "giftMaxAmount" },
-                                    { name: "rob-cooldown", value: "robCooldown" },
-                                    { name: "rob-min-balance", value: "robMinBalance" },
-                                    { name: "rob-immunity-duration", value: "robImmunityDuration" }
+                                    { name: "rob-min-balance", value: "robMinBalance" }
                                 )
                         )
                         .addIntegerOption((opt) =>
