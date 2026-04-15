@@ -2,7 +2,7 @@ import { Client, Collection } from "discord.js";
 import fs from "node:fs";
 import path from "node:path";
 
-export function loadCommands(client: Client): object[] {
+export async function loadCommands(client: Client): Promise<object[]> {
     client.commands = new Collection();
     const commandsJson: object[] = [];
 
@@ -11,7 +11,7 @@ export function loadCommands(client: Client): object[] {
 
     for (const file of files) {
         const filePath = path.join(commandsPath, file);
-        const command = require(filePath);
+        const command = await import(filePath);
 
         if ("data" in command.default && "execute" in command.default) {
             client.commands.set(command.default.data.name, command.default);

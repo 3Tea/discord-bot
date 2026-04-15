@@ -21,11 +21,13 @@ const client = new Client({
     ],
 });
 
-const commands = loadCommands(client);
-loadEvents(client);
-loadButtons(client);
-loadSelectMenus(client);
+export async function initializeClient(): Promise<void> {
+    const commands = await loadCommands(client);
+    await loadEvents(client);
+    await loadButtons(client);
+    await loadSelectMenus(client);
 
-deployCommands(commands).catch(console.error);
+    deployCommands(commands).catch(console.error);
+}
 
 export default client;

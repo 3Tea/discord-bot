@@ -2,7 +2,7 @@ import { Client, Collection } from "discord.js";
 import fs from "node:fs";
 import path from "node:path";
 
-export function loadSelectMenus(client: Client): void {
+export async function loadSelectMenus(client: Client): Promise<void> {
     client.selectMenus = new Collection();
 
     const buttonsPath = path.join(__dirname, "../buttons");
@@ -10,7 +10,7 @@ export function loadSelectMenus(client: Client): void {
 
     for (const file of files) {
         const filePath = path.join(buttonsPath, file);
-        const handler = require(filePath);
+        const handler = await import(filePath);
 
         if ("id" in handler.default && "execute" in handler.default) {
             const id: string = handler.default.id;

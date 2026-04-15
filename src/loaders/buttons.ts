@@ -2,7 +2,7 @@ import { Client, Collection } from "discord.js";
 import fs from "node:fs";
 import path from "node:path";
 
-export function loadButtons(client: Client): void {
+export async function loadButtons(client: Client): Promise<void> {
     client.buttons = new Collection();
 
     const buttonsPath = path.join(__dirname, "../buttons");
@@ -10,7 +10,7 @@ export function loadButtons(client: Client): void {
 
     for (const file of files) {
         const filePath = path.join(buttonsPath, file);
-        const button = require(filePath);
+        const button = await import(filePath);
 
         if ("id" in button.default && "execute" in button.default) {
             client.buttons.set(button.default.id, button.default);

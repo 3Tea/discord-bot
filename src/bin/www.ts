@@ -16,6 +16,10 @@ async function main(): Promise<void> {
     await initI18n();
 
     await import("../connector/mongo");
+
+    const { initializeClient } = await import("../client");
+    await initializeClient();
+
     await import("../bot");
 
     const { startGuildStatsAggregator } = await import("../util/xp/guildStatsAggregator");
