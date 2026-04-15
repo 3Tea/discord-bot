@@ -2,11 +2,14 @@ import { ActivityType, Client, Events } from "discord.js";
 
 import botInfo from "../../package.json";
 import { getNumberOfDays } from "../util/date/day";
+import EconomyLogService from "../services/economy/economyLog.service";
 
 export default {
     name: Events.ClientReady,
     once: true,
     execute(client: Client<true>) {
+        EconomyLogService.setClient(client);
+
         const guilds = client.guilds.cache.map((guild) => guild.id);
         console.log("Total guilds:", guilds.length);
 
