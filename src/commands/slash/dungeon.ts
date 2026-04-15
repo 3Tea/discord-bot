@@ -285,22 +285,18 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
 
     if (encounterType === "trap") {
         const hpLost = DungeonService.randomInRange(10, 20);
-        const balance = await CurrencyService.getBalance(userId, guildId);
-        const coinLost = Math.min(DungeonService.randomInRange(30, 60), balance.coin);
+        const coinLost = DungeonService.randomInRange(30, 60);
 
         runState.hp -= hpLost;
 
         if (runState.hp <= 0) {
             // Collapse: reset to checkpoint + additional coin loss
-            const additionalLoss = Math.min(
-                DungeonService.randomInRange(100, 200),
-                Math.max(balance.coin - coinLost, 0)
-            );
+            const additionalLoss = DungeonService.randomInRange(100, 200);
             const totalLoss = coinLost + additionalLoss;
 
             await UserEconomyModel.updateOne(
                 { userId, guildId },
-                { $inc: { coin: -totalLoss }, $set: { dungeonDepth: checkpoint } }
+                [{ $set: { coin: { $max: [{ $subtract: ["$coin", totalLoss] }, 0] }, dungeonDepth: checkpoint } }]
             );
 
             runState.floor = checkpoint;
@@ -317,7 +313,10 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
         }
 
         if (coinLost > 0) {
-            await UserEconomyModel.updateOne({ userId, guildId }, { $inc: { coin: -coinLost } });
+            await UserEconomyModel.updateOne(
+                { userId, guildId },
+                [{ $set: { coin: { $max: [{ $subtract: ["$coin", coinLost] }, 0] } } }]
+            );
         }
 
         const embed = buildTrapEmbed(locale, {

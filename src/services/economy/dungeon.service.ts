@@ -240,14 +240,13 @@ async function resolveCombatWin(userId: string, guildId: string, floor: number):
 
 async function resolveCombatLoss(userId: string, guildId: string): Promise<CombatLossResult> {
     const economy = await UserEconomyModel.findOne({ userId, guildId });
-    const userCoin = economy?.coin ?? 0;
     const checkpoint = economy?.dungeonCheckpoint ?? 1;
 
-    const coinLost = Math.min(randomInRange(100, 200), userCoin);
+    const coinLost = randomInRange(100, 200);
 
     await UserEconomyModel.updateOne(
         { userId, guildId },
-        { $inc: { coin: -coinLost }, $set: { dungeonDepth: checkpoint } }
+        [{ $set: { coin: { $max: [{ $subtract: ["$coin", coinLost] }, 0] }, dungeonDepth: checkpoint } }]
     );
 
     return {
