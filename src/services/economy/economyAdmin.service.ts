@@ -486,8 +486,9 @@ async function reverseTransaction(
     guildId: string,
     adminId: string
 ): Promise<{ original: { type: string; coinDelta: number; gemDelta: number }; reversedId: string }> {
-    const candidates = await TransactionModel.find({ guildId }).sort({ createdAt: -1 }).limit(5000).lean();
-    const matches = candidates.filter((t) => t._id.toString().slice(-6) === shortId);
+    if (!/^[a-f0-9]+$/i.test(shortId)) throw new Error("TRANSACTION_NOT_FOUND");
+    const regex = new RegExp(`${shortId}$`);
+    const matches = await TransactionModel.find({ guildId, _id: { $regex: regex } }).sort({ createdAt: -1 }).limit(5).lean();
 
     if (matches.length === 0) throw new Error("TRANSACTION_NOT_FOUND");
     if (matches.length > 1) throw new Error("AMBIGUOUS_ID");
@@ -498,16 +499,13 @@ async function reverseTransaction(
     if (nonReversibleTypes.includes(original.type)) throw new Error("NOT_REVERSIBLE");
     if (original.metadata?.reversed) throw new Error("ALREADY_REVERSED");
 
-    if (original.coinDelta !== 0) {
+    const incFields: Record<string, number> = {};
+    if (original.coinDelta !== 0) incFields.coin = -original.coinDelta;
+    if (original.gemDelta !== 0) incFields.gem = -original.gemDelta;
+    if (Object.keys(incFields).length > 0) {
         await UserEconomyModel.findOneAndUpdate(
             { userId: original.userId, guildId },
-            { $inc: { coin: -original.coinDelta } }
-        );
-    }
-    if (original.gemDelta !== 0) {
-        await UserEconomyModel.findOneAndUpdate(
-            { userId: original.userId, guildId },
-            { $inc: { gem: -original.gemDelta } }
+            { $inc: incFields }
         );
     }
 

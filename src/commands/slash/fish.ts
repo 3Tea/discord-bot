@@ -11,6 +11,7 @@ import type { SupportedLocale } from "../../util/i18n/index";
 import PremiumService from "../../services/premium/premium.service";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import QuestService from "../../services/quest/quest.service";
+import EconomyAdminService from "../../services/economy/economyAdmin.service";
 
 const CONFIG_CACHE_TTL = 300;
 
@@ -47,6 +48,11 @@ export default {
         const locale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
         const guildId = interaction.guildId!;
         const userId = interaction.user.id;
+
+        if (await EconomyAdminService.isFrozen(userId, guildId)) {
+            await interaction.editReply(t(locale, "common.frozen"));
+            return;
+        }
 
         try {
             const config = await getWorkConfig(guildId);
