@@ -93,8 +93,7 @@ async function buyItem(userId: string, guildId: string, itemId: string, guild: G
         // Rollback currency
         if (coinCost > 0)
             await CurrencyService.addCoin(userId, guildId, coinCost, "purchase", { itemId, refund: true });
-        if (gemCost > 0)
-            await CurrencyService.addGem(userId, guildId, gemCost, "purchase", { itemId, refund: true });
+        if (gemCost > 0) await CurrencyService.addGem(userId, guildId, gemCost, "purchase", { itemId, refund: true });
         // Rollback stock
         if (stockDecremented) {
             await ShopItemModel.updateOne({ _id: item._id }, { $inc: { stock: 1 } });

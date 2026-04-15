@@ -232,10 +232,9 @@ async function resolveCombatLoss(userId: string, guildId: string): Promise<Comba
 
     const coinLost = randomInRange(100, 200);
 
-    await UserEconomyModel.updateOne(
-        { userId, guildId },
-        [{ $set: { coin: { $max: [{ $subtract: ["$coin", coinLost] }, 0] }, dungeonDepth: checkpoint } }]
-    );
+    await UserEconomyModel.updateOne({ userId, guildId }, [
+        { $set: { coin: { $max: [{ $subtract: ["$coin", coinLost] }, 0] }, dungeonDepth: checkpoint } },
+    ]);
 
     return {
         coinLost,

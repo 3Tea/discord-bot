@@ -294,10 +294,9 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
             const additionalLoss = DungeonService.randomInRange(100, 200);
             const totalLoss = coinLost + additionalLoss;
 
-            await UserEconomyModel.updateOne(
-                { userId, guildId },
-                [{ $set: { coin: { $max: [{ $subtract: ["$coin", totalLoss] }, 0] }, dungeonDepth: checkpoint } }]
-            );
+            await UserEconomyModel.updateOne({ userId, guildId }, [
+                { $set: { coin: { $max: [{ $subtract: ["$coin", totalLoss] }, 0] }, dungeonDepth: checkpoint } },
+            ]);
 
             runState.floor = checkpoint;
 
@@ -313,10 +312,9 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
         }
 
         if (coinLost > 0) {
-            await UserEconomyModel.updateOne(
-                { userId, guildId },
-                [{ $set: { coin: { $max: [{ $subtract: ["$coin", coinLost] }, 0] } } }]
-            );
+            await UserEconomyModel.updateOne({ userId, guildId }, [
+                { $set: { coin: { $max: [{ $subtract: ["$coin", coinLost] }, 0] } } },
+            ]);
         }
 
         const embed = buildTrapEmbed(locale, {

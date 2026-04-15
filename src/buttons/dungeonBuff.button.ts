@@ -20,7 +20,10 @@ export default {
         const merchantState = (await redis.getJson(merchantKey)) as MerchantState | null;
         if (!merchantState) {
             const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-            await interaction.reply({ content: t(fallbackLocale, "dungeon.merchant.timeout"), flags: MessageFlags.Ephemeral });
+            await interaction.reply({
+                content: t(fallbackLocale, "dungeon.merchant.timeout"),
+                flags: MessageFlags.Ephemeral,
+            });
             return;
         }
 

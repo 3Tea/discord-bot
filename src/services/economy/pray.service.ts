@@ -35,7 +35,6 @@ const STREAK_MILESTONES = [
     { days: 30, bonusCoin: 500, bonusGem: 5 },
 ] as const;
 
-
 async function pray(userId: string, guildId: string, targetId?: string): Promise<PrayResult> {
     const now = new Date();
     const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
@@ -126,10 +125,7 @@ async function pray(userId: string, guildId: string, targetId?: string): Promise
     }
 
     // Update streak (lastPray already set atomically above)
-    await UserEconomyModel.updateOne(
-        { userId, guildId },
-        { $set: { prayStreak: newStreak, lastStreakDate: now } }
-    );
+    await UserEconomyModel.updateOne({ userId, guildId }, { $set: { prayStreak: newStreak, lastStreakDate: now } });
 
     return {
         userReward,

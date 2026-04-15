@@ -16,7 +16,10 @@ export default {
         const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
         if (!runState) {
             const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-            await interaction.reply({ content: t(fallbackLocale, "dungeon.run.timeout"), flags: MessageFlags.Ephemeral });
+            await interaction.reply({
+                content: t(fallbackLocale, "dungeon.run.timeout"),
+                flags: MessageFlags.Ephemeral,
+            });
             return;
         }
 

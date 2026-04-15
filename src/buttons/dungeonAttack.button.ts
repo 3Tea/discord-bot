@@ -132,7 +132,10 @@ export async function handleCombatAction(interaction: ButtonInteraction, action:
     const state = (await redis.getJson(combatKey)) as CombatState | null;
     if (!state) {
         const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-        await interaction.reply({ content: t(fallbackLocale, "dungeon.combat.timeout"), flags: MessageFlags.Ephemeral });
+        await interaction.reply({
+            content: t(fallbackLocale, "dungeon.combat.timeout"),
+            flags: MessageFlags.Ephemeral,
+        });
         return;
     }
 

@@ -136,9 +136,7 @@ export default {
                         });
                         robSucceeded = true;
                     } catch (deductError) {
-                        if (
-                            deductError instanceof CurrencyService.InsufficientFundsError
-                        ) {
+                        if (deductError instanceof CurrencyService.InsufficientFundsError) {
                             // Target balance changed since read — treat as escaped
                             robSucceeded = false;
                         } else {
@@ -156,9 +154,7 @@ export default {
                             if (!should) return;
                             const logEmbed = new EmbedBuilder()
                                 .setTitle("Rob Success")
-                                .setDescription(
-                                    `<@${robberId}> stole **${result.amount}** coin from <@${target.id}>`
-                                )
+                                .setDescription(`<@${robberId}> stole **${result.amount}** coin from <@${target.id}>`)
                                 .setColor(0xed4245)
                                 .setTimestamp();
                             EconomyLogService.sendLog(guildId, logEmbed);

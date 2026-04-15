@@ -1,5 +1,9 @@
 export function isSameUTCDay(d1: Date, d2: Date): boolean {
-    return d1.getUTCFullYear() === d2.getUTCFullYear() && d1.getUTCMonth() === d2.getUTCMonth() && d1.getUTCDate() === d2.getUTCDate();
+    return (
+        d1.getUTCFullYear() === d2.getUTCFullYear() &&
+        d1.getUTCMonth() === d2.getUTCMonth() &&
+        d1.getUTCDate() === d2.getUTCDate()
+    );
 }
 
 export function isConsecutiveUTCDay(prev: Date, now: Date): boolean {

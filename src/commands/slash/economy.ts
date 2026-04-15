@@ -1248,10 +1248,7 @@ export default {
                                 .setName("setting")
                                 .setDescription("Setting to change")
                                 .setRequired(true)
-                                .addChoices(
-                                    { name: "min-bet", value: "minBet" },
-                                    { name: "max-bet", value: "maxBet" }
-                                )
+                                .addChoices({ name: "min-bet", value: "minBet" }, { name: "max-bet", value: "maxBet" })
                         )
                         .addIntegerOption((opt) =>
                             opt.setName("value").setDescription("New value").setMinValue(0).setRequired(true)
