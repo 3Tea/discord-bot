@@ -7,6 +7,8 @@ export interface GuideMeta {
 }
 
 export const guideMeta: Record<string, GuideMeta> = {
+  "getting-started": { slug: "getting-started", label: "Getting Started", color: "#57F287", bg: "rgba(87,242,135,0.15)", order: 0 },
+  "admin-setup": { slug: "admin-setup", label: "Admin Setup", color: "#5865F2", bg: "rgba(88,101,242,0.15)", order: 0.5 },
   info: { slug: "info", label: "Info & Help", color: "#FAA61A", bg: "rgba(250,166,26,0.15)", order: 1 },
   settings: { slug: "settings", label: "Settings", color: "#7289DA", bg: "rgba(114,137,218,0.15)", order: 2 },
   economy: { slug: "economy", label: "Economy", color: "#F1C40F", bg: "rgba(241,196,15,0.15)", order: 3 },
