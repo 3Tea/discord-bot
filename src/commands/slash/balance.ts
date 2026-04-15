@@ -46,7 +46,7 @@ export default {
                     { name: t(locale, "balance.gem"), value: `**${balance.gem.toLocaleString()}**`, inline: true },
                     {
                         name: t(locale, "balance.pray_streak"),
-                        value: t(locale, "balance.pray_streak_value", { count: balance.prayStreak }),
+                        value: t(locale, "balance.pray_streak_value", { total: balance.prayStreak }),
                         inline: true,
                     }
                 )

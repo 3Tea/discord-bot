@@ -30,7 +30,7 @@ function stockLabel(locale: SupportedLocale, stock: number | null): string {
     if (stock === null) {
         return t(locale, "shop.stock_unlimited");
     }
-    return t(locale, "shop.stock_left", { count: stock });
+    return t(locale, "shop.stock_left", { total: stock });
 }
 
 async function handleView(interaction: ChatInputCommandInteraction): Promise<void> {

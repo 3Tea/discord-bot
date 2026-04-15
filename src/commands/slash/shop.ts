@@ -40,7 +40,7 @@ async function handleView(interaction: ChatInputCommandInteraction, guildId: str
             const stockText =
                 item.stock === null
                     ? t(locale, "shop.stock_unlimited")
-                    : t(locale, "shop.stock_left", { count: item.stock });
+                    : t(locale, "shop.stock_left", { total: item.stock });
             embed.addFields({
                 name: `${item.name} — ${item.price} ${currencyEmoji(item.currencyType)}`,
                 value: `${item.description}\nID: \`${item.itemId}\` | Stock: ${stockText}`,

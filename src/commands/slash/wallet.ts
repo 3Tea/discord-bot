@@ -71,13 +71,13 @@ async function handleView(interaction: ChatInputCommandInteraction): Promise<voi
                 },
                 {
                     name: t(locale, "wallet.daily_streak"),
-                    value: t(locale, "wallet.daily_streak_value", { count: balance.dailyStreak }),
+                    value: t(locale, "wallet.daily_streak_value", { total: balance.dailyStreak }),
                     inline: true,
                 },
                 {
                     name: t(locale, "wallet.milestones_claimed"),
                     value: t(locale, "wallet.milestones_value", {
-                        count: balance.claimedMilestones.length,
+                        claimed: balance.claimedMilestones.length,
                         total: getMilestoneCount(),
                     }),
                     inline: true,

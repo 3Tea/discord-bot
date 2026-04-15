@@ -529,7 +529,7 @@ async function handleAdmin(
                         text: t(locale, "economy.admin.history.page", {
                             current: result.page + 1,
                             total: result.totalPages,
-                            count: result.totalCount,
+                            totalCount: result.totalCount,
                         }),
                     });
                 }
@@ -699,7 +699,7 @@ async function handleAdmin(
             const confirmEmbed = new EmbedBuilder()
                 .setTitle(t(locale, "economy.admin.reset.confirm_title"))
                 .setDescription(
-                    t(locale, "economy.admin.reset.confirm_desc", { scope, target: targetLabel, count: affectedCount })
+                    t(locale, "economy.admin.reset.confirm_desc", { scope, target: targetLabel, total: affectedCount })
                 )
                 .setColor(0xfee75c);
 
@@ -735,7 +735,7 @@ async function handleAdmin(
                     .setDescription(
                         t(locale, "economy.admin.reset.success", {
                             scope,
-                            count: result.affectedCount,
+                            total: result.affectedCount,
                             snapshotId: result.snapshotId,
                         })
                     )
@@ -792,7 +792,7 @@ async function handleAdmin(
                         snapshotId,
                         scope: snapshot.scope,
                         date: snapDate,
-                        count: snapshot.data.length,
+                        total: snapshot.data.length,
                     })
                 )
                 .setColor(0xfee75c);
@@ -828,7 +828,7 @@ async function handleAdmin(
                 const successEmbed = new EmbedBuilder()
                     .setDescription(
                         t(locale, "economy.admin.rollback.success", {
-                            count: result.restoredCount,
+                            total: result.restoredCount,
                             scope: snapshot.scope,
                         })
                     )
@@ -995,7 +995,7 @@ async function handleBulk(
                 amount: amount.toLocaleString(),
                 currency: currencyLabel,
                 target: targetLabel,
-                count: eligible.length,
+                total: eligible.length,
             })
         )
         .setColor(0xfee75c);
@@ -1044,7 +1044,7 @@ async function handleBulk(
                 t(locale, successKey, {
                     amount: amount.toLocaleString(),
                     currency: currencyLabel,
-                    count: result.affectedCount,
+                    total: result.affectedCount,
                 })
             )
             .setColor(0x57f287);
@@ -1172,12 +1172,23 @@ export default {
                 .setName("config")
                 .setDescription("Manage server economy configuration")
                 .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.desc"))
-                .addSubcommand((sub) => sub.setName("reward-view").setDescription("View passive reward config"))
-                .addSubcommand((sub) => sub.setName("reward-toggle").setDescription("Enable/disable passive rewards"))
+                .addSubcommand((sub) =>
+                    sub
+                        .setName("reward-view")
+                        .setDescription("View passive reward config")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.reward-view.desc"))
+                )
+                .addSubcommand((sub) =>
+                    sub
+                        .setName("reward-toggle")
+                        .setDescription("Enable/disable passive rewards")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.reward-toggle.desc"))
+                )
                 .addSubcommand((sub) =>
                     sub
                         .setName("reward-set")
                         .setDescription("Set a reward config value")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.reward-set.desc"))
                         .addStringOption((opt) =>
                             opt
                                 .setName("setting")
@@ -1198,6 +1209,7 @@ export default {
                     sub
                         .setName("reward-milestone")
                         .setDescription("Set/remove a gem milestone (gems=0 removes)")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.reward-milestone.desc"))
                         .addIntegerOption((opt) =>
                             opt
                                 .setName("level")
@@ -1213,12 +1225,23 @@ export default {
                                 .setRequired(true)
                         )
                 )
-                .addSubcommand((sub) => sub.setName("gambling-view").setDescription("View gambling config"))
-                .addSubcommand((sub) => sub.setName("gambling-toggle").setDescription("Enable/disable gambling"))
+                .addSubcommand((sub) =>
+                    sub
+                        .setName("gambling-view")
+                        .setDescription("View gambling config")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.gambling-view.desc"))
+                )
+                .addSubcommand((sub) =>
+                    sub
+                        .setName("gambling-toggle")
+                        .setDescription("Enable/disable gambling")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.gambling-toggle.desc"))
+                )
                 .addSubcommand((sub) =>
                     sub
                         .setName("gambling-set")
                         .setDescription("Set a gambling config value")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.gambling-set.desc"))
                         .addStringOption((opt) =>
                             opt
                                 .setName("setting")
@@ -1233,14 +1256,23 @@ export default {
                             opt.setName("value").setDescription("New value").setMinValue(0).setRequired(true)
                         )
                 )
-                .addSubcommand((sub) => sub.setName("work-view").setDescription("View work & fish config"))
                 .addSubcommand((sub) =>
-                    sub.setName("work-toggle").setDescription("Enable/disable work & fish commands")
+                    sub
+                        .setName("work-view")
+                        .setDescription("View work & fish config")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.work-view.desc"))
+                )
+                .addSubcommand((sub) =>
+                    sub
+                        .setName("work-toggle")
+                        .setDescription("Enable/disable work & fish commands")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.work-toggle.desc"))
                 )
                 .addSubcommand((sub) =>
                     sub
                         .setName("work-set")
                         .setDescription("Set a work/fish config value")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.work-set.desc"))
                         .addStringOption((opt) =>
                             opt
                                 .setName("setting")
@@ -1255,14 +1287,23 @@ export default {
                             opt.setName("value").setDescription("New value").setMinValue(0).setRequired(true)
                         )
                 )
-                .addSubcommand((sub) => sub.setName("social-view").setDescription("View gift & rob config"))
                 .addSubcommand((sub) =>
-                    sub.setName("social-toggle").setDescription("Enable/disable gift & rob commands")
+                    sub
+                        .setName("social-view")
+                        .setDescription("View gift & rob config")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.social-view.desc"))
+                )
+                .addSubcommand((sub) =>
+                    sub
+                        .setName("social-toggle")
+                        .setDescription("Enable/disable gift & rob commands")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.social-toggle.desc"))
                 )
                 .addSubcommand((sub) =>
                     sub
                         .setName("social-set")
                         .setDescription("Set a social config value")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.economy.config.social-set.desc"))
                         .addStringOption((opt) =>
                             opt
                                 .setName("setting")

@@ -46,9 +46,9 @@ function formatDuration(locale: SupportedLocale, ms: number): string {
     const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
     const minutes = totalMinutes % 60;
     const parts: string[] = [];
-    if (days > 0) parts.push(t(locale, "moderation.fmt.days", { count: days }));
-    if (hours > 0) parts.push(t(locale, "moderation.fmt.hours", { count: hours }));
-    if (minutes > 0 || parts.length === 0) parts.push(t(locale, "moderation.fmt.minutes", { count: minutes }));
+    if (days > 0) parts.push(t(locale, "moderation.fmt.days", { total: days }));
+    if (hours > 0) parts.push(t(locale, "moderation.fmt.hours", { total: hours }));
+    if (minutes > 0 || parts.length === 0) parts.push(t(locale, "moderation.fmt.minutes", { total: minutes }));
     return parts.join(" ");
 }
 

@@ -39,6 +39,7 @@ export default {
             sub
                 .setName("coinflip")
                 .setDescription("Flip a coin — 50/50 chance to double your bet")
+                .setDescriptionLocalizations(descriptionLocales("cmd.gamble.coinflip.desc"))
                 .addIntegerOption((opt) =>
                     opt.setName("bet").setDescription("Amount of coin to bet").setMinValue(1).setRequired(true)
                 )
@@ -47,6 +48,7 @@ export default {
             sub
                 .setName("slots")
                 .setDescription("Spin the slot machine — match symbols to win")
+                .setDescriptionLocalizations(descriptionLocales("cmd.gamble.slots.desc"))
                 .addIntegerOption((opt) =>
                     opt.setName("bet").setDescription("Amount of coin to bet").setMinValue(1).setRequired(true)
                 )
@@ -55,6 +57,7 @@ export default {
             sub
                 .setName("dice")
                 .setDescription("Roll 2 dice — guess high or low to win")
+                .setDescriptionLocalizations(descriptionLocales("cmd.gamble.dice.desc"))
                 .addIntegerOption((opt) =>
                     opt.setName("bet").setDescription("Amount of coin to bet").setMinValue(1).setRequired(true)
                 )
