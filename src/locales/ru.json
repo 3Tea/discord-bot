@@ -909,9 +909,9 @@
     "profile.star": "{{amount}} ⭐",
     "profile.pray_streak": "Молитва: {{days}} дней",
     "profile.quest_streak": "Квест: {{days}} дней",
-    "profile.messages": "{{count}} сообщений",
+    "profile.messages": "{{total}} сообщений",
     "profile.voice": "{{time}} голос",
-    "profile.reactions": "{{count}} реакций",
+    "profile.reactions": "{{total}} реакций",
     "profile.member_since": "Участник с {{date}}",
     "profile.no_data": "Данных пока нет. Начни использовать команды, чтобы создать свой профиль!"
 }

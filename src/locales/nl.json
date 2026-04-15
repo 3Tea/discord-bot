@@ -909,9 +909,9 @@
     "profile.star": "{{amount}} ⭐",
     "profile.pray_streak": "Gebed: {{days}} dagen",
     "profile.quest_streak": "Quest: {{days}} dagen",
-    "profile.messages": "{{count}} berichten",
+    "profile.messages": "{{total}} berichten",
     "profile.voice": "{{time}} spraak",
-    "profile.reactions": "{{count}} reacties",
+    "profile.reactions": "{{total}} reacties",
     "profile.member_since": "Lid sinds {{date}}",
     "profile.no_data": "Nog geen gegevens. Begin commando's te gebruiken om je profiel op te bouwen!"
 }

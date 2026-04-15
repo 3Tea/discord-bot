@@ -909,9 +909,9 @@
     "profile.star": "{{amount}} ⭐",
     "profile.pray_streak": "Cầu nguyện: {{days}} ngày",
     "profile.quest_streak": "Nhiệm vụ: {{days}} ngày",
-    "profile.messages": "{{count}} tin nhắn",
+    "profile.messages": "{{total}} tin nhắn",
     "profile.voice": "{{time}} thoại",
-    "profile.reactions": "{{count}} cảm xúc",
+    "profile.reactions": "{{total}} cảm xúc",
     "profile.member_since": "Thành viên từ {{date}}",
     "profile.no_data": "Chưa có dữ liệu. Hãy bắt đầu sử dụng các lệnh để xây dựng hồ sơ của bạn!"
 }

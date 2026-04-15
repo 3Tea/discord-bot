@@ -909,9 +909,9 @@
     "profile.star": "{{amount}} ⭐",
     "profile.pray_streak": "Preghiera: {{days}} giorni",
     "profile.quest_streak": "Quest: {{days}} giorni",
-    "profile.messages": "{{count}} messaggi",
+    "profile.messages": "{{total}} messaggi",
     "profile.voice": "{{time}} vocale",
-    "profile.reactions": "{{count}} reazioni",
+    "profile.reactions": "{{total}} reazioni",
     "profile.member_since": "Membro dal {{date}}",
     "profile.no_data": "Nessun dato ancora. Inizia a usare i comandi per costruire il tuo profilo!"
 }

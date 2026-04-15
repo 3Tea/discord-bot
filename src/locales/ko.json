@@ -909,9 +909,9 @@
     "profile.star": "{{amount}} ⭐",
     "profile.pray_streak": "기도: {{days}}일",
     "profile.quest_streak": "퀘스트: {{days}}일",
-    "profile.messages": "{{count}}개 메시지",
+    "profile.messages": "{{total}}개 메시지",
     "profile.voice": "{{time}} 음성",
-    "profile.reactions": "{{count}}개 반응",
+    "profile.reactions": "{{total}}개 반응",
     "profile.member_since": "가입일: {{date}}",
     "profile.no_data": "아직 데이터가 없어요. 명령어를 사용해서 프로필을 만들어 보세요!"
 }

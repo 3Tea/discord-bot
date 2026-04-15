@@ -909,9 +909,9 @@
     "profile.star": "{{amount}} ⭐",
     "profile.pray_streak": "祈り: {{days}} 日",
     "profile.quest_streak": "クエスト: {{days}} 日",
-    "profile.messages": "{{count}} メッセージ",
+    "profile.messages": "{{total}} メッセージ",
     "profile.voice": "{{time}} ボイス",
-    "profile.reactions": "{{count}} リアクション",
+    "profile.reactions": "{{total}} リアクション",
     "profile.member_since": "参加日: {{date}}",
     "profile.no_data": "まだデータがありません。コマンドを使い始めてプロフィールを作りましょう！"
 }

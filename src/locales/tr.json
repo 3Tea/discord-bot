@@ -909,9 +909,9 @@
     "profile.star": "{{amount}} ⭐",
     "profile.pray_streak": "Dua: {{days}} gün",
     "profile.quest_streak": "Görev: {{days}} gün",
-    "profile.messages": "{{count}} mesaj",
+    "profile.messages": "{{total}} mesaj",
     "profile.voice": "{{time}} ses",
-    "profile.reactions": "{{count}} tepki",
+    "profile.reactions": "{{total}} tepki",
     "profile.member_since": "{{date}} tarihinden beri üye",
     "profile.no_data": "Henüz veri yok. Profilini oluşturmak için komutları kullanmaya başla!"
 }

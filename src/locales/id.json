@@ -909,9 +909,9 @@
     "profile.star": "{{amount}} ⭐",
     "profile.pray_streak": "Doa: {{days}} hari",
     "profile.quest_streak": "Misi: {{days}} hari",
-    "profile.messages": "{{count}} pesan",
+    "profile.messages": "{{total}} pesan",
     "profile.voice": "{{time}} suara",
-    "profile.reactions": "{{count}} reaksi",
+    "profile.reactions": "{{total}} reaksi",
     "profile.member_since": "Anggota sejak {{date}}",
     "profile.no_data": "Belum ada data. Mulailah menggunakan perintah untuk membangun profilmu!"
 }

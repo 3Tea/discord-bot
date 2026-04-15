@@ -909,9 +909,9 @@
     "profile.star": "{{amount}} ⭐",
     "profile.pray_streak": "祈祷: {{days}} 天",
     "profile.quest_streak": "任务: {{days}} 天",
-    "profile.messages": "{{count}} 条消息",
+    "profile.messages": "{{total}} 条消息",
     "profile.voice": "{{time}} 语音",
-    "profile.reactions": "{{count}} 个反应",
+    "profile.reactions": "{{total}} 个反应",
     "profile.member_since": "加入于 {{date}}",
     "profile.no_data": "暂无数据。开始使用命令来建立你的个人资料吧！"
 }
