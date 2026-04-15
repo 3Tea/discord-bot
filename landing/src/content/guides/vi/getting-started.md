@@ -3,7 +3,7 @@ title: Bắt Đầu
 description: Hướng dẫn nhanh về mọi thứ bot cung cấp — kiếm coin, lên cấp, hoàn thành nhiệm vụ, và khám phá.
 icon: "🚀"
 order: 0
-relatedCommands: ["pray", "curse", "balance", "work", "fish", "shop", "gamble", "rank", "leaderboard", "quest", "mine", "dungeon", "wallet", "confession", "voice"]
+relatedCommands: ["pray", "curse", "balance", "work", "fish", "shop", "gamble", "rank", "leaderboard", "quest", "mine", "dungeon", "wallet", "confession", "voice", "achievements"]
 ---
 
 ## Chào Mừng
@@ -40,6 +40,7 @@ Theo dõi thu nhập và thứ hạng trong server:
 - `/balance` — xem số coin, gem, streak cầu nguyện, và hoạt động gần nhất
 - `/rank` — xem cấp độ XP, thanh tiến độ, và thứ hạng của bạn trong server
 - `/profile` — xem thẻ hồ sơ đầy đủ gồm cấp độ, kinh tế, streak, và hoạt động trong một nơi (ảnh canvas cho người dùng premium)
+- `/achievements` — khám phá 50 thành tựu trên 10 danh mục; các mốc quan trọng tự động mở khóa phần thưởng coin, gem, và star
 
 Cả hai lệnh đều chấp nhận tùy chọn `user:@ai_do` để kiểm tra thống kê của thành viên khác.
 
@@ -161,3 +162,4 @@ Xem [Hướng dẫn Premium](/vi/guide/premium).
 | `/wallet daily` | Nhận star hàng ngày |
 | `/confession` | Đăng ẩn danh |
 | `/voice` | Điều khiển kênh thoại |
+| `/achievements` | Xem tiến độ thành tựu |

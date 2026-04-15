@@ -8,6 +8,7 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- **Achievement system** — 50 achievements across 10 categories (economy, XP, mining, dungeon, social, gambling, voice, activity, quests, stars) with tiered rewards (coin, gem, star). `/achievements` command with paginated category display. Integrated into `/profile` card. Config-driven — new achievements can be added without code changes.
 - **Profile card** — `/profile` command showing comprehensive user stats (level, economy, streaks, activity). Canvas image for premium users (Star: anime theme, Galaxy: gold glow effects), embed for free tier.
 - **Economy admin tools** — comprehensive server economy management via restructured `/economy` command.
   - Command restructured into 4 groups: `balance`, `config`, `admin`, `bulk` (breaking change: `/economy set-coin` → `/economy balance set-coin`).

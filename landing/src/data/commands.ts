@@ -189,6 +189,12 @@ export const commands: Command[] = [
     options: ["user (optional)"],
   },
   {
+    name: "achievements",
+    description: "Browse your achievements across 10 categories — paginated progress display with tiered rewards (coin, gem, star)",
+    category: "info",
+    options: ["category (optional)", "page (optional)"],
+  },
+  {
     name: "moderation",
     description:
       "Staff moderation — timeout (≤28 days), remove timeout, ban, kick, and unban by user ID (requires ModerateMembers / BanMembers)",

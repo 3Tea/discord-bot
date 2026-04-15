@@ -48,7 +48,7 @@ landing/src/
       commands/[...slug].astro
       guide/[...slug].astro
   content/
-    commands/{lang}/    # 40 command guides per language
+    commands/{lang}/    # 41 command guides per language
     guides/{lang}/      # 17 user guides per language
     pages/{lang}/       # Legal pages (EN + VI)
   data/

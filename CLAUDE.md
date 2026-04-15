@@ -63,6 +63,7 @@ src/
     economyFreeze.model.ts  # Economy freeze records (frozen users)
     economyLogConfig.model.ts # Per-guild economy log channel config
     economySnapshot.model.ts # Economy snapshots for reset rollback
+    userAchievement.model.ts # Per-user per-guild achievement unlocks
   services/
     economy/              # Currency, pray/curse, shop, gambling, work services
       currency.service.ts # Coin/gem balance operations
@@ -91,6 +92,9 @@ src/
     notification/         # Welcome/goodbye/boost notifications
       notificationService.ts  # Config lookup + send logic
       notificationEmbeds.ts   # Embed builders for notification types
+    achievement/          # Achievement system
+      achievement.config.ts # 50 achievement definitions, categories, rewards
+      achievement.service.ts # Check, unlock, stats, caching
     commandLog.service.ts # Buffered command usage analytics
   connector/
     mongo/index.ts        # MongoDB connection
@@ -550,6 +554,7 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/mine-system.md](docs/steering/mine-system.md) | Mining mini-game: minerals, depth progression, checkpoints, collapse risk, star drops |
 | [docs/steering/dungeon-system.md](docs/steering/dungeon-system.md) | Dungeon mini-game: multi-encounter runs, combat, NPC merchant, buffs, traps, floor progression |
 | [docs/steering/quest-system.md](docs/steering/quest-system.md) | Daily quests: 18 templates, deterministic generation, rewards, streaks, 14 command integrations |
+| [docs/steering/achievement-system.md](docs/steering/achievement-system.md) | Achievement system: 50 achievements across 10 categories, on-demand tracking, tiered rewards, profile integration |
 | [docs/steering/command-logging.md](docs/steering/command-logging.md) | Dev-only analytics: command stats, user/command history, buffered writes |
 | [docs/steering/premium-system.md](docs/steering/premium-system.md) | Premium tiers (Star/Galaxy): benefits, integration points, caching, expiry, admin commands |
 
