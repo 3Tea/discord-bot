@@ -17,6 +17,7 @@ const COMMAND_TO_CATEGORY: Record<string, HelpCategoryId> = {
     avatar: "general",
     trans: "general",
     profile: "general",
+    achievements: "general",
     // XP and rankings
     xp: "xp",
     rank: "xp",
