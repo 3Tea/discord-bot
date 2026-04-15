@@ -125,6 +125,7 @@ Kiếm star qua nhận hàng ngày, rơi ngẫu nhiên từ hoạt động, và 
 | `/gamble dice` | Đặt cược xúc xắc cao/thấp | `/gamble dice bet:100 mode:high` |
 | `/gift` | Gửi coin cho người dùng khác | `/gift user:@friend amount:500` |
 | `/rob` | Cố cướp coin của người khác | `/rob user:@target` |
+| `/profile` | Xem thẻ hồ sơ toàn diện của bạn | `/profile` |
 | `/mine` | Khai thác khoáng sản (thời gian chờ 2 giờ) | `/mine` |
 | `/dungeon` | Khám phá hầm ngục (thời gian chờ 1 giờ) | `/dungeon` |
 | `/wallet view` | Xem số dư star toàn cầu và mốc thành tích | `/wallet view` |

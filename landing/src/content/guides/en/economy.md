@@ -125,6 +125,7 @@ For the full breakdown, see the [Star Guide](/en/guide/star).
 | `/gamble dice` | Dice high/low bet | `/gamble dice bet:100 mode:high` |
 | `/gift` | Send coins to another user | `/gift user:@friend amount:500` |
 | `/rob` | Attempt to steal coins | `/rob user:@target` |
+| `/profile` | View your comprehensive profile card | `/profile` |
 | `/mine` | Mine for minerals (2h cooldown) | `/mine` |
 | `/dungeon` | Explore the dungeon (1h cooldown) | `/dungeon` |
 | `/wallet view` | View global star balance and milestones | `/wallet view` |

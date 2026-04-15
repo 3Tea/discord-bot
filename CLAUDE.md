@@ -143,6 +143,9 @@ src/
     voice/              # Voice system utilities
       helpers.ts        # Voice channel helper functions
       kick.ts           # Voice kick logic
+    profile/            # Profile card utilities
+      profileEmbed.ts   # Embed builder for free tier
+      canvasProfile.ts  # Canvas renderer for Star/Galaxy tier
   types/common/discord.d.ts  # Client type augmentation (commands, buttons)
 ```
 

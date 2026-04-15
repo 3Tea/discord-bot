@@ -39,6 +39,7 @@ Keep tabs on your earnings and server standing:
 
 - `/balance` — see your current coins, gems, pray streak, and last activity
 - `/rank` — view your XP level, progress bar, and where you rank in the server
+- `/profile` — view a full profile card combining level, economy, streaks, and activity in one place (canvas image for premium users)
 
 Both commands accept an optional `user:@someone` to check another member's stats.
 

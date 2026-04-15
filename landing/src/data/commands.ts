@@ -183,6 +183,12 @@ export const commands: Command[] = [
     subcommands: ["view", "claim"],
   },
   {
+    name: "profile",
+    description: "View a comprehensive profile card showing level, economy, streaks, and activity stats — canvas image for premium users",
+    category: "info",
+    options: ["user (optional)"],
+  },
+  {
     name: "moderation",
     description:
       "Staff moderation — timeout (≤28 days), remove timeout, ban, kick, and unban by user ID (requires ModerateMembers / BanMembers)",

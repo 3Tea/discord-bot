@@ -8,6 +8,7 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- **Profile card** — `/profile` command showing comprehensive user stats (level, economy, streaks, activity). Canvas image for premium users (Star: anime theme, Galaxy: gold glow effects), embed for free tier.
 - **Economy admin tools** — comprehensive server economy management via restructured `/economy` command.
   - Command restructured into 4 groups: `balance`, `config`, `admin`, `bulk` (breaking change: `/economy set-coin` → `/economy balance set-coin`).
   - Dashboard (`/economy admin dashboard`): circulation overview, 24h coin flow, source/sink breakdown, wealth distribution, week-over-week comparison, anomaly detection.

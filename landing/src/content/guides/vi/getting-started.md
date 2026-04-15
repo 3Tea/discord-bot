@@ -39,6 +39,7 @@ Theo dõi thu nhập và thứ hạng trong server:
 
 - `/balance` — xem số coin, gem, streak cầu nguyện, và hoạt động gần nhất
 - `/rank` — xem cấp độ XP, thanh tiến độ, và thứ hạng của bạn trong server
+- `/profile` — xem thẻ hồ sơ đầy đủ gồm cấp độ, kinh tế, streak, và hoạt động trong một nơi (ảnh canvas cho người dùng premium)
 
 Cả hai lệnh đều chấp nhận tùy chọn `user:@ai_do` để kiểm tra thống kê của thành viên khác.
 
