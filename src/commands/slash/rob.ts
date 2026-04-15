@@ -10,6 +10,7 @@ import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import EconomyAdminService from "../../services/economy/economyAdmin.service";
 import QuestService from "../../services/quest/quest.service";
+import EconomyLogService from "../../services/economy/economyLog.service";
 
 const CONFIG_CACHE_TTL = 300;
 
@@ -133,6 +134,15 @@ export default {
                 // Set target immunity
                 await redis.setJson(immunityKey, 1, config.robImmunityDuration);
                 await QuestService.trackProgress(robberId, guildId, "rob_success").catch(() => {});
+                EconomyLogService.shouldLog(guildId, "rob_success").then((should) => {
+                    if (!should) return;
+                    const logEmbed = new EmbedBuilder()
+                        .setTitle("Rob Success")
+                        .setDescription(`<@${robberId}> stole **${result.amount}** coin from <@${target.id}>`)
+                        .setColor(0xed4245)
+                        .setTimestamp();
+                    EconomyLogService.sendLog(guildId, logEmbed);
+                }).catch(() => {});
 
                 embed = new EmbedBuilder()
                     .setTitle(`💰 ${t(locale, "rob.title.success")}`)

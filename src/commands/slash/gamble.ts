@@ -10,6 +10,7 @@ import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import EconomyAdminService from "../../services/economy/economyAdmin.service";
 import QuestService from "../../services/quest/quest.service";
+import EconomyLogService from "../../services/economy/economyLog.service";
 
 const CONFIG_CACHE_TTL = 300;
 
@@ -155,6 +156,15 @@ export default {
                             payout,
                         });
                         await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
+                        EconomyLogService.shouldLog(guildId, "gambling_win", payout).then((should) => {
+                            if (!should) return;
+                            const logEmbed = new EmbedBuilder()
+                                .setTitle("Gambling Win")
+                                .setDescription(`<@${userId}> won **${payout.toLocaleString()}** coin on coinflip`)
+                                .setColor(0x57f287)
+                                .setTimestamp();
+                            EconomyLogService.sendLog(guildId, logEmbed);
+                        }).catch(() => {});
                     }
 
                     const resultText =
@@ -191,6 +201,15 @@ export default {
                             payout,
                         });
                         await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
+                        EconomyLogService.shouldLog(guildId, "gambling_win", payout).then((should) => {
+                            if (!should) return;
+                            const logEmbed = new EmbedBuilder()
+                                .setTitle("Gambling Win")
+                                .setDescription(`<@${userId}> won **${payout.toLocaleString()}** coin on slots`)
+                                .setColor(0x57f287)
+                                .setTimestamp();
+                            EconomyLogService.sendLog(guildId, logEmbed);
+                        }).catch(() => {});
                     }
 
                     const comboText = t(locale, `gamble.slots.combo.${result.combo}`);
@@ -237,6 +256,15 @@ export default {
                             payout,
                         });
                         await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
+                        EconomyLogService.shouldLog(guildId, "gambling_win", payout).then((should) => {
+                            if (!should) return;
+                            const logEmbed = new EmbedBuilder()
+                                .setTitle("Gambling Win")
+                                .setDescription(`<@${userId}> won **${payout.toLocaleString()}** coin on dice`)
+                                .setColor(0x57f287)
+                                .setTimestamp();
+                            EconomyLogService.sendLog(guildId, logEmbed);
+                        }).catch(() => {});
                     }
 
                     const modeText = mode === "high" ? t(locale, "gamble.dice.high") : t(locale, "gamble.dice.low");
