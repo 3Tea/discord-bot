@@ -13,6 +13,7 @@ import QuestService from "../../services/quest/quest.service";
 import EconomyLogService from "../../services/economy/economyLog.service";
 
 const CONFIG_CACHE_TTL = 300;
+const GAMBLE_COOLDOWN = 30; // seconds
 
 async function getGamblingConfig(guildId: string): Promise<IGuildGamblingConfig> {
     const cacheKey = `gambling_config:${guildId}`;
@@ -298,7 +299,7 @@ export default {
             }
 
             // Set cooldown
-            await redis.setJson(cdKey, 1, config.cooldown);
+            await redis.setJson(cdKey, 1, GAMBLE_COOLDOWN);
 
             return Reply.embedEdit(interaction, embed);
         } catch (error) {

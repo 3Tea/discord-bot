@@ -13,6 +13,8 @@ import QuestService from "../../services/quest/quest.service";
 import EconomyLogService from "../../services/economy/economyLog.service";
 
 const CONFIG_CACHE_TTL = 300;
+const ROB_COOLDOWN = 21600; // 6 hours in seconds
+const ROB_IMMUNITY = 7200; // 2 hours in seconds
 
 async function getSocialConfig(guildId: string): Promise<IGuildSocialConfig> {
     const cacheKey = `social_config:${guildId}`;
@@ -132,7 +134,7 @@ export default {
                     });
                 }
                 // Set target immunity
-                await redis.setJson(immunityKey, 1, config.robImmunityDuration);
+                await redis.setJson(immunityKey, 1, ROB_IMMUNITY);
                 await QuestService.trackProgress(robberId, guildId, "rob_success").catch(() => {});
                 EconomyLogService.shouldLog(guildId, "rob_success")
                     .then((should) => {
@@ -193,7 +195,7 @@ export default {
             }
 
             // Set robber cooldown (always, regardless of success/fail)
-            await redis.setJson(cdKey, 1, config.robCooldown);
+            await redis.setJson(cdKey, 1, ROB_COOLDOWN);
 
             return Reply.embedEdit(interaction, embed);
         } catch {

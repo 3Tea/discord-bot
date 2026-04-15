@@ -81,9 +81,8 @@ export default {
             // Pay out
             await CurrencyService.addCoin(userId, guildId, reward, "work", { reward });
 
-            // Set cooldown
-            const effectiveCooldown = Math.min(config.workCooldown, tierConfig.workCooldownMs / 1000);
-            await redis.setJson(cdKey, 1, effectiveCooldown);
+            // Set cooldown (premium tier determines duration)
+            await redis.setJson(cdKey, 1, Math.ceil(tierConfig.workCooldownMs / 1000));
 
             const gotStar = await tryStarDrop(userId, 0.04, "work");
 

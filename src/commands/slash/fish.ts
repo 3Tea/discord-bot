@@ -84,9 +84,8 @@ export default {
                 reward,
             });
 
-            // Set cooldown
-            const effectiveCooldown = Math.min(config.fishCooldown, tierConfig.fishCooldownMs / 1000);
-            await redis.setJson(cdKey, 1, effectiveCooldown);
+            // Set cooldown (premium tier determines duration)
+            await redis.setJson(cdKey, 1, Math.ceil(tierConfig.fishCooldownMs / 1000));
 
             const gotStar = await tryStarDrop(userId, 0.03, "fish");
 
