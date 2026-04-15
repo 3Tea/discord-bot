@@ -580,6 +580,7 @@
     "rob.success": "**{{robber}}** robbed **{{amount}} coin** from **{{target}}**!",
     "rob.fail": "**{{robber}}** tried to rob **{{target}}** but got caught!\nFined **{{penalty}} coin**",
     "rob.fail_broke": "**{{robber}}** tried to rob **{{target}}** but got caught!\nNo fine — you're broke!",
+    "rob.fail_escaped": "{{target}} è riuscito a scappare!",
     "rob.cooldown": "You can rob again in **{{time}}**.",
     "rob.target_poor": "**{{target}}** doesn't have enough coin to rob.",
     "rob.target_immune": "**{{target}}** was recently robbed. Try again in **{{time}}**.",

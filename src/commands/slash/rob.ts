@@ -119,45 +119,69 @@ export default {
             let embed: EmbedBuilder;
 
             if (result.success) {
+                let robSucceeded = false;
                 if (result.amount > 0) {
-                    // Deduct from target
-                    await CurrencyService.deduct(target.id, guildId, result.amount, 0, "rob", {
-                        robberId,
-                        stealPct: result.percentage,
-                        stealAmount: result.amount,
-                    });
-                    // Add to robber
-                    await CurrencyService.addCoin(robberId, guildId, result.amount, "rob", {
-                        targetId: target.id,
-                        stealPct: result.percentage,
-                        stealAmount: result.amount,
-                    });
+                    try {
+                        // Deduct from target
+                        await CurrencyService.deduct(target.id, guildId, result.amount, 0, "rob", {
+                            robberId,
+                            stealPct: result.percentage,
+                            stealAmount: result.amount,
+                        });
+                        // Add to robber
+                        await CurrencyService.addCoin(robberId, guildId, result.amount, "rob", {
+                            targetId: target.id,
+                            stealPct: result.percentage,
+                            stealAmount: result.amount,
+                        });
+                        robSucceeded = true;
+                    } catch (deductError) {
+                        if (
+                            deductError instanceof CurrencyService.InsufficientFundsError
+                        ) {
+                            // Target balance changed since read — treat as escaped
+                            robSucceeded = false;
+                        } else {
+                            throw deductError;
+                        }
+                    }
                 }
-                // Set target immunity
-                await redis.setJson(immunityKey, 1, ROB_IMMUNITY);
-                await QuestService.trackProgress(robberId, guildId, "rob_success").catch(() => {});
-                EconomyLogService.shouldLog(guildId, "rob_success")
-                    .then((should) => {
-                        if (!should) return;
-                        const logEmbed = new EmbedBuilder()
-                            .setTitle("Rob Success")
-                            .setDescription(`<@${robberId}> stole **${result.amount}** coin from <@${target.id}>`)
-                            .setColor(0xed4245)
-                            .setTimestamp();
-                        EconomyLogService.sendLog(guildId, logEmbed);
-                    })
-                    .catch(() => {});
 
-                embed = new EmbedBuilder()
-                    .setTitle(`💰 ${t(locale, "rob.title.success")}`)
-                    .setDescription(
-                        t(locale, "rob.success", {
-                            robber: interaction.user.username,
-                            amount: String(result.amount),
-                            target: target.username,
+                if (robSucceeded) {
+                    // Set target immunity
+                    await redis.setJson(immunityKey, 1, ROB_IMMUNITY);
+                    await QuestService.trackProgress(robberId, guildId, "rob_success").catch(() => {});
+                    EconomyLogService.shouldLog(guildId, "rob_success")
+                        .then((should) => {
+                            if (!should) return;
+                            const logEmbed = new EmbedBuilder()
+                                .setTitle("Rob Success")
+                                .setDescription(
+                                    `<@${robberId}> stole **${result.amount}** coin from <@${target.id}>`
+                                )
+                                .setColor(0xed4245)
+                                .setTimestamp();
+                            EconomyLogService.sendLog(guildId, logEmbed);
                         })
-                    )
-                    .setColor(0x57f287);
+                        .catch(() => {});
+
+                    embed = new EmbedBuilder()
+                        .setTitle(`💰 ${t(locale, "rob.title.success")}`)
+                        .setDescription(
+                            t(locale, "rob.success", {
+                                robber: interaction.user.username,
+                                amount: String(result.amount),
+                                target: target.username,
+                            })
+                        )
+                        .setColor(0x57f287);
+                } else {
+                    // Target escaped — balance was insufficient at deduct time
+                    embed = new EmbedBuilder()
+                        .setTitle(`🏃 ${t(locale, "rob.title.fail")}`)
+                        .setDescription(t(locale, "rob.fail_escaped", { target: target.username }))
+                        .setColor(0xe67e22);
+                }
             } else {
                 // Penalty — only deduct if robber has coin and penalty > 0
                 if (result.amount > 0) {
