@@ -1,4 +1,5 @@
 import { model, Schema, Document } from "mongoose";
+import type { CallbackError } from "mongoose";
 
 export interface IUser extends Document {
     userID: string;
@@ -51,24 +52,24 @@ const userSchema = new Schema(
 userSchema.index({ userID: 1 }, { unique: true });
 userSchema.index({ totalPoint: -1 });
 
-userSchema.post("save", (error: any, doc: any, next: any) => {
+userSchema.post("save", (error: CallbackError, doc: IUser, next: (err?: CallbackError) => void) => {
     if (process.env.NODE_ENV === "development") {
         console.log(doc);
     }
-    if (error.name === "MongoServerError" && error.code === 11000)
+    if (error && "code" in error && (error as Record<string, unknown>).code === 11000)
         next(new Error("This document already exists, please try again"));
     else next(error);
 });
 
 userSchema.set("toJSON", {
-    transform: (_doc: any, ret: any) => {
-        delete ret.__v;
+    transform: (_doc, ret) => {
+        delete (ret as Record<string, unknown>).__v;
     },
 });
 
 userSchema.set("toObject", {
-    transform: (_doc: any, ret: any) => {
-        delete ret.__v;
+    transform: (_doc, ret) => {
+        delete (ret as Record<string, unknown>).__v;
     },
 });
 

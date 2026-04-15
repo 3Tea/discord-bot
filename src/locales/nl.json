@@ -251,6 +251,7 @@
     "cmd.info.bot.desc": "Informatie over de bot",
     "cmd.avatar.desc": "Haal de avatar-URL op van de geselecteerde gebruiker, of je eigen avatar.",
     "cmd.avatar.target.desc": "De avatar van de gebruiker om te tonen",
+    "avatar.no_avatar": "Deze gebruiker heeft geen avatar.",
     "cmd.trans.desc": "Vertaal alle talen naar Vietnamees",
     "cmd.trans.word.desc": "woord of alinea",
     "cmd.weather.desc": "Haal weerinformatie op.",

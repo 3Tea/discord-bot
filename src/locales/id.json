@@ -251,6 +251,7 @@
     "cmd.info.bot.desc": "Informasi tentang bot",
     "cmd.avatar.desc": "Lihat URL avatar pengguna yang dipilih, atau avatarmu sendiri.",
     "cmd.avatar.target.desc": "Avatar pengguna yang ingin ditampilkan",
+    "avatar.no_avatar": "Pengguna ini tidak memiliki avatar.",
     "cmd.trans.desc": "Terjemahkan semua bahasa ke Bahasa Indonesia",
     "cmd.trans.word.desc": "kata atau paragraf",
     "cmd.weather.desc": "Lihat informasi cuaca.",

@@ -251,6 +251,7 @@
     "cmd.info.bot.desc": "Informazioni sul bot",
     "cmd.avatar.desc": "Ottieni l'URL avatar dell'utente selezionato o il tuo.",
     "cmd.avatar.target.desc": "L'avatar dell'utente da mostrare",
+    "avatar.no_avatar": "Questo utente non ha un avatar.",
     "cmd.trans.desc": "Traduci tutte le lingue in vietnamita",
     "cmd.trans.word.desc": "parola o paragrafo",
     "cmd.weather.desc": "Ottieni informazioni meteo.",

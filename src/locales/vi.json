@@ -251,6 +251,7 @@
     "cmd.info.bot.desc": "Thông tin về bot",
     "cmd.avatar.desc": "Xem avatar của người dùng hoặc avatar của bạn.",
     "cmd.avatar.target.desc": "Avatar của ai",
+    "avatar.no_avatar": "Người dùng này không có ảnh đại diện.",
     "cmd.trans.desc": "Dịch mọi ngôn ngữ sang Tiếng Việt",
     "cmd.trans.word.desc": "từ hoặc đoạn văn",
     "cmd.weather.desc": "Xem thông tin thời tiết.",

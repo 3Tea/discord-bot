@@ -251,6 +251,7 @@
     "cmd.info.bot.desc": "Bot hakkında bilgi",
     "cmd.avatar.desc": "Seçilen kullanıcının avatar URL'sini veya kendi avatarınızı alın.",
     "cmd.avatar.target.desc": "Gösterilecek kullanıcı avatarı",
+    "avatar.no_avatar": "Bu kullanıcının avatarı yok.",
     "cmd.trans.desc": "Tüm dilleri Vietnamcaya çevir",
     "cmd.trans.word.desc": "kelime veya paragraf",
     "cmd.weather.desc": "Hava durumu bilgisi al.",

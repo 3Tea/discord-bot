@@ -1,4 +1,5 @@
 import { model, Schema, Document } from "mongoose";
+import type { CallbackError } from "mongoose";
 
 export interface IGuild extends Document {
     guildID: string;
@@ -13,7 +14,7 @@ const guildSchema = new Schema(
     {
         guildID: {
             type: String,
-            default: null,
+            required: true,
         },
         totalPoint: {
             type: Number,
@@ -42,24 +43,26 @@ const guildSchema = new Schema(
     }
 );
 
-guildSchema.post("save", (error: any, doc: any, next: any) => {
+guildSchema.index({ guildID: 1 }, { unique: true });
+
+guildSchema.post("save", (error: CallbackError, doc: IGuild, next: (err?: CallbackError) => void) => {
     if (process.env.NODE_ENV === "development") {
         console.log(doc);
     }
-    if (error.name === "MongoServerError" && error.code === 11000)
+    if (error && "code" in error && (error as Record<string, unknown>).code === 11000)
         next(new Error("This document already exists, please try again"));
     else next(error);
 });
 
 guildSchema.set("toJSON", {
-    transform: (_doc: any, ret: any) => {
-        delete ret.__v;
+    transform: (_doc, ret) => {
+        delete (ret as Record<string, unknown>).__v;
     },
 });
 
 guildSchema.set("toObject", {
-    transform: (_doc: any, ret: any) => {
-        delete ret.__v;
+    transform: (_doc, ret) => {
+        delete (ret as Record<string, unknown>).__v;
     },
 });
 

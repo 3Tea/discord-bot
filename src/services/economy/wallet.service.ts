@@ -210,10 +210,12 @@ async function claimDaily(userId: string): Promise<DailyClaimResult> {
         }
     );
 
-    await logTransaction(userId, "global_daily", baseReward, { streak: newStreak });
-    if (streakBonus > 0) {
-        await logTransaction(userId, "global_streak_bonus", streakBonus, { days: milestoneHit!.days });
-    }
+    await logTransaction(userId, "global_daily", totalReward, {
+        streak: newStreak,
+        base: baseReward,
+        streakBonus,
+        premiumBonus,
+    });
 
     return { baseReward, streakBonus, premiumBonus, streak: newStreak, milestoneHit };
 }

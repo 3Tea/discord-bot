@@ -173,12 +173,12 @@ export default {
                     const cdKey = `setVoiceName:${voiceChannel.id}`;
                     if (!(await checkCooldown(interaction, cdKey, locale))) return;
                     const name = interaction.options.getString("string", true);
+                    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
                     await voiceChannel.setName(`* ${name}`, `setVoiceName to ${name} ${FOOTER.text}`);
                     await setCooldown(cdKey, 120);
                     await updatePanel(voiceChannel, locale);
-                    await interaction.reply({
+                    await interaction.editReply({
                         content: t(locale, "voice.renamed", { name }),
-                        flags: MessageFlags.Ephemeral,
                     });
                     break;
                 }

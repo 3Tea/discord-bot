@@ -251,6 +251,7 @@
     "cmd.info.bot.desc": "ボットの情報を表示するよ",
     "cmd.avatar.desc": "選択したユーザーまたは自分のアバターURLを取得するよ。",
     "cmd.avatar.target.desc": "表示するユーザーのアバター",
+    "avatar.no_avatar": "このユーザーにはアバターがありません。",
     "cmd.trans.desc": "全ての言語を日本語に翻訳するよ",
     "cmd.trans.word.desc": "単語または文章",
     "cmd.weather.desc": "天気情報を取得するよ。",

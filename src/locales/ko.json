@@ -251,6 +251,7 @@
     "cmd.info.bot.desc": "봇에 대한 정보",
     "cmd.avatar.desc": "선택한 유저 또는 나의 아바타 URL을 가져와요.",
     "cmd.avatar.target.desc": "보여줄 유저의 아바타",
+    "avatar.no_avatar": "이 사용자에게는 아바타가 없습니다.",
     "cmd.trans.desc": "모든 언어를 한국어로 번역해요",
     "cmd.trans.word.desc": "단어 또는 문장",
     "cmd.weather.desc": "날씨 정보를 가져와요.",

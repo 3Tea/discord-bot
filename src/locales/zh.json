@@ -251,6 +251,7 @@
     "cmd.info.bot.desc": "关于 bot 的信息",
     "cmd.avatar.desc": "获取所选用户或你自己的头像链接。",
     "cmd.avatar.target.desc": "要显示头像的用户",
+    "avatar.no_avatar": "该用户没有头像。",
     "cmd.trans.desc": "将所有语言翻译成中文",
     "cmd.trans.word.desc": "单词或段落",
     "cmd.weather.desc": "获取天气信息。",
