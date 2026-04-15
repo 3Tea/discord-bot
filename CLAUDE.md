@@ -222,6 +222,7 @@ export default {
 - **Always `await`** all interaction methods: `reply()`, `deferReply()`, `editReply()`, `followUp()`
 - **Error responses**: Check `interaction.replied || interaction.deferred` before choosing `reply()` vs `editReply()`
 - **Ephemeral**: Set on first response — cannot change after. Use `{ flags: MessageFlags.Ephemeral }` for error messages
+- **Subcommand groups**: Use `interaction.options.getSubcommandGroup(true)` + `getSubcommand(true)` when command uses groups (see `/economy`). Flat commands use only `getSubcommand(true)`
 
 ### Types — MUST use
 
@@ -335,6 +336,7 @@ Current: `Guilds`, `GuildMessages`, `GuildVoiceStates`, `GuildMessageReactions`.
 - **i18n**: All user-facing strings must use `t(locale, "key")` — see i18n section below
 - **Freeze check**: New economy commands must call `EconomyAdminService.isFrozen(userId, guildId)` after `resolveLocale()` — return early with `t(locale, "common.frozen")` if frozen
 - **Economy log**: Use fire-and-forget `EconomyLogService.shouldLog(...).then(...).catch(() => {})` — never await, never block user response
+- **Inline confirmations**: Use `reply.awaitMessageComponent({ filter, time: 30_000 })` for one-time confirm/cancel flows — do not create separate button handler files for these
 
 ### Do NOT
 
@@ -343,6 +345,8 @@ Current: `Guilds`, `GuildMessages`, `GuildVoiceStates`, `GuildMessageReactions`.
 - Use `CommandInteraction` — always use `ChatInputCommandInteraction`
 - Register commands manually — loader handles auto-discovery
 - Deploy commands on every startup unnecessarily — it's rate-limited
+- Attempt to run tests — no test framework is configured (no jest/vitest/mocha)
+- Use `nanoid` — not installed. For random IDs use `import { randomBytes } from "node:crypto"`
 
 ## Command Deployment
 
