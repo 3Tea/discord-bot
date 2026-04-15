@@ -5,7 +5,6 @@ export interface IGuildGamblingConfig extends Document {
     enabled: boolean;
     minBet: number;
     maxBet: number;
-    cooldown: number;
 }
 
 const guildGamblingConfigSchema = new Schema(
@@ -14,7 +13,6 @@ const guildGamblingConfigSchema = new Schema(
         enabled: { type: Boolean, default: true },
         minBet: { type: Number, default: 10 },
         maxBet: { type: Number, default: 500 },
-        cooldown: { type: Number, default: 30 },
     },
     {
         timestamps: true,
