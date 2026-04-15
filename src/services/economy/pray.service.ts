@@ -36,14 +36,6 @@ function randomInRange(min: number, max: number): number {
     return min + Math.floor(Math.random() * (max - min + 1));
 }
 
-function isSameUTCDay(d1: Date, d2: Date): boolean {
-    return (
-        d1.getUTCFullYear() === d2.getUTCFullYear() &&
-        d1.getUTCMonth() === d2.getUTCMonth() &&
-        d1.getUTCDate() === d2.getUTCDate()
-    );
-}
-
 function isConsecutiveUTCDay(prev: Date, now: Date): boolean {
     const prevDay = new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth(), prev.getUTCDate()));
     const nowDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
@@ -51,28 +43,41 @@ function isConsecutiveUTCDay(prev: Date, now: Date): boolean {
     return diffMs === 24 * 60 * 60 * 1000;
 }
 
-function checkCooldown(lastAction: Date | null): boolean {
-    if (!lastAction) return false;
-    return isSameUTCDay(lastAction, new Date());
-}
-
 async function pray(userId: string, guildId: string, targetId?: string): Promise<PrayResult> {
-    const eco = await UserEconomyModel.findOneAndUpdate(
-        { userId, guildId },
-        { $setOnInsert: { userId, guildId } },
-        { upsert: true, new: true }
+    const now = new Date();
+    const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+    // Atomically claim the cooldown slot — prevents concurrent invocations
+    const preUpdate = await UserEconomyModel.findOneAndUpdate(
+        {
+            userId,
+            guildId,
+            $or: [{ lastPray: null }, { lastPray: { $exists: false } }, { lastPray: { $lt: startOfToday } }],
+        },
+        {
+            $set: { lastPray: now },
+            $setOnInsert: { userId, guildId },
+        },
+        { upsert: true, returnDocument: "before" }
     );
 
-    if (checkCooldown(eco.lastPray)) {
-        throw new Error("PRAY_COOLDOWN");
+    // If preUpdate is null, it was an upsert (new doc) OR the filter didn't match.
+    // Check if doc exists with lastPray >= startOfToday (cooldown active).
+    if (!preUpdate) {
+        const existing = await UserEconomyModel.findOne({ userId, guildId });
+        if (existing && existing.lastPray && existing.lastPray >= startOfToday) {
+            throw new Error("PRAY_COOLDOWN");
+        }
     }
 
-    const now = new Date();
+    // Use pre-update doc for streak calculation (defaults for new users)
+    const prevPrayStreak = preUpdate?.prayStreak ?? 0;
+    const prevLastStreakDate = preUpdate?.lastStreakDate ?? null;
+
     const isTargeted = targetId !== undefined;
 
     // Calculate rewards
     const userCoin = isTargeted ? randomInRange(100, 200) : randomInRange(50, 150);
-    let userGem = 0;
     const userReward: Reward = { coin: userCoin, gem: 0 };
 
     let targetReward: Reward | null = null;
@@ -80,15 +85,14 @@ async function pray(userId: string, guildId: string, targetId?: string): Promise
         targetReward = { coin: randomInRange(80, 150), gem: 0 };
         // 5% gem chance for targeted pray
         if (Math.random() < 0.05) {
-            userGem = 1;
             userReward.gem = 1;
         }
     }
 
     // Calculate streak
     let newStreak = 1;
-    if (eco.lastStreakDate && isConsecutiveUTCDay(eco.lastStreakDate, now)) {
-        newStreak = eco.prayStreak + 1;
+    if (prevLastStreakDate && isConsecutiveUTCDay(prevLastStreakDate, now)) {
+        newStreak = prevPrayStreak + 1;
     }
 
     // Check milestone
@@ -120,16 +124,10 @@ async function pray(userId: string, guildId: string, targetId?: string): Promise
         await CurrencyService.addCoin(targetId, guildId, targetReward.coin, "pray", { fromUserId: userId });
     }
 
-    // Update pray state
+    // Update streak (lastPray already set atomically above)
     await UserEconomyModel.updateOne(
         { userId, guildId },
-        {
-            $set: {
-                lastPray: now,
-                prayStreak: newStreak,
-                lastStreakDate: now,
-            },
-        }
+        { $set: { prayStreak: newStreak, lastStreakDate: now } }
     );
 
     return {
@@ -141,14 +139,29 @@ async function pray(userId: string, guildId: string, targetId?: string): Promise
 }
 
 async function curse(userId: string, guildId: string, targetId?: string): Promise<CurseResult> {
-    const eco = await UserEconomyModel.findOneAndUpdate(
-        { userId, guildId },
-        { $setOnInsert: { userId, guildId } },
-        { upsert: true, new: true }
+    const now = new Date();
+    const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+    // Atomically claim the cooldown slot — prevents concurrent invocations
+    const preUpdate = await UserEconomyModel.findOneAndUpdate(
+        {
+            userId,
+            guildId,
+            $or: [{ lastCurse: null }, { lastCurse: { $exists: false } }, { lastCurse: { $lt: startOfToday } }],
+        },
+        {
+            $set: { lastCurse: now },
+            $setOnInsert: { userId, guildId },
+        },
+        { upsert: true, returnDocument: "before" }
     );
 
-    if (checkCooldown(eco.lastCurse)) {
-        throw new Error("CURSE_COOLDOWN");
+    // If preUpdate is null, check if cooldown is active (doc exists with lastCurse >= startOfToday)
+    if (!preUpdate) {
+        const existing = await UserEconomyModel.findOne({ userId, guildId });
+        if (existing && existing.lastCurse && existing.lastCurse >= startOfToday) {
+            throw new Error("CURSE_COOLDOWN");
+        }
     }
 
     const isTargeted = targetId !== undefined;
@@ -169,9 +182,6 @@ async function curse(userId: string, guildId: string, targetId?: string): Promis
     if (targetReward && targetId) {
         await CurrencyService.addCoin(targetId, guildId, targetReward.coin, "curse", { fromUserId: userId });
     }
-
-    // Update curse cooldown (no streak for curse)
-    await UserEconomyModel.updateOne({ userId, guildId }, { $set: { lastCurse: new Date() } });
 
     return { userReward, targetReward, targetId };
 }
