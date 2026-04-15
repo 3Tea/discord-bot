@@ -1,6 +1,8 @@
 import { ButtonInteraction, Events, MessageFlags } from "discord.js";
 
 import client from "../client";
+import { resolveLocale } from "../util/i18n/locale";
+import { t } from "../util/i18n/t";
 
 export default {
     name: Events.InteractionCreate,
@@ -24,13 +26,15 @@ export default {
         } catch (error) {
             console.error(error);
             try {
+                const locale = await resolveLocale(interaction).catch(() => "en" as const);
+                const errorMsg = t(locale, "common.error");
                 if (interaction.replied || interaction.deferred) {
                     await interaction.editReply({
-                        content: `There was an error while executing this button! ${interaction.customId}`,
+                        content: errorMsg,
                     });
                 } else {
                     await interaction.reply({
-                        content: `There was an error while executing this button! ${interaction.customId}`,
+                        content: errorMsg,
                         flags: MessageFlags.Ephemeral,
                     });
                 }

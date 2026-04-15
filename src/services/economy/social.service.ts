@@ -1,3 +1,6 @@
+import { randomInRange } from "../../util/math/random";
+import { formatCooldown } from "../../util/date/format";
+
 export interface RobResult {
     success: boolean;
     amount: number;
@@ -11,22 +14,6 @@ interface RobConfig {
     robPenaltyMinPct: number;
     robPenaltyMaxPct: number;
     robMinBalance: number;
-}
-
-function randomInRange(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function formatCooldown(seconds: number): string {
-    if (seconds <= 0) return "0s";
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    const parts: string[] = [];
-    if (h > 0) parts.push(`${h}h`);
-    if (m > 0) parts.push(`${m}m`);
-    if (parts.length === 0) parts.push(`${s}s`);
-    return parts.join(" ");
 }
 
 function rollRob(robberBalance: number, targetBalance: number, config: RobConfig): RobResult {

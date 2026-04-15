@@ -245,4 +245,4 @@ export class RedisService {
     }
 }
 
-export default new RedisService({ monitor: true });
+export default new RedisService({ monitor: process.env.NODE_ENV === "development" });

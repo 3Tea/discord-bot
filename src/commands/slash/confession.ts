@@ -711,16 +711,20 @@ async function executeSubmit(
 
     // --- Helper to refund all deducted currency and audio limit ---
     async function refundAll(reason: string): Promise<void> {
-        if (coinDeducted) {
-            await CurrencyService.addCoin(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, "confession_refund", {
-                reason,
-            });
-        }
-        if (gemDeducted) {
-            await CurrencyService.addGem(userId, guildId, CONFESSION_VIP_COST_GEM, "confession_refund", { reason });
-        }
-        if (confessionAudio) {
-            await decrementAudioLimit(userId).catch(() => {});
+        try {
+            if (coinDeducted) {
+                await CurrencyService.addCoin(userId, guildId, CONFESSION_SKIP_CD_COST_COIN, "confession_refund", {
+                    reason,
+                });
+            }
+            if (gemDeducted) {
+                await CurrencyService.addGem(userId, guildId, CONFESSION_VIP_COST_GEM, "confession_refund", { reason });
+            }
+            if (confessionAudio) {
+                await decrementAudioLimit(userId).catch(() => {});
+            }
+        } catch (error) {
+            console.error("refundAll failed:", error);
         }
     }
 

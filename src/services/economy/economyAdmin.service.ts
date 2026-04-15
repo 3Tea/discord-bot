@@ -295,6 +295,37 @@ interface ResetResult {
     affectedCount: number;
 }
 
+function buildSnapshotData(
+    users: Array<{ userId: string; coin: number; gem: number; prayStreak: number; lastStreakDate: Date | null }>,
+    scope: SnapshotScope
+): ISnapshotEntry[] {
+    return users.map((u) => {
+        const entry: ISnapshotEntry = { userId: u.userId };
+        if (scope === "coin" || scope === "all") entry.coin = u.coin;
+        if (scope === "gem" || scope === "all") entry.gem = u.gem;
+        if (scope === "streak" || scope === "all") {
+            entry.prayStreak = u.prayStreak;
+            entry.lastStreakDate = u.lastStreakDate;
+        }
+        return entry;
+    });
+}
+
+async function pruneOldSnapshots(guildId: string): Promise<void> {
+    const snapshotCount = await EconomySnapshotModel.countDocuments({ guildId });
+    if (snapshotCount <= 10) return;
+
+    const oldest = await EconomySnapshotModel.findOne({ guildId, restoredAt: { $ne: null } }).sort({
+        createdAt: 1,
+    });
+    if (oldest) {
+        await EconomySnapshotModel.deleteOne({ _id: oldest._id });
+    } else {
+        const oldestAny = await EconomySnapshotModel.findOne({ guildId }).sort({ createdAt: 1 });
+        if (oldestAny) await EconomySnapshotModel.deleteOne({ _id: oldestAny._id });
+    }
+}
+
 async function resetEconomy(
     guildId: string,
     scope: SnapshotScope,
@@ -315,16 +346,7 @@ async function resetEconomy(
     const users = await UserEconomyModel.find(filter).select(projection).lean();
 
     const snapshotId = generateSnapshotId();
-    const data: ISnapshotEntry[] = users.map((u) => {
-        const entry: ISnapshotEntry = { userId: u.userId };
-        if (scope === "coin" || scope === "all") entry.coin = u.coin;
-        if (scope === "gem" || scope === "all") entry.gem = u.gem;
-        if (scope === "streak" || scope === "all") {
-            entry.prayStreak = u.prayStreak;
-            entry.lastStreakDate = u.lastStreakDate;
-        }
-        return entry;
-    });
+    const data = buildSnapshotData(users, scope);
 
     await EconomySnapshotModel.create({
         snapshotId,
@@ -335,18 +357,7 @@ async function resetEconomy(
         data,
     });
 
-    const snapshotCount = await EconomySnapshotModel.countDocuments({ guildId });
-    if (snapshotCount > 10) {
-        const oldest = await EconomySnapshotModel.findOne({ guildId, restoredAt: { $ne: null } }).sort({
-            createdAt: 1,
-        });
-        if (oldest) {
-            await EconomySnapshotModel.deleteOne({ _id: oldest._id });
-        } else {
-            const oldestAny = await EconomySnapshotModel.findOne({ guildId }).sort({ createdAt: 1 });
-            if (oldestAny) await EconomySnapshotModel.deleteOne({ _id: oldestAny._id });
-        }
-    }
+    await pruneOldSnapshots(guildId);
 
     const updateSet: Record<string, unknown> = {};
     if (scope === "coin" || scope === "all") updateSet.coin = 0;

@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { randomInRange } from "../../util/math/random";
 
 // --- Types ---
 
@@ -33,10 +34,6 @@ export interface MerchantOffer {
 }
 
 // --- Helpers ---
-
-function randomInRange(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 const BUFF_TYPES: BuffType[] = ["attack", "defense", "luck"];
 

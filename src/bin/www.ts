@@ -35,10 +35,14 @@ async function main(): Promise<void> {
 
 main().catch(console.error);
 
-// Graceful shutdown — flush pending command logs before exit
+// Graceful shutdown — flush pending command logs, disconnect DB, destroy client before exit
 async function shutdown(): Promise<void> {
     const { CommandLogService } = await import("../services/commandLog.service");
     await CommandLogService.flush();
+    const mongoose = await import("mongoose");
+    await mongoose.default.disconnect().catch(() => {});
+    const { default: client } = await import("../client");
+    client.destroy();
     process.exit(0);
 }
 

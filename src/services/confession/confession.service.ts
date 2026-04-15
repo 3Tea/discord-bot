@@ -14,6 +14,7 @@ import {
 import { isValidObjectId } from "mongoose";
 
 import redis from "../../connector/redis";
+import { secondsUntilUTCMidnight } from "../../util/date/utc";
 import ConfessionModel, { IConfession, IConfessionAudio, IConfessionImage } from "../../models/confession.model";
 import GuildConfessionConfigModel, {
     ConfessionMode,
@@ -158,12 +159,6 @@ export function validateConfessionAudio(
         ok: true,
         audio: { url: att.url, name: att.name, contentType: att.contentType },
     };
-}
-
-function secondsUntilUTCMidnight(): number {
-    const now = new Date();
-    const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
-    return Math.floor((endOfDay.getTime() - now.getTime()) / 1000);
 }
 
 export async function checkAndIncrementAudioLimit(userId: string, dailyLimit: number): Promise<boolean> {

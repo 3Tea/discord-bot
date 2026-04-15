@@ -204,6 +204,8 @@ export default {
             const guildId = interaction.guildId!;
 
             if (subcommand === "view") {
+                await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
                 const types = Object.values(NotificationType);
                 const labels: Record<string, string> = {
                     welcome: "\uD83D\uDCE5 Welcome",
@@ -236,7 +238,7 @@ export default {
                     .setDescription(lines.join("\n"))
                     .setTimestamp();
 
-                await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
+                await interaction.editReply({ embeds: [embed] });
                 return;
             }
 

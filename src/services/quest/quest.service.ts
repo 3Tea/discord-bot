@@ -3,6 +3,7 @@ import CurrencyService from "../economy/currency.service";
 import WalletService from "../economy/wallet.service";
 import PremiumService from "../premium/premium.service";
 import redis from "../../connector/redis/index";
+import { secondsUntilUTCMidnight } from "../../util/date/utc";
 import {
     generateDailyQuests,
     getQuestCoinReward,
@@ -14,12 +15,6 @@ import {
 
 function cacheKey(userId: string, date: string): string {
     return `quest:${userId}:${date}`;
-}
-
-function secondsUntilUTCMidnight(): number {
-    const now = new Date();
-    const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
-    return Math.floor((endOfDay.getTime() - now.getTime()) / 1000);
 }
 
 function isConsecutiveDate(prev: string, current: string): boolean {

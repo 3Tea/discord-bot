@@ -2,6 +2,8 @@
 import { ChatInputCommandInteraction, Events, MessageFlags } from "discord.js";
 import client from "../client";
 import { CommandLogService } from "../services/commandLog.service";
+import { resolveLocale } from "../util/i18n/locale";
+import { t } from "../util/i18n/t";
 import type { CommandInteractionOption } from "discord.js";
 
 function serializeOptions(data: readonly CommandInteractionOption[]): Record<string, unknown> {
@@ -47,14 +49,16 @@ export default {
             success = false;
             errorMessage = error instanceof Error ? error.message : "Unknown error";
             console.error(error);
+            const locale = await resolveLocale(interaction).catch(() => "en" as const);
+            const errorMsg = t(locale, "common.error");
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
-                    content: `There was an error while executing this command! ${interaction.commandName}`,
+                    content: errorMsg,
                     flags: MessageFlags.Ephemeral,
                 });
             } else {
                 await interaction.editReply({
-                    content: `There was an error while executing this command! ${interaction.commandName}`,
+                    content: errorMsg,
                 });
             }
         }

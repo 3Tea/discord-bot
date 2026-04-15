@@ -21,17 +21,12 @@ import type { SupportedLocale } from "../i18n/index";
 import log from "../../util/log/logger.mixed";
 import WalletService, { InsufficientStarError } from "../../services/economy/wallet.service";
 import PremiumService from "../../services/premium/premium.service";
+import { secondsUntilUTCMidnight } from "../date/utc";
 import type { MangaSource } from "./sources";
 
 const CACHE_TTL = 60 * 10; // 10 minutes
 const BUTTON_REMOVE_DELAY = 20_000; // 20 seconds
 const STAR_COST = 1;
-
-function secondsUntilUTCMidnight(): number {
-    const now = new Date();
-    const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
-    return Math.floor((endOfDay.getTime() - now.getTime()) / 1000);
-}
 
 /**
  * Checks free-use counter and deducts a star if exhausted.
