@@ -177,7 +177,11 @@ export class RedisService {
             try {
                 const val = await this.client.incr(key);
                 if (ttl && val === 1) {
-                    await this.client.expire(key, ttl);
+                    try {
+                        await this.client.expire(key, ttl);
+                    } catch {
+                        await this.client.del(key).catch(() => {});
+                    }
                 }
                 return val;
             } catch {

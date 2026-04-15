@@ -1,3 +1,4 @@
+import { MongoServerError } from "mongodb";
 import UserEconomyModel from "../../models/userEconomy.model";
 import { randomInRange } from "../../util/math/random";
 import { isConsecutiveUTCDay } from "../../util/date/utc";
@@ -40,18 +41,26 @@ async function pray(userId: string, guildId: string, targetId?: string): Promise
     const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
     // Atomically claim the cooldown slot — prevents concurrent invocations
-    const preUpdate = await UserEconomyModel.findOneAndUpdate(
-        {
-            userId,
-            guildId,
-            $or: [{ lastPray: null }, { lastPray: { $exists: false } }, { lastPray: { $lt: startOfToday } }],
-        },
-        {
-            $set: { lastPray: now },
-            $setOnInsert: { userId, guildId },
-        },
-        { upsert: true, returnDocument: "before" }
-    );
+    let preUpdate;
+    try {
+        preUpdate = await UserEconomyModel.findOneAndUpdate(
+            {
+                userId,
+                guildId,
+                $or: [{ lastPray: null }, { lastPray: { $exists: false } }, { lastPray: { $lt: startOfToday } }],
+            },
+            {
+                $set: { lastPray: now },
+                $setOnInsert: { userId, guildId },
+            },
+            { upsert: true, returnDocument: "before" }
+        );
+    } catch (error) {
+        if (error instanceof MongoServerError && error.code === 11000) {
+            throw new Error("PRAY_COOLDOWN");
+        }
+        throw error;
+    }
 
     // If preUpdate is null, it was an upsert (new doc) OR the filter didn't match.
     // Check if doc exists with lastPray >= startOfToday (cooldown active).
@@ -135,18 +144,26 @@ async function curse(userId: string, guildId: string, targetId?: string): Promis
     const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
     // Atomically claim the cooldown slot — prevents concurrent invocations
-    const preUpdate = await UserEconomyModel.findOneAndUpdate(
-        {
-            userId,
-            guildId,
-            $or: [{ lastCurse: null }, { lastCurse: { $exists: false } }, { lastCurse: { $lt: startOfToday } }],
-        },
-        {
-            $set: { lastCurse: now },
-            $setOnInsert: { userId, guildId },
-        },
-        { upsert: true, returnDocument: "before" }
-    );
+    let preUpdate;
+    try {
+        preUpdate = await UserEconomyModel.findOneAndUpdate(
+            {
+                userId,
+                guildId,
+                $or: [{ lastCurse: null }, { lastCurse: { $exists: false } }, { lastCurse: { $lt: startOfToday } }],
+            },
+            {
+                $set: { lastCurse: now },
+                $setOnInsert: { userId, guildId },
+            },
+            { upsert: true, returnDocument: "before" }
+        );
+    } catch (error) {
+        if (error instanceof MongoServerError && error.code === 11000) {
+            throw new Error("CURSE_COOLDOWN");
+        }
+        throw error;
+    }
 
     // If preUpdate is null, check if cooldown is active (doc exists with lastCurse >= startOfToday)
     if (!preUpdate) {

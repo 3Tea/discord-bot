@@ -43,7 +43,16 @@ async function applyStarCharge(userId: string, sourceName: string): Promise<bool
     const newCount = await redis.incrKey(freeKey, secondsUntilUTCMidnight());
 
     if (newCount > freeLimit) {
-        await WalletService.deductStar(userId, STAR_COST, "command_charge", { command: sourceName });
+        try {
+            await WalletService.deductStar(userId, STAR_COST, "command_charge", { command: sourceName });
+        } catch (error) {
+            // Rollback the free-use counter so the failed charge doesn't burn a slot
+            const current = (await redis.getJson(freeKey)) as number | null;
+            if (current && current > 0) {
+                await redis.setJson(freeKey, current - 1, secondsUntilUTCMidnight());
+            }
+            throw error;
+        }
         return true;
     }
 

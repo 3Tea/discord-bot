@@ -517,22 +517,21 @@ async function reverseTransaction(
     if (nonReversibleTypes.includes(original.type)) throw new Error("NOT_REVERSIBLE");
     if (original.metadata?.reversed) throw new Error("ALREADY_REVERSED");
 
-    // Clamp reversal to zero — prevents negative balance when user has spent coins since the original transaction
+    // Atomic reversal — clamp to zero when taking back, add back when restoring
     const filter = { userId: original.userId, guildId };
-    if (original.coinDelta > 0) {
-        await UserEconomyModel.updateOne(filter, [
-            { $set: { coin: { $max: [{ $subtract: ["$coin", original.coinDelta] }, 0] } } },
-        ]);
-    } else if (original.coinDelta < 0) {
-        await UserEconomyModel.updateOne(filter, { $inc: { coin: -original.coinDelta } });
-    }
-    if (original.gemDelta > 0) {
-        await UserEconomyModel.updateOne(filter, [
-            { $set: { gem: { $max: [{ $subtract: ["$gem", original.gemDelta] }, 0] } } },
-        ]);
-    } else if (original.gemDelta < 0) {
-        await UserEconomyModel.updateOne(filter, { $inc: { gem: -original.gemDelta } });
-    }
+    const coinExpr =
+        original.coinDelta > 0
+            ? { $max: [{ $subtract: ["$coin", original.coinDelta] }, 0] }
+            : original.coinDelta < 0
+              ? { $add: ["$coin", -original.coinDelta] }
+              : "$coin";
+    const gemExpr =
+        original.gemDelta > 0
+            ? { $max: [{ $subtract: ["$gem", original.gemDelta] }, 0] }
+            : original.gemDelta < 0
+              ? { $add: ["$gem", -original.gemDelta] }
+              : "$gem";
+    await UserEconomyModel.updateOne(filter, [{ $set: { coin: coinExpr, gem: gemExpr } }]);
 
     const reverseTx = await TransactionModel.create({
         userId: original.userId,
