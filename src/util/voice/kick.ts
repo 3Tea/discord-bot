@@ -16,7 +16,7 @@ export async function handleKick(interaction: ButtonInteraction, block: boolean)
         return;
     }
 
-    const targetId = await redis.getJson(`kick_target:${interaction.user.id}:${voiceChannel.id}`);
+    const targetId = await redis.getJson<string>(`kick_target:${interaction.user.id}:${voiceChannel.id}`);
     if (!targetId) {
         await interaction.editReply({ content: t(locale, "voice.kick_expired") });
         return;
@@ -35,7 +35,7 @@ export async function handleKick(interaction: ButtonInteraction, block: boolean)
             ViewChannel: false,
         });
 
-        const blocked: string[] = (await redis.getJson(`blocked:${voiceChannel.id}`)) || [];
+        const blocked: string[] = (await redis.getJson<string[]>(`blocked:${voiceChannel.id}`)) || [];
         if (!blocked.includes(targetId)) {
             blocked.push(targetId);
             await redis.setJson(`blocked:${voiceChannel.id}`, blocked, TTL_12H);

@@ -66,7 +66,7 @@ export class RedisService {
         });
     }
 
-    async setJson(key: string, value: any, time?: number): Promise<string | null> {
+    async setJson(key: string, value: unknown, time?: number): Promise<string | null> {
         const ttl = time || this.ttl;
 
         if (this.connected) {
@@ -82,18 +82,18 @@ export class RedisService {
         return "OK";
     }
 
-    async getJson(key: string): Promise<any> {
+    async getJson<T = unknown>(key: string): Promise<T | null> {
         if (this.connected) {
             try {
                 const data = await this.client.get(key);
-                if (data) return JSON.parse(data);
+                if (data) return JSON.parse(data) as T;
                 return null;
             } catch {
                 // fall through to in-memory
             }
         }
 
-        return this.fallback.get(key) ?? null;
+        return (this.fallback.get(key) as T | undefined) ?? null;
     }
 
     async deleteKey(key: string): Promise<number> {

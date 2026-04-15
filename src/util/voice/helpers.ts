@@ -45,7 +45,7 @@ export async function validateOwner(
         return null;
     }
 
-    const ownerId = await redis.getJson(voiceChannel.id);
+    const ownerId = await redis.getJson<string>(voiceChannel.id);
     if (ownerId !== interaction.user.id) {
         await replyOrEdit(interaction, t(resolvedLocale, "voice.not_owner"));
         return null;
@@ -87,9 +87,9 @@ export async function buildPanelEmbed(
     ownerId: string,
     locale: SupportedLocale
 ): Promise<EmbedBuilder> {
-    const state: string = (await redis.getJson(`state:${channelId}`)) || "unlocked";
-    const permitted: string[] = (await redis.getJson(`permitted:${channelId}`)) || [];
-    const blocked: string[] = (await redis.getJson(`blocked:${channelId}`)) || [];
+    const state: string = (await redis.getJson<string>(`state:${channelId}`)) || "unlocked";
+    const permitted: string[] = (await redis.getJson<string[]>(`permitted:${channelId}`)) || [];
+    const blocked: string[] = (await redis.getJson<string[]>(`blocked:${channelId}`)) || [];
 
     const statusMap: Record<string, string> = {
         unlocked: t(locale, "voice.panel.status_unlocked"),
@@ -188,10 +188,10 @@ export function buildPanelRows(locale: SupportedLocale): ActionRowBuilder<Button
  * Update the control panel message in the voice channel.
  */
 export async function updatePanel(voiceChannel: VoiceChannel, locale: SupportedLocale): Promise<void> {
-    const panelMessageId = await redis.getJson(`panel:${voiceChannel.id}`);
+    const panelMessageId = await redis.getJson<string>(`panel:${voiceChannel.id}`);
     if (!panelMessageId) return;
 
-    const ownerId = await redis.getJson(voiceChannel.id);
+    const ownerId = await redis.getJson<string>(voiceChannel.id);
     if (!ownerId) return;
 
     try {
