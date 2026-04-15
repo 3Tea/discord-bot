@@ -4,6 +4,7 @@
     "common.guild_only": "This command can only be used in a server.",
     "common.no_permission": "You need Administrator permission.",
     "common.unknown_subcommand": "Unknown subcommand.",
+    "trans.error": "Translation failed. Please try again later.",
     "balance.title": "Wallet of {{username}}",
     "balance.coin": "Coin",
     "balance.gem": "Gem",

@@ -5,6 +5,7 @@ import {
     ButtonStyle,
     ChatInputCommandInteraction,
     EmbedBuilder,
+    MessageFlags,
     SlashCommandBuilder,
     TextChannel,
 } from "discord.js";
@@ -44,15 +45,13 @@ async function applyStarCharge(userId: string, sourceName: string): Promise<bool
     if (!Number.isFinite(freeLimit)) return false;
 
     const freeKey = `manga_free:${userId}`;
-    const usedToday = (await redis.getJson(freeKey)) as number | null;
+    const newCount = await redis.incrKey(freeKey, secondsUntilUTCMidnight());
 
-    if (usedToday !== null && usedToday >= freeLimit) {
+    if (newCount > freeLimit) {
         await WalletService.deductStar(userId, STAR_COST, "command_charge", { command: sourceName });
         return true;
     }
 
-    const newCount = (usedToday ?? 0) + 1;
-    await redis.setJson(freeKey, newCount, secondsUntilUTCMidnight());
     return false;
 }
 
@@ -155,7 +154,7 @@ export function mangaCommand(source: MangaSource) {
             const locale = await resolveLocale(interaction);
 
             if (!(interaction.channel as TextChannel)?.nsfw) {
-                await interaction.reply({ content: t(locale, "manga.nsfw_only"), ephemeral: true });
+                await interaction.reply({ content: t(locale, "manga.nsfw_only"), flags: MessageFlags.Ephemeral });
                 return;
             }
 
@@ -165,7 +164,7 @@ export function mangaCommand(source: MangaSource) {
                 charged = await applyStarCharge(interaction.user.id, source.name);
             } catch (error) {
                 if (error instanceof InsufficientStarError) {
-                    await interaction.reply({ content: t(locale, "manga.no_stars"), ephemeral: true });
+                    await interaction.reply({ content: t(locale, "manga.no_stars"), flags: MessageFlags.Ephemeral });
                     return;
                 }
                 throw error;

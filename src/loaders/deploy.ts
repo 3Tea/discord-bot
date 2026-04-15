@@ -1,8 +1,8 @@
 import { REST, Routes } from "discord.js";
-import { APPLICATION_ID, GUILD_ID } from "../util/config/index";
+import { APPLICATION_ID, DISCORD_TOKEN, GUILD_ID } from "../util/config/index";
 
 export async function deployCommands(commands: object[]): Promise<void> {
-    if (!process.env.DISCORD_TOKEN) {
+    if (!DISCORD_TOKEN) {
         throw new Error("DISCORD_TOKEN environment variable is required");
     }
 
@@ -11,7 +11,7 @@ export async function deployCommands(commands: object[]): Promise<void> {
         return;
     }
 
-    const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+    const rest = new REST().setToken(DISCORD_TOKEN);
     const isDev = process.env.NODE_ENV === "development";
 
     if (isDev && !GUILD_ID) {

@@ -142,6 +142,8 @@ async function buyItem(
             { new: true }
         );
         if (!updated) {
+            await redis.deleteKey(idemKey);
+            await redis.deleteKey(cdKey);
             throw new Error("OUT_OF_STOCK");
         }
         stockDecremented = true;

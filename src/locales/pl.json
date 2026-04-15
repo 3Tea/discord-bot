@@ -2,6 +2,7 @@
     "common.error": "Wystąpił błąd. Spróbuj ponownie później.",
     "common.no_permission": "Potrzebujesz uprawnienia Administratora.",
     "common.unknown_subcommand": "Nieznana podkomenda.",
+    "trans.error": "Tłumaczenie nie powiodło się. Spróbuj ponownie później.",
     "common.guild_only": "To polecenie może być używane tylko na serwerze.",
     "balance.title": "Portfel {{username}}",
     "balance.coin": "Coin",

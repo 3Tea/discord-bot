@@ -19,8 +19,8 @@ const userEconomySchema = new Schema(
     {
         userId: { type: String, required: true },
         guildId: { type: String, required: true },
-        coin: { type: Number, default: 0 },
-        gem: { type: Number, default: 0 },
+        coin: { type: Number, default: 0, min: 0 },
+        gem: { type: Number, default: 0, min: 0 },
         lastPray: { type: Date, default: null },
         lastCurse: { type: Date, default: null },
         prayStreak: { type: Number, default: 0 },

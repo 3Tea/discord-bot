@@ -31,3 +31,7 @@ export const URL_REPORT_BUG = process.env.URL_REPORT_BUG || "";
 
 export const DEV_USER_ID = process.env.DEV_USER_ID || "";
 export const SUPPORT_SERVER_LINK = process.env.SUPPORT_SERVER_LINK || "";
+
+export const URL_HOMEPAGE = process.env.URL_HOMEPAGE ?? "";
+export const URL_DISCUSSIONS = process.env.URL_DISCUSSIONS ?? "";
+export const DISCORD_TOKEN = process.env.DISCORD_TOKEN ?? "";

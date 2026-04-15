@@ -1,4 +1,4 @@
-import { ButtonInteraction } from "discord.js";
+import { ButtonInteraction, MessageFlags } from "discord.js";
 import { BUTTON_ID } from "../util/config/button";
 import redis from "../connector/redis";
 import { validateOwner, checkCooldown, setCooldown, updatePanel } from "../util/voice/helpers";

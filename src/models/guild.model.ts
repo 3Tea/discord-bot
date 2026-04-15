@@ -1,6 +1,7 @@
 import { model, Schema, Document } from "mongoose";
 import type { CallbackError } from "mongoose";
 
+// Legacy naming: uses guildID/userID (uppercase) — newer models use guildId/userId
 export interface IGuild extends Document {
     guildID: string;
     totalPoint: number;

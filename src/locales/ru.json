@@ -2,6 +2,7 @@
     "common.error": "Произошла ошибка. Пожалуйста, попробуйте позже.",
     "common.no_permission": "Вам нужно разрешение Администратора.",
     "common.unknown_subcommand": "Неизвестная подкоманда.",
+    "trans.error": "Перевод не удался. Пожалуйста, попробуйте позже.",
     "common.guild_only": "Эту команду можно использовать только на сервере.",
     "balance.title": "Кошелёк {{username}}",
     "balance.coin": "Coin",

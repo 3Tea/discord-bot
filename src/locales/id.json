@@ -2,6 +2,7 @@
     "common.error": "Terjadi kesalahan. Silakan coba lagi nanti.",
     "common.no_permission": "Kamu butuh izin Administrator.",
     "common.unknown_subcommand": "Subperintah tidak dikenal.",
+    "trans.error": "Terjemahan gagal. Silakan coba lagi nanti.",
     "common.guild_only": "Perintah ini hanya bisa digunakan di server.",
     "balance.title": "Dompet milik {{username}}",
     "balance.coin": "Coin",

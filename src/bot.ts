@@ -1,3 +1,6 @@
 import client from "./client";
+import { DISCORD_TOKEN } from "./util/config";
 
-client.login(process.env.DISCORD_TOKEN);
+export async function login(): Promise<void> {
+    await client.login(DISCORD_TOKEN);
+}

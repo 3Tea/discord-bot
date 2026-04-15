@@ -1,4 +1,4 @@
-import { ButtonInteraction, EmbedBuilder } from "discord.js";
+import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
 import type { CombatState, DungeonRunState } from "../services/economy/dungeon.service";
 import type { MerchantState } from "../services/economy/merchant.service";
@@ -19,7 +19,7 @@ export default {
         const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
         if (!runState) {
             const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-            await interaction.reply({ content: t(fallbackLocale, "dungeon.run.timeout"), ephemeral: true });
+            await interaction.reply({ content: t(fallbackLocale, "dungeon.run.timeout"), flags: MessageFlags.Ephemeral });
             return;
         }
 

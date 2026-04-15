@@ -1,6 +1,7 @@
 import UserWalletModel, { IUserWallet } from "../../models/userWallet.model";
 import TransactionModel, { TransactionType } from "../../models/transaction.model";
 import { getTierConfig } from "../premium/premium.config";
+import { isSameUTCDay, isConsecutiveUTCDay } from "../../util/date/utc";
 
 const GLOBAL_GUILD_ID = "global";
 
@@ -27,23 +28,6 @@ export interface DailyClaimResult {
     premiumBonus: number;
     streak: number;
     milestoneHit: { days: number; bonus: number } | null;
-}
-
-// --- UTC date helpers ---
-
-function isSameUTCDay(d1: Date, d2: Date): boolean {
-    return (
-        d1.getUTCFullYear() === d2.getUTCFullYear() &&
-        d1.getUTCMonth() === d2.getUTCMonth() &&
-        d1.getUTCDate() === d2.getUTCDate()
-    );
-}
-
-function isConsecutiveUTCDay(prev: Date, now: Date): boolean {
-    const prevDay = new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth(), prev.getUTCDate()));
-    const nowDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    const diffMs = nowDay.getTime() - prevDay.getTime();
-    return diffMs === 24 * 60 * 60 * 1000;
 }
 
 // --- Daily streak milestones ---

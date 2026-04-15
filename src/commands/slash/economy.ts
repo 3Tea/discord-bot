@@ -971,6 +971,7 @@ async function handleBulk(
     const role = interaction.options.getRole("role");
 
     if (!interaction.guild) return;
+    // WARNING: Fetches all cached members. If GuildMembers intent is enabled, add chunking to prevent OOM.
     await interaction.guild.members.fetch();
 
     const allMembers = [...interaction.guild.members.cache.values()].filter((m) => !m.user.bot);

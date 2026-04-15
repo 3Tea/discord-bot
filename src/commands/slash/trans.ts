@@ -2,6 +2,8 @@ import axios from "axios";
 import { bold, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from "discord.js";
 
 import { descriptionLocales } from "../../util/i18n/commandLocales";
+import { resolveLocale } from "../../util/i18n/locale";
+import { t } from "../../util/i18n/t";
 import Reply from "../../util/decorator/reply";
 
 async function translate(text: string, to: string): Promise<string> {
@@ -35,13 +37,14 @@ export default {
                 .setDescription(`${bold(translated)}`);
 
             return Reply.embedEdit(interaction, embed);
-        } catch (error) {
+        } catch {
+            const locale = await resolveLocale(interaction).catch(() => "en" as const);
             const content = interaction.options.getString("word", true);
             const embed = new EmbedBuilder()
                 .setColor("#00ff44")
                 .setTimestamp()
                 .setTitle(`${content}`)
-                .setDescription(`${bold((error as Error).message)}`);
+                .setDescription(`${bold(t(locale, "trans.error"))}`);
 
             return Reply.embedEdit(interaction, embed);
         }

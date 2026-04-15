@@ -85,6 +85,7 @@ export default {
             }
 
             // Get balances before
+            // NOTE: Displayed before/after values may be slightly stale under concurrency. The actual transfer is atomic.
             const giverBefore = await CurrencyService.getBalance(giverId, guildId);
             const receiverBefore = await CurrencyService.getBalance(target.id, guildId);
 

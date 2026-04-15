@@ -1,6 +1,8 @@
 import UserEconomyModel from "../../models/userEconomy.model";
 import CurrencyService from "./currency.service";
 import { tryStarDrop } from "../../util/economy/starDrop";
+import { randomInRange } from "../../util/math/random";
+import { isPrime } from "../../util/math/prime";
 import type { Buff } from "./merchant.service";
 
 // --- Types ---
@@ -89,20 +91,6 @@ const TIER_3 = [
 ];
 
 // --- Helpers ---
-
-function randomInRange(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function isPrime(n: number): boolean {
-    if (n < 2) return false;
-    if (n === 2) return true;
-    if (n % 2 === 0) return false;
-    for (let i = 3; i * i <= n; i += 2) {
-        if (n % i === 0) return false;
-    }
-    return true;
-}
 
 function rollMonster(floor: number): { name: string; emoji: string } {
     if (floor <= 5) return TIER_1[randomInRange(0, TIER_1.length - 1)];

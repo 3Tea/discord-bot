@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import { MONGO } from "../../util/config/index";
 import { logger } from "../../util/log/logger.mixed";
 
+const maskedUrl = MONGO.DB_URL.replace(/:\/\/[^@]+@/, "://*****@");
+
 mongoose
     .connect(MONGO.DB_URL, {
         autoCreate: true,
@@ -13,7 +15,7 @@ mongoose
     })
     .then(
         () => {
-            logger.debug(`[ Database =>] Connection to the database successful. ${MONGO.DB_URL}`);
+            logger.debug(`[ Database =>] Connection to the database successful. ${maskedUrl}`);
         },
-        (err: Error) => logger.error(`[ Database =>] The connection to the database failed: ${err}. = ${MONGO.DB_URL}`)
+        (err: Error) => logger.error(`[ Database =>] The connection to the database failed: ${err}. = ${maskedUrl}`)
     );

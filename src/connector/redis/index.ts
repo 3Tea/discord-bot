@@ -172,6 +172,23 @@ export class RedisService {
         return true;
     }
 
+    async incrKey(key: string, ttl?: number): Promise<number> {
+        if (this.connected) {
+            try {
+                const val = await this.client.incr(key);
+                if (ttl && val === 1) {
+                    await this.client.expire(key, ttl);
+                }
+                return val;
+            } catch {
+                // fall through to in-memory
+            }
+        }
+        const current = (this.fallback.get<number>(key) ?? 0) + 1;
+        this.fallback.set(key, current, ttl ?? this.ttl);
+        return current;
+    }
+
     async getKey(key: string): Promise<string | null> {
         if (this.connected) {
             try {

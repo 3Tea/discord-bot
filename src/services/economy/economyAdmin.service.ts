@@ -405,6 +405,7 @@ async function rollbackSnapshot(snapshotId: string, guildId: string): Promise<Ro
     await snapshot.save();
 
     if (snapshot.data.length > 0) {
+        // NOTE: coinDelta records the restored absolute value, not the actual delta from current balance. By design.
         const txDocs = snapshot.data.map((entry) => ({
             userId: entry.userId,
             guildId,
@@ -489,6 +490,7 @@ async function reverseTransaction(
     adminId: string
 ): Promise<{ original: { type: string; coinDelta: number; gemDelta: number }; reversedId: string }> {
     if (!/^[a-f0-9]+$/i.test(shortId)) throw new Error("TRANSACTION_NOT_FOUND");
+    if (shortId.length > 24) throw new Error("INVALID_ID");
     const regex = new RegExp(`${shortId}$`);
     const matches = await TransactionModel.find({ guildId, _id: { $regex: regex } })
         .sort({ createdAt: -1 })
@@ -504,11 +506,21 @@ async function reverseTransaction(
     if (nonReversibleTypes.includes(original.type)) throw new Error("NOT_REVERSIBLE");
     if (original.metadata?.reversed) throw new Error("ALREADY_REVERSED");
 
-    const incFields: Record<string, number> = {};
-    if (original.coinDelta !== 0) incFields.coin = -original.coinDelta;
-    if (original.gemDelta !== 0) incFields.gem = -original.gemDelta;
-    if (Object.keys(incFields).length > 0) {
-        await UserEconomyModel.findOneAndUpdate({ userId: original.userId, guildId }, { $inc: incFields });
+    // Clamp reversal to zero — prevents negative balance when user has spent coins since the original transaction
+    const filter = { userId: original.userId, guildId };
+    if (original.coinDelta > 0) {
+        await UserEconomyModel.updateOne(filter, [
+            { $set: { coin: { $max: [{ $subtract: ["$coin", original.coinDelta] }, 0] } } },
+        ]);
+    } else if (original.coinDelta < 0) {
+        await UserEconomyModel.updateOne(filter, { $inc: { coin: -original.coinDelta } });
+    }
+    if (original.gemDelta > 0) {
+        await UserEconomyModel.updateOne(filter, [
+            { $set: { gem: { $max: [{ $subtract: ["$gem", original.gemDelta] }, 0] } } },
+        ]);
+    } else if (original.gemDelta < 0) {
+        await UserEconomyModel.updateOne(filter, { $inc: { gem: -original.gemDelta } });
     }
 
     const reverseTx = await TransactionModel.create({

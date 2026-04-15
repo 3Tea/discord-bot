@@ -9,6 +9,7 @@ import {
 
 import infoBot from "../../../package.json";
 import reply from "../../util/decorator/reply";
+import { URL_HOMEPAGE, URL_DISCUSSIONS, URL_REPORT_BUG } from "../../util/config/index";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
@@ -101,17 +102,17 @@ export default {
 
         const homepage = new ButtonBuilder()
             .setLabel(t(locale, "btn.homepage"))
-            .setURL(`${process.env.URL_HOMEPAGE}`)
+            .setURL(URL_HOMEPAGE)
             .setStyle(ButtonStyle.Link);
 
         const discussions = new ButtonBuilder()
             .setLabel(t(locale, "btn.discussions"))
-            .setURL(`${process.env.URL_DISCUSSIONS}`)
+            .setURL(URL_DISCUSSIONS)
             .setStyle(ButtonStyle.Link);
 
         const reportBug = new ButtonBuilder()
             .setLabel(t(locale, "btn.report_bug"))
-            .setURL(`${process.env.URL_REPORT_BUG}`)
+            .setURL(URL_REPORT_BUG)
             .setStyle(ButtonStyle.Link);
 
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(homepage, discussions, reportBug);

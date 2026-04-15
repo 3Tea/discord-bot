@@ -147,8 +147,12 @@ async function setGem(userId: string, guildId: string, amount: number): Promise<
 async function exchange(userId: string, guildId: string, gemAmount: number, ratePerGem: number): Promise<IUserEconomy> {
     const coinCost = gemAmount * ratePerGem;
     await deduct(userId, guildId, coinCost, 0, "exchange", { gemAmount, ratePerGem });
-    const updated = await addGem(userId, guildId, gemAmount, "exchange", { coinCost, ratePerGem });
-    return updated;
+    try {
+        return await addGem(userId, guildId, gemAmount, "exchange", { coinCost, ratePerGem });
+    } catch (error) {
+        await addCoin(userId, guildId, coinCost, "exchange", { gemAmount, ratePerGem, refund: true });
+        throw error;
+    }
 }
 
 const CurrencyService = {

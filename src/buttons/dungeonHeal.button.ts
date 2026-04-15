@@ -1,4 +1,4 @@
-import { ButtonInteraction, EmbedBuilder } from "discord.js";
+import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
 import CurrencyService from "../services/economy/currency.service";
 import MerchantService from "../services/economy/merchant.service";
@@ -21,7 +21,7 @@ export default {
         const merchantState = (await redis.getJson(merchantKey)) as MerchantState | null;
         if (!merchantState) {
             const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-            await interaction.reply({ content: t(fallbackLocale, "dungeon.merchant.timeout"), ephemeral: true });
+            await interaction.reply({ content: t(fallbackLocale, "dungeon.merchant.timeout"), flags: MessageFlags.Ephemeral });
             return;
         }
 
@@ -38,13 +38,13 @@ export default {
         // Validate run state exists before spending coin
         const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
         if (!runState) {
-            await interaction.reply({ content: t(locale, "dungeon.run.timeout"), ephemeral: true });
+            await interaction.reply({ content: t(locale, "dungeon.run.timeout"), flags: MessageFlags.Ephemeral });
             return;
         }
 
         // Check HP already full
         if (merchantState.currentHp >= 100) {
-            await interaction.reply({ content: t(locale, "dungeon.merchant.hp_full"), ephemeral: true });
+            await interaction.reply({ content: t(locale, "dungeon.merchant.hp_full"), flags: MessageFlags.Ephemeral });
             // Restore merchant state since no purchase happened
             await redis.setJson(merchantKey, merchantState, 30);
             return;
@@ -65,7 +65,7 @@ export default {
                 error instanceof Error && error.name === "InsufficientFundsError"
                     ? t(locale, "dungeon.merchant.no_coin")
                     : t(locale, "common.error");
-            await interaction.followUp({ content: msg, ephemeral: true });
+            await interaction.followUp({ content: msg, flags: MessageFlags.Ephemeral });
             // Clear stale merchant embed — show continue/leave
             await interaction.editReply({
                 embeds: [

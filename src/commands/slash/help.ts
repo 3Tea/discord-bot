@@ -14,7 +14,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
-import { SUPPORT_SERVER_LINK } from "../../util/config/index";
+import { SUPPORT_SERVER_LINK, URL_HOMEPAGE, URL_DISCUSSIONS, URL_REPORT_BUG } from "../../util/config/index";
 
 /** Discord embed field value max length; leave margin for safety. */
 const FIELD_VALUE_SAFE_MAX = 1000;
@@ -73,22 +73,22 @@ export default {
 
         const homepage = new ButtonBuilder()
             .setLabel(t(locale, "btn.homepage"))
-            .setURL(`${process.env.URL_HOMEPAGE}`)
+            .setURL(URL_HOMEPAGE)
             .setStyle(ButtonStyle.Link);
 
         const discussions = new ButtonBuilder()
             .setLabel(t(locale, "btn.discussions"))
-            .setURL(`${process.env.URL_DISCUSSIONS}`)
+            .setURL(URL_DISCUSSIONS)
             .setStyle(ButtonStyle.Link);
 
         const reportBug = new ButtonBuilder()
             .setLabel(t(locale, "btn.report_bug"))
-            .setURL(`${process.env.URL_REPORT_BUG}`)
+            .setURL(URL_REPORT_BUG)
             .setStyle(ButtonStyle.Link);
 
         const guide = new ButtonBuilder()
             .setLabel(t(locale, "btn.guide"))
-            .setURL(`${process.env.URL_HOMEPAGE}/guide`)
+            .setURL(`${URL_HOMEPAGE}/guide`)
             .setStyle(ButtonStyle.Link);
 
         const buttons = [homepage, guide, discussions, reportBug];

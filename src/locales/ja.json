@@ -2,6 +2,7 @@
     "common.error": "エラーが発生しました。後でもう一度試してね。",
     "common.no_permission": "管理者権限が必要だよ。",
     "common.unknown_subcommand": "不明なサブコマンドだよ。",
+    "trans.error": "翻訳に失敗しました。後でもう一度お試しください。",
     "common.guild_only": "このコマンドはサーバー内でのみ使用できるよ。",
     "balance.title": "{{username}}のウォレット",
     "balance.coin": "Coin",

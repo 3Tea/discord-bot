@@ -20,7 +20,8 @@ async function main(): Promise<void> {
     const { initializeClient } = await import("../client");
     await initializeClient();
 
-    await import("../bot");
+    const { login } = await import("../bot");
+    await login();
 
     const { startGuildStatsAggregator } = await import("../util/xp/guildStatsAggregator");
     startGuildStatsAggregator();

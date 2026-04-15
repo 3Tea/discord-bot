@@ -2,6 +2,7 @@
     "common.error": "Bir hata oluştu. Lütfen daha sonra tekrar deneyin.",
     "common.no_permission": "Yönetici iznine ihtiyacınız var.",
     "common.unknown_subcommand": "Bilinmeyen alt komut.",
+    "trans.error": "Çeviri başarısız oldu. Lütfen daha sonra tekrar deneyin.",
     "common.guild_only": "Bu komut yalnızca bir sunucuda kullanılabilir.",
     "balance.title": "{{username}} Cüzdanı",
     "balance.coin": "Coin",

@@ -2,6 +2,7 @@
     "common.error": "Ocorreu um erro. Tente novamente mais tarde.",
     "common.no_permission": "Você precisa de permissão de Administrador.",
     "common.unknown_subcommand": "Subcomando desconhecido.",
+    "trans.error": "A tradução falhou. Tente novamente mais tarde.",
     "common.guild_only": "Este comando só pode ser usado em um servidor.",
     "balance.title": "Carteira de {{username}}",
     "balance.coin": "Coin",

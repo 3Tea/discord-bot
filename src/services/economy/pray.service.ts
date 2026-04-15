@@ -1,4 +1,6 @@
 import UserEconomyModel from "../../models/userEconomy.model";
+import { randomInRange } from "../../util/math/random";
+import { isConsecutiveUTCDay } from "../../util/date/utc";
 import CurrencyService from "./currency.service";
 import WalletService from "./wallet.service";
 
@@ -32,16 +34,6 @@ const STREAK_MILESTONES = [
     { days: 30, bonusCoin: 500, bonusGem: 5 },
 ] as const;
 
-function randomInRange(min: number, max: number): number {
-    return min + Math.floor(Math.random() * (max - min + 1));
-}
-
-function isConsecutiveUTCDay(prev: Date, now: Date): boolean {
-    const prevDay = new Date(Date.UTC(prev.getUTCFullYear(), prev.getUTCMonth(), prev.getUTCDate()));
-    const nowDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    const diffMs = nowDay.getTime() - prevDay.getTime();
-    return diffMs === 24 * 60 * 60 * 1000;
-}
 
 async function pray(userId: string, guildId: string, targetId?: string): Promise<PrayResult> {
     const now = new Date();
