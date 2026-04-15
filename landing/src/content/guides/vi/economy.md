@@ -137,14 +137,14 @@ Kiếm star qua nhận hàng ngày, rơi ngẫu nhiên từ hoạt động, và 
 
 ### Quản Lý Tiền Tệ
 
-Dùng `/economy` để điều chỉnh số dư của bất kỳ người dùng nào:
+Dùng `/economy balance` để điều chỉnh số dư của bất kỳ người dùng nào:
 
 | Lệnh Con | Mô Tả | Ví Dụ |
 |----------|--------|--------|
-| `/economy set-coin` | Đặt số coin chính xác | `/economy set-coin user:@user amount:500` |
-| `/economy add-coin` | Thêm (hoặc trừ) coin | `/economy add-coin user:@user amount:100` |
-| `/economy set-gem` | Đặt số gem chính xác | `/economy set-gem user:@user amount:10` |
-| `/economy add-gem` | Thêm (hoặc trừ) gem | `/economy add-gem user:@user amount:5` |
+| `/economy balance set-coin` | Đặt số coin chính xác | `/economy balance set-coin user:@user amount:500` |
+| `/economy balance add-coin` | Thêm (hoặc trừ) coin | `/economy balance add-coin user:@user amount:100` |
+| `/economy balance set-gem` | Đặt số gem chính xác | `/economy balance set-gem user:@user amount:10` |
+| `/economy balance add-gem` | Thêm (hoặc trừ) gem | `/economy balance add-gem user:@user amount:5` |
 
 Mọi thay đổi tiền tệ đều được ghi lại trong lịch sử giao dịch.
 
@@ -161,7 +161,33 @@ Mọi thay đổi tiền tệ đều được ghi lại trong lịch sử giao d
 
 | Nhóm Lệnh | Điều Chỉnh |
 |-----------|-----------|
-| `/economy reward-config-*` | Thưởng coin/gem khi lên cấp, thưởng coin khi chat thoại, thưởng gem theo mốc |
-| `/economy gambling-config-*` | Cược tối thiểu/tối đa, thời gian chờ cờ bạc, bật/tắt cờ bạc |
-| `/economy work-config-*` | Thời gian chờ làm việc/câu cá, thưởng coin tối thiểu/tối đa |
-| `/economy social-config-*` | Số coin tặng tối đa, thời gian chờ cướp, tỉ lệ thành công, phần trăm cướp/phạt |
+| `/economy config reward-*` | Thưởng coin/gem khi lên cấp, thưởng coin khi chat thoại, thưởng gem theo mốc |
+| `/economy config gambling-*` | Cược tối thiểu/tối đa, thời gian chờ cờ bạc, bật/tắt cờ bạc |
+| `/economy config work-*` | Thời gian chờ làm việc/câu cá, thưởng coin tối thiểu/tối đa |
+| `/economy config social-*` | Số coin tặng tối đa, thời gian chờ cướp, tỉ lệ thành công, phần trăm cướp/phạt |
+
+### Bảng Điều Khiển, Kiểm Tra & Công Cụ Nâng Cao
+
+Nhóm lệnh `/economy admin` cung cấp khả năng giám sát và kiểm soát toàn diện:
+
+| Lệnh Con | Chức Năng |
+|----------|-----------|
+| `/economy admin dashboard` | Tổng quan kinh tế: lưu thông coin/gem, dòng chảy 24h, phân phối tài sản, so sánh tuần trước, cảnh báo bất thường |
+| `/economy admin history <user>` | Lịch sử giao dịch phân trang với bộ lọc (loại, khoảng thời gian) |
+| `/economy admin reverse <id>` | Hoàn tác một giao dịch cụ thể theo ID |
+| `/economy admin freeze/unfreeze <user>` | Khóa/mở khóa người dùng khỏi tất cả lệnh kinh tế (pray, curse, work, fish, gamble, gift, rob, shop, mine, dungeon) |
+| `/economy admin reset <scope>` | Reset coin, gem, streak hoặc toàn bộ kinh tế — tự động tạo snapshot trước |
+| `/economy admin rollback <id>` | Khôi phục kinh tế server từ snapshot đã lưu |
+| `/economy admin log-setup <channel>` | Cấu hình kênh nhận thông báo nhật ký kinh tế |
+| `/economy admin log-config` | Đặt ngưỡng ghi nhật ký (chuyển khoản lớn, thắng cờ bạc, hành động admin) |
+
+### Thao Tác Hàng Loạt
+
+Dùng `/economy bulk` để thay đổi tiền tệ hàng loạt:
+
+| Lệnh Con | Chức Năng |
+|----------|-----------|
+| `/economy bulk distribute` | Phân phối coin hoặc gem cho tất cả thành viên (hoặc một role cụ thể) |
+| `/economy bulk tax` | Thu coin hoặc gem từ tất cả thành viên |
+
+> **Lưu ý:** Thao tác bulk yêu cầu xác nhận và có thời gian chờ 60 giây. Reset luôn tự động lưu snapshot để có thể rollback.

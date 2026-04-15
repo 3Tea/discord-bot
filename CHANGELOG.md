@@ -8,6 +8,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Added
 
+- **Economy admin tools** — comprehensive server economy management via restructured `/economy` command.
+  - Command restructured into 4 groups: `balance`, `config`, `admin`, `bulk` (breaking change: `/economy set-coin` → `/economy balance set-coin`).
+  - Dashboard (`/economy admin dashboard`): circulation overview, 24h coin flow, source/sink breakdown, wealth distribution, week-over-week comparison, anomaly detection.
+  - Audit tools: transaction history with pagination and filters, reverse specific transactions, freeze/unfreeze user economy access.
+  - Reset system: flexible reset (coin/gem/streak/all) with auto-snapshot before reset and rollback capability.
+  - Bulk operations: distribute or tax coin/gem to all members or by role, with confirmation gates and 60s cooldown.
+  - Economy log channel: opt-in admin-configured channel for notable transactions (large amounts, gambling wins, rob success, admin actions).
+  - Freeze enforcement: frozen users blocked from all 10 economy commands (pray, curse, work, fish, gamble, gift, rob, shop, mine, dungeon).
 - **Daily quest system** — 3 random quests per day (1 easy + 1 medium + 1 hard) with hybrid rewards.
   - 18 quest templates across 3 difficulty tiers, deterministic generation via `SHA-256(userId + date)`.
   - `/quest view` shows today's quests + progress, `/quest claim` collects all-3-complete star bonus.

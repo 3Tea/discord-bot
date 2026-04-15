@@ -60,6 +60,9 @@ src/
     guildGamblingConfig.model.ts # Per-guild gambling settings
     guildSocialConfig.model.ts # Social command toggles
     guildWorkConfig.model.ts # Work command settings
+    economyFreeze.model.ts  # Economy freeze records (frozen users)
+    economyLogConfig.model.ts # Per-guild economy log channel config
+    economySnapshot.model.ts # Economy snapshots for reset rollback
   services/
     economy/              # Currency, pray/curse, shop, gambling, work services
       currency.service.ts # Coin/gem balance operations
@@ -73,6 +76,9 @@ src/
       social.service.ts   # Social command toggles
       wallet.service.ts   # Global star wallet operations
       globalShop.service.ts # Global shop purchase flow
+      economyAdmin.service.ts # Dashboard, freeze, reset/rollback, audit, reverse
+      economyBulk.service.ts  # Bulk distribute/tax operations
+      economyLog.service.ts   # Economy log channel service
     premium/              # Subscription tier system
       premium.config.ts   # Tier definitions (free/star/galaxy) and benefit values
       premium.service.ts  # CRUD, status lookup, Redis caching (5min TTL)
@@ -519,6 +525,7 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/commands.md](docs/steering/commands.md) | Full command inventory, button handlers, events, i18n, and business rules |
 | [docs/steering/xp-system.md](docs/steering/xp-system.md) | XP earning, leveling formula, snapshots, server stats, leaderboards, canvas rendering |
 | [docs/steering/economy-system.md](docs/steering/economy-system.md) | Coins, gems, pray/curse, streaks, shop, transactions, services |
+| [docs/steering/economy-admin.md](docs/steering/economy-admin.md) | Economy admin tools: dashboard, freeze, reset/rollback, bulk operations, audit, log channel |
 | [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md) | Root `CHANGELOG.md` + `package.json` version; CI posts the matching `## [x.y.z]` section to Discord |
 | [docs/steering/landing-page.md](docs/steering/landing-page.md) | Astro 6 landing site: routes, components, i18n, content collections, design system, deployment |
 | [docs/steering/confession-system.md](docs/steering/confession-system.md) | Anonymous confessions: submit flows, voting, replies, moderation, economy integration |

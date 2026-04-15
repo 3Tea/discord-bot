@@ -94,16 +94,155 @@ Soft delete: sets `enabled: false`. Does not physically delete from database.
 
 ## Admin Commands (`/economy`)
 
-All require `Administrator` permission. Responses are ephemeral.
+The `/economy` command is organized into 4 subcommand groups. All admin and bulk subcommands require `Administrator` permission. Responses are ephemeral.
+
+### Group Structure
+
+| Group | Purpose |
+|-------|---------|
+| `balance` | Read-only balance queries (`balance check`) |
+| `config` | Server configuration (`gambling-config-*`, `work-config-*`, `social-config-*`, `reward-config-*`) |
+| `admin` | Administrative tools — audit, freeze, reset, logs |
+| `bulk` | Mass currency operations across multiple users |
+
+### `/economy balance`
+
+| Subcommand | Action |
+|------------|--------|
+| `balance check @user` | View a user's coin, gem, streak, and last pray/curse timestamps |
+
+### `/economy config`
+
+All pre-existing per-guild configuration subcommands (`gambling-config-*`, `work-config-*`, `social-config-*`, `reward-config-*`) now live under this group. See individual feature sections below for parameters.
+
+### `/economy admin` — Balance Management
 
 | Subcommand | Action | Transaction logged |
 |------------|--------|-------------------|
-| `set-coin` | Set exact coin amount | Delta (new - old) |
-| `add-coin` | Add/subtract coins | Exact amount |
-| `set-gem` | Set exact gem amount | Delta (new - old) |
-| `add-gem` | Add/subtract gems | Exact amount |
+| `admin set-coin @user <amount>` | Set exact coin amount | Delta (new − old), type `admin` |
+| `admin add-coin @user <amount>` | Add/subtract coins | Exact amount, type `admin` |
+| `admin set-gem @user <amount>` | Set exact gem amount | Delta (new − old), type `admin` |
+| `admin add-gem @user <amount>` | Add/subtract gems | Exact amount, type `admin` |
 
 Transaction type: `"admin"` with metadata `{ action: "set-coin" | "add-coin" | ... }`.
+
+### `/economy admin` — Dashboard
+
+`/economy admin dashboard` — Server economy overview. No arguments. Ephemeral response.
+
+Displays:
+- **Circulation stats**: Total coins and gems in circulation, number of active holders
+- **24h flow**: Coins earned vs. spent in the last 24 hours, net balance
+- **Source/sink breakdown**: Contribution by transaction type (pray, work, gambling, admin, etc.)
+- **Wealth distribution**: Percentile breakdown (top 1%, top 10%, median, bottom 10%)
+- **Week comparison**: Current week vs. prior week totals
+- **Anomaly alerts**: Flags unusual spikes (single admin grant > threshold, unusually high gambling wins, etc.)
+
+### `/economy admin` — Transaction History
+
+`/economy admin history @user [type] [limit]`
+
+Paginated audit trail of a user's transactions.
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `@user` | User | Target user (required) |
+| `type` | String | Filter by transaction type (optional) |
+| `limit` | Integer | Entries per page, default 10, max 25 (optional) |
+
+- Shows: short transaction ID, type, coin delta, gem delta, timestamp, metadata summary
+- Paginated with Previous / Next buttons
+- Short IDs are used with `admin reverse` to undo specific entries
+
+### `/economy admin` — Reverse Transaction
+
+`/economy admin reverse <id>`
+
+Undoes a specific transaction by its short ID.
+
+| Behaviour | Detail |
+|-----------|--------|
+| Lookup | Finds transaction by short ID within the guild |
+| Reversal | Applies the inverse delta (`coinDelta × -1`, `gemDelta × -1`) to the user's balance |
+| Logging | Creates a new transaction of type `"reverse"` referencing the original ID |
+| Balance guard | If reversal would make balance negative, command fails with an error |
+| Idempotency | Each transaction can only be reversed once (tracked via metadata flag) |
+
+### `/economy admin` — Freeze / Unfreeze
+
+| Subcommand | Action |
+|------------|--------|
+| `admin freeze @user [reason]` | Locks the user's economy access for this guild |
+| `admin unfreeze @user` | Removes the freeze |
+
+While frozen a user cannot earn coins/gems from any source (pray, work, gambling, passive rewards) and cannot use shop or transfer commands. Admin balance edits bypass the freeze check. The freeze record stores `frozenBy` (admin user ID) and optional `reason`. See `EconomyFreeze` model below.
+
+### `/economy admin` — Reset with Snapshot
+
+`/economy admin reset <scope> [@user]`
+
+Resets economy data after auto-snapshotting the current state.
+
+| Scope | What is reset |
+|-------|--------------|
+| `coin` | Coin balance → 0 |
+| `gem` | Gem balance → 0 |
+| `streak` | `prayStreak`, `lastStreakDate` → 0 / null |
+| `all` | All of the above + `lastPray`, `lastCurse` |
+
+| Option | Description |
+|--------|-------------|
+| `@user` | Reset a specific user. Omit to reset **all members** of the guild (confirmation prompt shown) |
+
+Before any reset, an `EconomySnapshot` record is created automatically. Transaction type: `"reset"`.
+
+### `/economy admin` — Rollback
+
+`/economy admin rollback <snapshot-id>`
+
+Restores balances from a previously created snapshot.
+
+- Lists recent snapshots if no ID is supplied (up to 10)
+- Applies stored coin/gem/streak values back to `UserEconomy` records
+- Creates transactions of type `"rollback"` for each affected user
+- Partial rollback (single user) supported when snapshot was created for that user only
+
+### `/economy admin` — Log Channel
+
+| Subcommand | Action |
+|------------|--------|
+| `admin log-setup #channel` | Set the economy event log channel for this guild |
+| `admin log-config` | View or update log thresholds (min delta to log, transaction types to include) |
+
+When configured, qualifying transactions are posted to the log channel as embeds: user, type, delta, running balance, timestamp. Thresholds prevent log spam from small routine transactions. See `EconomyLogConfig` model and `EconomyLogService` below.
+
+### `/economy bulk` — Bulk Distribute
+
+`/economy bulk distribute <amount> <currency> [@role]`
+
+Awards currency to multiple members at once.
+
+| Option | Description |
+|--------|-------------|
+| `amount` | Coin or gem amount per user |
+| `currency` | `coin` or `gem` |
+| `@role` | Restrict to members with this role. Omit for all members |
+
+Uses `bulkWrite` for efficiency. Transaction type: `"bulk_distribute"` per user. Progress embed shown; large guilds are processed in batches.
+
+### `/economy bulk` — Bulk Tax
+
+`/economy bulk tax <amount> <currency> [@role]`
+
+Deducts currency from multiple members at once.
+
+| Option | Description |
+|--------|-------------|
+| `amount` | Flat amount to deduct per user |
+| `currency` | `coin` or `gem` |
+| `@role` | Restrict to members with this role. Omit for all members |
+
+Members whose balance would go below 0 are set to 0 (no negative balances). Transaction type: `"bulk_tax"` per user.
 
 ## Data Models
 
@@ -151,7 +290,7 @@ Mine/dungeon depth and checkpoint fields track per-user per-guild progression fo
 |-------|------|---------|
 | `userId` | String | required |
 | `guildId` | String | required |
-| `type` | Enum | `pray` / `curse` / `purchase` / `exchange` / `streak_bonus` / `admin` |
+| `type` | Enum | see below |
 | `coinDelta` | Number | 0 |
 | `gemDelta` | Number | 0 |
 | `metadata` | Mixed | {} |
@@ -159,11 +298,88 @@ Mine/dungeon depth and checkpoint fields track per-user per-guild progression fo
 
 **Index**: `(userId, guildId, createdAt: -1)` for transaction history.
 
+**Transaction types**:
+
+| Type | Source |
+|------|--------|
+| `pray` | `/pray` command |
+| `curse` | `/curse` command |
+| `purchase` | Shop buy |
+| `exchange` | Currency exchange |
+| `streak_bonus` | Pray streak milestone |
+| `admin` | `/economy admin set-*/add-*` |
+| `level_up` | XP level-up passive reward |
+| `voice_reward` | Voice time passive reward |
+| `gambling` | `/gamble` games |
+| `work` | `/work` command |
+| `fish` | `/fish` command |
+| `gift` | `/gift` transfer |
+| `rob` | `/rob` steal |
+| `rob_penalty` | `/rob` failed penalty |
+| `bulk_distribute` | `/economy bulk distribute` |
+| `bulk_tax` | `/economy bulk tax` |
+| `reverse` | `/economy admin reverse` — undo of another transaction |
+| `reset` | `/economy admin reset` — balance zeroed |
+| `rollback` | `/economy admin rollback` — balance restored from snapshot |
+
+> **Two-place edit rule**: Adding a `TransactionType` requires updating both the TypeScript union (line ~3) and the schema `enum` array (line ~44) in `transaction.model.ts`. Missing either causes runtime errors TypeScript will not catch.
+
 **Metadata examples**:
 - Pray: `{ targetId: "..." }` or `{}`
 - Purchase: `{ itemId: "...", itemName: "..." }`
 - Admin: `{ action: "set-coin", newTotal: 500 }`
 - Streak bonus: `{ milestone: 7, bonusCoin: 150, bonusGem: 1 }`
+- Reverse: `{ originalId: "<transaction short ID>", originalType: "admin" }`
+- Reset: `{ scope: "all", resetBy: "<adminUserId>", snapshotId: "<snapshot short ID>" }`
+- Rollback: `{ snapshotId: "<snapshot short ID>", restoredBy: "<adminUserId>" }`
+- Bulk distribute/tax: `{ adminId: "<userId>", roleId?: "<roleId>", totalAffected: 42 }`
+
+### EconomyFreeze
+
+Tracks frozen users who cannot access economy features.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `userId` | String | required |
+| `guildId` | String | required |
+| `frozenBy` | String | Admin user ID who applied the freeze |
+| `reason` | String | Optional reason string |
+| `createdAt` | Date | Auto-managed |
+
+**Index**: Unique `(userId, guildId)`.
+
+Admin balance edits (`set-coin`, `add-coin`, etc.) bypass freeze checks. All other economy actions check this collection before proceeding.
+
+### EconomyLogConfig
+
+Per-guild configuration for the economy event log channel.
+
+| Field | Type | Default | Notes |
+|-------|------|---------|-------|
+| `guildId` | String | required | Unique |
+| `channelId` | String | required | Discord channel to post logs |
+| `enabled` | Boolean | `true` | Master toggle |
+| `minCoinDelta` | Number | `100` | Minimum absolute coin change to log |
+| `minGemDelta` | Number | `1` | Minimum absolute gem change to log |
+| `includedTypes` | String[] | all types | Transaction types to log (empty = all) |
+| `updatedAt` | Date | Auto-managed | |
+
+`EconomyLogService.shouldLog(transaction, config)` checks thresholds before posting. If no config exists for a guild, logging is silently skipped.
+
+### EconomySnapshot
+
+Economy state captured before a reset, used for rollback.
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `snapshotId` | String | Short ID for use with `admin rollback` |
+| `guildId` | String | required |
+| `scope` | Enum | `coin` / `gem` / `streak` / `all` |
+| `createdBy` | String | Admin user ID who triggered the reset |
+| `entries` | Array | `{ userId, coin, gem, prayStreak, lastStreakDate }[]` — one per affected user |
+| `createdAt` | Date | Auto-managed |
+
+Snapshots are immutable after creation. `admin rollback` reads `entries` and reapplies the stored values via `bulkWrite`.
 
 ## Services
 
@@ -197,6 +413,45 @@ Mine/dungeon depth and checkpoint fields track per-user per-guild progression fo
 | `addItem(guildId, data)` | Create shop item, prevent duplicate itemId |
 | `removeItem(guildId, itemId)` | Soft delete (enabled: false) |
 
+### EconomyAdminService (`services/economy/economyAdmin.service.ts`)
+
+Handles all privileged administrative operations.
+
+| Method | Description |
+|--------|-------------|
+| `getDashboard(guildId)` | Aggregates circulation stats, 24h flow, source/sink breakdown, wealth distribution, week comparison, and anomaly alerts |
+| `getHistory(userId, guildId, options)` | Paginated transaction history with optional type and limit filters |
+| `reverseTransaction(shortId, guildId, adminId)` | Looks up transaction by short ID, applies inverse delta, creates `reverse` transaction. Fails if balance would go negative or already reversed |
+| `freezeUser(userId, guildId, frozenBy, reason?)` | Upserts `EconomyFreeze` record |
+| `unfreezeUser(userId, guildId)` | Deletes `EconomyFreeze` record |
+| `isFrozen(userId, guildId)` | Boolean check used by economy commands before processing |
+| `resetEconomy(guildId, scope, adminId, userId?)` | Auto-snapshots then zeroes selected fields. Guild-wide if `userId` omitted |
+| `rollback(snapshotId, guildId, adminId)` | Restores `UserEconomy` records from `EconomySnapshot.entries` via `bulkWrite`, creates `rollback` transactions |
+
+### EconomyBulkService (`services/economy/economyBulk.service.ts`)
+
+Handles mass currency operations via `bulkWrite` for efficiency.
+
+| Method | Description |
+|--------|-------------|
+| `distribute(guildId, amount, currency, adminId, roleId?)` | Awards flat amount to all matching members. Uses MongoDB `bulkWrite` with `$inc`. Logs `bulk_distribute` transactions per user |
+| `tax(guildId, amount, currency, adminId, roleId?)` | Deducts flat amount from matching members (floors at 0). Logs `bulk_tax` transactions per user |
+
+Both methods return `{ affected: number }` and accept an optional `roleId` to restrict the target set to Discord role members.
+
+### EconomyLogService (`services/economy/economyLog.service.ts`)
+
+Opt-in per-guild transaction logging to a Discord channel.
+
+| Method | Description |
+|--------|-------------|
+| `getConfig(guildId)` | Fetches `EconomyLogConfig` with Redis cache (TTL 5 min) |
+| `setConfig(guildId, data)` | Upserts config, invalidates cache |
+| `shouldLog(transaction, config)` | Returns `true` if the transaction passes threshold and type filters |
+| `sendLog(transaction, guild)` | Posts a formatted embed to the configured channel. Silent no-op if no config or `shouldLog` is false |
+
+`sendLog` is called from `CurrencyService` after each successful transaction write. Errors in `sendLog` are caught and logged internally — they never propagate to the caller.
+
 ## Passive Activity Rewards
 
 Coin and gem rewards earned automatically through XP-tracked activity.
@@ -228,7 +483,7 @@ Per-guild via `GuildEconomyRewardConfig` model:
 | `voiceCoinInterval` | `30` | Minutes between voice coin awards |
 | `voiceCoinReward` | `10` | Coins per voice interval |
 
-Admin commands: `/economy reward-config-view`, `reward-config-toggle`, `reward-config-set`, `reward-config-milestone`
+Admin commands (under `/economy config`): `reward-config-view`, `reward-config-toggle`, `reward-config-set`, `reward-config-milestone`
 
 ### Dependency on XP
 
@@ -257,7 +512,7 @@ Per-guild via `GuildGamblingConfig` model:
 | `maxBet` | `500` | Maximum coin bet |
 | `cooldown` | `30` | Seconds between games per user |
 
-Admin commands: `/economy gambling-config-view`, `gambling-config-toggle`, `gambling-config-set`
+Admin commands (under `/economy config`): `gambling-config-view`, `gambling-config-toggle`, `gambling-config-set`
 
 ### Bet Flow
 
@@ -304,7 +559,7 @@ Per-guild via `GuildWorkConfig` model:
 | `fishCooldown` | `3600` (1h) | Fish cooldown in seconds |
 | `fishRewardMultiplier` | `1.0` | Multiplier applied to all fish rewards |
 
-Admin commands: `/economy work-config-view`, `work-config-toggle`, `work-config-set`
+Admin commands (under `/economy config`): `work-config-view`, `work-config-toggle`, `work-config-set`
 
 Transaction types: `"work"`, `"fish"`
 
@@ -346,6 +601,6 @@ Per-guild via `GuildSocialConfig` model:
 | `robMinBalance` | `100` | Target protection threshold |
 | `robImmunityDuration` | `7200` (2h) | Target immunity after rob |
 
-Admin commands: `/economy social-config-view`, `social-config-toggle`, `social-config-set`
+Admin commands (under `/economy config`): `social-config-view`, `social-config-toggle`, `social-config-set`
 
 Transaction types: `"gift"`, `"rob"`, `"rob_penalty"`

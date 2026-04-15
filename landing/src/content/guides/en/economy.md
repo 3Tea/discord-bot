@@ -137,14 +137,14 @@ For the full breakdown, see the [Star Guide](/en/guide/star).
 
 ### Managing Currency
 
-Use `/economy` to directly adjust any user's balance:
+Use `/economy balance` to directly adjust any user's balance:
 
 | Subcommand | Description | Example |
 |------------|-------------|---------|
-| `/economy set-coin` | Set a user's coin balance to an exact amount | `/economy set-coin user:@user amount:500` |
-| `/economy add-coin` | Add (or subtract with negative) coins | `/economy add-coin user:@user amount:100` |
-| `/economy set-gem` | Set a user's gem balance | `/economy set-gem user:@user amount:10` |
-| `/economy add-gem` | Add (or subtract) gems | `/economy add-gem user:@user amount:5` |
+| `/economy balance set-coin` | Set a user's coin balance to an exact amount | `/economy balance set-coin user:@user amount:500` |
+| `/economy balance add-coin` | Add (or subtract with negative) coins | `/economy balance add-coin user:@user amount:100` |
+| `/economy balance set-gem` | Set a user's gem balance | `/economy balance set-gem user:@user amount:10` |
+| `/economy balance add-gem` | Add (or subtract) gems | `/economy balance add-gem user:@user amount:5` |
 
 All currency changes are logged in the transaction history.
 
@@ -161,7 +161,33 @@ All currency changes are logged in the transaction history.
 
 | Command Group | What It Controls |
 |---------------|-----------------|
-| `/economy reward-config-*` | Level-up coin/gem rewards, voice chat coin rewards, milestone gem rewards |
-| `/economy gambling-config-*` | Min/max bet amounts, gambling cooldown, enable/disable gambling |
-| `/economy work-config-*` | Work/fish cooldowns, min/max coin rewards |
-| `/economy social-config-*` | Gift max amount, rob cooldown, success rate, steal/penalty percentages |
+| `/economy config reward-*` | Level-up coin/gem rewards, voice chat coin rewards, milestone gem rewards |
+| `/economy config gambling-*` | Min/max bet amounts, gambling cooldown, enable/disable gambling |
+| `/economy config work-*` | Work/fish cooldowns, min/max coin rewards |
+| `/economy config social-*` | Gift max amount, rob cooldown, success rate, steal/penalty percentages |
+
+### Dashboard, Audit & Advanced Tools
+
+The `/economy admin` group provides comprehensive oversight and control:
+
+| Subcommand | What It Does |
+|------------|-------------|
+| `/economy admin dashboard` | Economy overview: coin/gem circulation, 24h flow, wealth distribution, week-over-week comparison, anomaly alerts |
+| `/economy admin history <user>` | Paginated transaction history with filters (type, date range) |
+| `/economy admin reverse <id>` | Undo a specific transaction by ID |
+| `/economy admin freeze/unfreeze <user>` | Block/unblock a user from all economy commands (pray, curse, work, fish, gamble, gift, rob, shop, mine, dungeon) |
+| `/economy admin reset <scope>` | Reset coin, gem, streak, or all economy data — auto-creates a snapshot first |
+| `/economy admin rollback <id>` | Restore server economy from a saved snapshot |
+| `/economy admin log-setup <channel>` | Configure a channel to receive economy log notifications |
+| `/economy admin log-config` | Set thresholds for what gets logged (large transfers, gambling wins, admin actions) |
+
+### Bulk Operations
+
+Use `/economy bulk` for mass currency changes:
+
+| Subcommand | What It Does |
+|------------|-------------|
+| `/economy bulk distribute` | Give coin or gem to all members (or a specific role) at once |
+| `/economy bulk tax` | Collect coin or gem from all members |
+
+> **Warning:** Bulk operations require confirmation and have a 60-second cooldown. Reset always auto-saves a snapshot you can roll back to.
