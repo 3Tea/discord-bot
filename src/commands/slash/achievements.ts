@@ -42,7 +42,9 @@ export default {
             const pages = buildPages(interaction, locale, result.all, byCategory, result.newUnlocks);
 
             if (pages.length === 0) {
-                await interaction.editReply({ embeds: [new EmbedBuilder().setDescription(t(locale, "common.error")).setColor(0xed4245)] });
+                await interaction.editReply({
+                    embeds: [new EmbedBuilder().setDescription(t(locale, "common.error")).setColor(0xed4245)],
+                });
                 return;
             }
 
@@ -84,7 +86,11 @@ export default {
 
             await interaction.editReply({ embeds: [pages[pageIndex]], components: [buildRow(true)] }).catch(() => {});
         } catch {
-            await interaction.editReply({ embeds: [new EmbedBuilder().setDescription(t(locale, "common.error")).setColor(0xed4245)] }).catch(() => {});
+            await interaction
+                .editReply({
+                    embeds: [new EmbedBuilder().setDescription(t(locale, "common.error")).setColor(0xed4245)],
+                })
+                .catch(() => {});
         }
     },
 };
@@ -121,15 +127,9 @@ function buildOverviewEmbed(
         return `${emoji} ${name}: ${catUnlocked}/${catTotal}`;
     });
 
-    const totalCoin = all
-        .filter((s) => s.unlocked)
-        .reduce((sum, s) => sum + (s.def.reward.coin ?? 0), 0);
-    const totalGem = all
-        .filter((s) => s.unlocked)
-        .reduce((sum, s) => sum + (s.def.reward.gem ?? 0), 0);
-    const totalStar = all
-        .filter((s) => s.unlocked)
-        .reduce((sum, s) => sum + (s.def.reward.star ?? 0), 0);
+    const totalCoin = all.filter((s) => s.unlocked).reduce((sum, s) => sum + (s.def.reward.coin ?? 0), 0);
+    const totalGem = all.filter((s) => s.unlocked).reduce((sum, s) => sum + (s.def.reward.gem ?? 0), 0);
+    const totalStar = all.filter((s) => s.unlocked).reduce((sum, s) => sum + (s.def.reward.star ?? 0), 0);
 
     const totalRewardsLine = t(locale, "achievement.total_rewards", {
         coin: totalCoin.toLocaleString(),
@@ -140,14 +140,18 @@ function buildOverviewEmbed(
     let description = categoryLines.join("\n") + `\n\n${totalRewardsLine}`;
 
     if (newUnlocks.length > 0) {
-        const unlockLines = newUnlocks
-            .map((def) => `✅ ${t(locale, def.nameKey)} — ${formatReward(def)}`)
-            .join("\n");
+        const unlockLines = newUnlocks.map((def) => `✅ ${t(locale, def.nameKey)} — ${formatReward(def)}`).join("\n");
         description = `🎉 ${t(locale, "achievement.new_unlocks")}\n${unlockLines}\n\n---\n${description}`;
     }
 
     return new EmbedBuilder()
-        .setTitle(t(locale, "achievement.title", { username: interaction.user.username, unlocked: String(unlocked), total: String(total) }))
+        .setTitle(
+            t(locale, "achievement.title", {
+                username: interaction.user.username,
+                unlocked: String(unlocked),
+                total: String(total),
+            })
+        )
         .setDescription(description)
         .setColor(0xf1c40f)
         .setTimestamp();

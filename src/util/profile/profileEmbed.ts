@@ -27,8 +27,20 @@ export interface ProfileData {
 
 export function buildProfileEmbed(data: ProfileData, locale: SupportedLocale): EmbedBuilder {
     const {
-        xp, level, messageCount, voiceMinutes, reactionCount, serverRank,
-        coin, gem, star, prayStreak, questStreak, member, premiumBadge, achievementCount,
+        xp,
+        level,
+        messageCount,
+        voiceMinutes,
+        reactionCount,
+        serverRank,
+        coin,
+        gem,
+        star,
+        prayStreak,
+        questStreak,
+        member,
+        premiumBadge,
+        achievementCount,
     } = data;
 
     const progress = progressToNextLevel(xp);
@@ -40,9 +52,7 @@ export function buildProfileEmbed(data: ProfileData, locale: SupportedLocale): E
     const voiceM = voiceMinutes % 60;
     const voiceStr = `${voiceH}h ${voiceM}m`;
 
-    const joinDate = member.joinedAt
-        ? member.joinedAt.toISOString().slice(0, 10)
-        : "Unknown";
+    const joinDate = member.joinedAt ? member.joinedAt.toISOString().slice(0, 10) : "Unknown";
 
     const titleSuffix = premiumBadge ? ` ${premiumBadge}` : "";
 
@@ -82,7 +92,7 @@ export function buildProfileEmbed(data: ProfileData, locale: SupportedLocale): E
                           inline: true,
                       },
                   ]
-                : []),
+                : [])
         )
         .setFooter({ text: t(locale, "profile.member_since", { date: joinDate }) })
         .setTimestamp();

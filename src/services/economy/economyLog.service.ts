@@ -3,7 +3,15 @@ import redis from "../../connector/redis";
 import EconomyLogConfigModel, { IEconomyLogConfig } from "../../models/economyLogConfig.model";
 import { logger } from "../../util/log/logger.mixed";
 
-type LogEventType = "coin_transaction" | "gem_transaction" | "gambling_win" | "rob_success" | "admin_action" | "bulk_operation" | "freeze" | "reset";
+type LogEventType =
+    | "coin_transaction"
+    | "gem_transaction"
+    | "gambling_win"
+    | "rob_success"
+    | "admin_action"
+    | "bulk_operation"
+    | "freeze"
+    | "reset";
 
 let clientRef: Client | null = null;
 
@@ -63,7 +71,9 @@ async function sendLog(guildId: string, embed: EmbedBuilder): Promise<void> {
 
         await channel.send({ embeds: [embed] });
     } catch (error) {
-        logger.warn(`Economy log send failed for guild ${guildId}: ${error instanceof Error ? error.message : "Unknown"}`);
+        logger.warn(
+            `Economy log send failed for guild ${guildId}: ${error instanceof Error ? error.message : "Unknown"}`
+        );
     }
 }
 

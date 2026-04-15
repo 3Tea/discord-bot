@@ -337,7 +337,9 @@ async function resetEconomy(
 
     const snapshotCount = await EconomySnapshotModel.countDocuments({ guildId });
     if (snapshotCount > 10) {
-        const oldest = await EconomySnapshotModel.findOne({ guildId, restoredAt: { $ne: null } }).sort({ createdAt: 1 });
+        const oldest = await EconomySnapshotModel.findOne({ guildId, restoredAt: { $ne: null } }).sort({
+            createdAt: 1,
+        });
         if (oldest) {
             await EconomySnapshotModel.deleteOne({ _id: oldest._id });
         } else {
@@ -488,7 +490,10 @@ async function reverseTransaction(
 ): Promise<{ original: { type: string; coinDelta: number; gemDelta: number }; reversedId: string }> {
     if (!/^[a-f0-9]+$/i.test(shortId)) throw new Error("TRANSACTION_NOT_FOUND");
     const regex = new RegExp(`${shortId}$`);
-    const matches = await TransactionModel.find({ guildId, _id: { $regex: regex } }).sort({ createdAt: -1 }).limit(5).lean();
+    const matches = await TransactionModel.find({ guildId, _id: { $regex: regex } })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean();
 
     if (matches.length === 0) throw new Error("TRANSACTION_NOT_FOUND");
     if (matches.length > 1) throw new Error("AMBIGUOUS_ID");
@@ -503,10 +508,7 @@ async function reverseTransaction(
     if (original.coinDelta !== 0) incFields.coin = -original.coinDelta;
     if (original.gemDelta !== 0) incFields.gem = -original.gemDelta;
     if (Object.keys(incFields).length > 0) {
-        await UserEconomyModel.findOneAndUpdate(
-            { userId: original.userId, guildId },
-            { $inc: incFields }
-        );
+        await UserEconomyModel.findOneAndUpdate({ userId: original.userId, guildId }, { $inc: incFields });
     }
 
     const reverseTx = await TransactionModel.create({

@@ -1,9 +1,4 @@
-import {
-    AttachmentBuilder,
-    ChatInputCommandInteraction,
-    MessageFlags,
-    SlashCommandBuilder,
-} from "discord.js";
+import { AttachmentBuilder, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
 import MemberXPModel from "../../models/memberXP.model";
 import UserEconomyModel from "../../models/userEconomy.model";
 import UserWalletModel from "../../models/userWallet.model";
@@ -65,9 +60,7 @@ export default {
                 UserQuestModel.findOne({ userId: targetUser.id }).sort({ date: -1 }).lean(),
                 PremiumService.getConfig(targetUser.id),
                 PremiumService.getTier(targetUser.id),
-                memberXP
-                    ? MemberXPModel.countDocuments({ guildId, xp: { $gt: memberXP.xp } })
-                    : Promise.resolve(0),
+                memberXP ? MemberXPModel.countDocuments({ guildId, xp: { $gt: memberXP.xp } }) : Promise.resolve(0),
                 AchievementService.getUnlockedCount(targetUser.id, guildId),
             ]);
 

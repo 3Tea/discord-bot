@@ -13,12 +13,8 @@ export default {
         .setName("quest")
         .setDescription("Daily quests — complete tasks for coin and star rewards")
         .setDescriptionLocalizations(descriptionLocales("cmd.quest.desc"))
-        .addSubcommand((sub) =>
-            sub.setName("view").setDescription("View today's quests and progress")
-        )
-        .addSubcommand((sub) =>
-            sub.setName("claim").setDescription("Claim your all-quests-complete bonus")
-        ),
+        .addSubcommand((sub) => sub.setName("view").setDescription("View today's quests and progress"))
+        .addSubcommand((sub) => sub.setName("claim").setDescription("Claim your all-quests-complete bonus")),
 
     async execute(interaction: ChatInputCommandInteraction) {
         if (!interaction.inGuild()) {
@@ -44,10 +40,7 @@ export default {
     },
 };
 
-async function handleView(
-    interaction: ChatInputCommandInteraction,
-    locale: SupportedLocale
-): Promise<void> {
+async function handleView(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
     const userId = interaction.user.id;
     const doc = await QuestService.getOrCreateToday(userId);
     const tier = await PremiumService.getTier(userId);
@@ -75,23 +68,24 @@ async function handleView(
     });
 
     const completedCount = doc.quests.filter((q) => q.completed).length;
-    const streakLine = doc.questStreak > 0
-        ? t(locale, "quest.view.streak", { days: String(doc.questStreak) })
-        : t(locale, "quest.view.no_streak");
+    const streakLine =
+        doc.questStreak > 0
+            ? t(locale, "quest.view.streak", { days: String(doc.questStreak) })
+            : t(locale, "quest.view.no_streak");
 
     const embed = new EmbedBuilder()
         .setTitle(t(locale, "quest.view.title", { date }))
-        .setDescription(lines.join("\n") + `\n\n${t(locale, "quest.view.progress", { done: String(completedCount) })} | ${streakLine}`)
+        .setDescription(
+            lines.join("\n") +
+                `\n\n${t(locale, "quest.view.progress", { done: String(completedCount) })} | ${streakLine}`
+        )
         .setColor(completedCount === 3 ? 0x57f287 : 0xf39c12)
         .setTimestamp();
 
     await Reply.embedEdit(interaction, embed);
 }
 
-async function handleClaim(
-    interaction: ChatInputCommandInteraction,
-    locale: SupportedLocale
-): Promise<void> {
+async function handleClaim(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
     const userId = interaction.user.id;
     const result = await QuestService.claim(userId);
 
@@ -109,16 +103,15 @@ async function handleClaim(
 
     let description = t(locale, "quest.claim.success", { stars: String(result.starReward) });
     if (result.streakBonus) {
-        description += "\n" + t(locale, "quest.claim.streak_bonus", {
-            bonus: String(result.streakBonus),
-            days: String(result.streakDays),
-        });
+        description +=
+            "\n" +
+            t(locale, "quest.claim.streak_bonus", {
+                bonus: String(result.streakBonus),
+                days: String(result.streakDays),
+            });
     }
 
-    const embed = new EmbedBuilder()
-        .setDescription(description)
-        .setColor(0x57f287)
-        .setTimestamp();
+    const embed = new EmbedBuilder().setDescription(description).setColor(0x57f287).setTimestamp();
 
     await Reply.embedEdit(interaction, embed);
 }

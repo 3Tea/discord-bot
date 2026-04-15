@@ -104,16 +104,20 @@ export default {
             await Reply.embedEdit(interaction, embed);
             const questTrigger = targetUser ? "pray_target" : "pray";
             await QuestService.trackProgress(userId, guildId, questTrigger).catch(() => {});
-            EconomyLogService.shouldLog(guildId, "coin_transaction", result.userReward.coin).then((should) => {
-                if (!should) return;
-                const targetSuffix = result.targetId ? ` (target: <@${result.targetId}>)` : "";
-                const logEmbed = new EmbedBuilder()
-                    .setTitle("Pray Reward")
-                    .setDescription(`<@${userId}> earned **${result.userReward.coin}** coin from pray${targetSuffix}`)
-                    .setColor(0xffd700)
-                    .setTimestamp();
-                EconomyLogService.sendLog(guildId, logEmbed);
-            }).catch(() => {});
+            EconomyLogService.shouldLog(guildId, "coin_transaction", result.userReward.coin)
+                .then((should) => {
+                    if (!should) return;
+                    const targetSuffix = result.targetId ? ` (target: <@${result.targetId}>)` : "";
+                    const logEmbed = new EmbedBuilder()
+                        .setTitle("Pray Reward")
+                        .setDescription(
+                            `<@${userId}> earned **${result.userReward.coin}** coin from pray${targetSuffix}`
+                        )
+                        .setColor(0xffd700)
+                        .setTimestamp();
+                    EconomyLogService.sendLog(guildId, logEmbed);
+                })
+                .catch(() => {});
         } catch (error) {
             const locale = await resolveLocale(interaction).catch(fallbackLocale);
             if (error instanceof Error && error.message === "PRAY_COOLDOWN") {

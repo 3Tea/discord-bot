@@ -77,7 +77,15 @@ interface TextBlockParams {
     achievementCount?: { unlocked: number; total: number };
 }
 
-function drawStreakRow(ctx: Ctx2D, streakColor: string, contentX: number, contentW: number, textY: number, prayStreak: number, questStreak: number): void {
+function drawStreakRow(
+    ctx: Ctx2D,
+    streakColor: string,
+    contentX: number,
+    contentW: number,
+    textY: number,
+    prayStreak: number,
+    questStreak: number
+): void {
     ctx.font = '14px "Inter Bold"';
     ctx.fillStyle = C.muted;
     ctx.fillText("PRAY STREAK", contentX, textY + 14);
@@ -122,7 +130,10 @@ function drawActivityRow(p: ActivityRowParams): void {
         { label: `${p.stats.reactionCount.toLocaleString()} REACT`, color: p.actColor },
     ];
     if (p.achievementCount) {
-        items.push({ label: `\uD83C\uDFC6 ${p.achievementCount.unlocked}/${p.achievementCount.total}`, color: p.achColor });
+        items.push({
+            label: `\uD83C\uDFC6 ${p.achievementCount.unlocked}/${p.achievementCount.total}`,
+            color: p.achColor,
+        });
     }
     const segW = p.contentW / items.length;
     p.ctx.font = '14px "Inter Bold"';
@@ -134,7 +145,6 @@ function drawActivityRow(p: ActivityRowParams): void {
         clearShadow(p.ctx);
     }
 }
-
 
 function drawTextBlock(p: TextBlockParams): void {
     if (p.textAvail < 16) return;
@@ -161,20 +171,24 @@ function drawTextBlock(p: TextBlockParams): void {
     });
 }
 
-interface EconItem { label: string; value: string; color: string }
+interface EconItem {
+    label: string;
+    value: string;
+    color: string;
+}
 
 function buildEconItems(coin: number, gem: number, star: number, isGalaxy: boolean): EconItem[] {
     if (isGalaxy) {
         return [
             { label: "COIN", value: coin.toLocaleString(), color: GALAXY.stat1 },
-            { label: "GEM",  value: gem.toLocaleString(),  color: GALAXY.stat2 },
+            { label: "GEM", value: gem.toLocaleString(), color: GALAXY.stat2 },
             { label: "STAR", value: star.toLocaleString(), color: GALAXY.stat3 },
         ];
     }
     return [
-        { label: "COIN", value: coin.toLocaleString(), color: C.gold   },
-        { label: "GEM",  value: gem.toLocaleString(),  color: C.purple },
-        { label: "STAR", value: star.toLocaleString(), color: C.pink   },
+        { label: "COIN", value: coin.toLocaleString(), color: C.gold },
+        { label: "GEM", value: gem.toLocaleString(), color: C.purple },
+        { label: "STAR", value: star.toLocaleString(), color: C.pink },
     ];
 }
 
@@ -309,9 +323,17 @@ export async function renderProfileCard(options: ProfileCanvasOptions): Promise<
     // --- Activity & streak text block ---
     const TEXT_Y = XP_Y + 60;
     drawTextBlock({
-        ctx, isGalaxy, contentX: CONTENT_X, contentW: CONTENT_W,
-        textY: TEXT_Y, textAvail: STAT_Y - TEXT_Y - 4,
-        prayStreak, questStreak, messageCount, voiceMinutes, reactionCount,
+        ctx,
+        isGalaxy,
+        contentX: CONTENT_X,
+        contentW: CONTENT_W,
+        textY: TEXT_Y,
+        textAvail: STAT_Y - TEXT_Y - 4,
+        prayStreak,
+        questStreak,
+        messageCount,
+        voiceMinutes,
+        reactionCount,
         achievementCount,
     });
 

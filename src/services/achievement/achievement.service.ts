@@ -51,7 +51,7 @@ interface TypeCount {
 
 export async function fetchUserStats(userId: string, guildId: string): Promise<UserStats> {
     const cacheKey = statsKey(guildId, userId);
-    const cached = await redis.getJson(cacheKey) as UserStats | null;
+    const cached = (await redis.getJson(cacheKey)) as UserStats | null;
     if (cached) return cached;
 
     const [memberXP, userEconomy, userWallet, latestQuest, typeCounts] = await Promise.all([
@@ -65,9 +65,7 @@ export async function fetchUserStats(userId: string, guildId: string): Promise<U
         ]),
     ]);
 
-    const typeMap = new Map<CountedType, number>(
-        typeCounts.map((tc) => [tc._id, tc.count])
-    );
+    const typeMap = new Map<CountedType, number>(typeCounts.map((tc) => [tc._id, tc.count]));
 
     const stats: UserStats = {
         // From MemberXP
@@ -112,23 +110,14 @@ export async function checkAndUnlock(userId: string, guildId: string): Promise<C
     let unlockedMap: Map<string, Date>;
     if (cachedUnlocked) {
         unlockedMap = new Map(
-            Object.entries(cachedUnlocked as Record<string, string>).map(
-                ([k, v]) => [k, new Date(v)]
-            )
+            Object.entries(cachedUnlocked as Record<string, string>).map(([k, v]) => [k, new Date(v)])
         );
     } else {
-        const unlockedDocs = await UserAchievementModel
-            .find({ userId, guildId })
+        const unlockedDocs = await UserAchievementModel.find({ userId, guildId })
             .select("achievementId unlockedAt")
             .lean();
-        unlockedMap = new Map<string, Date>(
-            unlockedDocs.map((doc) => [doc.achievementId, doc.unlockedAt])
-        );
-        await redis.setJson(
-            unlockedKey(guildId, userId),
-            Object.fromEntries(unlockedMap),
-            60
-        );
+        unlockedMap = new Map<string, Date>(unlockedDocs.map((doc) => [doc.achievementId, doc.unlockedAt]));
+        await redis.setJson(unlockedKey(guildId, userId), Object.fromEntries(unlockedMap), 60);
     }
 
     // Step 3: Find newly qualifying achievements
@@ -195,9 +184,7 @@ export async function checkAndUnlock(userId: string, guildId: string): Promise<C
                     );
                 }
                 if (def.reward.star && def.reward.star > 0) {
-                    rewardPromises.push(
-                        WalletService.addStar(userId, def.reward.star, "achievement_reward", meta)
-                    );
+                    rewardPromises.push(WalletService.addStar(userId, def.reward.star, "achievement_reward", meta));
                 }
 
                 await Promise.all(rewardPromises);
@@ -211,10 +198,7 @@ export async function checkAndUnlock(userId: string, guildId: string): Promise<C
         }
 
         // Step 6: Invalidate both caches after unlocks
-        await Promise.all([
-            redis.deleteKey(statsKey(guildId, userId)),
-            redis.deleteKey(unlockedKey(guildId, userId)),
-        ]);
+        await Promise.all([redis.deleteKey(statsKey(guildId, userId)), redis.deleteKey(unlockedKey(guildId, userId))]);
     }
 
     // Step 7: Build full status list
@@ -232,22 +216,15 @@ export async function checkAndUnlock(userId: string, guildId: string): Promise<C
 
 // ── 3. getUnlockedCount ──────────────────────────────────────────────────────
 
-export async function getUnlockedCount(
-    userId: string,
-    guildId: string
-): Promise<{ unlocked: number; total: number }> {
+export async function getUnlockedCount(userId: string, guildId: string): Promise<{ unlocked: number; total: number }> {
     const unlocked = await UserAchievementModel.countDocuments({ userId, guildId });
     return { unlocked, total: ACHIEVEMENTS.length };
 }
 
 // ── 4. getByCategory ────────────────────────────────────────────────────────
 
-export function getByCategory(
-    statuses: AchievementStatus[]
-): Map<AchievementCategory, AchievementStatus[]> {
-    const map = new Map<AchievementCategory, AchievementStatus[]>(
-        CATEGORY_ORDER.map((cat) => [cat, []])
-    );
+export function getByCategory(statuses: AchievementStatus[]): Map<AchievementCategory, AchievementStatus[]> {
+    const map = new Map<AchievementCategory, AchievementStatus[]>(CATEGORY_ORDER.map((cat) => [cat, []]));
 
     for (const status of statuses) {
         const bucket = map.get(status.def.category);

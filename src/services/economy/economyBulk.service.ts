@@ -74,9 +74,9 @@ async function tax(
     const userIds = members.map((m) => m.id);
 
     // Query pre-tax balances to compute accurate deltas after clamping
-    const preBalances = await UserEconomyModel.find(
-        { guildId, userId: { $in: userIds } }
-    ).select("userId coin gem").lean();
+    const preBalances = await UserEconomyModel.find({ guildId, userId: { $in: userIds } })
+        .select("userId coin gem")
+        .lean();
 
     const balanceMap = new Map(preBalances.map((u) => [u.userId, { coin: u.coin, gem: u.gem }]));
 
