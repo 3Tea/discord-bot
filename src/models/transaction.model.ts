@@ -42,7 +42,8 @@ export type TransactionType =
     | "bulk_tax"
     | "reverse"
     | "reset"
-    | "rollback";
+    | "rollback"
+    | "achievement_reward";
 
 export interface ITransaction extends Document {
     userId: string;
@@ -103,6 +104,7 @@ const transactionSchema = new Schema(
                 "reverse",
                 "reset",
                 "rollback",
+                "achievement_reward",
             ],
             required: true,
         },
