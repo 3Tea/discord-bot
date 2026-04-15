@@ -37,7 +37,12 @@ export type TransactionType =
     | "premium_extend"
     | "quest_reward"
     | "quest_complete"
-    | "quest_streak";
+    | "quest_streak"
+    | "bulk_distribute"
+    | "bulk_tax"
+    | "reverse"
+    | "reset"
+    | "rollback";
 
 export interface ITransaction extends Document {
     userId: string;
@@ -93,6 +98,11 @@ const transactionSchema = new Schema(
                 "quest_reward",
                 "quest_complete",
                 "quest_streak",
+                "bulk_distribute",
+                "bulk_tax",
+                "reverse",
+                "reset",
+                "rollback",
             ],
             required: true,
         },
