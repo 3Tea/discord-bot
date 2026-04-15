@@ -68,10 +68,10 @@ Vật phẩm có thể có **số lượng giới hạn** — hết hàng thì p
 ## Làm Việc & Câu Cá
 
 ### /work
-Kiếm 80–200 coin mỗi ca làm việc với thời gian chờ 4 giờ. Chạy lệnh, nhận mô tả công việc ngẫu nhiên và nhận lương. Thu nhập đơn giản và ổn định.
+Kiếm 80–200 coin mỗi ca làm việc. Thời gian chờ phụ thuộc vào gói premium: 4 giờ (miễn phí), 2 giờ (Star), 1 giờ (Galaxy). Chạy lệnh, nhận mô tả công việc ngẫu nhiên và nhận lương. Thu nhập đơn giản và ổn định.
 
 ### /fish
-Thả câu mỗi giờ để có cơ hội bắt cá với 4 cấp độ hiếm. Cá thường (55%) cho 10–30 coin, trong khi cá huyền thoại (4%) có thể thưởng 300–600 coin. Tên cá và cấp độ hiếm được hiển thị trong embed.
+Thả câu để có cơ hội bắt cá với 4 cấp độ hiếm. Thời gian chờ phụ thuộc vào gói premium: 1 giờ (miễn phí), 30 phút (Star), 15 phút (Galaxy). Cá thường (55%) cho 10–30 coin, trong khi cá huyền thoại (4%) có thể thưởng 300–600 coin. Tên cá và cấp độ hiếm được hiển thị trong embed.
 
 ## Thử Vận May
 
@@ -80,7 +80,7 @@ Dùng `/gamble` để đặt cược coin vào các mini-game:
 - **Slots** — trùng biểu tượng để thắng đến ×20
 - **Dice** — đoán cao/thấp trên 2d6
 
-Thử vận may có lợi thế nhà cái (trừ coinflip) và là nơi tiêu coin. Cược tối thiểu/tối đa và thời gian chờ có thể tùy chỉnh bởi admin.
+Thử vận may có lợi thế nhà cái (trừ coinflip) và là nơi tiêu coin. Cược tối thiểu/tối đa có thể tùy chỉnh bởi admin. Thời gian chờ giữa các lượt là cố định 30 giây.
 
 ## Khai Thác & Hầm Ngục
 
@@ -118,8 +118,8 @@ Kiếm star qua nhận hàng ngày, rơi ngẫu nhiên từ hoạt động, và 
 | `/curse target:@user` | Nguyền rủa người khác | `/curse target:@rival` |
 | `/shop view` | Xem các vật phẩm trong shop | `/shop view` |
 | `/shop buy` | Mua vật phẩm từ shop | `/shop buy` |
-| `/work` | Làm việc kiếm coin (thời gian chờ 4 giờ) | `/work` |
-| `/fish` | Câu cá kiếm coin (thời gian chờ 1 giờ) | `/fish` |
+| `/work` | Làm việc kiếm coin (thời gian chờ theo tier: 4h/2h/1h) | `/work` |
+| `/fish` | Câu cá kiếm coin (thời gian chờ theo tier: 1h/30m/15m) | `/fish` |
 | `/gamble coinflip` | Đặt cược 50/50 | `/gamble coinflip bet:100` |
 | `/gamble slots` | Đặt cược máy slot | `/gamble slots bet:50` |
 | `/gamble dice` | Đặt cược xúc xắc cao/thấp | `/gamble dice bet:100 mode:high` |
@@ -163,9 +163,9 @@ Mọi thay đổi tiền tệ đều được ghi lại trong lịch sử giao d
 | Nhóm Lệnh | Điều Chỉnh |
 |-----------|-----------|
 | `/economy config reward-*` | Thưởng coin/gem khi lên cấp, thưởng coin khi chat thoại, thưởng gem theo mốc |
-| `/economy config gambling-*` | Cược tối thiểu/tối đa, thời gian chờ cờ bạc, bật/tắt cờ bạc |
-| `/economy config work-*` | Thời gian chờ làm việc/câu cá, thưởng coin tối thiểu/tối đa |
-| `/economy config social-*` | Số coin tặng tối đa, thời gian chờ cướp, tỉ lệ thành công, phần trăm cướp/phạt |
+| `/economy config gambling-*` | Cược tối thiểu/tối đa, bật/tắt cờ bạc (thời gian chờ cố định 30 giây) |
+| `/economy config work-*` | Thưởng coin tối thiểu/tối đa, bật/tắt làm việc (thời gian chờ theo gói premium) |
+| `/economy config social-*` | Số coin tặng tối đa, tỉ lệ thành công, phần trăm cướp/phạt (thời gian chờ cướp và miễn nhiễm là cố định) |
 
 ### Bảng Điều Khiển, Kiểm Tra & Công Cụ Nâng Cao
 

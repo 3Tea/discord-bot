@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Changed
+
+- **Economy cooldowns no longer admin-configurable** — work/fish cooldowns now determined by premium tier; gamble (30s) and rob (6h + 2h immunity) are fixed constants. Prevents premium value erosion and economy imbalance.
+
 ### Added
 
 - **Achievement system** — 50 achievements across 10 categories (economy, XP, mining, dungeon, social, gambling, voice, activity, quests, stars) with tiered rewards (coin, gem, star). `/achievements` command with paginated category display. Integrated into `/profile` card. Config-driven — new achievements can be added without code changes.

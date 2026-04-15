@@ -48,13 +48,14 @@ Nhóm lệnh `/economy config` kiểm soát toàn bộ gameplay kinh tế. Các 
 | Nhóm Cấu Hình | Điều Chỉnh |
 |---------------|-----------|
 | `/economy config reward-view` | Thưởng coin/gem khi lên cấp, hoạt động chat thoại, và các mốc streak |
-| `/economy config gambling-view` | Cược tối thiểu và tối đa, thời gian chờ cờ bạc, bật/tắt cờ bạc |
-| `/economy config work-view` | Thời gian chờ làm việc/câu cá và khoảng thưởng coin |
-| `/economy config social-view` | Giới hạn tặng, thời gian chờ cướp, tỉ lệ thành công, phần trăm cướp/phạt |
+| `/economy config gambling-view` | Cược tối thiểu và tối đa, bật/tắt cờ bạc |
+| `/economy config work-view` | Khoảng thưởng coin làm việc/câu cá, bật/tắt làm việc |
+| `/economy config social-view` | Giới hạn tặng, tỉ lệ thành công cướp, phần trăm cướp/phạt |
+
+> **Lưu ý:** Thời gian chờ work/fish được quyết định bởi gói premium của mỗi người dùng (miễn phí: 4h/1h, Star: 2h/30m, Galaxy: 1h/15m) — không thể cấu hình theo server. Thời gian chờ cờ bạc cố định là 30 giây. Thời gian chờ cướp (6h) và miễn nhiễm (2h) cũng là hằng số cố định.
 
 **Khi nào nên điều chỉnh:**
 - Server lớn (500+ thành viên hoạt động) có thể muốn cược tối đa cao hơn để giữ người chơi nhiều coin
-- Server nhỏ (dưới 50 thành viên) có thể tốt hơn với thời gian chờ work/fish ngắn hơn
 - Nếu cờ bạc gây vấn đề cân bằng, tăng cược tối thiểu hoặc tạm thời vô hiệu hóa
 
 Dùng lệnh `-view` để kiểm tra giá trị hiện tại trước khi thay đổi.
@@ -290,7 +291,7 @@ Tất cả ba loại thông báo độc lập — bạn có thể chỉ bật ti
 | Xem bảng điều khiển kinh tế | `/economy admin dashboard` |
 | Cấu hình thưởng | `/economy config reward-view` |
 | Cấu hình cờ bạc | `/economy config gambling-view` |
-| Cấu hình làm việc/câu cá | `/economy config work-view` |
+| Cấu hình thưởng làm việc/câu cá | `/economy config work-view` |
 | Cấu hình tặng/cướp | `/economy config social-view` |
 | Thêm vật phẩm shop | `/shop add` |
 | Thiết lập kênh log | `/economy admin log-setup` |

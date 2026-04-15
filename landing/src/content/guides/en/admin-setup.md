@@ -48,13 +48,14 @@ The `/economy config` group controls all economy gameplay. Defaults are balanced
 | Config Group | What It Controls |
 |--------------|-----------------|
 | `/economy config reward-view` | Coin/gem rewards for level-ups, voice chat activity, and streak milestones |
-| `/economy config gambling-view` | Minimum and maximum bet amounts, gambling cooldown, enable/disable gambling |
-| `/economy config work-view` | Work/fish cooldowns and coin reward ranges |
-| `/economy config social-view` | Gift cap, rob cooldown, rob success rate, steal/penalty percentages |
+| `/economy config gambling-view` | Minimum and maximum bet amounts, enable/disable gambling |
+| `/economy config work-view` | Work/fish coin reward ranges, enable/disable work |
+| `/economy config social-view` | Gift cap, rob success rate, steal/penalty percentages |
+
+> **Note:** Work/fish cooldowns are determined by each user's premium tier (free: 4h/1h, Star: 2h/30m, Galaxy: 1h/15m) — they are not server-configurable. Gambling cooldown is fixed at 30s. Rob cooldown (6h) and immunity (2h) are also fixed constants.
 
 **When to adjust:**
 - Large servers (500+ active members) may want higher max bets to keep high earners engaged
-- Small servers (under 50 members) may benefit from shorter work/fish cooldowns to keep activity up
 - If gambling is causing balance issues, raise the minimum bet or disable it temporarily
 
 Use the `-view` variants to check current values before making changes.
@@ -290,7 +291,7 @@ All three notification types are independent — you can enable just welcome mes
 | View economy dashboard | `/economy admin dashboard` |
 | Configure rewards | `/economy config reward-view` |
 | Configure gambling | `/economy config gambling-view` |
-| Configure work/fish | `/economy config work-view` |
+| Configure work/fish rewards | `/economy config work-view` |
 | Configure gift/rob | `/economy config social-view` |
 | Add shop item | `/shop add` |
 | Setup log channel | `/economy admin log-setup` |

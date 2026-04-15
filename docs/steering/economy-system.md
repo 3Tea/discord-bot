@@ -510,18 +510,19 @@ Per-guild via `GuildGamblingConfig` model:
 | `enabled` | `true` | Master toggle |
 | `minBet` | `10` | Minimum coin bet |
 | `maxBet` | `500` | Maximum coin bet |
-| `cooldown` | `30` | Seconds between games per user |
+
+The cooldown between games is **30 seconds (fixed constant)** — not admin-configurable.
 
 Admin commands (under `/economy config`): `gambling-config-view`, `gambling-config-toggle`, `gambling-config-set`
 
 ### Bet Flow
 
 1. Validate config enabled + bet within min/max
-2. Check Redis cooldown (`gamble_cd:{guildId}:{userId}`)
+2. Check Redis cooldown (`gamble_cd:{guildId}:{userId}`, 30s fixed)
 3. Atomic deduct via `CurrencyService.deduct()`
 4. Play game via `GamblingService`
 5. If win: `CurrencyService.addCoin(payout)`
-6. Set Redis cooldown
+6. Set Redis cooldown (30s)
 7. Transaction type: `"gambling"` with game metadata
 
 ## Work & Task Commands
@@ -532,8 +533,8 @@ Cooldown-based coin earning commands for steady income between daily pray/curse 
 
 | Command | Cooldown | Reward | Mechanics |
 |---------|----------|--------|-----------|
-| `/work` | 4h (configurable) | 80-200 coin | Random reward + flavor text |
-| `/fish` | 1h (configurable) | 10-600 coin | 4-rarity fish roll (common/uncommon/rare/legendary) |
+| `/work` | Determined by premium tier (4h free, 2h Star, 1h Galaxy) | 80-200 coin | Random reward + flavor text |
+| `/fish` | Determined by premium tier (1h free, 30m Star, 15m Galaxy) | 10-600 coin | 4-rarity fish roll (common/uncommon/rare/legendary) |
 
 ### Fish Rarity Table
 
@@ -553,11 +554,11 @@ Per-guild via `GuildWorkConfig` model:
 | Field | Default | Description |
 |-------|---------|-------------|
 | `enabled` | `true` | Master toggle for work + fish |
-| `workCooldown` | `14400` (4h) | Work cooldown in seconds |
 | `workMinReward` | `80` | Minimum work coin reward |
 | `workMaxReward` | `200` | Maximum work coin reward |
-| `fishCooldown` | `3600` (1h) | Fish cooldown in seconds |
 | `fishRewardMultiplier` | `1.0` | Multiplier applied to all fish rewards |
+
+Cooldowns are **not admin-configurable** — they are determined entirely by the user's premium tier (free: 4h work / 1h fish; Star: 2h / 30m; Galaxy: 1h / 15m). Read from `PremiumService.getConfig(userId)`.
 
 Admin commands (under `/economy config`): `work-config-view`, `work-config-toggle`, `work-config-set`
 
@@ -577,8 +578,8 @@ User-to-user coin transfer commands. Rob acts as a net coin sink.
 ### Rob Protections
 
 - **Min balance:** Target must have ≥100 coin (configurable) to be robbed
-- **Immunity:** Target gets 2h immunity after being successfully robbed
-- **Cooldown:** Robber has 6h cooldown between attempts
+- **Immunity:** Target gets **2h immunity** (fixed constant) after being successfully robbed
+- **Cooldown:** Robber has **6h cooldown** (fixed constant) between attempts
 
 ### Rob Economics
 
@@ -594,12 +595,12 @@ Per-guild via `GuildSocialConfig` model:
 |-------|---------|-------------|
 | `enabled` | `true` | Master toggle for gift + rob |
 | `giftMaxAmount` | `1000` | Max coin per gift |
-| `robCooldown` | `21600` (6h) | Robber cooldown |
 | `robSuccessRate` | `0.4` (40%) | Rob success chance |
 | `robStealMinPct` / `robStealMaxPct` | `10` / `30` | Steal range (% of target) |
 | `robPenaltyMinPct` / `robPenaltyMaxPct` | `10` / `20` | Fine range (% of robber) |
 | `robMinBalance` | `100` | Target protection threshold |
-| `robImmunityDuration` | `7200` (2h) | Target immunity after rob |
+
+Rob cooldown (6h) and immunity duration (2h) are **fixed constants** — not admin-configurable. This prevents economy imbalance from excessively short rob windows.
 
 Admin commands (under `/economy config`): `social-config-view`, `social-config-toggle`, `social-config-set`
 

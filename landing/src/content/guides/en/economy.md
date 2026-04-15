@@ -68,10 +68,10 @@ Items may have **limited stock** — once sold out, they're gone until the admin
 ## Working & Fishing
 
 ### /work
-Earn 80–200 coins per work session with a 4-hour cooldown. Run the command, get a random job description, and collect your pay. Simple and reliable income.
+Earn 80–200 coins per work session. Cooldown depends on your premium tier: 4 hours (free), 2 hours (Star), 1 hour (Galaxy). Run the command, get a random job description, and collect your pay. Simple and reliable income.
 
 ### /fish
-Cast your line every hour for a chance at 4 rarity tiers of fish. Common catches (55%) earn 10–30 coins, while legendary catches (4%) can reward 300–600 coins. Fish names and rarities are displayed in the embed.
+Cast your line for a chance at 4 rarity tiers of fish. Cooldown depends on your premium tier: 1 hour (free), 30 minutes (Star), 15 minutes (Galaxy). Common catches (55%) earn 10–30 coins, while legendary catches (4%) can reward 300–600 coins. Fish names and rarities are displayed in the embed.
 
 ## Gambling
 
@@ -80,7 +80,7 @@ Use `/gamble` to bet coins on mini-games:
 - **Slots** — match symbols for up to ×20 payout
 - **Dice** — guess high/low on a 2d6 roll
 
-Gambling has a house edge (except coinflip) and acts as a coin sink. Min/max bets and cooldowns are configurable by admins.
+Gambling has a house edge (except coinflip) and acts as a coin sink. Min/max bets are configurable by admins. The cooldown between games is a fixed 30 seconds.
 
 ## Mining & Dungeon
 
@@ -118,8 +118,8 @@ For the full breakdown, see the [Star Guide](/en/guide/star).
 | `/curse target:@user` | Daily curse for more coins | `/curse target:@rival` |
 | `/shop view` | Browse available shop items | `/shop view` |
 | `/shop buy` | Purchase an item from the shop | `/shop buy` |
-| `/work` | Work a job for coins (4h cooldown) | `/work` |
-| `/fish` | Go fishing for coins (1h cooldown) | `/fish` |
+| `/work` | Work a job for coins (cooldown by tier: 4h/2h/1h) | `/work` |
+| `/fish` | Go fishing for coins (cooldown by tier: 1h/30m/15m) | `/fish` |
 | `/gamble coinflip` | 50/50 coin bet | `/gamble coinflip bet:100` |
 | `/gamble slots` | Slot machine bet | `/gamble slots bet:50` |
 | `/gamble dice` | Dice high/low bet | `/gamble dice bet:100 mode:high` |
@@ -163,9 +163,9 @@ All currency changes are logged in the transaction history.
 | Command Group | What It Controls |
 |---------------|-----------------|
 | `/economy config reward-*` | Level-up coin/gem rewards, voice chat coin rewards, milestone gem rewards |
-| `/economy config gambling-*` | Min/max bet amounts, gambling cooldown, enable/disable gambling |
-| `/economy config work-*` | Work/fish cooldowns, min/max coin rewards |
-| `/economy config social-*` | Gift max amount, rob cooldown, success rate, steal/penalty percentages |
+| `/economy config gambling-*` | Min/max bet amounts, enable/disable gambling (cooldown is fixed at 30s) |
+| `/economy config work-*` | Min/max coin rewards, enable/disable work (cooldowns determined by premium tier) |
+| `/economy config social-*` | Gift max amount, success rate, steal/penalty percentages (rob cooldown and immunity are fixed) |
 
 ### Dashboard, Audit & Advanced Tools
 
