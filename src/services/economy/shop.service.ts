@@ -40,26 +40,47 @@ async function buyItem(userId: string, guildId: string, itemId: string, guild: G
         throw new Error("ITEM_NOT_FOUND");
     }
 
-    if (item.stock !== null && item.stock <= 0) {
-        throw new Error("OUT_OF_STOCK");
-    }
-
-    // Deduct currency
     const coinCost = item.currencyType === "coin" ? item.price : 0;
     const gemCost = item.currencyType === "gem" ? item.price : 0;
+    let stockDecremented = false;
 
-    await CurrencyService.deduct(userId, guildId, coinCost, gemCost, "purchase", { itemId });
+    // Atomically decrement stock FIRST (if limited) to prevent overselling
+    if (item.stock !== null) {
+        const stockResult = await ShopItemModel.findOneAndUpdate(
+            { _id: item._id, stock: { $gte: 1 } },
+            { $inc: { stock: -1 } },
+            { new: true }
+        );
+        if (!stockResult) {
+            throw new Error("OUT_OF_STOCK");
+        }
+        stockDecremented = true;
+    }
 
-    // Apply effect
+    // Deduct currency — rollback stock on failure
+    try {
+        await CurrencyService.deduct(userId, guildId, coinCost, gemCost, "purchase", { itemId });
+    } catch (error) {
+        if (stockDecremented) {
+            await ShopItemModel.updateOne({ _id: item._id }, { $inc: { stock: 1 } });
+        }
+        throw error;
+    }
+
+    // Apply effect — rollback both currency AND stock on failure
     try {
         if (item.type === "role" && item.roleId) {
             const member = await guild.members.fetch(userId);
             if (member.roles.cache.has(item.roleId)) {
-                // Rollback: refund the currency
+                // Rollback currency
                 if (coinCost > 0)
                     await CurrencyService.addCoin(userId, guildId, coinCost, "purchase", { itemId, refund: true });
                 if (gemCost > 0)
                     await CurrencyService.addGem(userId, guildId, gemCost, "purchase", { itemId, refund: true });
+                // Rollback stock
+                if (stockDecremented) {
+                    await ShopItemModel.updateOne({ _id: item._id }, { $inc: { stock: 1 } });
+                }
                 throw new Error("ALREADY_HAS_ROLE");
             }
             await member.roles.add(item.roleId);
@@ -69,16 +90,16 @@ async function buyItem(userId: string, guildId: string, itemId: string, guild: G
         if (error instanceof Error && error.message === "ALREADY_HAS_ROLE") {
             throw error;
         }
-        // Rollback on unexpected failure
+        // Rollback currency
         if (coinCost > 0)
             await CurrencyService.addCoin(userId, guildId, coinCost, "purchase", { itemId, refund: true });
-        if (gemCost > 0) await CurrencyService.addGem(userId, guildId, gemCost, "purchase", { itemId, refund: true });
+        if (gemCost > 0)
+            await CurrencyService.addGem(userId, guildId, gemCost, "purchase", { itemId, refund: true });
+        // Rollback stock
+        if (stockDecremented) {
+            await ShopItemModel.updateOne({ _id: item._id }, { $inc: { stock: 1 } });
+        }
         throw new Error("EFFECT_FAILED");
-    }
-
-    // Decrement stock if not unlimited
-    if (item.stock !== null) {
-        await ShopItemModel.updateOne({ _id: item._id }, { $inc: { stock: -1 } });
     }
 
     return { item, coinSpent: coinCost, gemSpent: gemCost };
