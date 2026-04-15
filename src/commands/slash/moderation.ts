@@ -58,9 +58,8 @@ function ephemeralError(
     key: string,
     vars?: Record<string, string | number>
 ): Promise<unknown> {
-    return interaction.reply({
+    return interaction.editReply({
         content: t(locale, key, vars),
-        flags: MessageFlags.Ephemeral,
     });
 }
 
@@ -229,8 +228,13 @@ export default {
         const locale = await resolveLocale(interaction).catch(fallbackLocale);
 
         if (!interaction.inGuild() || !interaction.guild) {
-            return ephemeralError(interaction, locale, "common.guild_only");
+            return interaction.reply({
+                content: t(locale, "common.guild_only"),
+                flags: MessageFlags.Ephemeral,
+            });
         }
+
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const sub = interaction.options.getSubcommand(true);
         const executor = interaction.member;
@@ -292,7 +296,7 @@ export default {
                         duration: formatDuration(locale, ms),
                     })
                 );
-                return Reply.embed(interaction, embed);
+                return Reply.embedEdit(interaction, embed);
             }
 
             if (sub === "untimeout") {
@@ -331,7 +335,7 @@ export default {
                 const embed = new EmbedBuilder()
                     .setColor(0x57f287)
                     .setDescription(t(locale, "moderation.untimeout_success", { username: member.user.tag }));
-                return Reply.embed(interaction, embed);
+                return Reply.embedEdit(interaction, embed);
             }
 
             if (sub === "ban") {
@@ -375,7 +379,7 @@ export default {
                 const embed = new EmbedBuilder()
                     .setColor(0xed4245)
                     .setDescription(t(locale, "moderation.ban_success", { username: targetUser.tag }));
-                return Reply.embed(interaction, embed);
+                return Reply.embedEdit(interaction, embed);
             }
 
             if (sub === "kick") {
@@ -418,7 +422,7 @@ export default {
                 const embed = new EmbedBuilder()
                     .setColor(0xfee75c)
                     .setDescription(t(locale, "moderation.kick_success", { username: displayTag }));
-                return Reply.embed(interaction, embed);
+                return Reply.embedEdit(interaction, embed);
             }
 
             if (sub === "unban") {
@@ -441,7 +445,7 @@ export default {
                 const embed = new EmbedBuilder()
                     .setColor(0x57f287)
                     .setDescription(t(locale, "moderation.unban_success", { userId: rawId }));
-                return Reply.embed(interaction, embed);
+                return Reply.embedEdit(interaction, embed);
             }
 
             return ephemeralError(interaction, locale, "common.unknown_subcommand");
@@ -454,10 +458,7 @@ export default {
                 return ephemeralError(interaction, locale, "moderation.unban_not_banned");
             }
             const message = t(locale, "moderation.api_error");
-            if (interaction.replied || interaction.deferred) {
-                return interaction.followUp({ content: message, flags: MessageFlags.Ephemeral });
-            }
-            return interaction.reply({ content: message, flags: MessageFlags.Ephemeral });
+            return interaction.editReply({ content: message });
         }
     },
 };
