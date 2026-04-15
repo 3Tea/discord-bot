@@ -344,6 +344,7 @@ Current: `Guilds`, `GuildMessages`, `GuildVoiceStates`, `GuildMessageReactions`.
 - **Freeze check**: New economy commands must call `EconomyAdminService.isFrozen(userId, guildId)` after `resolveLocale()` — return early with `t(locale, "common.frozen")` if frozen
 - **Economy log**: Use fire-and-forget `EconomyLogService.shouldLog(...).then(...).catch(() => {})` — never await, never block user response
 - **Inline confirmations**: Use `reply.awaitMessageComponent({ filter, time: 30_000 })` for one-time confirm/cancel flows — do not create separate button handler files for these
+- **Config-driven features**: Define features as typed arrays with condition functions (see `achievement.config.ts`). Service iterates config, no command changes needed to add entries
 
 ### Do NOT
 
@@ -354,6 +355,7 @@ Current: `Guilds`, `GuildMessages`, `GuildVoiceStates`, `GuildMessageReactions`.
 - Deploy commands on every startup unnecessarily — it's rate-limited
 - Attempt to run tests — no test framework is configured (no jest/vitest/mocha)
 - Use `nanoid` — not installed. For random IDs use `import { randomBytes } from "node:crypto"`
+- Use `insertMany` for idempotent operations — use `bulkWrite` with `updateOne` + `$setOnInsert` + `upsert: true` to avoid duplicates and check `upsertedIds` for actually-new documents
 
 ## Command Deployment
 
@@ -409,6 +411,7 @@ const locale = await resolveGuildLocale(guildId);
 - **Add keys to ALL 15 locale files** (`en.json`, `vi.json`, `id.json`, `es.json`, `ja.json`, `zh.json`, `ko.json`, `pt-BR.json`, `fr.json`, `de.json`, `ru.json`, `tr.json`, `it.json`, `pl.json`, `nl.json`) when adding new strings
 - **Non-English locales must have native translations** — never commit English placeholder text in non-EN files
 - **Use interpolation** for dynamic values: `t(locale, "key", { name: value })` with `{{name}}` in JSON
+- **Never use `count` as an interpolation key** — i18next reserves it for pluralization (`TOptions` types it as `number`). Use `total`, `amount`, or another name for formatted strings
 - **Error catch blocks**: resolve locale with fallback: `await resolveLocale(interaction).catch(() => "en" as const)`
 - **Event handlers**: use `resolveGuildLocale(guildId)` since there's no interaction
 - **Internal logging stays in English** — only translate user-facing strings
