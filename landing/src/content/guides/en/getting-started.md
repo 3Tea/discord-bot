@@ -3,7 +3,7 @@ title: Getting Started
 description: Your quick-start guide to everything the bot offers — earn coins, level up, complete quests, and explore.
 icon: "🚀"
 order: 0
-relatedCommands: ["pray", "curse", "balance", "work", "fish", "shop", "gamble", "rank", "leaderboard", "quest", "mine", "dungeon", "wallet", "confession", "voice", "achievements"]
+relatedCommands: ["pray", "curse", "balance", "work", "fish", "shop", "gamble", "rank", "leaderboard", "quest", "mine", "dungeon", "wallet", "confession", "voice", "achievements", "profile"]
 ---
 
 ## Welcome

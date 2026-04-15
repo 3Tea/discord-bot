@@ -1,7 +1,7 @@
 ---
 title: Profile Card
 command: profile
-category: general
+category: info
 description: View a comprehensive profile card showing your level, economy, streaks, and activity stats.
 ---
 

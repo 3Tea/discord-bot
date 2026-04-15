@@ -1,7 +1,7 @@
 ---
 title: Thẻ Hồ Sơ
 command: profile
-category: general
+category: info
 description: Xem thẻ hồ sơ toàn diện hiển thị cấp độ, kinh tế, chuỗi streak, và thống kê hoạt động của bạn.
 ---
 

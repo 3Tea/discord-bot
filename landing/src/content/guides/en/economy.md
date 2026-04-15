@@ -3,7 +3,7 @@ title: Economy System
 description: Learn how to earn coins and gems, build pray streaks, and spend in the shop.
 icon: "💰"
 order: 1
-relatedCommands: ["balance", "pray", "curse", "shop", "economy", "gamble", "work", "fish", "gift", "rob", "wallet", "mine", "dungeon"]
+relatedCommands: ["balance", "pray", "curse", "shop", "economy", "gamble", "work", "fish", "gift", "rob", "wallet", "mine", "dungeon", "profile", "achievements"]
 ---
 
 ## Overview

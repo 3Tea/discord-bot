@@ -3,7 +3,7 @@ title: Bắt Đầu
 description: Hướng dẫn nhanh về mọi thứ bot cung cấp — kiếm coin, lên cấp, hoàn thành nhiệm vụ, và khám phá.
 icon: "🚀"
 order: 0
-relatedCommands: ["pray", "curse", "balance", "work", "fish", "shop", "gamble", "rank", "leaderboard", "quest", "mine", "dungeon", "wallet", "confession", "voice", "achievements"]
+relatedCommands: ["pray", "curse", "balance", "work", "fish", "shop", "gamble", "rank", "leaderboard", "quest", "mine", "dungeon", "wallet", "confession", "voice", "achievements", "profile"]
 ---
 
 ## Chào Mừng
