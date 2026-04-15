@@ -333,6 +333,8 @@ Current: `Guilds`, `GuildMessages`, `GuildVoiceStates`, `GuildMessageReactions`.
 - **Rate limiting**: Use `redis.ttlKey(key)` to check cooldown before action
 - **Logging**: Use `logger` from `src/util/log/logger.mixed.ts` for structured logging
 - **i18n**: All user-facing strings must use `t(locale, "key")` — see i18n section below
+- **Freeze check**: New economy commands must call `EconomyAdminService.isFrozen(userId, guildId)` after `resolveLocale()` — return early with `t(locale, "common.frozen")` if frozen
+- **Economy log**: Use fire-and-forget `EconomyLogService.shouldLog(...).then(...).catch(() => {})` — never await, never block user response
 
 ### Do NOT
 
@@ -470,7 +472,11 @@ Redis `setKeyNX` for atomic idempotency; `setKey` for cooldowns. Both keys clean
 
 ### Admin Commands
 
-`/economy set-coin|add-coin|set-gem|add-gem` — requires Administrator permission.
+`/economy` uses 4 subcommand groups (requires Administrator):
+- **`/economy balance`** — `set-coin`, `add-coin`, `set-gem`, `add-gem`
+- **`/economy config`** — `reward-*`, `gambling-*`, `work-*`, `social-*` (view/toggle/set)
+- **`/economy admin`** — `dashboard`, `history`, `reverse`, `freeze`, `unfreeze`, `reset`, `rollback`, `log-setup`, `log-config`
+- **`/economy bulk`** — `distribute`, `tax`
 
 ## Premium Subscription System
 
@@ -524,8 +530,7 @@ All variables documented in `.env.example`. Critical ones:
 |----------|----------|
 | [docs/steering/commands.md](docs/steering/commands.md) | Full command inventory, button handlers, events, i18n, and business rules |
 | [docs/steering/xp-system.md](docs/steering/xp-system.md) | XP earning, leveling formula, snapshots, server stats, leaderboards, canvas rendering |
-| [docs/steering/economy-system.md](docs/steering/economy-system.md) | Coins, gems, pray/curse, streaks, shop, transactions, services |
-| [docs/steering/economy-admin.md](docs/steering/economy-admin.md) | Economy admin tools: dashboard, freeze, reset/rollback, bulk operations, audit, log channel |
+| [docs/steering/economy-system.md](docs/steering/economy-system.md) | Coins, gems, pray/curse, streaks, shop, transactions, admin tools, dashboard, freeze, reset/rollback, bulk ops, audit, log channel |
 | [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md) | Root `CHANGELOG.md` + `package.json` version; CI posts the matching `## [x.y.z]` section to Discord |
 | [docs/steering/landing-page.md](docs/steering/landing-page.md) | Astro 6 landing site: routes, components, i18n, content collections, design system, deployment |
 | [docs/steering/confession-system.md](docs/steering/confession-system.md) | Anonymous confessions: submit flows, voting, replies, moderation, economy integration |
