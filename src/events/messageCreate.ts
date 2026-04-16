@@ -9,6 +9,8 @@ import { syncGlobalXP } from "../util/xp/globalXP";
 import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
 import { rewardLevelUp } from "../util/economy/activityReward";
+import CharacterService from "../services/rpg/character.service";
+import { MESSAGE_XP_TO_EXP_RATE } from "../services/rpg/rpg.config";
 import { getNotificationConfig, sendNotification } from "../services/notification/notificationService";
 import { buildLevelUpEmbed } from "../services/notification/notificationEmbeds";
 import { NotificationType } from "../models/guildNotificationConfig.model";
@@ -74,6 +76,12 @@ export default {
             await syncGlobalXP(message.author.id, xpGain);
             // Sync period snapshots
             await syncSnapshots(message.author.id, message.guild.id, xpGain, "message");
+
+            // RPG: convert fraction of message XP to character EXP (fire-and-forget)
+            const charExp = Math.floor(xpGain * MESSAGE_XP_TO_EXP_RATE);
+            if (charExp > 0) {
+                CharacterService.addExp(message.author.id, charExp).catch(() => {});
+            }
 
             // Check level up
             const newLevel = levelFromXP(updated.xp);
