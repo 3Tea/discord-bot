@@ -19,6 +19,11 @@ export interface ICharacter extends Document {
         accessory: Types.ObjectId | null;
     };
     materials: Map<string, number>;
+    crates: {
+        bronze: number;
+        silver: number;
+        gold: number;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
@@ -45,6 +50,11 @@ const characterSchema = new Schema(
             accessory: { type: Schema.Types.ObjectId, ref: "Equipment", default: null },
         },
         materials: { type: Map, of: Number, default: new Map() },
+        crates: {
+            bronze: { type: Number, default: 0, min: 0 },
+            silver: { type: Number, default: 0, min: 0 },
+            gold: { type: Number, default: 0, min: 0 },
+        },
     },
     {
         timestamps: true,

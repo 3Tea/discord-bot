@@ -304,3 +304,44 @@ export const DUNGEON_REWARDS = {
 export const NORMAL_TURNS = 5;
 export const BOSS_TURNS = 7;
 export const ENCOUNTERS_PER_RUN = 5;
+
+// --- Craft Recipes ---
+
+export interface CraftRecipe {
+    rarity: Rarity;
+    materials: { key: string; qty: number }[];
+    goldCost: number;
+}
+
+export const CRAFT_RECIPES: CraftRecipe[] = [
+    { rarity: "common", materials: [{ key: "common_shard", qty: 5 }], goldCost: 50 },
+    { rarity: "uncommon", materials: [{ key: "uncommon_fragment", qty: 3 }, { key: "common_shard", qty: 5 }], goldCost: 150 },
+    { rarity: "rare", materials: [{ key: "rare_essence", qty: 3 }, { key: "uncommon_fragment", qty: 5 }], goldCost: 500 },
+    { rarity: "epic", materials: [{ key: "epic_core", qty: 3 }, { key: "rare_essence", qty: 5 }], goldCost: 1500 },
+    { rarity: "legendary", materials: [{ key: "legendary_soul", qty: 3 }, { key: "epic_core", qty: 5 }], goldCost: 5000 },
+    { rarity: "mythic", materials: [{ key: "mythic_heart", qty: 3 }, { key: "legendary_soul", qty: 5 }], goldCost: 15000 },
+];
+
+// --- Gacha Crate Config ---
+
+export type CrateType = "bronze" | "silver" | "gold";
+export const CRATE_TYPES = ["bronze", "silver", "gold"] as const;
+
+export interface CrateDef {
+    key: CrateType;
+    emoji: string;
+    shopCost: number;
+    rarityWeights: Partial<Record<Rarity, number>>;
+}
+
+export const CRATES: Record<CrateType, CrateDef> = {
+    bronze: { key: "bronze", emoji: "🟫", shopCost: 200, rarityWeights: { common: 50, uncommon: 35, rare: 15 } },
+    silver: { key: "silver", emoji: "🥈", shopCost: 800, rarityWeights: { uncommon: 40, rare: 35, epic: 25 } },
+    gold: { key: "gold", emoji: "🥇", shopCost: 2500, rarityWeights: { rare: 35, epic: 30, legendary: 25, mythic: 10 } },
+};
+
+export const CRATE_DROP_RATES = {
+    monster: { bronze: 0.05 },
+    treasure: { bronze: 0.15, silver: 0.05 },
+    boss: { silver: 0.5, gold: 0.15 },
+} as const;
