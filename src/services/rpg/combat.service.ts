@@ -4,6 +4,10 @@ import {
     CLASS_SKILLS,
     NORMAL_TURNS,
     BOSS_TURNS,
+    MP_REGEN_PER_TURN,
+    MP_REGEN_ON_DEFEND,
+    SKILL1_MP_COST,
+    SKILL2_MP_COST,
     type ClassType,
     type StatBlock,
     type SkillDef,
@@ -21,6 +25,8 @@ export interface StatusEffect {
 export interface CombatantState {
     hp: number;
     maxHp: number;
+    mp: number;
+    maxMp: number;
     stats: StatBlock;
     statusEffects: StatusEffect[];
 }
@@ -51,19 +57,37 @@ export interface CombatActionResult {
     statusApplied?: string;    // status effect name applied
     critHit?: boolean;         // critical hit triggered
     poisonDamage?: number;     // poison tick damage this turn
+    mpCost: number;
+    mpRegen: number;
+    currentMp: number;
+    insufficientMp: boolean;
 }
 
 // --- Combat Initialization ---
 
-function initCombat(
-    userId: string,
-    classType: ClassType,
-    userStats: StatBlock,
-    userHp: number,
-    maxHp: number,
-    monster: { name: string; emoji: string; stats: MonsterStats },
-    isBoss: boolean
-): RpgCombatState {
+interface InitCombatOptions {
+    userId: string;
+    classType: ClassType;
+    userStats: StatBlock;
+    userHp: number;
+    maxHp: number;
+    userMp: number;
+    maxMp: number;
+    monster: { name: string; emoji: string; stats: MonsterStats };
+    isBoss: boolean;
+}
+
+function initCombat({
+    userId,
+    classType,
+    userStats,
+    userHp,
+    maxHp,
+    userMp,
+    maxMp,
+    monster,
+    isBoss,
+}: InitCombatOptions): RpgCombatState {
     const maxTurns = isBoss ? BOSS_TURNS : NORMAL_TURNS;
     const turnOrder = userStats.spd >= monster.stats.spd ? "user_first" : "monster_first";
 
@@ -76,12 +100,16 @@ function initCombat(
         user: {
             hp: userHp,
             maxHp,
+            mp: userMp,
+            maxMp,
             stats: { ...userStats },
             statusEffects: [],
         },
         monster: {
             hp: monster.stats.hp,
             maxHp: monster.stats.hp,
+            mp: 0,
+            maxMp: 0,
             stats: {
                 hp: monster.stats.hp,
                 str: monster.stats.str,
@@ -173,8 +201,30 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
             lost: false,
             fled: true,
             turnsUp: false,
+            mpCost: 0,
+            mpRegen: 0,
+            currentMp: state.user.mp,
+            insufficientMp: false,
         };
     }
+
+    // --- MP cost check ---
+    let mpCost = 0;
+    if (action === "skill1") mpCost = SKILL1_MP_COST;
+    if (action === "skill2") mpCost = SKILL2_MP_COST;
+
+    if (mpCost > 0 && state.user.mp < mpCost) {
+        return {
+            userDamage: 0, monsterDamage: 0,
+            userHp: state.user.hp, monsterHp: state.monster.hp,
+            turnsLeft: state.turnsLeft,
+            won: false, lost: false, fled: false, turnsUp: false,
+            mpCost: 0, mpRegen: 0, currentMp: state.user.mp,
+            insufficientMp: true,
+        };
+    }
+
+    if (mpCost > 0) state.user.mp -= mpCost;
 
     const classConfig = CLASS_CONFIG[state.classType];
     let userDamage = 0;
@@ -197,6 +247,10 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
         const monsterPoisonDmg = tickStatusEffects(state.monster);
         const userPoisonDmg = tickStatusEffects(state.user);
 
+        // MP regen on defend (passive + defend bonus)
+        const mpRegenDefend = MP_REGEN_PER_TURN + MP_REGEN_ON_DEFEND;
+        state.user.mp = Math.min(state.user.maxMp, state.user.mp + mpRegenDefend);
+
         return {
             userDamage: 0,
             monsterDamage: monsterDmg,
@@ -209,6 +263,10 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
             turnsUp: state.turnsLeft <= 0 && state.monster.hp > 0 && state.user.hp > 0,
             healAmount,
             poisonDamage: monsterPoisonDmg + userPoisonDmg,
+            mpCost,
+            mpRegen: mpRegenDefend,
+            currentMp: state.user.mp,
+            insufficientMp: false,
         };
     }
 
@@ -245,6 +303,10 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
         tickStatusEffects(state.monster);
         tickStatusEffects(state.user);
 
+        // MP passive regen
+        const mpRegenHeal = MP_REGEN_PER_TURN;
+        state.user.mp = Math.min(state.user.maxMp, state.user.mp + mpRegenHeal);
+
         return {
             userDamage: 0,
             monsterDamage: monsterDmg,
@@ -257,6 +319,10 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
             turnsUp: state.turnsLeft <= 0 && state.monster.hp > 0 && state.user.hp > 0,
             healAmount,
             statusApplied,
+            mpCost,
+            mpRegen: mpRegenHeal,
+            currentMp: state.user.mp,
+            insufficientMp: false,
         };
     }
 
@@ -304,6 +370,10 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
     const monsterPoisonDmg = tickStatusEffects(state.monster);
     tickStatusEffects(state.user);
 
+    // MP passive regen
+    const mpRegenAttack = MP_REGEN_PER_TURN;
+    state.user.mp = Math.min(state.user.maxMp, state.user.mp + mpRegenAttack);
+
     return {
         userDamage,
         monsterDamage: monsterDmg,
@@ -317,6 +387,10 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
         critHit,
         statusApplied,
         poisonDamage: monsterPoisonDmg,
+        mpCost,
+        mpRegen: mpRegenAttack,
+        currentMp: state.user.mp,
+        insufficientMp: false,
     };
 }
 

@@ -248,6 +248,49 @@ export function getBossStats(floor: number, playerLevel: number): MonsterStats {
     };
 }
 
+// --- Mana/MP Config ---
+
+export const MP_BASE = 50;
+export const MP_PER_LEVEL = 5;
+export const MP_REGEN_PER_TURN = 5;
+export const MP_REGEN_ON_DEFEND = 15;
+export const SKILL1_MP_COST = 20;
+export const SKILL2_MP_COST = 30;
+
+// --- Material Config ---
+
+export interface MaterialDef {
+    key: string;
+    emoji: string;
+    minFloor: number;
+    dropChance: number;
+    minQty: number;
+    maxQty: number;
+}
+
+export const MATERIALS: MaterialDef[] = [
+    { key: "mythic_heart",      emoji: "🟥", minFloor: 20, dropChance: 0.02, minQty: 1, maxQty: 1 },
+    { key: "legendary_soul",    emoji: "🟨", minFloor: 15, dropChance: 0.05, minQty: 1, maxQty: 1 },
+    { key: "epic_core",         emoji: "🟪", minFloor: 10, dropChance: 0.10, minQty: 1, maxQty: 1 },
+    { key: "rare_essence",      emoji: "🟦", minFloor: 6,  dropChance: 0.20, minQty: 1, maxQty: 2 },
+    { key: "uncommon_fragment", emoji: "🟩", minFloor: 3,  dropChance: 0.35, minQty: 1, maxQty: 3 },
+    { key: "common_shard",      emoji: "⬜", minFloor: 1,  dropChance: 0.60, minQty: 2, maxQty: 4 },
+];
+
+// --- Class-Weighted Drop Config ---
+
+export const CLASS_PRIORITY_SLOTS: Record<ClassType, [EquipmentSlot, EquipmentSlot, EquipmentSlot]> = {
+    swordsman: ["weapon", "armor", "shield"],
+    tank:      ["shield", "armor", "helmet"],
+    mage:      ["weapon", "accessory", "shield"],
+    archer:    ["weapon", "boots", "accessory"],
+    assassin:  ["weapon", "boots", "accessory"],
+    healer:    ["weapon", "shield", "helmet"],
+};
+
+export const CLASS_PRIORITY_WEIGHTS = [0.4, 0.35, 0.25] as const;
+export const CLASS_MATCH_CHANCE = 0.7;
+
 // --- Reward Config ---
 
 export const DUNGEON_REWARDS = {

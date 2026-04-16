@@ -9,11 +9,16 @@ import {
     CLASS_WEAPON_TYPES,
     CLASS_SHIELD_TYPES,
     EQUIPMENT_SLOTS,
+    MATERIALS,
+    CLASS_PRIORITY_SLOTS,
+    CLASS_PRIORITY_WEIGHTS,
+    CLASS_MATCH_CHANCE,
     type ClassType,
     type EquipmentSlot,
     type Rarity,
     type StatBlock,
 } from "./rpg.config";
+import { randomInRange } from "../../util/math/random";
 
 // --- Errors ---
 
@@ -168,9 +173,82 @@ function generateEquipment(
     } as Omit<IEquipment, keyof Document>;
 }
 
-async function createEquipmentDrop(ownerId: string, floor: number, classType: ClassType): Promise<IEquipment> {
-    const slot = EQUIPMENT_SLOTS[Math.floor(Math.random() * EQUIPMENT_SLOTS.length)];
+function rollMaterialDrops(floor: number, source: "monster" | "treasure" | "boss"): { key: string; qty: number }[] {
+    const drops: { key: string; qty: number }[] = [];
+
+    for (const mat of MATERIALS) {
+        if (floor < mat.minFloor) continue;
+        if (Math.random() < mat.dropChance) {
+            drops.push({ key: mat.key, qty: randomInRange(mat.minQty, mat.maxQty) });
+        }
+    }
+
+    // Treasure always drops at least 1 material
+    if (source === "treasure" && drops.length === 0) {
+        drops.push({ key: "common_shard", qty: randomInRange(2, 4) });
+    }
+
+    // Boss guaranteed 1 Rare+ material
+    if (source === "boss") {
+        const hasRarePlus = drops.some((d) => {
+            const mat = MATERIALS.find((m) => m.key === d.key);
+            return mat && mat.minFloor >= 6;
+        });
+        if (!hasRarePlus) {
+            const rareOrAbove = MATERIALS.filter((m) => m.minFloor >= 6 && floor >= m.minFloor);
+            const fallback =
+                rareOrAbove.length > 0
+                    ? rareOrAbove[rareOrAbove.length - 1]
+                    : MATERIALS[MATERIALS.length - 2]; // uncommon_fragment
+            drops.push({ key: fallback.key, qty: 1 });
+        }
+    }
+
+    return drops;
+}
+
+function rollSlotForClass(classType: ClassType, source: "monster" | "treasure" | "boss"): EquipmentSlot {
+    const useClassPriority = source === "boss" || Math.random() < CLASS_MATCH_CHANCE;
+
+    if (useClassPriority) {
+        const slots = CLASS_PRIORITY_SLOTS[classType];
+        const roll = Math.random();
+        if (roll < CLASS_PRIORITY_WEIGHTS[0]) return slots[0];
+        if (roll < CLASS_PRIORITY_WEIGHTS[0] + CLASS_PRIORITY_WEIGHTS[1]) return slots[1];
+        return slots[2];
+    }
+
+    return EQUIPMENT_SLOTS[Math.floor(Math.random() * EQUIPMENT_SLOTS.length)];
+}
+
+function rollRarityForSource(floor: number, source: "monster" | "treasure" | "boss"): Rarity {
+    if (source === "boss") {
+        const rareIndex = RARITIES.indexOf("rare");
+        let rarity = rollRarity(floor);
+        let attempts = 0;
+        while (RARITIES.indexOf(rarity) < rareIndex && attempts < 20) {
+            rarity = rollRarity(floor);
+            attempts++;
+        }
+        return RARITIES.indexOf(rarity) < rareIndex ? "rare" : rarity;
+    }
+    if (source === "treasure") {
+        return rollRarity(floor + 5);
+    }
+    return rollRarity(floor);
+}
+
+async function createEquipmentDrop(
+    ownerId: string,
+    floor: number,
+    classType: ClassType,
+    source: "monster" | "treasure" | "boss" = "monster"
+): Promise<IEquipment> {
+    const slot = rollSlotForClass(classType, source);
+    const rarity = rollRarityForSource(floor, source);
     const data = generateEquipment(ownerId, slot, floor, classType);
+    (data as Record<string, unknown>).rarity = rarity;
+    (data as Record<string, unknown>).stats = generateEquipmentStats(slot, rarity, floor);
     return EquipmentModel.create(data);
 }
 
@@ -240,6 +318,9 @@ const EquipmentService = {
     rollRarity,
     generateEquipment,
     createEquipmentDrop,
+    rollMaterialDrops,
+    rollSlotForClass,
+    rollRarityForSource,
     equipItem,
     unequipSlot,
     getInventory,

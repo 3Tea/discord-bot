@@ -7,6 +7,8 @@ import {
     expForLevel,
     levelFromExp,
     MAX_LEVEL,
+    MP_BASE,
+    MP_PER_LEVEL,
     STARTER_WEAPONS,
     STARTER_ARMOR,
     type ClassType,
@@ -207,6 +209,20 @@ async function updateDungeonProgress(userId: string, floor: number, checkpoint: 
     await redis.deleteKey(`rpg_char:${userId}`);
 }
 
+async function addMaterials(userId: string, materials: { key: string; qty: number }[]): Promise<void> {
+    if (materials.length === 0) return;
+    const inc: Record<string, number> = {};
+    for (const { key, qty } of materials) {
+        inc[`materials.${key}`] = qty;
+    }
+    await CharacterModel.updateOne({ userId }, { $inc: inc });
+    await redis.deleteKey(`rpg_char:${userId}`);
+}
+
+function getMaxMp(level: number): number {
+    return MP_BASE + level * MP_PER_LEVEL;
+}
+
 const CharacterService = {
     getCharacter,
     requireCharacter,
@@ -218,6 +234,8 @@ const CharacterService = {
     addGold,
     deductGold,
     updateDungeonProgress,
+    addMaterials,
+    getMaxMp,
     CharacterNotFoundError,
     CharacterAlreadyExistsError,
     InsufficientGoldError,
