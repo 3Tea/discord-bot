@@ -13,7 +13,9 @@ import {
     CLASS_PRIORITY_SLOTS,
     CLASS_PRIORITY_WEIGHTS,
     CLASS_MATCH_CHANCE,
+    CRATES,
     type ClassType,
+    type CrateType,
     type EquipmentSlot,
     type Rarity,
     type StatBlock,
@@ -312,6 +314,36 @@ async function getEquippedItems(userId: string): Promise<IEquipment[]> {
     return EquipmentModel.find({ ownerId: userId, equipped: true });
 }
 
+// --- Crate & Craft ---
+
+function getCrateRarity(crateType: CrateType): Rarity {
+    const weights = CRATES[crateType].rarityWeights;
+    const entries = Object.entries(weights) as [Rarity, number][];
+    const totalWeight = entries.reduce((sum, [, w]) => sum + w, 0);
+    let roll = Math.random() * totalWeight;
+    for (const [rarity, weight] of entries) {
+        roll -= weight;
+        if (roll <= 0) return rarity;
+    }
+    return entries[0][0];
+}
+
+async function openCrate(ownerId: string, crateType: CrateType, classType: ClassType, level: number): Promise<IEquipment> {
+    const rarity = getCrateRarity(crateType);
+    const slot = rollSlotForClass(classType, "monster");
+    const data = generateEquipment(ownerId, slot, level, classType);
+    (data as Record<string, unknown>).rarity = rarity;
+    (data as Record<string, unknown>).stats = generateEquipmentStats(slot, rarity, level);
+    return EquipmentModel.create(data);
+}
+
+async function craftEquipment(ownerId: string, slot: EquipmentSlot, rarity: Rarity, classType: ClassType, level: number): Promise<IEquipment> {
+    const data = generateEquipment(ownerId, slot, level, classType);
+    (data as Record<string, unknown>).rarity = rarity;
+    (data as Record<string, unknown>).stats = generateEquipmentStats(slot, rarity, level);
+    return EquipmentModel.create(data);
+}
+
 // --- Export ---
 
 const EquipmentService = {
@@ -325,6 +357,9 @@ const EquipmentService = {
     unequipSlot,
     getInventory,
     getEquippedItems,
+    getCrateRarity,
+    openCrate,
+    craftEquipment,
     EquipmentNotFoundError,
     ClassRestrictionError,
     LevelRequirementError,

@@ -12,6 +12,7 @@ import {
     STARTER_WEAPONS,
     STARTER_ARMOR,
     type ClassType,
+    type CrateType,
     type StatBlock,
 } from "./rpg.config";
 
@@ -223,6 +224,44 @@ function getMaxMp(level: number): number {
     return MP_BASE + level * MP_PER_LEVEL;
 }
 
+async function hasEnoughMaterials(userId: string, materials: { key: string; qty: number }[]): Promise<boolean> {
+    const char = await requireCharacter(userId);
+    for (const { key, qty } of materials) {
+        if ((char.materials.get(key) ?? 0) < qty) return false;
+    }
+    return true;
+}
+
+async function deductMaterials(userId: string, materials: { key: string; qty: number }[]): Promise<void> {
+    const char = await requireCharacter(userId);
+    for (const { key, qty } of materials) {
+        if ((char.materials.get(key) ?? 0) < qty) {
+            throw new InsufficientGoldError(char.materials.get(key) ?? 0, qty);
+        }
+    }
+    const inc: Record<string, number> = {};
+    for (const { key, qty } of materials) {
+        inc[`materials.${key}`] = -qty;
+    }
+    await CharacterModel.updateOne({ userId }, { $inc: inc });
+    await redis.deleteKey(`rpg_char:${userId}`);
+}
+
+async function addCrate(userId: string, crateType: CrateType, qty: number = 1): Promise<void> {
+    await CharacterModel.updateOne({ userId }, { $inc: { [`crates.${crateType}`]: qty } });
+    await redis.deleteKey(`rpg_char:${userId}`);
+}
+
+async function deductCrate(userId: string, crateType: CrateType): Promise<boolean> {
+    const result = await CharacterModel.updateOne(
+        { userId, [`crates.${crateType}`]: { $gte: 1 } },
+        { $inc: { [`crates.${crateType}`]: -1 } }
+    );
+    if (result.modifiedCount === 0) return false;
+    await redis.deleteKey(`rpg_char:${userId}`);
+    return true;
+}
+
 const CharacterService = {
     getCharacter,
     requireCharacter,
@@ -236,6 +275,10 @@ const CharacterService = {
     updateDungeonProgress,
     addMaterials,
     getMaxMp,
+    hasEnoughMaterials,
+    deductMaterials,
+    addCrate,
+    deductCrate,
     CharacterNotFoundError,
     CharacterAlreadyExistsError,
     InsufficientGoldError,
