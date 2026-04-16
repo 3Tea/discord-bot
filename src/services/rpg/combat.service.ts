@@ -226,6 +226,24 @@ function tickStatusEffects(combatant: CombatantState): number {
     return poisonDmg;
 }
 
+/** Standalone version for PvP/team contexts where effects, hp, and maxHp are separate values. */
+function tickStatusEffectsStandalone(
+    effects: StatusEffect[],
+    hp: number,
+    maxHp: number
+): { effects: StatusEffect[]; poisonDmg: number; hp: number } {
+    let poisonDmg = 0;
+    for (const effect of effects) {
+        if (effect.type === "poison") {
+            poisonDmg = Math.floor(maxHp * effect.value);
+            hp = Math.max(0, hp - poisonDmg);
+        }
+        effect.turnsLeft--;
+    }
+    const remaining = effects.filter((e) => e.turnsLeft > 0);
+    return { effects: remaining, poisonDmg, hp };
+}
+
 // --- MP helpers ---
 
 function resolveMpCost(action: string): number {
@@ -702,6 +720,9 @@ const CombatService = {
     getSkillLabels,
     calcPhysicalDamage,
     calcMagicalDamage,
+    getEffectiveStat,
+    tickStatusEffects,
+    tickStatusEffectsStandalone,
 };
 
 export default CombatService;

@@ -132,6 +132,10 @@ function cooldownKey(userId: string): string {
     return `dungeon_cd:${userId}`;
 }
 
+function teamActionKey(partyId: string, userId: string): string {
+    return `team_action:${partyId}:${userId}`;
+}
+
 function scaleMonsterStats(baseStats: MonsterStats, partySize: number): MonsterStats {
     const scale = 1 + 0.5 * (partySize - 1);
     return {
@@ -301,14 +305,36 @@ async function submitAction(partyId: string, userId: string, action: string): Pr
         action = "attack";
     }
 
-    state.actions[userId] = action;
-    await saveParty(state);
+    // Store action in per-member key to avoid read-modify-write races on party state.
+    await redis.setJson(teamActionKey(partyId, userId), action, TEAM_DUNGEON_TTL);
     return true;
 }
 
-function allAliveSubmitted(state: TeamPartyState): boolean {
+async function allAliveSubmitted(state: TeamPartyState): Promise<boolean> {
     const aliveMembers = state.members.filter((m) => m.alive);
-    return aliveMembers.every((m) => state.actions[m.userId] !== undefined);
+    const submittedActions = await Promise.all(
+        aliveMembers.map((member) => redis.getJson<string>(teamActionKey(state.partyId, member.userId)))
+    );
+    return submittedActions.every((action) => action !== null);
+}
+
+async function getTurnActions(state: TeamPartyState): Promise<Record<string, string>> {
+    const actions: Record<string, string> = {};
+    const aliveMembers = state.members.filter((m) => m.alive);
+    const values = await Promise.all(
+        aliveMembers.map((member) => redis.getJson<string>(teamActionKey(state.partyId, member.userId)))
+    );
+
+    for (let i = 0; i < aliveMembers.length; i++) {
+        const member = aliveMembers[i];
+        actions[member.userId] = values[i] ?? "defend";
+    }
+
+    return actions;
+}
+
+async function clearTurnActions(state: TeamPartyState): Promise<void> {
+    await Promise.all(state.members.map((member) => redis.deleteKey(teamActionKey(state.partyId, member.userId))));
 }
 
 // --- Combat: Turn Resolution ---
@@ -391,10 +417,13 @@ function resolveMemberAction(
     return { damage, healed: 0, statusApplied };
 }
 
-function resolveTurn(state: TeamPartyState): TeamTurnResult {
+async function resolveTurn(state: TeamPartyState): Promise<TeamTurnResult> {
     if (!state.monster) {
         return { memberActions: [], monsterDamagePerTarget: 0, monsterDefeated: false, teamWiped: false, downedThisTurn: [], revivedThisTurn: null };
     }
+
+    const turnActions = await getTurnActions(state);
+    state.actions = turnActions;
 
     const monster = state.monster;
     const aliveMembers = state.members.filter((m) => m.alive);
@@ -440,6 +469,7 @@ function resolveTurn(state: TeamPartyState): TeamTurnResult {
     if (monster.hp <= 0) {
         applyMpRegen(state);
         state.actions = {};
+        await clearTurnActions(state);
         return {
             memberActions,
             monsterDamagePerTarget: 0,
@@ -452,7 +482,8 @@ function resolveTurn(state: TeamPartyState): TeamTurnResult {
 
     // Monster attacks all alive players
     const currentAlive = state.members.filter((m) => m.alive);
-    const totalMonsterDmg = Math.max(1, Math.floor((monster.stats.str * 1.5) - (0)));
+    const avgDef = Math.floor(currentAlive.reduce((sum, m) => sum + m.stats.def, 0) / currentAlive.length);
+    const totalMonsterDmg = Math.max(1, Math.floor((monster.stats.str * 1.5) - (avgDef * 0.5)));
     const perTargetDmg = Math.max(1, Math.floor(totalMonsterDmg / currentAlive.length));
 
     const downedThisTurn: string[] = [];
@@ -484,6 +515,7 @@ function resolveTurn(state: TeamPartyState): TeamTurnResult {
 
     state.turn++;
     state.actions = {};
+    await clearTurnActions(state);
 
     return {
         memberActions,
@@ -657,15 +689,10 @@ async function advanceFloor(state: TeamPartyState): Promise<{ checkpointReached:
 
 async function cleanupParty(state: TeamPartyState): Promise<void> {
     await redis.deleteKey(partyKey(state.partyId));
-    for (const member of state.members) {
-        await redis.deleteKey(activePartyKey(member.userId));
-    }
-}
-
-async function setCooldownForAll(state: TeamPartyState, cooldownSeconds: number): Promise<void> {
-    for (const member of state.members) {
-        await redis.setJson(cooldownKey(member.userId), 1, cooldownSeconds);
-    }
+    await Promise.all([
+        ...state.members.map((member) => redis.deleteKey(activePartyKey(member.userId))),
+        ...state.members.map((member) => redis.deleteKey(teamActionKey(state.partyId, member.userId))),
+    ]);
 }
 
 async function isInParty(userId: string): Promise<boolean> {
@@ -691,7 +718,6 @@ const TeamDungeonService = {
     resolveTeamTrap,
     advanceFloor,
     cleanupParty,
-    setCooldownForAll,
     isInParty,
     getClassLabel,
     scaleMonsterStats,

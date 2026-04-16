@@ -708,7 +708,7 @@ async function collectTeamActions(
                 await btnInteraction.reply({ content: t(locale, "dungeon.team.joined"), flags: MessageFlags.Ephemeral });
 
                 const freshParty = await TeamDungeonService.getParty(partyId);
-                if (freshParty && TeamDungeonService.allAliveSubmitted(freshParty)) {
+                if (freshParty && await TeamDungeonService.allAliveSubmitted(freshParty)) {
                     collector.stop("all_submitted");
                 }
             });
@@ -742,7 +742,7 @@ async function resolveTeamTurnAndShow(
     const resolveParty = await TeamDungeonService.getParty(partyId);
     if (!resolveParty) return null;
 
-    const result = TeamDungeonService.resolveTurn(resolveParty);
+    const result = await TeamDungeonService.resolveTurn(resolveParty);
     await TeamDungeonService.saveParty(resolveParty);
 
     const revealEmbed = new EmbedBuilder()
@@ -1101,7 +1101,6 @@ async function handleTeam(interaction: ChatInputCommandInteraction, locale: Supp
 
     await new Promise((r) => setTimeout(r, 1500));
 
-    const tierConfig = await PremiumService.getConfig(userId);
     await runTeamEncounterLoop(interaction, locale, party.partyId, interaction.guildId ?? "");
 
     const finalParty = await TeamDungeonService.getParty(party.partyId);
@@ -1112,8 +1111,16 @@ async function handleTeam(interaction: ChatInputCommandInteraction, locale: Supp
             .setColor(0x2ecc71);
         await interaction.editReply({ embeds: [resultEmbed], components: [] });
 
-        await TeamDungeonService.setCooldownForAll(finalParty, tierConfig.dungeonCooldownMs / 1000);
-        await TeamDungeonService.cleanupParty(finalParty);
+        try {
+            await Promise.allSettled(
+                finalParty.members.map(async (member) => {
+                    const memberTierConfig = await PremiumService.getConfig(member.userId);
+                    await redis.setJson(`dungeon_cd:${member.userId}`, 1, memberTierConfig.dungeonCooldownMs / 1000);
+                })
+            );
+        } finally {
+            await TeamDungeonService.cleanupParty(finalParty);
+        }
     }
 }
 

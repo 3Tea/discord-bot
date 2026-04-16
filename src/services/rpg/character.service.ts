@@ -41,6 +41,19 @@ export class InsufficientGoldError extends Error {
     }
 }
 
+export class InsufficientMaterialsError extends Error {
+    constructor(key: string, available: number, required: number) {
+        super(`Insufficient ${key}: need ${required}, have ${available}`);
+        this.name = "InsufficientMaterialsError";
+    }
+}
+
+/** Safely read a material count from either a Map (Mongoose doc) or plain object (Redis cache). */
+function getMaterialCount(materials: Map<string, number> | Record<string, number>, key: string): number {
+    if (materials instanceof Map) return materials.get(key) ?? 0;
+    return (materials as Record<string, number>)[key] ?? 0;
+}
+
 async function getCharacter(userId: string): Promise<ICharacter | null> {
     const cacheKey = `rpg_char:${userId}`;
     const cached = await redis.getJson(cacheKey);
@@ -247,7 +260,7 @@ function getMaxMp(level: number): number {
 async function hasEnoughMaterials(userId: string, materials: { key: string; qty: number }[]): Promise<boolean> {
     const char = await requireCharacter(userId);
     for (const { key, qty } of materials) {
-        if ((char.materials.get(key) ?? 0) < qty) return false;
+        if (getMaterialCount(char.materials, key) < qty) return false;
     }
     return true;
 }
@@ -255,8 +268,9 @@ async function hasEnoughMaterials(userId: string, materials: { key: string; qty:
 async function deductMaterials(userId: string, materials: { key: string; qty: number }[]): Promise<void> {
     const char = await requireCharacter(userId);
     for (const { key, qty } of materials) {
-        if ((char.materials.get(key) ?? 0) < qty) {
-            throw new InsufficientGoldError(char.materials.get(key) ?? 0, qty);
+        const available = getMaterialCount(char.materials, key);
+        if (available < qty) {
+            throw new InsufficientMaterialsError(key, available, qty);
         }
     }
     const inc: Record<string, number> = {};
@@ -323,6 +337,7 @@ const CharacterService = {
     CharacterNotFoundError,
     CharacterAlreadyExistsError,
     InsufficientGoldError,
+    InsufficientMaterialsError,
 };
 
 export default CharacterService;

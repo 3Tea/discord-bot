@@ -99,31 +99,11 @@ function activeMatchKey(userId: string): string {
     return `pvp_active:${userId}`;
 }
 
-function getEffectiveStat(base: number, effects: StatusEffect[], statType: string): number {
-    let value = base;
-    for (const effect of effects) {
-        if (effect.type === "def_buff" && (statType === "def" || statType === "magDef")) {
-            value = Math.floor(value * (1 + effect.value));
-        }
-        if (effect.type === "spd_debuff" && statType === "spd") {
-            value = Math.floor(value * (1 - effect.value));
-        }
-    }
-    return value;
+function actionKey(matchId: string, userId: string): string {
+    return `pvp_action:${matchId}:${userId}`;
 }
 
-function tickStatusEffects(effects: StatusEffect[], hp: number, maxHp: number): { effects: StatusEffect[]; poisonDmg: number; hp: number } {
-    let poisonDmg = 0;
-    for (const effect of effects) {
-        if (effect.type === "poison") {
-            poisonDmg = Math.floor(maxHp * effect.value);
-            hp = Math.max(0, hp - poisonDmg);
-        }
-        effect.turnsLeft--;
-    }
-    const remaining = effects.filter((e) => e.turnsLeft > 0);
-    return { effects: remaining, poisonDmg, hp };
-}
+const { getEffectiveStat, tickStatusEffectsStandalone: tickStatusEffects } = CombatService;
 
 function resolveSkill(classType: ClassType, advancedClass: AdvancedClassType | null, action: string): SkillDef | null {
     if (action === "skill1") return CLASS_SKILLS[classType][0];
@@ -262,22 +242,22 @@ async function submitAction(matchId: string, userId: string, action: string): Pr
     const state = await getMatch(matchId);
     if (!state) return false;
 
-    if (userId === state.challengerId) {
-        state.challengerAction = action;
-    } else if (userId === state.defenderId) {
-        state.defenderAction = action;
-    } else {
-        return false;
-    }
+    if (userId !== state.challengerId && userId !== state.defenderId) return false;
 
-    await redis.setJson(matchKey(matchId), state, PVP_MATCH_TTL);
+    // Store action in a separate per-player key to avoid read-modify-write race
+    await redis.setJson(actionKey(matchId, userId), action, PVP_MATCH_TTL);
     return true;
 }
 
 async function bothSubmitted(matchId: string): Promise<boolean> {
     const state = await getMatch(matchId);
     if (!state) return false;
-    return state.challengerAction !== null && state.defenderAction !== null;
+
+    const [a1, a2] = await Promise.all([
+        redis.getJson<string>(actionKey(matchId, state.challengerId)),
+        redis.getJson<string>(actionKey(matchId, state.defenderId)),
+    ]);
+    return a1 !== null && a2 !== null;
 }
 
 interface PlayerView {
@@ -434,16 +414,32 @@ async function resolveTurn(matchId: string): Promise<TurnResult> {
         throw new Error("Match not found");
     }
 
-    const cAction = state.challengerAction ?? "defend";
-    const dAction = state.defenderAction ?? "defend";
+    // Read actions from separate per-player keys, then clean up
+    const [challengerRaw, defenderRaw] = await Promise.all([
+        redis.getJson<string>(actionKey(matchId, state.challengerId)),
+        redis.getJson<string>(actionKey(matchId, state.defenderId)),
+    ]);
+
+    const cAction = challengerRaw ?? "defend";
+    const dAction = defenderRaw ?? "defend";
+
+    // Write actions back onto state for applyActionEffects to read
+    state.challengerAction = challengerRaw;
+    state.defenderAction = defenderRaw;
+
+    // Delete per-player action keys
+    await Promise.all([
+        redis.deleteKey(actionKey(matchId, state.challengerId)),
+        redis.deleteKey(actionKey(matchId, state.defenderId)),
+    ]);
 
     // Track auto-defends for forfeit detection
-    if (state.challengerAction === null) {
+    if (challengerRaw === null) {
         state.challengerAutoDefends++;
     } else {
         state.challengerAutoDefends = 0;
     }
-    if (state.defenderAction === null) {
+    if (defenderRaw === null) {
         state.defenderAutoDefends++;
     } else {
         state.defenderAutoDefends = 0;
@@ -593,27 +589,21 @@ async function endMatch(matchId: string, winnerId: string, loserId: string): Pro
         GuildService.addGP(loserId, PVP_LOSE_GP).catch(() => {}),
     ]);
 
-    // Update PvP stats
+    // Update PvP stats atomically
     await Promise.all([
         GuildMemberModel.updateOne(
             { userId: winnerId },
             { $inc: { pvpWins: 1, pvpRating: PVP_WIN_RATING } }
         ),
+        // Use aggregation pipeline update for atomic clamp-to-zero
         GuildMemberModel.updateOne(
             { userId: loserId },
-            {
-                $inc: { pvpLosses: 1 },
-                $max: { pvpRating: 0 },
-            }
+            [{ $set: {
+                pvpLosses: { $add: ["$pvpLosses", 1] },
+                pvpRating: { $max: [0, { $subtract: ["$pvpRating", PVP_LOSE_RATING] }] },
+            }}]
         ),
     ]);
-
-    // Decrement loser rating separately to enforce minimum 0
-    const loser = await GuildMemberModel.findOne({ userId: loserId });
-    if (loser) {
-        const newRating = Math.max(0, loser.pvpRating - PVP_LOSE_RATING);
-        await GuildMemberModel.updateOne({ userId: loserId }, { $set: { pvpRating: newRating } });
-    }
 
     // Clear caches
     await Promise.all([
@@ -648,6 +638,8 @@ async function cleanupMatch(matchId: string, challengerId: string, defenderId: s
         redis.deleteKey(matchKey(matchId)),
         redis.deleteKey(activeMatchKey(challengerId)),
         redis.deleteKey(activeMatchKey(defenderId)),
+        redis.deleteKey(actionKey(matchId, challengerId)),
+        redis.deleteKey(actionKey(matchId, defenderId)),
     ]);
 }
 

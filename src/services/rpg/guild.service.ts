@@ -47,10 +47,19 @@ async function register(userId: string): Promise<IGuildMember> {
 
 async function addGP(userId: string, amount: number): Promise<{ gp: number; rankedUp: boolean; oldRank: AdventurerRank; newRank: AdventurerRank }> {
     const member = await requireMember(userId);
-    const newGP = member.gp + amount;
     const oldRank = member.rank as AdventurerRank;
 
-    // Check rank up
+    // Atomically increment GP and read the updated document
+    const updated = await GuildMemberModel.findOneAndUpdate(
+        { userId },
+        { $inc: { gp: amount } },
+        { new: true }
+    );
+    if (!updated) throw new GuildMemberNotFoundError(userId);
+
+    const newGP = updated.gp;
+
+    // Check rank up using the atomically-updated GP
     const char = await CharacterService.requireCharacter(userId);
     const bossKills = char.bossKills ?? 0;
     let newRank = oldRank;
@@ -66,7 +75,11 @@ async function addGP(userId: string, amount: number): Promise<{ gp: number; rank
         }
     }
 
-    await GuildMemberModel.updateOne({ userId }, { $set: { gp: newGP, rank: newRank } });
+    // Only update rank if it changed
+    if (newRank !== oldRank) {
+        await GuildMemberModel.updateOne({ userId }, { $set: { rank: newRank } });
+    }
+
     await redis.deleteKey(`guild_member:${userId}`);
 
     return { gp: newGP, rankedUp: newRank !== oldRank, oldRank, newRank };
