@@ -6,6 +6,7 @@ import {
     EmbedBuilder,
     MessageFlags,
     SlashCommandBuilder,
+    type MessageActionRowComponentBuilder,
 } from "discord.js";
 import crypto from "node:crypto";
 import redis from "../../connector/redis";
@@ -15,6 +16,8 @@ import MerchantService from "../../services/economy/merchant.service";
 import type { MerchantState } from "../../services/economy/merchant.service";
 import CurrencyService from "../../services/economy/currency.service";
 import PremiumService from "../../services/premium/premium.service";
+import { buildPremiumButton } from "../../util/premium/upgradeButton";
+import { TIER_CONFIG } from "../../services/premium/premium.config";
 import WorkService from "../../services/economy/work.service";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import UserEconomyModel from "../../models/userEconomy.model";
@@ -463,9 +466,18 @@ export default {
             const cdKey = `dungeon_cd:${guildId}:${userId}`;
             const remaining = await redis.ttlKey(cdKey);
             if (remaining > 0) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "dungeon.cooldown", { time: WorkService.formatCooldown(remaining) }))
-                    .setColor(0xed4245);
+                let description = t(locale, "dungeon.cooldown", { time: WorkService.formatCooldown(remaining) });
+                const isFreeTier = tierConfig.dungeonCooldownMs === TIER_CONFIG.free.dungeonCooldownMs;
+                if (isFreeTier) {
+                    const reduced = WorkService.formatCooldown(TIER_CONFIG.star.dungeonCooldownMs / 1000);
+                    description += `\n${t(locale, "premium.cooldown_hint", { reduced })}`;
+                }
+                const embed = new EmbedBuilder().setDescription(description).setColor(0xed4245);
+                if (isFreeTier) {
+                    const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
+                        .addComponents(buildPremiumButton(locale));
+                    return Reply.embedEditComponents(interaction, embed, [row]);
+                }
                 return Reply.embedEdit(interaction, embed);
             }
 

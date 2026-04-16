@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder, type MessageActionRowComponentBuilder } from "discord.js";
 import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
 import WorkService from "../../services/economy/work.service";
@@ -9,6 +9,8 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import PremiumService from "../../services/premium/premium.service";
+import { buildPremiumButton } from "../../util/premium/upgradeButton";
+import { TIER_CONFIG } from "../../services/premium/premium.config";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import QuestService from "../../services/quest/quest.service";
 import EconomyAdminService from "../../services/economy/economyAdmin.service";
@@ -67,9 +69,18 @@ export default {
             const cdKey = `fish_cd:${guildId}:${userId}`;
             const remaining = await redis.ttlKey(cdKey);
             if (remaining > 0) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "fish.cooldown", { time: WorkService.formatCooldown(remaining) }))
-                    .setColor(0xed4245);
+                let description = t(locale, "fish.cooldown", { time: WorkService.formatCooldown(remaining) });
+                const isFreeTier = tierConfig.fishCooldownMs === TIER_CONFIG.free.fishCooldownMs;
+                if (isFreeTier) {
+                    const reduced = WorkService.formatCooldown(TIER_CONFIG.star.fishCooldownMs / 1000);
+                    description += `\n${t(locale, "premium.cooldown_hint", { reduced })}`;
+                }
+                const embed = new EmbedBuilder().setDescription(description).setColor(0xed4245);
+                if (isFreeTier) {
+                    const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
+                        .addComponents(buildPremiumButton(locale));
+                    return Reply.embedEditComponents(interaction, embed, [row]);
+                }
                 return Reply.embedEdit(interaction, embed);
             }
 
