@@ -4,6 +4,7 @@ import {
     ChatInputCommandInteraction,
     EmbedBuilder,
     InteractionReplyOptions,
+    type MessageActionRowComponentBuilder,
 } from "discord.js";
 
 import { FOOTER } from "../config/index";
@@ -39,6 +40,15 @@ class Reply {
     async embedEdit(interaction: ChatInputCommandInteraction, embed: EmbedBuilder) {
         applyFooter(embed);
         return interaction.editReply({ embeds: [embed] });
+    }
+
+    async embedEditComponents(
+        interaction: ChatInputCommandInteraction,
+        embed: EmbedBuilder,
+        components: ActionRowBuilder<MessageActionRowComponentBuilder>[]
+    ) {
+        applyFooter(embed);
+        return interaction.editReply({ embeds: [embed], components });
     }
 }
 
