@@ -10,6 +10,9 @@ export interface IGuildMember extends Document {
     activeQuests: string[];
     lastBoardDate: string;
     lastPersonalDate: string;
+    pvpRating: number;
+    pvpWins: number;
+    pvpLosses: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -23,6 +26,9 @@ const guildMemberSchema = new Schema(
         activeQuests: [{ type: String }],
         lastBoardDate: { type: String, default: "" },
         lastPersonalDate: { type: String, default: "" },
+        pvpRating: { type: Number, default: 1000 },
+        pvpWins: { type: Number, default: 0, min: 0 },
+        pvpLosses: { type: Number, default: 0, min: 0 },
     },
     { timestamps: true, collection: "GuildMembers" }
 );
@@ -30,6 +36,7 @@ const guildMemberSchema = new Schema(
 guildMemberSchema.index({ userId: 1 }, { unique: true });
 guildMemberSchema.index({ gp: -1 });
 guildMemberSchema.index({ questsCompleted: -1 });
+guildMemberSchema.index({ pvpRating: -1 });
 
 const GuildMemberModel = model<IGuildMember>("GuildMember", guildMemberSchema);
 export default GuildMemberModel;
