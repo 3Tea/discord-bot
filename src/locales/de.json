@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "Der Abenteurergilde beitreten",
     "cmd.guild.profile.desc": "Dein Gildenprofil und Rang ansehen",
     "cmd.guild.board.desc": "Tägliches Questbrett ansehen",
-    "cmd.guild.quests.desc": "Deine Quests ansehen und verwalten"
+    "cmd.guild.quests.desc": "Deine Quests ansehen und verwalten",
+    "cmd.guild.ranking.desc": "Gilden-Rangliste ansehen",
+    "guild.ranking.title_gp": "🏆 Gilden-Rangliste — GP",
+    "guild.ranking.title_rank": "🏆 Gilden-Rangliste — Rang",
+    "guild.ranking.title_quests": "🏆 Gilden-Rangliste — Quests",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** Quests",
+    "guild.ranking.your_position": "Deine Position: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "Keine Gildenmitglieder gefunden.",
+    "guild.ranking.global": "🌐 Global",
+    "guild.ranking.server": "🏠 Dieser Server",
+    "guild.ranking.page": "Seite {{current}}/{{total}}"
 }

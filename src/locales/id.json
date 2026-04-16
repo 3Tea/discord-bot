@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "Bergabung dengan Guild Petualang",
     "cmd.guild.profile.desc": "Lihat profil dan peringkat guildmu",
     "cmd.guild.board.desc": "Lihat papan quest harian",
-    "cmd.guild.quests.desc": "Lihat dan kelola questmu"
+    "cmd.guild.quests.desc": "Lihat dan kelola questmu",
+    "cmd.guild.ranking.desc": "Lihat papan peringkat guild",
+    "guild.ranking.title_gp": "🏆 Peringkat Guild — GP",
+    "guild.ranking.title_rank": "🏆 Peringkat Guild — Rank",
+    "guild.ranking.title_quests": "🏆 Peringkat Guild — Quest",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** quest",
+    "guild.ranking.your_position": "Posisimu: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "Tidak ada anggota guild ditemukan.",
+    "guild.ranking.global": "🌐 Global",
+    "guild.ranking.server": "🏠 Server Ini",
+    "guild.ranking.page": "Halaman {{current}}/{{total}}"
 }

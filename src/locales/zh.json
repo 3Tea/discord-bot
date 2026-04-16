@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "加入冒险者公会",
     "cmd.guild.profile.desc": "查看公会档案和等级",
     "cmd.guild.board.desc": "查看每日任务板",
-    "cmd.guild.quests.desc": "查看和管理你的任务"
+    "cmd.guild.quests.desc": "查看和管理你的任务",
+    "cmd.guild.ranking.desc": "查看公会排行榜",
+    "guild.ranking.title_gp": "🏆 公会排名 — GP",
+    "guild.ranking.title_rank": "🏆 公会排名 — 等级",
+    "guild.ranking.title_quests": "🏆 公会排名 — 任务",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** 个任务",
+    "guild.ranking.your_position": "你的排名: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "未找到公会成员。",
+    "guild.ranking.global": "🌐 全球",
+    "guild.ranking.server": "🏠 本服务器",
+    "guild.ranking.page": "第 {{current}}/{{total}} 页"
 }

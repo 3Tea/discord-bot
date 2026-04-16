@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "Word lid van het Avonturiersgilde",
     "cmd.guild.profile.desc": "Bekijk je gildeprofiel en rang",
     "cmd.guild.board.desc": "Bekijk het dagelijks opdrachtenbord",
-    "cmd.guild.quests.desc": "Bekijk en beheer je opdrachten"
+    "cmd.guild.quests.desc": "Bekijk en beheer je opdrachten",
+    "cmd.guild.ranking.desc": "Bekijk de gilderanglijst",
+    "guild.ranking.title_gp": "🏆 Gilderanglijst — GP",
+    "guild.ranking.title_rank": "🏆 Gilderanglijst — Rang",
+    "guild.ranking.title_quests": "🏆 Gilderanglijst — Opdrachten",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** opdrachten",
+    "guild.ranking.your_position": "Jouw positie: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "Geen gildeleden gevonden.",
+    "guild.ranking.global": "🌐 Globaal",
+    "guild.ranking.server": "🏠 Deze Server",
+    "guild.ranking.page": "Pagina {{current}}/{{total}}"
 }

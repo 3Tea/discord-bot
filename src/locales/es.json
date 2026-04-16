@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "Únete al Gremio de Aventureros",
     "cmd.guild.profile.desc": "Ver tu perfil y rango del gremio",
     "cmd.guild.board.desc": "Ver el tablón de misiones diarias",
-    "cmd.guild.quests.desc": "Ver y gestionar tus misiones"
+    "cmd.guild.quests.desc": "Ver y gestionar tus misiones",
+    "cmd.guild.ranking.desc": "Ver clasificación del gremio",
+    "guild.ranking.title_gp": "🏆 Clasificación del Gremio — GP",
+    "guild.ranking.title_rank": "🏆 Clasificación del Gremio — Rango",
+    "guild.ranking.title_quests": "🏆 Clasificación del Gremio — Misiones",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** misiones",
+    "guild.ranking.your_position": "Tu posición: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "No se encontraron miembros del gremio.",
+    "guild.ranking.global": "🌐 Global",
+    "guild.ranking.server": "🏠 Este Servidor",
+    "guild.ranking.page": "Página {{current}}/{{total}}"
 }

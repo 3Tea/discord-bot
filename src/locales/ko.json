@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "모험가 길드에 가입하기",
     "cmd.guild.profile.desc": "길드 프로필과 랭크 보기",
     "cmd.guild.board.desc": "일일 퀘스트 의뢰판 보기",
-    "cmd.guild.quests.desc": "퀘스트 확인 및 관리"
+    "cmd.guild.quests.desc": "퀘스트 확인 및 관리",
+    "cmd.guild.ranking.desc": "길드 랭킹 보기",
+    "guild.ranking.title_gp": "🏆 길드 랭킹 — GP",
+    "guild.ranking.title_rank": "🏆 길드 랭킹 — 랭크",
+    "guild.ranking.title_quests": "🏆 길드 랭킹 — 퀘스트",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** 퀘스트",
+    "guild.ranking.your_position": "내 순위: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "길드 멤버를 찾을 수 없습니다.",
+    "guild.ranking.global": "🌐 글로벌",
+    "guild.ranking.server": "🏠 이 서버",
+    "guild.ranking.page": "페이지 {{current}}/{{total}}"
 }

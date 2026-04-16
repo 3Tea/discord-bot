@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "Dołącz do Gildii Poszukiwaczy",
     "cmd.guild.profile.desc": "Zobacz swój profil i rangę gildii",
     "cmd.guild.board.desc": "Zobacz codzienną tablicę zadań",
-    "cmd.guild.quests.desc": "Zobacz i zarządzaj swoimi zadaniami"
+    "cmd.guild.quests.desc": "Zobacz i zarządzaj swoimi zadaniami",
+    "cmd.guild.ranking.desc": "Zobacz ranking gildii",
+    "guild.ranking.title_gp": "🏆 Ranking Gildii — GP",
+    "guild.ranking.title_rank": "🏆 Ranking Gildii — Ranga",
+    "guild.ranking.title_quests": "🏆 Ranking Gildii — Zadania",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** zadań",
+    "guild.ranking.your_position": "Twoja pozycja: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "Nie znaleziono członków gildii.",
+    "guild.ranking.global": "🌐 Globalny",
+    "guild.ranking.server": "🏠 Ten Serwer",
+    "guild.ranking.page": "Strona {{current}}/{{total}}"
 }

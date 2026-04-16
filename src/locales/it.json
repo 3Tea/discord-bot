@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "Unisciti alla Gilda degli Avventurieri",
     "cmd.guild.profile.desc": "Vedi il tuo profilo e rango della gilda",
     "cmd.guild.board.desc": "Vedi la bacheca delle missioni giornaliere",
-    "cmd.guild.quests.desc": "Vedi e gestisci le tue missioni"
+    "cmd.guild.quests.desc": "Vedi e gestisci le tue missioni",
+    "cmd.guild.ranking.desc": "Vedi la classifica della gilda",
+    "guild.ranking.title_gp": "🏆 Classifica della Gilda — GP",
+    "guild.ranking.title_rank": "🏆 Classifica della Gilda — Rango",
+    "guild.ranking.title_quests": "🏆 Classifica della Gilda — Missioni",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** missioni",
+    "guild.ranking.your_position": "La tua posizione: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "Nessun membro della gilda trovato.",
+    "guild.ranking.global": "🌐 Globale",
+    "guild.ranking.server": "🏠 Questo Server",
+    "guild.ranking.page": "Pagina {{current}}/{{total}}"
 }

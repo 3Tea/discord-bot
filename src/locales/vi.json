@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "Gia nhập Hội Phiêu Lưu",
     "cmd.guild.profile.desc": "Xem hồ sơ hội và xếp hạng",
     "cmd.guild.board.desc": "Xem bảng nhiệm vụ hàng ngày",
-    "cmd.guild.quests.desc": "Xem và quản lý nhiệm vụ"
+    "cmd.guild.quests.desc": "Xem và quản lý nhiệm vụ",
+    "cmd.guild.ranking.desc": "Xem bảng xếp hạng bang hội",
+    "guild.ranking.title_gp": "🏆 Xếp Hạng Bang Hội — GP",
+    "guild.ranking.title_rank": "🏆 Xếp Hạng Bang Hội — Rank",
+    "guild.ranking.title_quests": "🏆 Xếp Hạng Bang Hội — Nhiệm Vụ",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** nhiệm vụ",
+    "guild.ranking.your_position": "Vị trí của bạn: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "Không tìm thấy thành viên bang hội.",
+    "guild.ranking.global": "🌐 Toàn cầu",
+    "guild.ranking.server": "🏠 Server này",
+    "guild.ranking.page": "Trang {{current}}/{{total}}"
 }

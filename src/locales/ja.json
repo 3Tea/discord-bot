@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "冒険者ギルドに参加する",
     "cmd.guild.profile.desc": "ギルドプロフィールとランクを見る",
     "cmd.guild.board.desc": "本日のクエスト依頼板を見る",
-    "cmd.guild.quests.desc": "クエストの確認と管理"
+    "cmd.guild.quests.desc": "クエストの確認と管理",
+    "cmd.guild.ranking.desc": "ギルドランキングを表示",
+    "guild.ranking.title_gp": "🏆 ギルドランキング — GP",
+    "guild.ranking.title_rank": "🏆 ギルドランキング — ランク",
+    "guild.ranking.title_quests": "🏆 ギルドランキング — クエスト",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** クエスト",
+    "guild.ranking.your_position": "あなたの順位: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "ギルドメンバーが見つかりません。",
+    "guild.ranking.global": "🌐 グローバル",
+    "guild.ranking.server": "🏠 このサーバー",
+    "guild.ranking.page": "ページ {{current}}/{{total}}"
 }

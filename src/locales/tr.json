@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "Maceracı Loncası'na katıl",
     "cmd.guild.profile.desc": "Lonca profilini ve rütbeni gör",
     "cmd.guild.board.desc": "Günlük görev panosunu gör",
-    "cmd.guild.quests.desc": "Görevlerini gör ve yönet"
+    "cmd.guild.quests.desc": "Görevlerini gör ve yönet",
+    "cmd.guild.ranking.desc": "Lonca sıralamasını gör",
+    "guild.ranking.title_gp": "🏆 Lonca Sıralaması — GP",
+    "guild.ranking.title_rank": "🏆 Lonca Sıralaması — Rütbe",
+    "guild.ranking.title_quests": "🏆 Lonca Sıralaması — Görevler",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** görev",
+    "guild.ranking.your_position": "Sıralamanız: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "Lonca üyesi bulunamadı.",
+    "guild.ranking.global": "🌐 Küresel",
+    "guild.ranking.server": "🏠 Bu Sunucu",
+    "guild.ranking.page": "Sayfa {{current}}/{{total}}"
 }

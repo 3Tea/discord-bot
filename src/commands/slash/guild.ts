@@ -11,6 +11,8 @@ import CharacterService from "../../services/rpg/character.service";
 import GuildService, { GuildMemberNotFoundError, AlreadyRegisteredError } from "../../services/rpg/guild.service";
 import GuildQuestService from "../../services/rpg/guildQuest.service";
 import type { GuildQuest } from "../../services/rpg/guildQuest.service";
+import GuildMemberModel from "../../models/guildMember.model";
+import redis from "../../connector/redis";
 import {
     ADVENTURER_RANKS,
     MAX_ACTIVE_QUESTS,
@@ -415,6 +417,281 @@ async function handleQuests(interaction: ChatInputCommandInteraction, locale: Su
     }
 }
 
+// --- /guild ranking ---
+
+const RANKING_PAGE_SIZE = 10;
+const RANK_ORDER_MAP: Record<string, number> = Object.fromEntries(
+    ADVENTURER_RANKS.map((r, i) => [r, i])
+);
+
+type RankingType = "gp" | "rank" | "quests";
+
+interface RankingPage {
+    entries: { userId: string; gp: number; rank: AdventurerRank; questsCompleted: number }[];
+    totalEntries: number;
+    page: number;
+    totalPages: number;
+}
+
+function getSortField(type: RankingType): Record<string, -1> {
+    if (type === "quests") return { questsCompleted: -1 };
+    return { gp: -1 };
+}
+
+function getTitleKey(type: RankingType): string {
+    return `guild.ranking.title_${type}`;
+}
+
+async function fetchServerMemberIds(interaction: ChatInputCommandInteraction, guildId: string): Promise<string[]> {
+    const cacheKey = `guild_members:${guildId}`;
+    const cached = await redis.getJson(cacheKey) as string[] | null;
+    if (cached) return cached;
+
+    const members = await interaction.guild!.members.fetch();
+    const ids = members.map((m) => m.id);
+    await redis.setJson(cacheKey, ids, 300);
+    return ids;
+}
+
+async function fetchRankingPage(
+    type: RankingType,
+    page: number,
+    serverMemberIds?: string[]
+): Promise<RankingPage> {
+    const filter = serverMemberIds ? { userId: { $in: serverMemberIds } } : {};
+
+    if (type === "rank") {
+        // Aggregation to sort by rank ordinal (descending) then GP
+        const pipeline = [
+            ...(serverMemberIds ? [{ $match: { userId: { $in: serverMemberIds } } }] : []),
+            {
+                $addFields: {
+                    rankOrder: {
+                        $indexOfArray: [ADVENTURER_RANKS as unknown as string[], "$rank"],
+                    },
+                },
+            },
+            { $sort: { rankOrder: -1, gp: -1 } as Record<string, 1 | -1> },
+            { $skip: page * RANKING_PAGE_SIZE },
+            { $limit: RANKING_PAGE_SIZE },
+            { $project: { userId: 1, gp: 1, rank: 1, questsCompleted: 1, _id: 0 } },
+        ];
+
+        const entries = await GuildMemberModel.aggregate<RankingPage["entries"][number]>(pipeline);
+        const totalEntries = await GuildMemberModel.countDocuments(filter);
+        const totalPages = Math.max(1, Math.ceil(totalEntries / RANKING_PAGE_SIZE));
+
+        return { entries, totalEntries, page, totalPages };
+    }
+
+    const sort = getSortField(type);
+    const totalEntries = await GuildMemberModel.countDocuments(filter);
+    const totalPages = Math.max(1, Math.ceil(totalEntries / RANKING_PAGE_SIZE));
+
+    const entries = await GuildMemberModel.find(filter)
+        .sort(sort)
+        .skip(page * RANKING_PAGE_SIZE)
+        .limit(RANKING_PAGE_SIZE)
+        .select("userId gp rank questsCompleted")
+        .lean();
+
+    return { entries, totalEntries, page, totalPages };
+}
+
+function formatRankingEntry(
+    locale: SupportedLocale,
+    type: RankingType,
+    entry: RankingPage["entries"][number],
+    position: number,
+    username: string
+): string {
+    const rankDef = RANK_CONFIG[entry.rank];
+    const rankLabel = getRankLabel(locale, entry.rank);
+
+    if (type === "gp") {
+        return t(locale, "guild.ranking.entry_gp", {
+            pos: String(position),
+            rankEmoji: rankDef.emoji,
+            username,
+            gp: String(entry.gp),
+            rank: rankLabel,
+        });
+    }
+    if (type === "rank") {
+        return t(locale, "guild.ranking.entry_rank", {
+            pos: String(position),
+            rankEmoji: rankDef.emoji,
+            username,
+            rank: rankLabel,
+            gp: String(entry.gp),
+        });
+    }
+    return t(locale, "guild.ranking.entry_quests", {
+        pos: String(position),
+        username,
+        quests: String(entry.questsCompleted),
+    });
+}
+
+async function getUserPosition(
+    userId: string,
+    type: RankingType,
+    serverMemberIds?: string[]
+): Promise<{ position: number; value: string } | null> {
+    const userMember = await GuildService.getMember(userId);
+    if (!userMember) return null;
+
+    const filter = serverMemberIds ? { userId: { $in: serverMemberIds } } : {};
+
+    if (type === "rank") {
+        const rankIdx = RANK_ORDER_MAP[userMember.rank] ?? 0;
+        const ahead = await GuildMemberModel.countDocuments({
+            ...filter,
+            $or: [
+                { rank: { $in: ADVENTURER_RANKS.filter((_, i) => i > rankIdx) } },
+                { rank: userMember.rank, gp: { $gt: userMember.gp } },
+            ],
+        });
+        return { position: ahead + 1, value: `${RANK_CONFIG[userMember.rank as AdventurerRank].emoji} ${getRankLabel("en", userMember.rank as AdventurerRank)}` };
+    }
+
+    if (type === "quests") {
+        const ahead = await GuildMemberModel.countDocuments({
+            ...filter,
+            questsCompleted: { $gt: userMember.questsCompleted },
+        });
+        return { position: ahead + 1, value: `${userMember.questsCompleted} quests` };
+    }
+
+    // gp
+    const ahead = await GuildMemberModel.countDocuments({
+        ...filter,
+        gp: { $gt: userMember.gp },
+    });
+    return { position: ahead + 1, value: `${userMember.gp} GP` };
+}
+
+function buildRankingButtons(
+    locale: SupportedLocale,
+    page: number,
+    totalPages: number,
+    serverMode: boolean,
+    inGuild: boolean
+): ActionRowBuilder<ButtonBuilder> {
+    const prevBtn = new ButtonBuilder()
+        .setCustomId("guild_ranking_prev")
+        .setEmoji("\u25c0")
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(page <= 0);
+
+    const nextBtn = new ButtonBuilder()
+        .setCustomId("guild_ranking_next")
+        .setEmoji("\u25b6")
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(page >= totalPages - 1);
+
+    const toggleBtn = new ButtonBuilder()
+        .setCustomId("guild_ranking_toggle")
+        .setLabel(serverMode ? t(locale, "guild.ranking.global") : t(locale, "guild.ranking.server"))
+        .setStyle(serverMode ? ButtonStyle.Primary : ButtonStyle.Success)
+        .setDisabled(!inGuild);
+
+    return new ActionRowBuilder<ButtonBuilder>().addComponents(prevBtn, nextBtn, toggleBtn);
+}
+
+async function buildRankingEmbed(
+    interaction: ChatInputCommandInteraction,
+    locale: SupportedLocale,
+    type: RankingType,
+    data: RankingPage,
+    serverMode: boolean
+): Promise<EmbedBuilder> {
+    const lines: string[] = [];
+
+    for (let i = 0; i < data.entries.length; i++) {
+        const entry = data.entries[i];
+        const position = data.page * RANKING_PAGE_SIZE + i + 1;
+        const username = await interaction.client.users
+            .fetch(entry.userId)
+            .then((u) => u.username)
+            .catch(() => "Unknown");
+        lines.push(formatRankingEntry(locale, type, entry, position, username));
+    }
+
+    const description = lines.length > 0 ? lines.join("\n") : t(locale, "guild.ranking.empty");
+
+    // User's own position
+    const serverMemberIds = serverMode && interaction.guildId
+        ? await fetchServerMemberIds(interaction, interaction.guildId)
+        : undefined;
+    const userPos = await getUserPosition(interaction.user.id, type, serverMemberIds);
+    const userOnPage = userPos
+        ? data.page * RANKING_PAGE_SIZE < userPos.position && userPos.position <= (data.page + 1) * RANKING_PAGE_SIZE
+        : false;
+
+    const sections = [description];
+    if (userPos && !userOnPage) {
+        sections.push("", t(locale, "guild.ranking.your_position", { pos: String(userPos.position), value: userPos.value }));
+    }
+
+    const modeLabel = serverMode ? t(locale, "guild.ranking.server") : t(locale, "guild.ranking.global");
+
+    return new EmbedBuilder()
+        .setTitle(t(locale, getTitleKey(type)))
+        .setDescription(sections.join("\n"))
+        .setFooter({ text: `${modeLabel} \u2022 ${t(locale, "guild.ranking.page", { current: String(data.page + 1), total: String(data.totalPages) })}` })
+        .setColor(0xf1c40f)
+        .setTimestamp();
+}
+
+async function handleRanking(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
+    const type = (interaction.options.getString("type") ?? "gp") as RankingType;
+    let page = 0;
+    let serverMode = false;
+    const inGuild = !!interaction.guildId;
+
+    let serverMemberIds: string[] | undefined;
+    if (serverMode && inGuild) {
+        serverMemberIds = await fetchServerMemberIds(interaction, interaction.guildId!);
+    }
+
+    let data = await fetchRankingPage(type, page, serverMemberIds);
+    let embed = await buildRankingEmbed(interaction, locale, type, data, serverMode);
+    const row = buildRankingButtons(locale, page, data.totalPages, serverMode, inGuild);
+
+    const message = await interaction.editReply({ embeds: [embed], components: [row] });
+
+    const collector = message.createMessageComponentCollector({
+        filter: (i) => i.user.id === interaction.user.id && i.customId.startsWith("guild_ranking_"),
+        idle: 60_000,
+    });
+
+    collector.on("collect", async (btnInteraction) => {
+        if (btnInteraction.customId === "guild_ranking_prev") {
+            page = Math.max(0, page - 1);
+        } else if (btnInteraction.customId === "guild_ranking_next") {
+            page = Math.min(data.totalPages - 1, page + 1);
+        } else if (btnInteraction.customId === "guild_ranking_toggle") {
+            serverMode = !serverMode;
+            page = 0;
+        }
+
+        serverMemberIds = serverMode && inGuild
+            ? await fetchServerMemberIds(interaction, interaction.guildId!)
+            : undefined;
+
+        data = await fetchRankingPage(type, page, serverMemberIds);
+        embed = await buildRankingEmbed(interaction, locale, type, data, serverMode);
+        const updatedRow = buildRankingButtons(locale, page, data.totalPages, serverMode, inGuild);
+
+        await btnInteraction.update({ embeds: [embed], components: [updatedRow] });
+    });
+
+    collector.on("end", () => {
+        interaction.editReply({ components: [] }).catch(() => {});
+    });
+}
+
 // --- Command definition ---
 
 export default {
@@ -445,6 +722,22 @@ export default {
                 .setName("quests")
                 .setDescription("View and manage your quests")
                 .setDescriptionLocalizations(descriptionLocales("cmd.guild.quests.desc"))
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("ranking")
+                .setDescription("View guild leaderboard")
+                .setDescriptionLocalizations(descriptionLocales("cmd.guild.ranking.desc"))
+                .addStringOption((opt) =>
+                    opt
+                        .setName("type")
+                        .setDescription("Leaderboard type")
+                        .addChoices(
+                            { name: "GP", value: "gp" },
+                            { name: "Rank", value: "rank" },
+                            { name: "Quests", value: "quests" }
+                        )
+                )
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -465,6 +758,9 @@ export default {
                     return;
                 case "quests":
                     await handleQuests(interaction, locale);
+                    return;
+                case "ranking":
+                    await handleRanking(interaction, locale);
                     return;
                 default: {
                     const embed = new EmbedBuilder()

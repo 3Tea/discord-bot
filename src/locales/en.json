@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "Join the Adventurer Guild",
     "cmd.guild.profile.desc": "View your guild profile and rank",
     "cmd.guild.board.desc": "View daily quest board",
-    "cmd.guild.quests.desc": "View and manage your quests"
+    "cmd.guild.quests.desc": "View and manage your quests",
+    "cmd.guild.ranking.desc": "View guild leaderboard",
+    "guild.ranking.title_gp": "🏆 Guild Ranking — GP",
+    "guild.ranking.title_rank": "🏆 Guild Ranking — Rank",
+    "guild.ranking.title_quests": "🏆 Guild Ranking — Quests",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** quests",
+    "guild.ranking.your_position": "Your position: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "No guild members found.",
+    "guild.ranking.global": "🌐 Global",
+    "guild.ranking.server": "🏠 This Server",
+    "guild.ranking.page": "Page {{current}}/{{total}}"
 }

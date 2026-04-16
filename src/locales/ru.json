@@ -1253,5 +1253,17 @@
     "cmd.guild.register.desc": "Вступить в Гильдию Искателей",
     "cmd.guild.profile.desc": "Посмотреть профиль и ранг гильдии",
     "cmd.guild.board.desc": "Посмотреть ежедневную доску заданий",
-    "cmd.guild.quests.desc": "Просмотр и управление заданиями"
+    "cmd.guild.quests.desc": "Просмотр и управление заданиями",
+    "cmd.guild.ranking.desc": "Посмотреть рейтинг гильдии",
+    "guild.ranking.title_gp": "🏆 Рейтинг Гильдии — GP",
+    "guild.ranking.title_rank": "🏆 Рейтинг Гильдии — Ранг",
+    "guild.ranking.title_quests": "🏆 Рейтинг Гильдии — Задания",
+    "guild.ranking.entry_gp": "**#{{pos}}** {{rankEmoji}} {{username}} — **{{gp}}** GP ({{rank}})",
+    "guild.ranking.entry_rank": "**#{{pos}}** {{rankEmoji}} {{username}} — {{rank}} ({{gp}} GP)",
+    "guild.ranking.entry_quests": "**#{{pos}}** {{username}} — **{{quests}}** заданий",
+    "guild.ranking.your_position": "Ваша позиция: **#{{pos}}** — {{value}}",
+    "guild.ranking.empty": "Участники гильдии не найдены.",
+    "guild.ranking.global": "🌐 Глобальный",
+    "guild.ranking.server": "🏠 Этот сервер",
+    "guild.ranking.page": "Страница {{current}}/{{total}}"
 }
