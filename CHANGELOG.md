@@ -10,6 +10,10 @@ All notable changes to this project are documented in this file. The format is b
 
 - **Economy cooldowns no longer admin-configurable** — work/fish cooldowns now determined by premium tier; gamble (30s) and rob (6h + 2h immunity) are fixed constants. Prevents premium value erosion and economy imbalance.
 
+### Fixed
+
+- **RPG combat state consistency** — removed Redis read-modify-write race windows in PvP/team-dungeon action submission and ensured team-dungeon party cleanup always runs even if one member cooldown write fails.
+
 ### Added
 
 - **Achievement system** — 50 achievements across 10 categories (economy, XP, mining, dungeon, social, gambling, voice, activity, quests, stars) with tiered rewards (coin, gem, star). `/achievements` command with paginated category display. Integrated into `/profile` card. Config-driven — new achievements can be added without code changes.
