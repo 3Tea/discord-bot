@@ -13,6 +13,7 @@ import { buildPremiumButton } from "../../util/premium/upgradeButton";
 import { TIER_CONFIG } from "../../services/premium/premium.config";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import QuestService from "../../services/quest/quest.service";
+import GuildQuestService from "../../services/rpg/guildQuest.service";
 import EconomyAdminService from "../../services/economy/economyAdmin.service";
 
 const CONFIG_CACHE_TTL = 300;
@@ -116,6 +117,7 @@ export default {
                 .setColor(WorkService.getRarityColor(fish.rarity));
 
             await QuestService.trackProgress(userId, guildId, "fish").catch(() => {});
+            GuildQuestService.trackProgress(userId, "use_fish", 1).catch(() => {});
             return Reply.embedEdit(interaction, embed);
         } catch {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");

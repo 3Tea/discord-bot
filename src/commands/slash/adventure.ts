@@ -31,6 +31,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import GuildQuestService from "../../services/rpg/guildQuest.service";
 
 // --- Helpers ---
 
@@ -581,6 +582,7 @@ async function handleCraft(interaction: ChatInputCommandInteraction, locale: Sup
         .setColor(RARITY_CONFIG[item.rarity].color);
 
     await confirmInteraction.update({ embeds: [successEmbed], components: [] });
+    GuildQuestService.trackProgress(interaction.user.id, "craft_equipment", 1).catch(() => {});
 }
 
 // --- /adventure crate ---
@@ -666,6 +668,7 @@ async function handleCrate(interaction: ChatInputCommandInteraction, locale: Sup
         .setColor(RARITY_CONFIG[item.rarity].color);
 
     await selectInteraction.update({ embeds: [resultEmbed], components: [] });
+    GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1).catch(() => {});
 }
 
 // --- /adventure shop ---
@@ -743,6 +746,7 @@ async function handleShop(interaction: ChatInputCommandInteraction, locale: Supp
         .setColor(RARITY_CONFIG[item.rarity].color);
 
     await buyInteraction.update({ embeds: [resultEmbed], components: [] });
+    GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1).catch(() => {});
 }
 
 // --- Command definition ---

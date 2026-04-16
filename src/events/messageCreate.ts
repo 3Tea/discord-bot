@@ -10,6 +10,7 @@ import { syncSnapshots } from "../util/xp/snapshotSync";
 import { logger } from "../util/log/logger.mixed";
 import { rewardLevelUp } from "../util/economy/activityReward";
 import CharacterService from "../services/rpg/character.service";
+import GuildQuestService from "../services/rpg/guildQuest.service";
 import { MESSAGE_XP_TO_EXP_RATE } from "../services/rpg/rpg.config";
 import { getNotificationConfig, sendNotification } from "../services/notification/notificationService";
 import { buildLevelUpEmbed } from "../services/notification/notificationEmbeds";
@@ -82,6 +83,7 @@ export default {
             if (charExp > 0) {
                 CharacterService.addExp(message.author.id, charExp).catch(() => {});
             }
+            GuildQuestService.trackProgress(message.author.id, "send_messages", 1).catch(() => {});
 
             // Check level up
             const newLevel = levelFromXP(updated.xp);

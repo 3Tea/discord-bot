@@ -185,6 +185,7 @@ async function addGold(userId: string, amount: number): Promise<number> {
     );
     if (!result) throw new CharacterNotFoundError(userId);
     await redis.deleteKey(`rpg_char:${userId}`);
+    import("./guildQuest.service").then(({ default: GQS }) => GQS.trackProgress(userId, "earn_gold", amount)).catch(() => {});
     return result.gold;
 }
 
@@ -218,6 +219,10 @@ async function addMaterials(userId: string, materials: { key: string; qty: numbe
     }
     await CharacterModel.updateOne({ userId }, { $inc: inc });
     await redis.deleteKey(`rpg_char:${userId}`);
+    const totalQty = materials.reduce((sum, m) => sum + m.qty, 0);
+    if (totalQty > 0) {
+        import("./guildQuest.service").then(({ default: GQS }) => GQS.trackProgress(userId, "collect_materials", totalQty)).catch(() => {});
+    }
 }
 
 function getMaxMp(level: number): number {

@@ -14,6 +14,7 @@ import { buildPremiumButton } from "../../util/premium/upgradeButton";
 import { TIER_CONFIG } from "../../services/premium/premium.config";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import QuestService from "../../services/quest/quest.service";
+import GuildQuestService from "../../services/rpg/guildQuest.service";
 
 const CONFIG_CACHE_TTL = 300;
 
@@ -112,6 +113,7 @@ export default {
                 .setColor(0x57f287);
 
             await QuestService.trackProgress(userId, guildId, "work").catch(() => {});
+            GuildQuestService.trackProgress(userId, "use_work", 1).catch(() => {});
             return Reply.embedEdit(interaction, embed);
         } catch {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");

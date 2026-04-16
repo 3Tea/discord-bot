@@ -20,6 +20,8 @@ import {
     formatMaterialDrops,
     RUN_TTL,
 } from "../commands/slash/dungeon";
+import GuildQuestService from "../services/rpg/guildQuest.service";
+import GuildService from "../services/rpg/guild.service";
 
 function buildDefendLine(locale: SupportedLocale, result: CombatActionResult): string[] {
     const lines = [
@@ -174,6 +176,12 @@ async function handleWin(
         embeds: [embed],
         components: [buildContinueLeaveRow(locale, runState.encountersLeft)],
     });
+
+    GuildQuestService.trackProgress(state.userId, "kill_monsters", 1).catch(() => {});
+    if (state.isBoss) {
+        GuildQuestService.trackProgress(state.userId, "defeat_boss", 1).catch(() => {});
+        GuildService.incrementBossKills(state.userId).catch(() => {});
+    }
 }
 
 async function handleLoss(
