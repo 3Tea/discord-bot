@@ -1,9 +1,10 @@
-import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder, type MessageActionRowComponentBuilder } from "discord.js";
 import { DEV_USER_ID } from "../../util/config/index";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import Reply from "../../util/decorator/reply";
+import { buildPremiumButton } from "../../util/premium/upgradeButton";
 import PremiumService, { DurationKey } from "../../services/premium/premium.service";
 import { getTierConfig } from "../../services/premium/premium.config";
 import type { PremiumTier } from "../../models/userWallet.model";
@@ -244,7 +245,13 @@ async function handleStatus(interaction: ChatInputCommandInteraction, locale: Su
             .addFields({ name: "\u200b", value: t(locale, "premium.status.free_desc") });
     }
 
-    await Reply.embedEdit(interaction, embed);
+    if (status.isActive) {
+        await Reply.embedEdit(interaction, embed);
+    } else {
+        const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
+            .addComponents(buildPremiumButton(locale));
+        await Reply.embedEditComponents(interaction, embed, [row]);
+    }
 }
 
 function formatCd(ms: number): string {
@@ -315,5 +322,7 @@ async function handleCompare(interaction: ChatInputCommandInteraction, locale: S
         .setColor(0xf39c12)
         .setTimestamp();
 
-    await Reply.embedEdit(interaction, embed);
+    const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
+        .addComponents(buildPremiumButton(locale));
+    await Reply.embedEditComponents(interaction, embed, [row]);
 }
