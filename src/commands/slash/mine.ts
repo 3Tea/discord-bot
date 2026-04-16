@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder, type MessageActionRowComponentBuilder } from "discord.js";
+import { ActionRowBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder, type MessageActionRowComponentBuilder } from "discord.js";
 import redis from "../../connector/redis";
 import MineService from "../../services/economy/mine.service";
 import WorkService from "../../services/economy/work.service";

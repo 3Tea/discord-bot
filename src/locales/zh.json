@@ -193,7 +193,6 @@
     "weather.wmo.unknown": "未知",
     "manga.nsfw_only": "仅限 NSFW 频道",
     "manga.insufficient_funds": "资金不足，无法维持此服务器。",
-    "manga.premium_only": "仅限高级用户。",
     "manga.load_failed": "加载漫画失败。请稍后再试。",
     "manga.support_server": "支持服务器",
     "manga.no_stars": "你已用完今天的3次免费机会，星星不足。请使用 /wallet daily 领取星星。",

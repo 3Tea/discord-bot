@@ -193,7 +193,6 @@
     "weather.wmo.unknown": "Tidak diketahui",
     "manga.nsfw_only": "Hanya channel NSFW",
     "manga.insufficient_funds": "Dana tidak cukup untuk memelihara server ini",
-    "manga.premium_only": "Khusus premium.",
     "manga.load_failed": "Gagal memuat manga. Silakan coba lagi nanti.",
     "manga.support_server": "Server Dukungan",
     "manga.no_stars": "Anda telah menggunakan 3 penggunaan gratis hari ini dan tidak memiliki cukup star. Gunakan /wallet daily untuk klaim star.",

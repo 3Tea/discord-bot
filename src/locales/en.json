@@ -194,7 +194,6 @@
     "weather.wmo.unknown": "Unknown",
     "manga.nsfw_only": "Only NSFW channel",
     "manga.insufficient_funds": "Not enough funds to keep this server running.",
-    "manga.premium_only": "Premium only.",
     "manga.load_failed": "Failed to load manga. Please try again later.",
     "manga.support_server": "Support Server",
     "manga.no_stars": "You've used all 3 free uses today and don't have enough stars. Use /wallet daily to claim stars.",

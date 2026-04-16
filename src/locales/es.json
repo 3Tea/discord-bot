@@ -193,7 +193,6 @@
     "weather.wmo.unknown": "Desconocido",
     "manga.nsfw_only": "Solo canal NSFW",
     "manga.insufficient_funds": "No hay fondos suficientes para mantener este servidor.",
-    "manga.premium_only": "Solo premium.",
     "manga.load_failed": "Error al cargar el manga. Inténtalo de nuevo más tarde.",
     "manga.support_server": "Servidor de soporte",
     "manga.no_stars": "Has agotado tus 3 usos gratuitos de hoy y no tienes suficientes estrellas. Usa /wallet daily para reclamar estrellas.",
