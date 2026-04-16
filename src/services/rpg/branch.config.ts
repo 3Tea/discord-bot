@@ -4,8 +4,12 @@ import type { CrateType } from "./rpg.config";
 
 // Weekly quest actions (subset of guild quest actions - collective-friendly only)
 export const WEEKLY_QUEST_ACTIONS: QuestAction[] = [
-    "kill_monsters", "defeat_boss", "earn_gold",
-    "collect_materials", "complete_quests", "craft_equipment",
+    "kill_monsters",
+    "defeat_boss",
+    "earn_gold",
+    "collect_materials",
+    "complete_quests",
+    "craft_equipment",
 ];
 
 export interface WeeklyQuestTemplate {

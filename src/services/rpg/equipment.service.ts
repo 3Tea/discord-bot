@@ -75,14 +75,28 @@ const WEAPON_NAMES: Record<string, string[]> = {
     crossbow: ["Light Crossbow", "Heavy Crossbow", "Repeater", "Siege Crossbow", "Dragon Crossbow", "Void Crossbow"],
     dagger: ["Iron Dagger", "Steel Dagger", "Shadow Dagger", "Venom Fang", "Soul Reaper", "Godslayer"],
     katana: ["Wooden Katana", "Steel Katana", "Shadow Katana", "Demon Katana", "Divine Katana", "Muramasa"],
-    scepter: ["Wooden Scepter", "Silver Scepter", "Holy Scepter", "Divine Scepter", "Celestial Scepter", "Scepter of Light"],
+    scepter: [
+        "Wooden Scepter",
+        "Silver Scepter",
+        "Holy Scepter",
+        "Divine Scepter",
+        "Celestial Scepter",
+        "Scepter of Light",
+    ],
 };
 
 const SHIELD_NAMES: Record<string, string[]> = {
     shield: ["Wooden Shield", "Iron Shield", "Steel Shield", "Tower Shield", "Dragon Shield", "Aegis"],
     heavy_shield: ["Buckler", "Iron Wall", "Fortress Shield", "Titan Guard", "Divine Barrier", "Odin's Guard"],
     magic_tome: ["Old Tome", "Spell Book", "Grimoire", "Arcane Codex", "Elder Grimoire", "Tome of Infinity"],
-    quiver: ["Leather Quiver", "Hunter's Quiver", "Elven Quiver", "Enchanted Quiver", "Celestial Quiver", "Quiver of Stars"],
+    quiver: [
+        "Leather Quiver",
+        "Hunter's Quiver",
+        "Elven Quiver",
+        "Enchanted Quiver",
+        "Celestial Quiver",
+        "Quiver of Stars",
+    ],
     holy_tome: ["Prayer Book", "Holy Script", "Sacred Tome", "Divine Codex", "Celestial Script", "Book of Miracles"],
 };
 
@@ -199,9 +213,7 @@ function rollMaterialDrops(floor: number, source: "monster" | "treasure" | "boss
         if (!hasRarePlus) {
             const rareOrAbove = MATERIALS.filter((m) => m.minFloor >= 6 && floor >= m.minFloor);
             const fallback =
-                rareOrAbove.length > 0
-                    ? rareOrAbove[rareOrAbove.length - 1]
-                    : MATERIALS[MATERIALS.length - 2]; // uncommon_fragment
+                rareOrAbove.length > 0 ? rareOrAbove[rareOrAbove.length - 1] : MATERIALS[MATERIALS.length - 2]; // uncommon_fragment
             drops.push({ key: fallback.key, qty: 1 });
         }
     }
@@ -256,7 +268,12 @@ async function createEquipmentDrop(
 
 // --- Equip / Unequip ---
 
-async function equipItem(userId: string, equipmentId: string, characterClass: ClassType, characterLevel: number): Promise<IEquipment> {
+async function equipItem(
+    userId: string,
+    equipmentId: string,
+    characterClass: ClassType,
+    characterLevel: number
+): Promise<IEquipment> {
     const item = await EquipmentModel.findOne({ _id: equipmentId, ownerId: userId });
     if (!item) throw new EquipmentNotFoundError();
 
@@ -328,7 +345,12 @@ function getCrateRarity(crateType: CrateType): Rarity {
     return entries[0][0];
 }
 
-async function openCrate(ownerId: string, crateType: CrateType, classType: ClassType, level: number): Promise<IEquipment> {
+async function openCrate(
+    ownerId: string,
+    crateType: CrateType,
+    classType: ClassType,
+    level: number
+): Promise<IEquipment> {
     const rarity = getCrateRarity(crateType);
     const slot = rollSlotForClass(classType, "monster");
     const data = generateEquipment(ownerId, slot, level, classType);
@@ -337,7 +359,13 @@ async function openCrate(ownerId: string, crateType: CrateType, classType: Class
     return EquipmentModel.create(data);
 }
 
-async function craftEquipment(ownerId: string, slot: EquipmentSlot, rarity: Rarity, classType: ClassType, level: number): Promise<IEquipment> {
+async function craftEquipment(
+    ownerId: string,
+    slot: EquipmentSlot,
+    rarity: Rarity,
+    classType: ClassType,
+    level: number
+): Promise<IEquipment> {
     const data = generateEquipment(ownerId, slot, level, classType);
     (data as Record<string, unknown>).rarity = rarity;
     (data as Record<string, unknown>).stats = generateEquipmentStats(slot, rarity, level);

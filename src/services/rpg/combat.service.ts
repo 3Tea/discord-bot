@@ -52,29 +52,29 @@ export interface RpgCombatState {
 }
 
 export interface CombatActionResult {
-    userDamage: number;        // damage dealt to monster
-    monsterDamage: number;     // damage dealt to user
+    userDamage: number; // damage dealt to monster
+    monsterDamage: number; // damage dealt to user
     userHp: number;
     monsterHp: number;
     turnsLeft: number;
-    won: boolean;              // monster dead
-    lost: boolean;             // user dead
+    won: boolean; // monster dead
+    lost: boolean; // user dead
     fled: boolean;
-    turnsUp: boolean;          // turns exhausted
-    healAmount?: number;       // for heal skills
-    statusApplied?: string;    // status effect name applied
-    critHit?: boolean;         // critical hit triggered
-    poisonDamage?: number;     // poison tick damage this turn
+    turnsUp: boolean; // turns exhausted
+    healAmount?: number; // for heal skills
+    statusApplied?: string; // status effect name applied
+    critHit?: boolean; // critical hit triggered
+    poisonDamage?: number; // poison tick damage this turn
     mpCost: number;
     mpRegen: number;
     currentMp: number;
     insufficientMp: boolean;
-    ultimateUsed?: boolean;    // ultimate was used this action
+    ultimateUsed?: boolean; // ultimate was used this action
     resurrectionTriggered?: boolean; // priest auto-revive triggered
     stoneWallReflect?: number; // damage reflected by stone wall
     divineShieldBlocked?: boolean; // divine shield blocked damage
-    instantKill?: boolean;     // sniper headshot instant kill
-    selfDamage?: number;       // warlock soul burn HP cost
+    instantKill?: boolean; // sniper headshot instant kill
+    selfDamage?: number; // warlock soul burn HP cost
 }
 
 // --- Combat Initialization ---
@@ -156,7 +156,7 @@ function calcPhysicalDamage(
     ignoreDefPercent: number = 0
 ): number {
     const effectiveDef = defenderDef * (1 - ignoreDefPercent);
-    const raw = (attackerStr * 1.5) * multiplier - (effectiveDef * 0.5);
+    const raw = attackerStr * 1.5 * multiplier - effectiveDef * 0.5;
     return Math.max(1, Math.floor(raw));
 }
 
@@ -167,7 +167,7 @@ function calcMagicalDamage(
     ignoreDefPercent: number = 0
 ): number {
     const effectiveMagDef = defenderMagDef * (1 - ignoreDefPercent);
-    const raw = (attackerMag * 1.5) * multiplier - (effectiveMagDef * 0.5);
+    const raw = attackerMag * 1.5 * multiplier - effectiveMagDef * 0.5;
     return Math.max(1, Math.floor(raw));
 }
 
@@ -195,7 +195,7 @@ interface MonsterAttackResult {
 function monsterAttack(state: RpgCombatState): MonsterAttackResult {
     const monsterStr = state.monster.stats.str;
     const userDef = getEffectiveStat(state.user.stats.def, state.user.statusEffects, "def");
-    const raw = Math.max(1, Math.floor((monsterStr * 1.5) - (userDef * 0.5)));
+    const raw = Math.max(1, Math.floor(monsterStr * 1.5 - userDef * 0.5));
 
     if (state.divineShieldActive) {
         state.divineShieldActive = false;
@@ -388,7 +388,12 @@ function calcHitDamage(
 
 // --- Action branch: Damage (attack / damage skills) ---
 
-function executeDamageAction(state: RpgCombatState, skill: SkillDef | null, action: string, mpCost: number): CombatActionResult {
+function executeDamageAction(
+    state: RpgCombatState,
+    skill: SkillDef | null,
+    action: string,
+    mpCost: number
+): CombatActionResult {
     const hits = skill?.hits ?? 1;
     const monsterDef = getEffectiveStat(state.monster.stats.def, state.monster.statusEffects, "def");
     const monsterMagDef = getEffectiveStat(state.monster.stats.magDef, state.monster.statusEffects, "magDef");
@@ -622,24 +627,60 @@ function buildUltimateResult(
 
 function executeUltimate(state: RpgCombatState): CombatActionResult {
     if (!state.advancedClass) {
-        return { userDamage: 0, monsterDamage: 0, userHp: state.user.hp, monsterHp: state.monster.hp,
-            turnsLeft: state.turnsLeft, won: false, lost: false, fled: false, turnsUp: false,
-            mpCost: 0, mpRegen: 0, currentMp: state.user.mp, insufficientMp: false };
+        return {
+            userDamage: 0,
+            monsterDamage: 0,
+            userHp: state.user.hp,
+            monsterHp: state.monster.hp,
+            turnsLeft: state.turnsLeft,
+            won: false,
+            lost: false,
+            fled: false,
+            turnsUp: false,
+            mpCost: 0,
+            mpRegen: 0,
+            currentMp: state.user.mp,
+            insufficientMp: false,
+        };
     }
 
     if (state.ultimateUsed) {
-        return { userDamage: 0, monsterDamage: 0, userHp: state.user.hp, monsterHp: state.monster.hp,
-            turnsLeft: state.turnsLeft, won: false, lost: false, fled: false, turnsUp: false,
-            mpCost: 0, mpRegen: 0, currentMp: state.user.mp, insufficientMp: false };
+        return {
+            userDamage: 0,
+            monsterDamage: 0,
+            userHp: state.user.hp,
+            monsterHp: state.monster.hp,
+            turnsLeft: state.turnsLeft,
+            won: false,
+            lost: false,
+            fled: false,
+            turnsUp: false,
+            mpCost: 0,
+            mpRegen: 0,
+            currentMp: state.user.mp,
+            insufficientMp: false,
+        };
     }
 
     const advConfig = ADVANCED_CLASS_CONFIG[state.advancedClass];
     const mpCost = advConfig.ultimate.mpCost;
 
     if (state.user.mp < mpCost) {
-        return { userDamage: 0, monsterDamage: 0, userHp: state.user.hp, monsterHp: state.monster.hp,
-            turnsLeft: state.turnsLeft, won: false, lost: false, fled: false, turnsUp: false,
-            mpCost: 0, mpRegen: 0, currentMp: state.user.mp, insufficientMp: true };
+        return {
+            userDamage: 0,
+            monsterDamage: 0,
+            userHp: state.user.hp,
+            monsterHp: state.monster.hp,
+            turnsLeft: state.turnsLeft,
+            won: false,
+            lost: false,
+            fled: false,
+            turnsUp: false,
+            mpCost: 0,
+            mpRegen: 0,
+            currentMp: state.user.mp,
+            insufficientMp: true,
+        };
     }
 
     state.user.mp -= mpCost;
@@ -647,23 +688,37 @@ function executeUltimate(state: RpgCombatState): CombatActionResult {
 
     const skill = advConfig.ultimate;
     switch (state.advancedClass) {
-        case "berserker":  return executeUltimateBloodFrenzy(state, skill);
-        case "warlock":    return executeUltimateSoulBurn(state, skill);
-        case "sniper":     return executeUltimateHeadshot(state, skill);
-        default:           return executeUltimateGeneric(state, skill);
+        case "berserker":
+            return executeUltimateBloodFrenzy(state, skill);
+        case "warlock":
+            return executeUltimateSoulBurn(state, skill);
+        case "sniper":
+            return executeUltimateHeadshot(state, skill);
+        default:
+            return executeUltimateGeneric(state, skill);
     }
 }
 
 // --- Execute Action (dispatcher) ---
 
-function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "skill2" | "defend" | "run" | "ultimate"): CombatActionResult {
+function executeAction(
+    state: RpgCombatState,
+    action: "attack" | "skill1" | "skill2" | "defend" | "run" | "ultimate"
+): CombatActionResult {
     if (action === "run") {
         return {
-            userDamage: 0, monsterDamage: 0,
-            userHp: state.user.hp, monsterHp: state.monster.hp,
+            userDamage: 0,
+            monsterDamage: 0,
+            userHp: state.user.hp,
+            monsterHp: state.monster.hp,
             turnsLeft: state.turnsLeft,
-            won: false, lost: false, fled: true, turnsUp: false,
-            mpCost: 0, mpRegen: 0, currentMp: state.user.mp,
+            won: false,
+            lost: false,
+            fled: true,
+            turnsUp: false,
+            mpCost: 0,
+            mpRegen: 0,
+            currentMp: state.user.mp,
             insufficientMp: false,
         };
     }
@@ -673,11 +728,18 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
     const mpCost = resolveMpCost(action);
     if (mpCost > 0 && state.user.mp < mpCost) {
         return {
-            userDamage: 0, monsterDamage: 0,
-            userHp: state.user.hp, monsterHp: state.monster.hp,
+            userDamage: 0,
+            monsterDamage: 0,
+            userHp: state.user.hp,
+            monsterHp: state.monster.hp,
             turnsLeft: state.turnsLeft,
-            won: false, lost: false, fled: false, turnsUp: false,
-            mpCost: 0, mpRegen: 0, currentMp: state.user.mp,
+            won: false,
+            lost: false,
+            fled: false,
+            turnsUp: false,
+            mpCost: 0,
+            mpRegen: 0,
+            currentMp: state.user.mp,
             insufficientMp: true,
         };
     }
@@ -697,7 +759,10 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
 
 // --- Get available actions ---
 
-interface SkillLabel { key: string; emoji: string }
+interface SkillLabel {
+    key: string;
+    emoji: string;
+}
 
 function getSkillLabels(classType: ClassType, advancedClass?: AdvancedClassType | null): SkillLabel[] {
     const [s1, s2] = CLASS_SKILLS[classType];

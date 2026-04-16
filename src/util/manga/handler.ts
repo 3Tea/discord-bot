@@ -163,9 +163,7 @@ export function mangaCommand(source: MangaSource) {
                 charged = await applyStarCharge(interaction.user.id, source.name);
             } catch (error) {
                 if (error instanceof InsufficientStarError) {
-                    const embed = new EmbedBuilder()
-                        .setDescription(t(locale, "manga.no_stars"))
-                        .setColor(0xed4245);
+                    const embed = new EmbedBuilder().setDescription(t(locale, "manga.no_stars")).setColor(0xed4245);
                     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(buildPremiumButton(locale));
                     await interaction.reply({ embeds: [embed], components: [row], flags: MessageFlags.Ephemeral });
                     return;

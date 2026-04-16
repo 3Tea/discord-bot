@@ -2,10 +2,7 @@ import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
 import CharacterService from "../services/rpg/character.service";
 import DungeonService from "../services/economy/dungeon.service";
-import type {
-    CombatResolveResult,
-    DungeonRunState,
-} from "../services/economy/dungeon.service";
+import type { CombatResolveResult, DungeonRunState } from "../services/economy/dungeon.service";
 import CombatService from "../services/rpg/combat.service";
 import type { RpgCombatState, CombatActionResult } from "../services/rpg/combat.service";
 import { RARITY_CONFIG, CRATES, type Rarity } from "../services/rpg/rpg.config";
@@ -49,9 +46,8 @@ function buildSkillLine(
     const [s1, s2] = CombatService.getSkillLabels(classType);
     const skillLabel = action === "skill1" ? s1 : s2;
     const skillName = t(locale, `rpg.skill.${skillLabel.key}`);
-    const mpCostSuffix = result.mpCost > 0
-        ? ` ${t(locale, "dungeon.combat.mp_cost", { cost: String(result.mpCost) })}`
-        : "";
+    const mpCostSuffix =
+        result.mpCost > 0 ? ` ${t(locale, "dungeon.combat.mp_cost", { cost: String(result.mpCost) })}` : "";
     const lines = [
         t(locale, "dungeon.combat.skill", {
             skill: skillName,
@@ -65,19 +61,14 @@ function buildSkillLine(
     return lines;
 }
 
-function buildUltimateLine(
-    locale: SupportedLocale,
-    result: CombatActionResult,
-    state: RpgCombatState
-): string[] {
+function buildUltimateLine(locale: SupportedLocale, result: CombatActionResult, state: RpgCombatState): string[] {
     if (!state.advancedClass) return [];
     const labels = CombatService.getSkillLabels(state.classType, state.advancedClass);
     const ultimateLabel = labels[2];
     if (!ultimateLabel) return [];
     const skillName = t(locale, `rpg.skill.${ultimateLabel.key}`);
-    const mpCostSuffix = result.mpCost > 0
-        ? ` ${t(locale, "dungeon.combat.mp_cost", { cost: String(result.mpCost) })}`
-        : "";
+    const mpCostSuffix =
+        result.mpCost > 0 ? ` ${t(locale, "dungeon.combat.mp_cost", { cost: String(result.mpCost) })}` : "";
     const lines = [
         t(locale, "dungeon.combat.skill", {
             skill: skillName,
@@ -153,18 +144,22 @@ function buildWinDesc(
         t(locale, "dungeon.reward.gold", { amount: String(resolve.goldReward) }),
         t(locale, "dungeon.reward.exp", { amount: String(resolve.expReward) }),
         ...(resolve.equipDrop
-            ? [t(locale, "dungeon.reward.equip_drop", {
-                rarity: RARITY_CONFIG[resolve.equipDrop.rarity as Rarity].emoji,
-                name: resolve.equipDrop.name,
-            })]
+            ? [
+                  t(locale, "dungeon.reward.equip_drop", {
+                      rarity: RARITY_CONFIG[resolve.equipDrop.rarity as Rarity].emoji,
+                      name: resolve.equipDrop.name,
+                  }),
+              ]
             : []),
         ...(resolve.materialDrops.length > 0 ? formatMaterialDrops(locale, resolve.materialDrops) : []),
         ...(resolve.crateDrops?.length
-            ? resolve.crateDrops.map(drop => t(locale, "dungeon.reward.crate", {
-                emoji: CRATES[drop.type].emoji,
-                name: t(locale, `rpg.crate.${drop.type}`),
-                amount: String(drop.qty),
-            }))
+            ? resolve.crateDrops.map((drop) =>
+                  t(locale, "dungeon.reward.crate", {
+                      emoji: CRATES[drop.type].emoji,
+                      name: t(locale, `rpg.crate.${drop.type}`),
+                      amount: String(drop.qty),
+                  })
+              )
             : []),
         "",
         t(locale, "dungeon.floor", { floor: String(resolve.newFloor), checkpoint: String(resolve.checkpoint) }),
@@ -221,7 +216,9 @@ async function handleWin(
     CharacterService.incrementMonstersKilled(state.userId, 1).catch(() => {});
     GuildQuestService.trackProgress(state.userId, "kill_monsters", 1, interaction.guildId ?? undefined).catch(() => {});
     if (state.isBoss) {
-        GuildQuestService.trackProgress(state.userId, "defeat_boss", 1, interaction.guildId ?? undefined).catch(() => {});
+        GuildQuestService.trackProgress(state.userId, "defeat_boss", 1, interaction.guildId ?? undefined).catch(
+            () => {}
+        );
         GuildService.incrementBossKills(state.userId).catch(() => {});
     }
 }

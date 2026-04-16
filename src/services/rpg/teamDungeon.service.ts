@@ -419,7 +419,14 @@ function resolveMemberAction(
 
 async function resolveTurn(state: TeamPartyState): Promise<TeamTurnResult> {
     if (!state.monster) {
-        return { memberActions: [], monsterDamagePerTarget: 0, monsterDefeated: false, teamWiped: false, downedThisTurn: [], revivedThisTurn: null };
+        return {
+            memberActions: [],
+            monsterDamagePerTarget: 0,
+            monsterDefeated: false,
+            teamWiped: false,
+            downedThisTurn: [],
+            revivedThisTurn: null,
+        };
     }
 
     const turnActions = await getTurnActions(state);
@@ -483,7 +490,7 @@ async function resolveTurn(state: TeamPartyState): Promise<TeamTurnResult> {
     // Monster attacks all alive players
     const currentAlive = state.members.filter((m) => m.alive);
     const avgDef = Math.floor(currentAlive.reduce((sum, m) => sum + m.stats.def, 0) / currentAlive.length);
-    const totalMonsterDmg = Math.max(1, Math.floor((monster.stats.str * 1.5) - (avgDef * 0.5)));
+    const totalMonsterDmg = Math.max(1, Math.floor(monster.stats.str * 1.5 - avgDef * 0.5));
     const perTargetDmg = Math.max(1, Math.floor(totalMonsterDmg / currentAlive.length));
 
     const downedThisTurn: string[] = [];
@@ -538,10 +545,7 @@ function applyMpRegen(state: TeamPartyState): void {
 
 // --- Rewards ---
 
-async function distributeRewards(
-    state: TeamPartyState,
-    source: "monster" | "boss"
-): Promise<TeamRewardResult> {
+async function distributeRewards(state: TeamPartyState, source: "monster" | "boss"): Promise<TeamRewardResult> {
     const floor = state.floor;
     const partySize = state.members.length;
     const isBoss = source === "boss";
@@ -607,9 +611,7 @@ async function distributeRewards(
     return { goldPerMember, expPerMember, memberRewards };
 }
 
-async function distributeTreasureRewards(
-    state: TeamPartyState
-): Promise<TeamTreasureResult> {
+async function distributeTreasureRewards(state: TeamPartyState): Promise<TeamTreasureResult> {
     const floor = state.floor;
     const partySize = state.members.length;
     const rewards = DUNGEON_REWARDS.treasure;

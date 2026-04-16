@@ -102,19 +102,32 @@ export const CLASS_SKILLS: Record<ClassType, [SkillDef, SkillDef]> = {
     ],
     tank: [
         {
-            key: "shield_bash", emoji: "🔨", damageType: "physical", multiplier: 1.4,
-            statusEffect: { type: "def_buff", value: 0.2, turns: 2 }, statusTarget: "self",
+            key: "shield_bash",
+            emoji: "🔨",
+            damageType: "physical",
+            multiplier: 1.4,
+            statusEffect: { type: "def_buff", value: 0.2, turns: 2 },
+            statusTarget: "self",
         },
         {
-            key: "fortify", emoji: "🏰", damageType: "heal", multiplier: 0, healPercent: 0.2,
-            statusEffect: { type: "def_buff", value: 0.4, turns: 1 }, statusTarget: "self",
+            key: "fortify",
+            emoji: "🏰",
+            damageType: "heal",
+            multiplier: 0,
+            healPercent: 0.2,
+            statusEffect: { type: "def_buff", value: 0.4, turns: 1 },
+            statusTarget: "self",
         },
     ],
     mage: [
         { key: "fireball", emoji: "🔥", damageType: "magical", multiplier: 2 },
         {
-            key: "ice_shard", emoji: "❄️", damageType: "magical", multiplier: 1.5,
-            statusEffect: { type: "spd_debuff", value: 0.3, turns: 2 }, statusTarget: "monster",
+            key: "ice_shard",
+            emoji: "❄️",
+            damageType: "magical",
+            multiplier: 1.5,
+            statusEffect: { type: "spd_debuff", value: 0.3, turns: 2 },
+            statusTarget: "monster",
         },
     ],
     archer: [
@@ -124,8 +137,12 @@ export const CLASS_SKILLS: Record<ClassType, [SkillDef, SkillDef]> = {
     assassin: [
         { key: "backstab", emoji: "🗡️", damageType: "physical", multiplier: 2.2, critChance: 0.3, critMultiplier: 3 },
         {
-            key: "poison_blade", emoji: "💀", damageType: "physical", multiplier: 1,
-            statusEffect: { type: "poison", value: 0.1, turns: 3 }, statusTarget: "monster",
+            key: "poison_blade",
+            emoji: "💀",
+            damageType: "physical",
+            multiplier: 1,
+            statusEffect: { type: "poison", value: 0.1, turns: 3 },
+            statusTarget: "monster",
         },
     ],
     healer: [
@@ -142,13 +159,16 @@ export type EquipmentSlot = (typeof EQUIPMENT_SLOTS)[number];
 export const RARITIES = ["common", "uncommon", "rare", "epic", "legendary", "mythic"] as const;
 export type Rarity = (typeof RARITIES)[number];
 
-export const RARITY_CONFIG: Record<Rarity, { color: number; emoji: string; statMultiplier: number; dropWeight: number }> = {
-    common:    { color: 0x95a5a6, emoji: "⬜", statMultiplier: 1, dropWeight: 45 },
-    uncommon:  { color: 0x2ecc71, emoji: "🟩", statMultiplier: 1.3, dropWeight: 25 },
-    rare:      { color: 0x3498db, emoji: "🟦", statMultiplier: 1.6, dropWeight: 15 },
-    epic:      { color: 0x9b59b6, emoji: "🟪", statMultiplier: 2, dropWeight: 10 },
+export const RARITY_CONFIG: Record<
+    Rarity,
+    { color: number; emoji: string; statMultiplier: number; dropWeight: number }
+> = {
+    common: { color: 0x95a5a6, emoji: "⬜", statMultiplier: 1, dropWeight: 45 },
+    uncommon: { color: 0x2ecc71, emoji: "🟩", statMultiplier: 1.3, dropWeight: 25 },
+    rare: { color: 0x3498db, emoji: "🟦", statMultiplier: 1.6, dropWeight: 15 },
+    epic: { color: 0x9b59b6, emoji: "🟪", statMultiplier: 2, dropWeight: 10 },
     legendary: { color: 0xf1c40f, emoji: "🟨", statMultiplier: 2.5, dropWeight: 4 },
-    mythic:    { color: 0xe74c3c, emoji: "🟥", statMultiplier: 3.2, dropWeight: 1 },
+    mythic: { color: 0xe74c3c, emoji: "🟥", statMultiplier: 3.2, dropWeight: 1 },
 };
 
 export const CLASS_WEAPON_TYPES: Record<ClassType, string[]> = {
@@ -181,16 +201,63 @@ export interface EquipmentTemplate {
 }
 
 export const STARTER_WEAPONS: Record<ClassType, EquipmentTemplate> = {
-    swordsman: { name: "Iron Sword", slot: "weapon", type: "sword", baseStats: { str: 5 }, classRestriction: ["swordsman"], requiredLevel: 1 },
-    tank: { name: "Iron Mace", slot: "weapon", type: "mace", baseStats: { str: 3, def: 2 }, classRestriction: ["tank"], requiredLevel: 1 },
-    mage: { name: "Wooden Staff", slot: "weapon", type: "staff", baseStats: { mag: 5 }, classRestriction: ["mage", "healer"], requiredLevel: 1 },
-    archer: { name: "Short Bow", slot: "weapon", type: "bow", baseStats: { str: 4, spd: 1 }, classRestriction: ["archer"], requiredLevel: 1 },
-    assassin: { name: "Iron Dagger", slot: "weapon", type: "dagger", baseStats: { str: 4, spd: 2 }, classRestriction: ["assassin"], requiredLevel: 1 },
-    healer: { name: "Wooden Scepter", slot: "weapon", type: "scepter", baseStats: { mag: 4, hp: 5 }, classRestriction: ["healer"], requiredLevel: 1 },
+    swordsman: {
+        name: "Iron Sword",
+        slot: "weapon",
+        type: "sword",
+        baseStats: { str: 5 },
+        classRestriction: ["swordsman"],
+        requiredLevel: 1,
+    },
+    tank: {
+        name: "Iron Mace",
+        slot: "weapon",
+        type: "mace",
+        baseStats: { str: 3, def: 2 },
+        classRestriction: ["tank"],
+        requiredLevel: 1,
+    },
+    mage: {
+        name: "Wooden Staff",
+        slot: "weapon",
+        type: "staff",
+        baseStats: { mag: 5 },
+        classRestriction: ["mage", "healer"],
+        requiredLevel: 1,
+    },
+    archer: {
+        name: "Short Bow",
+        slot: "weapon",
+        type: "bow",
+        baseStats: { str: 4, spd: 1 },
+        classRestriction: ["archer"],
+        requiredLevel: 1,
+    },
+    assassin: {
+        name: "Iron Dagger",
+        slot: "weapon",
+        type: "dagger",
+        baseStats: { str: 4, spd: 2 },
+        classRestriction: ["assassin"],
+        requiredLevel: 1,
+    },
+    healer: {
+        name: "Wooden Scepter",
+        slot: "weapon",
+        type: "scepter",
+        baseStats: { mag: 4, hp: 5 },
+        classRestriction: ["healer"],
+        requiredLevel: 1,
+    },
 };
 
 export const STARTER_ARMOR: EquipmentTemplate = {
-    name: "Leather Vest", slot: "armor", type: "light_armor", baseStats: { def: 3, hp: 10 }, classRestriction: [], requiredLevel: 1,
+    name: "Leather Vest",
+    slot: "armor",
+    type: "light_armor",
+    baseStats: { def: 3, hp: 10 },
+    classRestriction: [],
+    requiredLevel: 1,
 };
 
 // --- Leveling Config ---
@@ -227,12 +294,12 @@ export interface MonsterStats {
 
 export function getMonsterStats(floor: number, playerLevel: number): MonsterStats {
     return {
-        hp: 80 + (floor * 15) + (playerLevel * 5),
-        str: 10 + (floor * 4),
-        def: 5 + (floor * 2),
-        mag: 8 + (floor * 3),
-        magDef: 5 + (floor * 2),
-        spd: 8 + (floor * 2),
+        hp: 80 + floor * 15 + playerLevel * 5,
+        str: 10 + floor * 4,
+        def: 5 + floor * 2,
+        mag: 8 + floor * 3,
+        magDef: 5 + floor * 2,
+        spd: 8 + floor * 2,
     };
 }
 
@@ -269,23 +336,23 @@ export interface MaterialDef {
 }
 
 export const MATERIALS: MaterialDef[] = [
-    { key: "mythic_heart",      emoji: "🟥", minFloor: 20, dropChance: 0.02, minQty: 1, maxQty: 1 },
-    { key: "legendary_soul",    emoji: "🟨", minFloor: 15, dropChance: 0.05, minQty: 1, maxQty: 1 },
-    { key: "epic_core",         emoji: "🟪", minFloor: 10, dropChance: 0.10, minQty: 1, maxQty: 1 },
-    { key: "rare_essence",      emoji: "🟦", minFloor: 6,  dropChance: 0.20, minQty: 1, maxQty: 2 },
-    { key: "uncommon_fragment", emoji: "🟩", minFloor: 3,  dropChance: 0.35, minQty: 1, maxQty: 3 },
-    { key: "common_shard",      emoji: "⬜", minFloor: 1,  dropChance: 0.60, minQty: 2, maxQty: 4 },
+    { key: "mythic_heart", emoji: "🟥", minFloor: 20, dropChance: 0.02, minQty: 1, maxQty: 1 },
+    { key: "legendary_soul", emoji: "🟨", minFloor: 15, dropChance: 0.05, minQty: 1, maxQty: 1 },
+    { key: "epic_core", emoji: "🟪", minFloor: 10, dropChance: 0.1, minQty: 1, maxQty: 1 },
+    { key: "rare_essence", emoji: "🟦", minFloor: 6, dropChance: 0.2, minQty: 1, maxQty: 2 },
+    { key: "uncommon_fragment", emoji: "🟩", minFloor: 3, dropChance: 0.35, minQty: 1, maxQty: 3 },
+    { key: "common_shard", emoji: "⬜", minFloor: 1, dropChance: 0.6, minQty: 2, maxQty: 4 },
 ];
 
 // --- Class-Weighted Drop Config ---
 
 export const CLASS_PRIORITY_SLOTS: Record<ClassType, [EquipmentSlot, EquipmentSlot, EquipmentSlot]> = {
     swordsman: ["weapon", "armor", "shield"],
-    tank:      ["shield", "armor", "helmet"],
-    mage:      ["weapon", "accessory", "shield"],
-    archer:    ["weapon", "boots", "accessory"],
-    assassin:  ["weapon", "boots", "accessory"],
-    healer:    ["weapon", "shield", "helmet"],
+    tank: ["shield", "armor", "helmet"],
+    mage: ["weapon", "accessory", "shield"],
+    archer: ["weapon", "boots", "accessory"],
+    assassin: ["weapon", "boots", "accessory"],
+    healer: ["weapon", "shield", "helmet"],
 };
 
 export const CLASS_PRIORITY_WEIGHTS = [0.4, 0.35, 0.25] as const;
@@ -315,11 +382,46 @@ export interface CraftRecipe {
 
 export const CRAFT_RECIPES: CraftRecipe[] = [
     { rarity: "common", materials: [{ key: "common_shard", qty: 5 }], goldCost: 50 },
-    { rarity: "uncommon", materials: [{ key: "uncommon_fragment", qty: 3 }, { key: "common_shard", qty: 5 }], goldCost: 150 },
-    { rarity: "rare", materials: [{ key: "rare_essence", qty: 3 }, { key: "uncommon_fragment", qty: 5 }], goldCost: 500 },
-    { rarity: "epic", materials: [{ key: "epic_core", qty: 3 }, { key: "rare_essence", qty: 5 }], goldCost: 1500 },
-    { rarity: "legendary", materials: [{ key: "legendary_soul", qty: 3 }, { key: "epic_core", qty: 5 }], goldCost: 5000 },
-    { rarity: "mythic", materials: [{ key: "mythic_heart", qty: 3 }, { key: "legendary_soul", qty: 5 }], goldCost: 15000 },
+    {
+        rarity: "uncommon",
+        materials: [
+            { key: "uncommon_fragment", qty: 3 },
+            { key: "common_shard", qty: 5 },
+        ],
+        goldCost: 150,
+    },
+    {
+        rarity: "rare",
+        materials: [
+            { key: "rare_essence", qty: 3 },
+            { key: "uncommon_fragment", qty: 5 },
+        ],
+        goldCost: 500,
+    },
+    {
+        rarity: "epic",
+        materials: [
+            { key: "epic_core", qty: 3 },
+            { key: "rare_essence", qty: 5 },
+        ],
+        goldCost: 1500,
+    },
+    {
+        rarity: "legendary",
+        materials: [
+            { key: "legendary_soul", qty: 3 },
+            { key: "epic_core", qty: 5 },
+        ],
+        goldCost: 5000,
+    },
+    {
+        rarity: "mythic",
+        materials: [
+            { key: "mythic_heart", qty: 3 },
+            { key: "legendary_soul", qty: 5 },
+        ],
+        goldCost: 15000,
+    },
 ];
 
 // --- Gacha Crate Config ---
@@ -337,7 +439,12 @@ export interface CrateDef {
 export const CRATES: Record<CrateType, CrateDef> = {
     bronze: { key: "bronze", emoji: "🟫", shopCost: 200, rarityWeights: { common: 50, uncommon: 35, rare: 15 } },
     silver: { key: "silver", emoji: "🥈", shopCost: 800, rarityWeights: { uncommon: 40, rare: 35, epic: 25 } },
-    gold: { key: "gold", emoji: "🥇", shopCost: 2500, rarityWeights: { rare: 35, epic: 30, legendary: 25, mythic: 10 } },
+    gold: {
+        key: "gold",
+        emoji: "🥇",
+        shopCost: 2500,
+        rarityWeights: { rare: 35, epic: 30, legendary: 25, mythic: 10 },
+    },
 };
 
 export const CRATE_DROP_RATES = {
@@ -349,8 +456,18 @@ export const CRATE_DROP_RATES = {
 // --- Advanced Class Types ---
 
 export const ADVANCED_CLASSES = [
-    "berserker", "knight", "fortress", "paladin", "warlock", "archmage",
-    "sniper", "ranger", "phantom", "shadow", "druid", "priest",
+    "berserker",
+    "knight",
+    "fortress",
+    "paladin",
+    "warlock",
+    "archmage",
+    "sniper",
+    "ranger",
+    "phantom",
+    "shadow",
+    "druid",
+    "priest",
 ] as const;
 export type AdvancedClassType = (typeof ADVANCED_CLASSES)[number];
 
@@ -376,7 +493,10 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "offensive",
         statBonus: { str: 0.2, hp: -0.1 },
         ultimate: {
-            key: "blood_frenzy", emoji: "🩸", damageType: "physical", multiplier: 3,
+            key: "blood_frenzy",
+            emoji: "🩸",
+            damageType: "physical",
+            multiplier: 3,
             mpCost: ULTIMATE_MP_COST,
         },
     },
@@ -387,7 +507,10 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "offensive",
         statBonus: { def: 0.25, spd: -0.15 },
         ultimate: {
-            key: "stone_wall", emoji: "🪨", damageType: "buff", multiplier: 0,
+            key: "stone_wall",
+            emoji: "🪨",
+            damageType: "buff",
+            multiplier: 0,
             mpCost: ULTIMATE_MP_COST,
         },
     },
@@ -398,7 +521,10 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "offensive",
         statBonus: { mag: 0.25, hp: -0.15 },
         ultimate: {
-            key: "soul_burn", emoji: "💀", damageType: "magical", multiplier: 4,
+            key: "soul_burn",
+            emoji: "💀",
+            damageType: "magical",
+            multiplier: 4,
             mpCost: ULTIMATE_MP_COST,
         },
     },
@@ -409,7 +535,10 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "offensive",
         statBonus: { str: 0.15, spd: 0.1, def: -0.15 },
         ultimate: {
-            key: "headshot", emoji: "💥", damageType: "physical", multiplier: 5,
+            key: "headshot",
+            emoji: "💥",
+            damageType: "physical",
+            multiplier: 5,
             mpCost: ULTIMATE_MP_COST,
         },
     },
@@ -420,7 +549,10 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "offensive",
         statBonus: { str: 0.2, spd: 0.1, hp: -0.2 },
         ultimate: {
-            key: "shadow_strike", emoji: "🌀", damageType: "physical", multiplier: 3.5,
+            key: "shadow_strike",
+            emoji: "🌀",
+            damageType: "physical",
+            multiplier: 3.5,
             ignoreDefPercent: 1,
             mpCost: ULTIMATE_MP_COST,
         },
@@ -432,9 +564,13 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "offensive",
         statBonus: { mag: 0.15, hp: 0.1 },
         ultimate: {
-            key: "natures_wrath", emoji: "🌿", damageType: "magical", multiplier: 2.5,
+            key: "natures_wrath",
+            emoji: "🌿",
+            damageType: "magical",
+            multiplier: 2.5,
             healPercent: 0.25,
-            statusEffect: { type: "poison", value: 0.1, turns: 3 }, statusTarget: "monster",
+            statusEffect: { type: "poison", value: 0.1, turns: 3 },
+            statusTarget: "monster",
             mpCost: ULTIMATE_MP_COST,
         },
     },
@@ -446,8 +582,12 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "defensive",
         statBonus: { def: 0.15, str: 0.05 },
         ultimate: {
-            key: "guardians_oath", emoji: "⚔️", damageType: "physical", multiplier: 1.5,
-            statusEffect: { type: "def_buff", value: 1, turns: 3 }, statusTarget: "self",
+            key: "guardians_oath",
+            emoji: "⚔️",
+            damageType: "physical",
+            multiplier: 1.5,
+            statusEffect: { type: "def_buff", value: 1, turns: 3 },
+            statusTarget: "self",
             mpCost: ULTIMATE_MP_COST,
         },
     },
@@ -458,7 +598,10 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "defensive",
         statBonus: { hp: 0.2, magDef: 0.15 },
         ultimate: {
-            key: "divine_shield", emoji: "✨", damageType: "heal", multiplier: 0,
+            key: "divine_shield",
+            emoji: "✨",
+            damageType: "heal",
+            multiplier: 0,
             healPercent: 0.5,
             mpCost: ULTIMATE_MP_COST,
         },
@@ -470,8 +613,12 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "defensive",
         statBonus: { mag: 0.1, magDef: 0.2 },
         ultimate: {
-            key: "arcane_barrier", emoji: "🌟", damageType: "magical", multiplier: 2.5,
-            statusEffect: { type: "def_buff", value: 1, turns: 2 }, statusTarget: "self",
+            key: "arcane_barrier",
+            emoji: "🌟",
+            damageType: "magical",
+            multiplier: 2.5,
+            statusEffect: { type: "def_buff", value: 1, turns: 2 },
+            statusTarget: "self",
             mpCost: ULTIMATE_MP_COST,
         },
     },
@@ -482,7 +629,10 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "defensive",
         statBonus: { spd: 0.2, def: 0.1 },
         ultimate: {
-            key: "arrow_rain", emoji: "🏹", damageType: "physical", multiplier: 1,
+            key: "arrow_rain",
+            emoji: "🏹",
+            damageType: "physical",
+            multiplier: 1,
             hits: 5,
             mpCost: ULTIMATE_MP_COST,
         },
@@ -494,8 +644,12 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "defensive",
         statBonus: { spd: 0.15, mag: 0.1 },
         ultimate: {
-            key: "toxic_cloud", emoji: "☠️", damageType: "physical", multiplier: 0,
-            statusEffect: { type: "poison", value: 0.2, turns: 4 }, statusTarget: "monster",
+            key: "toxic_cloud",
+            emoji: "☠️",
+            damageType: "physical",
+            multiplier: 0,
+            statusEffect: { type: "poison", value: 0.2, turns: 4 },
+            statusTarget: "monster",
             mpCost: ULTIMATE_MP_COST,
         },
     },
@@ -506,7 +660,10 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
         path: "defensive",
         statBonus: { hp: 0.15, mag: 0.1, magDef: 0.15 },
         ultimate: {
-            key: "resurrection", emoji: "💫", damageType: "buff", multiplier: 0,
+            key: "resurrection",
+            emoji: "💫",
+            damageType: "buff",
+            multiplier: 0,
             mpCost: ULTIMATE_MP_COST,
         },
     },
@@ -516,7 +673,10 @@ export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfi
 
 export const ADVANCEMENT_REQUIREMENTS = {
     level: 20,
-    materials: [{ key: "epic_core", qty: 5 }, { key: "rare_essence", qty: 10 }],
+    materials: [
+        { key: "epic_core", qty: 5 },
+        { key: "rare_essence", qty: 10 },
+    ],
     goldCost: 3000,
 };
 

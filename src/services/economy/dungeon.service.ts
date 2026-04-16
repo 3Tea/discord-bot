@@ -1,6 +1,12 @@
 import CharacterService from "../rpg/character.service";
 import EquipmentService from "../rpg/equipment.service";
-import { DUNGEON_REWARDS, ENCOUNTERS_PER_RUN, CRATE_DROP_RATES, type ClassType, type CrateType } from "../rpg/rpg.config";
+import {
+    DUNGEON_REWARDS,
+    ENCOUNTERS_PER_RUN,
+    CRATE_DROP_RATES,
+    type ClassType,
+    type CrateType,
+} from "../rpg/rpg.config";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import { randomInRange } from "../../util/math/random";
 import { isPrime } from "../../util/math/prime";
@@ -159,7 +165,7 @@ async function resolveCombatWin(
 ): Promise<CombatResolveResult> {
     const rewards = DUNGEON_REWARDS.monster;
     const multiplier = isBoss ? DUNGEON_REWARDS.boss.rewardMultiplier : 1;
-    const source = isBoss ? "boss" : "monster" as const;
+    const source = isBoss ? "boss" : ("monster" as const);
 
     const goldReward = Math.floor((rewards.goldBase + floor * rewards.goldPerFloor) * multiplier);
     const expReward = Math.floor((rewards.expBase + floor * rewards.expPerFloor) * multiplier);
@@ -236,11 +242,7 @@ async function resolveCombatLoss(userId: string): Promise<CombatLossResult> {
     return { goldLost, newFloor: checkpoint, checkpoint };
 }
 
-async function resolveTreasure(
-    userId: string,
-    floor: number,
-    classType: ClassType
-): Promise<TreasureResult> {
+async function resolveTreasure(userId: string, floor: number, classType: ClassType): Promise<TreasureResult> {
     const rewards = DUNGEON_REWARDS.treasure;
     const goldReward = rewards.goldBase + floor * rewards.goldPerFloor;
     const expReward = rewards.expBase + floor * rewards.expPerFloor;

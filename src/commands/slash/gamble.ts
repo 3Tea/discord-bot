@@ -110,9 +110,7 @@ async function playGame(params: PlayGameParams): Promise<EmbedBuilder> {
             }
 
             const resultText =
-                result.result === "heads"
-                    ? t(locale, "gamble.coinflip.heads")
-                    : t(locale, "gamble.coinflip.tails");
+                result.result === "heads" ? t(locale, "gamble.coinflip.heads") : t(locale, "gamble.coinflip.tails");
 
             embed = new EmbedBuilder()
                 .setTitle(`🪙 ${t(locale, "gamble.coinflip.title")}`)
@@ -231,9 +229,7 @@ async function playGame(params: PlayGameParams): Promise<EmbedBuilder> {
         }
 
         default: {
-            embed = new EmbedBuilder()
-                .setDescription(t(locale, "common.unknown_subcommand"))
-                .setColor(0xed4245);
+            embed = new EmbedBuilder().setDescription(t(locale, "common.unknown_subcommand")).setColor(0xed4245);
         }
     }
 
@@ -531,9 +527,7 @@ export default {
             let currentGame: GameType = subcommand as GameType;
             let currentBet = initialBet;
             let currentDiceMode: "high" | "low" | undefined =
-                subcommand === "dice"
-                    ? (interaction.options.getString("mode", true) as "high" | "low")
-                    : undefined;
+                subcommand === "dice" ? (interaction.options.getString("mode", true) as "high" | "low") : undefined;
 
             // Initial play
             const embed = await playGame({
@@ -570,8 +564,7 @@ export default {
 
                         const submitted = await i
                             .awaitModalSubmit({
-                                filter: (mi) =>
-                                    mi.customId === CUSTOM_ID.CHANGE_BET_MODAL && mi.user.id === userId,
+                                filter: (mi) => mi.customId === CUSTOM_ID.CHANGE_BET_MODAL && mi.user.id === userId,
                                 time: 30_000,
                             })
                             .catch(() => null);
@@ -584,15 +577,24 @@ export default {
                         const freshConfig = await getGamblingConfig(guildId);
 
                         if (isNaN(newBet) || newBet < 1) {
-                            await submitted.reply({ content: t(locale, "gamble.invalid_bet"), flags: MessageFlags.Ephemeral });
+                            await submitted.reply({
+                                content: t(locale, "gamble.invalid_bet"),
+                                flags: MessageFlags.Ephemeral,
+                            });
                             return;
                         }
                         if (newBet < freshConfig.minBet) {
-                            await submitted.reply({ content: t(locale, "gamble.min_bet", { min: String(freshConfig.minBet) }), flags: MessageFlags.Ephemeral });
+                            await submitted.reply({
+                                content: t(locale, "gamble.min_bet", { min: String(freshConfig.minBet) }),
+                                flags: MessageFlags.Ephemeral,
+                            });
                             return;
                         }
                         if (newBet > freshConfig.maxBet) {
-                            await submitted.reply({ content: t(locale, "gamble.max_bet", { max: String(freshConfig.maxBet) }), flags: MessageFlags.Ephemeral });
+                            await submitted.reply({
+                                content: t(locale, "gamble.max_bet", { max: String(freshConfig.maxBet) }),
+                                flags: MessageFlags.Ephemeral,
+                            });
                             return;
                         }
 
@@ -600,8 +602,13 @@ export default {
                         currentBet = newBet;
 
                         const result = await validateAndReplay({
-                            interaction, userId, guildId, locale,
-                            currentGame, currentBet, currentDiceMode,
+                            interaction,
+                            userId,
+                            guildId,
+                            locale,
+                            currentGame,
+                            currentBet,
+                            currentDiceMode,
                         });
                         const followUp = (content: string) =>
                             submitted.followUp({ content, flags: MessageFlags.Ephemeral });
@@ -636,11 +643,15 @@ export default {
                     await i.deferUpdate();
 
                     const result = await validateAndReplay({
-                        interaction, userId, guildId, locale,
-                        currentGame, currentBet, currentDiceMode,
+                        interaction,
+                        userId,
+                        guildId,
+                        locale,
+                        currentGame,
+                        currentBet,
+                        currentDiceMode,
                     });
-                    const followUp = (content: string) =>
-                        i.followUp({ content, flags: MessageFlags.Ephemeral });
+                    const followUp = (content: string) => i.followUp({ content, flags: MessageFlags.Ephemeral });
                     await handleReplayResult(result, followUp, locale, collector);
                     if (result.status === "ok") currentBet = result.bet;
                 } catch (error) {

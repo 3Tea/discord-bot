@@ -71,9 +71,11 @@ function generateRewards(template: QuestTemplate, rank: AdventurerRank, rng: () 
     let crate: CrateType | null = null;
     if (rng() < scale.crateChance) {
         const rankIdx = ADVENTURER_RANKS.indexOf(rank);
-        if (rankIdx >= 7) crate = "gold";       // SS+
-        else if (rankIdx >= 4) crate = "silver"; // B-S
-        else crate = "bronze";                    // F-A
+        if (rankIdx >= 7)
+            crate = "gold"; // SS+
+        else if (rankIdx >= 4)
+            crate = "silver"; // B-S
+        else crate = "bronze"; // F-A
     }
 
     return { gold, exp, gp, materials, crate };
@@ -166,13 +168,18 @@ async function trackProgress(userId: string, action: QuestAction, amount: number
 
     // Branch quest tracking (if guildId provided)
     if (guildId) {
-        import("./branch.service").then(({ default: BranchService }) => {
-            BranchService.trackBranchProgress(guildId, action, amount).catch(() => {});
-        }).catch(() => {});
+        import("./branch.service")
+            .then(({ default: BranchService }) => {
+                BranchService.trackBranchProgress(guildId, action, amount).catch(() => {});
+            })
+            .catch(() => {});
     }
 }
 
-async function claimQuest(userId: string, questId: string): Promise<{
+async function claimQuest(
+    userId: string,
+    questId: string
+): Promise<{
     rewards: GuildQuest["rewards"];
     rankUp: { rankedUp: boolean; oldRank: AdventurerRank; newRank: AdventurerRank };
     levelUp: { leveled: boolean; oldLevel: number; newLevel: number };
@@ -204,10 +211,7 @@ async function claimQuest(userId: string, questId: string): Promise<{
     const rankUp = await GuildService.addGP(userId, quest.rewards.gp);
 
     // Update member: remove quest, increment completed
-    await GuildMemberModel.updateOne(
-        { userId },
-        { $pull: { activeQuests: questId }, $inc: { questsCompleted: 1 } }
-    );
+    await GuildMemberModel.updateOne({ userId }, { $pull: { activeQuests: questId }, $inc: { questsCompleted: 1 } });
     await redis.deleteKey(`guild_member:${userId}`);
     await redis.deleteKey(`guild_quest_progress:${userId}:${questId}`);
 

@@ -79,49 +79,42 @@ function buildPvPActionRow(
             .setStyle(ButtonStyle.Danger)
             .setDisabled(ultimateUsed || currentMp < ULTIMATE_MP_COST);
 
-        const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            attackBtn, skill1Btn, skill2Btn, ultimateBtn
-        );
+        const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(attackBtn, skill1Btn, skill2Btn, ultimateBtn);
         const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(defendBtn);
         return [row1, row2];
     }
 
-    return [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-            attackBtn, skill1Btn, skill2Btn, defendBtn
-        ),
-    ];
+    return [new ActionRowBuilder<ButtonBuilder>().addComponents(attackBtn, skill1Btn, skill2Btn, defendBtn)];
 }
 
 // --- Helper: build turn status embed for the channel ---
 
-function buildTurnEmbed(
-    locale: SupportedLocale,
-    state: PvPMatchState
-): EmbedBuilder {
+function buildTurnEmbed(locale: SupportedLocale, state: PvPMatchState): EmbedBuilder {
     const cClass = PvPService.getClassLabel(state.challengerClass, state.challengerAdvanced);
     const dClass = PvPService.getClassLabel(state.defenderClass, state.defenderAdvanced);
 
     return new EmbedBuilder()
         .setTitle(t(locale, "pvp.turn.title", { turn: String(state.turn), max: String(state.maxTurns) }))
-        .setDescription([
-            t(locale, "pvp.reveal.status", {
-                user: state.challengerId,
-                hp: String(state.challengerHp),
-                maxHp: String(state.challengerMaxHp),
-                mp: String(state.challengerMp),
-                maxMp: String(state.challengerMaxMp),
-            }) + ` (${cClass.emoji} ${cClass.name})`,
-            t(locale, "pvp.reveal.status", {
-                user: state.defenderId,
-                hp: String(state.defenderHp),
-                maxHp: String(state.defenderMaxHp),
-                mp: String(state.defenderMp),
-                maxMp: String(state.defenderMaxMp),
-            }) + ` (${dClass.emoji} ${dClass.name})`,
-            "",
-            t(locale, "pvp.turn.select"),
-        ].join("\n"))
+        .setDescription(
+            [
+                t(locale, "pvp.reveal.status", {
+                    user: state.challengerId,
+                    hp: String(state.challengerHp),
+                    maxHp: String(state.challengerMaxHp),
+                    mp: String(state.challengerMp),
+                    maxMp: String(state.challengerMaxMp),
+                }) + ` (${cClass.emoji} ${cClass.name})`,
+                t(locale, "pvp.reveal.status", {
+                    user: state.defenderId,
+                    hp: String(state.defenderHp),
+                    maxHp: String(state.defenderMaxHp),
+                    mp: String(state.defenderMp),
+                    maxMp: String(state.defenderMaxMp),
+                }) + ` (${dClass.emoji} ${dClass.name})`,
+                "",
+                t(locale, "pvp.turn.select"),
+            ].join("\n")
+        )
         .setColor(0xe67e22);
 }
 
@@ -155,55 +148,67 @@ function buildRevealEmbed(
 
     // Challenger action
     if (result.challengerAction === "defend") {
-        lines.push(t(locale, "pvp.reveal.defend", {
-            user: state.challengerId,
-            class: `${cClass.name} ${cClass.emoji}`,
-            heal: String(result.challengerHealed),
-        }));
+        lines.push(
+            t(locale, "pvp.reveal.defend", {
+                user: state.challengerId,
+                class: `${cClass.name} ${cClass.emoji}`,
+                heal: String(result.challengerHealed),
+            })
+        );
     } else {
         const skillName = t(locale, `rpg.skill.${cLabel.key}`, { defaultValue: cLabel.key });
-        lines.push(t(locale, "pvp.reveal.action", {
-            user: state.challengerId,
-            class: `${cClass.name} ${cClass.emoji}`,
-            skill: result.challengerDamageDealt > 0 ? skillName : skillName,
-            damage: String(result.challengerDamageDealt),
-        }));
+        lines.push(
+            t(locale, "pvp.reveal.action", {
+                user: state.challengerId,
+                class: `${cClass.name} ${cClass.emoji}`,
+                skill: result.challengerDamageDealt > 0 ? skillName : skillName,
+                damage: String(result.challengerDamageDealt),
+            })
+        );
     }
 
     // Defender action
     if (result.defenderAction === "defend") {
-        lines.push(t(locale, "pvp.reveal.defend", {
-            user: state.defenderId,
-            class: `${dClass.name} ${dClass.emoji}`,
-            heal: String(result.defenderHealed),
-        }));
+        lines.push(
+            t(locale, "pvp.reveal.defend", {
+                user: state.defenderId,
+                class: `${dClass.name} ${dClass.emoji}`,
+                heal: String(result.defenderHealed),
+            })
+        );
     } else {
         const skillName = t(locale, `rpg.skill.${dLabel.key}`, { defaultValue: dLabel.key });
-        lines.push(t(locale, "pvp.reveal.action", {
-            user: state.defenderId,
-            class: `${dClass.name} ${dClass.emoji}`,
-            skill: skillName,
-            damage: String(result.defenderDamageDealt),
-        }));
+        lines.push(
+            t(locale, "pvp.reveal.action", {
+                user: state.defenderId,
+                class: `${dClass.name} ${dClass.emoji}`,
+                skill: skillName,
+                damage: String(result.defenderDamageDealt),
+            })
+        );
     }
 
     lines.push("");
 
     // Status
-    lines.push(t(locale, "pvp.reveal.status", {
-        user: state.challengerId,
-        hp: String(result.challengerHp),
-        maxHp: String(state.challengerMaxHp),
-        mp: String(result.challengerMp),
-        maxMp: String(state.challengerMaxMp),
-    }));
-    lines.push(t(locale, "pvp.reveal.status", {
-        user: state.defenderId,
-        hp: String(result.defenderHp),
-        maxHp: String(state.defenderMaxHp),
-        mp: String(result.defenderMp),
-        maxMp: String(state.defenderMaxMp),
-    }));
+    lines.push(
+        t(locale, "pvp.reveal.status", {
+            user: state.challengerId,
+            hp: String(result.challengerHp),
+            maxHp: String(state.challengerMaxHp),
+            mp: String(result.challengerMp),
+            maxMp: String(state.challengerMaxMp),
+        })
+    );
+    lines.push(
+        t(locale, "pvp.reveal.status", {
+            user: state.defenderId,
+            hp: String(result.defenderHp),
+            maxHp: String(state.defenderMaxHp),
+            mp: String(result.defenderMp),
+            maxMp: String(state.defenderMaxMp),
+        })
+    );
 
     return new EmbedBuilder()
         .setTitle(t(locale, "pvp.reveal.title", { turn: String(turnNumber) }))
@@ -231,14 +236,23 @@ function buildResultEmbed(
     }
 
     lines.push("");
-    lines.push(`<@${state.challengerId}> (${cClass.name} ${cClass.emoji}): HP **${Math.max(0, state.challengerHp)}**/${state.challengerMaxHp}`);
-    lines.push(`<@${state.defenderId}> (${dClass.name} ${dClass.emoji}): HP **${Math.max(0, state.defenderHp)}**/${state.defenderMaxHp}`);
+    lines.push(
+        `<@${state.challengerId}> (${cClass.name} ${cClass.emoji}): HP **${Math.max(0, state.challengerHp)}**/${state.challengerMaxHp}`
+    );
+    lines.push(
+        `<@${state.defenderId}> (${dClass.name} ${dClass.emoji}): HP **${Math.max(0, state.defenderHp)}**/${state.defenderMaxHp}`
+    );
     lines.push("");
     lines.push(`Duration: ${turnNumber} turns`);
 
     if (winnerId) {
         const loserId = winnerId === state.challengerId ? state.defenderId : state.challengerId;
-        lines.push(t(locale, "pvp.result.reward_win", { gp: String(PvPService.PVP_WIN_GP), gold: String(PvPService.PVP_WIN_GOLD) }));
+        lines.push(
+            t(locale, "pvp.result.reward_win", {
+                gp: String(PvPService.PVP_WIN_GP),
+                gold: String(PvPService.PVP_WIN_GOLD),
+            })
+        );
         lines.push(t(locale, "pvp.result.reward_lose", { gp: String(PvPService.PVP_LOSE_GP) }));
     } else {
         lines.push(t(locale, "pvp.result.reward_lose", { gp: String(PvPService.PVP_LOSE_GP) }));
@@ -266,9 +280,12 @@ async function runTurnLoop(
         // Build and send turn embed with action buttons
         const turnEmbed = buildTurnEmbed(locale, state);
         const actionRows = buildPvPActionRow(
-            locale, matchId,
-            state.challengerClass, state.challengerMp,
-            state.challengerAdvanced, state.challengerUltimateUsed
+            locale,
+            matchId,
+            state.challengerClass,
+            state.challengerMp,
+            state.challengerAdvanced,
+            state.challengerUltimateUsed
         );
 
         // We show one set of buttons — both players click the same message.
@@ -324,7 +341,8 @@ async function runTurnLoop(
                     let finalAction = actionPart;
                     if (actionPart === "skill1" && playerMp < SKILL1_MP_COST) finalAction = "attack";
                     if (actionPart === "skill2" && playerMp < SKILL2_MP_COST) finalAction = "attack";
-                    if (actionPart === "ultimate" && (playerUltUsed || playerMp < ULTIMATE_MP_COST || !playerAdvanced)) finalAction = "attack";
+                    if (actionPart === "ultimate" && (playerUltUsed || playerMp < ULTIMATE_MP_COST || !playerAdvanced))
+                        finalAction = "attack";
 
                     await PvPService.submitAction(matchId, userId, finalAction);
                     submitted.add(userId);
@@ -443,18 +461,12 @@ function buildCombinedActionRows(
             .setEmoji("💥")
             .setStyle(ButtonStyle.Danger);
 
-        const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            attackBtn, skill1Btn, skill2Btn, ultimateBtn
-        );
+        const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(attackBtn, skill1Btn, skill2Btn, ultimateBtn);
         const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(defendBtn);
         return [row1, row2];
     }
 
-    return [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-            attackBtn, skill1Btn, skill2Btn, defendBtn
-        ),
-    ];
+    return [new ActionRowBuilder<ButtonBuilder>().addComponents(attackBtn, skill1Btn, skill2Btn, defendBtn)];
 }
 
 // --- Subcommand: challenge ---
@@ -467,18 +479,14 @@ async function handleChallenge(interaction: ChatInputCommandInteraction, locale:
 
     // Validate not self
     if (challenger.id === defender.id) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "pvp.challenge.self"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "pvp.challenge.self")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
 
     // Validate not a bot
     if (defender.bot) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "pvp.challenge.self"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "pvp.challenge.self")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -512,9 +520,7 @@ async function handleChallenge(interaction: ChatInputCommandInteraction, locale:
     ]);
 
     if (challengerInMatch || defenderInMatch) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "pvp.challenge.in_match"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "pvp.challenge.in_match")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -526,9 +532,7 @@ async function handleChallenge(interaction: ChatInputCommandInteraction, locale:
     ]);
 
     if (!challengerChar || !defenderChar) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "pvp.challenge.no_character"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "pvp.challenge.no_character")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -539,9 +543,7 @@ async function handleChallenge(interaction: ChatInputCommandInteraction, locale:
     ]);
 
     if (!challengerMember || !defenderMember) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "pvp.challenge.no_guild"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "pvp.challenge.no_guild")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -549,10 +551,12 @@ async function handleChallenge(interaction: ChatInputCommandInteraction, locale:
     // Send challenge embed
     const challengeEmbed = new EmbedBuilder()
         .setTitle(t(locale, "pvp.challenge.title"))
-        .setDescription(t(locale, "pvp.challenge.desc", {
-            defender: defender.id,
-            challenger: challenger.id,
-        }))
+        .setDescription(
+            t(locale, "pvp.challenge.desc", {
+                defender: defender.id,
+                challenger: challenger.id,
+            })
+        )
         .setColor(0xe67e22);
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -563,7 +567,7 @@ async function handleChallenge(interaction: ChatInputCommandInteraction, locale:
         new ButtonBuilder()
             .setCustomId(`pvp_decline:${challenger.id}`)
             .setLabel(t(locale, "pvp.challenge.decline"))
-            .setStyle(ButtonStyle.Danger),
+            .setStyle(ButtonStyle.Danger)
     );
 
     const msg = await interaction.editReply({
@@ -588,26 +592,17 @@ async function handleChallenge(interaction: ChatInputCommandInteraction, locale:
 
         // Accepted — create match
         await btnInteraction.update({
-            embeds: [new EmbedBuilder()
-                .setDescription(t(locale, "pvp.challenge.accepted"))
-                .setColor(0x2ecc71)],
+            embeds: [new EmbedBuilder().setDescription(t(locale, "pvp.challenge.accepted")).setColor(0x2ecc71)],
             components: [],
         });
 
-        const matchState = await PvPService.createMatch(
-            challenger.id,
-            defender.id,
-            interaction.channelId,
-            msg.id
-        );
+        const matchState = await PvPService.createMatch(challenger.id, defender.id, interaction.channelId, msg.id);
 
         // Start the turn loop
         await runTurnLoop(interaction, locale, matchState.matchId);
     } catch {
         // Timeout
-        const timeoutEmbed = new EmbedBuilder()
-            .setDescription(t(locale, "pvp.challenge.timeout"))
-            .setColor(0x95a5a6);
+        const timeoutEmbed = new EmbedBuilder().setDescription(t(locale, "pvp.challenge.timeout")).setColor(0x95a5a6);
         await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
     }
 }
@@ -621,19 +616,19 @@ async function handleStats(interaction: ChatInputCommandInteraction, locale: Sup
     const member = await GuildService.getMember(userId);
 
     if (!member) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "pvp.challenge.no_guild"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "pvp.challenge.no_guild")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
 
     const embed = new EmbedBuilder()
         .setTitle(t(locale, "pvp.stats.title", { username: interaction.user.username }))
-        .setDescription([
-            t(locale, "pvp.stats.rating", { rating: String(member.pvpRating) }),
-            t(locale, "pvp.stats.record", { wins: String(member.pvpWins), losses: String(member.pvpLosses) }),
-        ].join("\n"))
+        .setDescription(
+            [
+                t(locale, "pvp.stats.rating", { rating: String(member.pvpRating) }),
+                t(locale, "pvp.stats.record", { wins: String(member.pvpWins), losses: String(member.pvpLosses) }),
+            ].join("\n")
+        )
         .setColor(0x3498db)
         .setThumbnail(interaction.user.displayAvatarURL());
 

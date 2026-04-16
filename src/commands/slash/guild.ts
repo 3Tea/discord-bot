@@ -12,16 +12,16 @@ import GuildService, { GuildMemberNotFoundError, AlreadyRegisteredError } from "
 import GuildQuestService from "../../services/rpg/guildQuest.service";
 import type { GuildQuest } from "../../services/rpg/guildQuest.service";
 import BranchService from "../../services/rpg/branch.service";
-import { getWeekKey, WEEKLY_QUESTS_COUNT, getCurrentEventTheme, getDaysRemainingInMonth } from "../../services/rpg/branch.config";
+import {
+    getWeekKey,
+    WEEKLY_QUESTS_COUNT,
+    getCurrentEventTheme,
+    getDaysRemainingInMonth,
+} from "../../services/rpg/branch.config";
 import { CRATES as RPG_CRATES } from "../../services/rpg/rpg.config";
 import GuildMemberModel from "../../models/guildMember.model";
 import redis from "../../connector/redis";
-import {
-    ADVENTURER_RANKS,
-    MAX_ACTIVE_QUESTS,
-    RANK_CONFIG,
-    type AdventurerRank,
-} from "../../services/rpg/guild.config";
+import { ADVENTURER_RANKS, MAX_ACTIVE_QUESTS, RANK_CONFIG, type AdventurerRank } from "../../services/rpg/guild.config";
 import { CRATES, MATERIALS, type CrateType } from "../../services/rpg/rpg.config";
 import Reply from "../../util/decorator/reply";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
@@ -67,9 +67,7 @@ async function handleRegister(interaction: ChatInputCommandInteraction, locale: 
     // Character gate
     const char = await CharacterService.getCharacter(interaction.user.id);
     if (!char) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "adventure.require_character"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "adventure.require_character")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -78,9 +76,7 @@ async function handleRegister(interaction: ChatInputCommandInteraction, locale: 
         await GuildService.register(interaction.user.id);
     } catch (error) {
         if (error instanceof AlreadyRegisteredError) {
-            const embed = new EmbedBuilder()
-                .setDescription(t(locale, "guild.already_registered"))
-                .setColor(0xed4245);
+            const embed = new EmbedBuilder().setDescription(t(locale, "guild.already_registered")).setColor(0xed4245);
             await Reply.embedEdit(interaction, embed);
             return;
         }
@@ -241,7 +237,9 @@ async function handleBoard(interaction: ChatInputCommandInteraction, locale: Sup
         await btnInteraction.update({ embeds: [successEmbed], components: [] });
     } else {
         const failEmbed = new EmbedBuilder()
-            .setDescription(t(locale, "guild.board.full", { current: String(MAX_ACTIVE_QUESTS), max: String(MAX_ACTIVE_QUESTS) }))
+            .setDescription(
+                t(locale, "guild.board.full", { current: String(MAX_ACTIVE_QUESTS), max: String(MAX_ACTIVE_QUESTS) })
+            )
             .setColor(0xed4245);
         await btnInteraction.update({ embeds: [failEmbed], components: [] });
     }
@@ -321,7 +319,9 @@ async function handleQuests(interaction: ChatInputCommandInteraction, locale: Su
     // Build embed
     const sections: string[] = [];
 
-    sections.push(`**${t(locale, "guild.quests.active", { current: String(member.activeQuests.length), max: String(MAX_ACTIVE_QUESTS) })}**`);
+    sections.push(
+        `**${t(locale, "guild.quests.active", { current: String(member.activeQuests.length), max: String(MAX_ACTIVE_QUESTS) })}**`
+    );
     sections.push(activeLines.length > 0 ? activeLines.join("\n") : t(locale, "guild.profile.no_active"));
     sections.push("");
     sections.push(`**${t(locale, "guild.quests.personal")}**`);
@@ -367,9 +367,7 @@ async function handleQuests(interaction: ChatInputCommandInteraction, locale: Su
         const result = await GuildQuestService.claimQuest(interaction.user.id, questId);
 
         if (!result) {
-            const failEmbed = new EmbedBuilder()
-                .setDescription(t(locale, "common.error"))
-                .setColor(0xed4245);
+            const failEmbed = new EmbedBuilder().setDescription(t(locale, "common.error")).setColor(0xed4245);
             await btnInteraction.update({ embeds: [failEmbed], components: [] });
             return;
         }
@@ -396,9 +394,7 @@ async function handleQuests(interaction: ChatInputCommandInteraction, locale: Su
             );
         }
 
-        const successEmbed = new EmbedBuilder()
-            .setDescription(descLines.join("\n"))
-            .setColor(0x57f287);
+        const successEmbed = new EmbedBuilder().setDescription(descLines.join("\n")).setColor(0x57f287);
         await btnInteraction.update({ embeds: [successEmbed], components: [] });
     } else if (btnInteraction.customId.startsWith("guild_personal_accept_")) {
         const questIndex = parseInt(btnInteraction.customId.replace("guild_personal_accept_", ""), 10);
@@ -408,12 +404,19 @@ async function handleQuests(interaction: ChatInputCommandInteraction, locale: Su
 
         if (accepted) {
             const successEmbed = new EmbedBuilder()
-                .setDescription(`${t(locale, "guild.board.accept_success")}\n${getQuestDescription(locale, selectedQuest)}`)
+                .setDescription(
+                    `${t(locale, "guild.board.accept_success")}\n${getQuestDescription(locale, selectedQuest)}`
+                )
                 .setColor(0x57f287);
             await btnInteraction.update({ embeds: [successEmbed], components: [] });
         } else {
             const failEmbed = new EmbedBuilder()
-                .setDescription(t(locale, "guild.board.full", { current: String(MAX_ACTIVE_QUESTS), max: String(MAX_ACTIVE_QUESTS) }))
+                .setDescription(
+                    t(locale, "guild.board.full", {
+                        current: String(MAX_ACTIVE_QUESTS),
+                        max: String(MAX_ACTIVE_QUESTS),
+                    })
+                )
                 .setColor(0xed4245);
             await btnInteraction.update({ embeds: [failEmbed], components: [] });
         }
@@ -423,9 +426,7 @@ async function handleQuests(interaction: ChatInputCommandInteraction, locale: Su
 // --- /guild ranking ---
 
 const RANKING_PAGE_SIZE = 10;
-const RANK_ORDER_MAP: Record<string, number> = Object.fromEntries(
-    ADVENTURER_RANKS.map((r, i) => [r, i])
-);
+const RANK_ORDER_MAP: Record<string, number> = Object.fromEntries(ADVENTURER_RANKS.map((r, i) => [r, i]));
 
 type RankingType = "gp" | "rank" | "quests";
 
@@ -447,7 +448,7 @@ function getTitleKey(type: RankingType): string {
 
 async function fetchServerMemberIds(interaction: ChatInputCommandInteraction, guildId: string): Promise<string[]> {
     const cacheKey = `guild_members:${guildId}`;
-    const cached = await redis.getJson(cacheKey) as string[] | null;
+    const cached = (await redis.getJson(cacheKey)) as string[] | null;
     if (cached) return cached;
 
     const members = await interaction.guild!.members.fetch();
@@ -456,11 +457,7 @@ async function fetchServerMemberIds(interaction: ChatInputCommandInteraction, gu
     return ids;
 }
 
-async function fetchRankingPage(
-    type: RankingType,
-    page: number,
-    serverMemberIds?: string[]
-): Promise<RankingPage> {
+async function fetchRankingPage(type: RankingType, page: number, serverMemberIds?: string[]): Promise<RankingPage> {
     const filter = serverMemberIds ? { userId: { $in: serverMemberIds } } : {};
 
     if (type === "rank") {
@@ -555,7 +552,10 @@ async function getUserPosition(
                 { rank: userMember.rank, gp: { $gt: userMember.gp } },
             ],
         });
-        return { position: ahead + 1, value: `${RANK_CONFIG[userMember.rank as AdventurerRank].emoji} ${getRankLabel("en", userMember.rank as AdventurerRank)}` };
+        return {
+            position: ahead + 1,
+            value: `${RANK_CONFIG[userMember.rank as AdventurerRank].emoji} ${getRankLabel("en", userMember.rank as AdventurerRank)}`,
+        };
     }
 
     if (type === "quests") {
@@ -624,9 +624,8 @@ async function buildRankingEmbed(
     const description = lines.length > 0 ? lines.join("\n") : t(locale, "guild.ranking.empty");
 
     // User's own position
-    const serverMemberIds = serverMode && interaction.guildId
-        ? await fetchServerMemberIds(interaction, interaction.guildId)
-        : undefined;
+    const serverMemberIds =
+        serverMode && interaction.guildId ? await fetchServerMemberIds(interaction, interaction.guildId) : undefined;
     const userPos = await getUserPosition(interaction.user.id, type, serverMemberIds);
     const userOnPage = userPos
         ? data.page * RANKING_PAGE_SIZE < userPos.position && userPos.position <= (data.page + 1) * RANKING_PAGE_SIZE
@@ -634,7 +633,10 @@ async function buildRankingEmbed(
 
     const sections = [description];
     if (userPos && !userOnPage) {
-        sections.push("", t(locale, "guild.ranking.your_position", { pos: String(userPos.position), value: userPos.value }));
+        sections.push(
+            "",
+            t(locale, "guild.ranking.your_position", { pos: String(userPos.position), value: userPos.value })
+        );
     }
 
     const modeLabel = serverMode ? t(locale, "guild.ranking.server") : t(locale, "guild.ranking.global");
@@ -642,7 +644,9 @@ async function buildRankingEmbed(
     return new EmbedBuilder()
         .setTitle(t(locale, getTitleKey(type)))
         .setDescription(sections.join("\n"))
-        .setFooter({ text: `${modeLabel} \u2022 ${t(locale, "guild.ranking.page", { current: String(data.page + 1), total: String(data.totalPages) })}` })
+        .setFooter({
+            text: `${modeLabel} \u2022 ${t(locale, "guild.ranking.page", { current: String(data.page + 1), total: String(data.totalPages) })}`,
+        })
         .setColor(0xf1c40f)
         .setTimestamp();
 }
@@ -679,9 +683,8 @@ async function handleRanking(interaction: ChatInputCommandInteraction, locale: S
             page = 0;
         }
 
-        serverMemberIds = serverMode && inGuild
-            ? await fetchServerMemberIds(interaction, interaction.guildId!)
-            : undefined;
+        serverMemberIds =
+            serverMode && inGuild ? await fetchServerMemberIds(interaction, interaction.guildId!) : undefined;
 
         data = await fetchRankingPage(type, page, serverMemberIds);
         embed = await buildRankingEmbed(interaction, locale, type, data, serverMode);
@@ -709,9 +712,7 @@ function getPreviousWeekKey(): string {
 async function handleBranch(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
     const guildId = interaction.guildId;
     if (!guildId) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "common.guild_only"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "common.guild_only")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -719,9 +720,7 @@ async function handleBranch(interaction: ChatInputCommandInteraction, locale: Su
     // Check branch exists
     const branch = await BranchService.getBranch(guildId);
     if (!branch) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "branch.not_setup"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "branch.not_setup")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -729,9 +728,7 @@ async function handleBranch(interaction: ChatInputCommandInteraction, locale: Su
     // Check user is guild member
     const member = await GuildService.getMember(interaction.user.id);
     if (!member) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "guild.require_member"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "guild.require_member")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -772,9 +769,10 @@ async function handleBranch(interaction: ChatInputCommandInteraction, locale: Su
     }
 
     // Progress summary
-    const progressLine = completedCount >= WEEKLY_QUESTS_COUNT
-        ? t(locale, "branch.weekly.complete")
-        : t(locale, "branch.weekly.progress", { done: String(completedCount) });
+    const progressLine =
+        completedCount >= WEEKLY_QUESTS_COUNT
+            ? t(locale, "branch.weekly.complete")
+            : t(locale, "branch.weekly.progress", { done: String(completedCount) });
 
     // Build embed sections
     const sections: string[] = [
@@ -803,12 +801,7 @@ async function handleBranch(interaction: ChatInputCommandInteraction, locale: Su
         }
 
         // Auto-claim
-        const reward = await BranchService.claimWeeklyReward(
-            interaction.user.id,
-            guildId,
-            prevWeekKey,
-            prevCompleted
-        );
+        const reward = await BranchService.claimWeeklyReward(interaction.user.id, guildId, prevWeekKey, prevCompleted);
 
         if (reward) {
             let rewardLine = t(locale, "branch.weekly.reward_claimed", {
@@ -854,9 +847,7 @@ function getMedalEmoji(rank: number): string {
 async function handleEvent(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
     const guildId = interaction.guildId;
     if (!guildId) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "common.guild_only"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "common.guild_only")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -864,9 +855,7 @@ async function handleEvent(interaction: ChatInputCommandInteraction, locale: Sup
     // Check branch exists
     const branch = await BranchService.getBranch(guildId);
     if (!branch) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "guild.event.no_branch"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "guild.event.no_branch")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -887,14 +876,18 @@ async function handleEvent(interaction: ChatInputCommandInteraction, locale: Sup
     sections.push(t(locale, "guild.event.your_server", { name: branch.name }));
 
     if (serverEntry) {
-        sections.push(t(locale, "guild.event.score", {
-            raw: String(serverEntry.rawScore),
-            perCapita: String(serverEntry.perCapita),
-        }));
-        sections.push(t(locale, "guild.event.rank", {
-            rank: String(serverRank),
-            total: String(ranking.length),
-        }));
+        sections.push(
+            t(locale, "guild.event.score", {
+                raw: String(serverEntry.rawScore),
+                perCapita: String(serverEntry.perCapita),
+            })
+        );
+        sections.push(
+            t(locale, "guild.event.rank", {
+                rank: String(serverRank),
+                total: String(ranking.length),
+            })
+        );
     } else {
         sections.push(t(locale, "guild.event.no_data"));
     }
@@ -907,14 +900,16 @@ async function handleEvent(interaction: ChatInputCommandInteraction, locale: Sup
         for (let i = 0; i < top5.length; i++) {
             const entry = top5[i];
             const pos = i + 1;
-            sections.push(t(locale, "guild.event.entry", {
-                pos: String(pos),
-                medal: getMedalEmoji(pos),
-                name: entry.name,
-                perCapita: String(entry.perCapita),
-                raw: String(entry.rawScore),
-                members: String(entry.memberCount),
-            }));
+            sections.push(
+                t(locale, "guild.event.entry", {
+                    pos: String(pos),
+                    medal: getMedalEmoji(pos),
+                    name: entry.name,
+                    perCapita: String(entry.perCapita),
+                    raw: String(entry.rawScore),
+                    members: String(entry.memberCount),
+                })
+            );
         }
     } else {
         sections.push(t(locale, "guild.event.no_data"));
@@ -934,12 +929,7 @@ async function handleEvent(interaction: ChatInputCommandInteraction, locale: Sup
         const prevRank = prevEntry ? prevRanking.indexOf(prevEntry) + 1 : 0;
 
         if (prevRank > 0 && prevRank <= 10) {
-            const reward = await BranchService.claimEventReward(
-                interaction.user.id,
-                guildId,
-                prevMonthKey,
-                prevRank,
-            );
+            const reward = await BranchService.claimEventReward(interaction.user.id, guildId, prevMonthKey, prevRank);
 
             if (reward) {
                 const prevTheme = BranchService.getPreviousEventTheme();
@@ -967,11 +957,13 @@ async function handleEvent(interaction: ChatInputCommandInteraction, locale: Sup
     }
 
     const embed = new EmbedBuilder()
-        .setTitle(t(locale, "guild.event.title", {
-            emoji: theme.emoji,
-            theme: t(locale, `guild.event.theme.${theme.key}`),
-            month: monthLabel,
-        }))
+        .setTitle(
+            t(locale, "guild.event.title", {
+                emoji: theme.emoji,
+                theme: t(locale, `guild.event.theme.${theme.key}`),
+                month: monthLabel,
+            })
+        )
         .setDescription(sections.join("\n"))
         .setColor(0xf1c40f)
         .setTimestamp();
@@ -1076,9 +1068,7 @@ export default {
             }
         } catch (error) {
             if (error instanceof GuildMemberNotFoundError) {
-                const embed = new EmbedBuilder()
-                    .setDescription(t(locale, "guild.require_member"))
-                    .setColor(0xed4245);
+                const embed = new EmbedBuilder().setDescription(t(locale, "guild.require_member")).setColor(0xed4245);
                 await Reply.embedEdit(interaction, embed);
                 return;
             }

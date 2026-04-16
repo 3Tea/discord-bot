@@ -178,10 +178,7 @@ async function addExp(userId: string, amount: number): Promise<LevelUpResult> {
     const newExp = char.exp + amount;
     const newLevel = Math.min(levelFromExp(newExp), MAX_LEVEL);
 
-    await CharacterModel.updateOne(
-        { userId },
-        { $set: { exp: newExp, level: newLevel } }
-    );
+    await CharacterModel.updateOne({ userId }, { $set: { exp: newExp, level: newLevel } });
     await redis.deleteKey(`rpg_char:${userId}`);
 
     return {
@@ -206,14 +203,12 @@ async function addGold(userId: string, amount: number): Promise<number> {
     const inc: Record<string, number> = { gold: amount };
     if (amount > 0) inc.goldEarned = amount;
 
-    const result = await CharacterModel.findOneAndUpdate(
-        { userId },
-        { $inc: inc },
-        { new: true }
-    );
+    const result = await CharacterModel.findOneAndUpdate({ userId }, { $inc: inc }, { new: true });
     if (!result) throw new CharacterNotFoundError(userId);
     await redis.deleteKey(`rpg_char:${userId}`);
-    import("./guildQuest.service").then(({ default: GQS }) => GQS.trackProgress(userId, "earn_gold", amount)).catch(() => {});
+    import("./guildQuest.service")
+        .then(({ default: GQS }) => GQS.trackProgress(userId, "earn_gold", amount))
+        .catch(() => {});
     return result.gold;
 }
 
@@ -232,10 +227,7 @@ async function deductGold(userId: string, amount: number): Promise<number> {
 }
 
 async function updateDungeonProgress(userId: string, floor: number, checkpoint: number): Promise<void> {
-    await CharacterModel.updateOne(
-        { userId },
-        { $set: { dungeonDepth: floor, dungeonCheckpoint: checkpoint } }
-    );
+    await CharacterModel.updateOne({ userId }, { $set: { dungeonDepth: floor, dungeonCheckpoint: checkpoint } });
     await redis.deleteKey(`rpg_char:${userId}`);
 }
 
@@ -249,7 +241,9 @@ async function addMaterials(userId: string, materials: { key: string; qty: numbe
     await redis.deleteKey(`rpg_char:${userId}`);
     const totalQty = materials.reduce((sum, m) => sum + m.qty, 0);
     if (totalQty > 0) {
-        import("./guildQuest.service").then(({ default: GQS }) => GQS.trackProgress(userId, "collect_materials", totalQty)).catch(() => {});
+        import("./guildQuest.service")
+            .then(({ default: GQS }) => GQS.trackProgress(userId, "collect_materials", totalQty))
+            .catch(() => {});
     }
 }
 
@@ -297,10 +291,7 @@ async function deductCrate(userId: string, crateType: CrateType): Promise<boolea
 }
 
 async function advanceClass(userId: string, advancedClass: AdvancedClassType): Promise<void> {
-    await CharacterModel.updateOne(
-        { userId },
-        { $set: { advancedClass } }
-    );
+    await CharacterModel.updateOne({ userId }, { $set: { advancedClass } });
     await redis.deleteKey(`rpg_char:${userId}`);
 }
 

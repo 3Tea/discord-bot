@@ -1,4 +1,12 @@
-import { ActionRowBuilder, ButtonBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder, type MessageActionRowComponentBuilder } from "discord.js";
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    MessageFlags,
+    SlashCommandBuilder,
+    type MessageActionRowComponentBuilder,
+} from "discord.js";
 import { DEV_USER_ID } from "../../util/config/index";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -248,8 +256,7 @@ async function handleStatus(interaction: ChatInputCommandInteraction, locale: Su
     if (status.isActive) {
         await Reply.embedEdit(interaction, embed);
     } else {
-        const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
-            .addComponents(buildPremiumButton(locale));
+        const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildPremiumButton(locale));
         await Reply.embedEditComponents(interaction, embed, [row]);
     }
 }
@@ -322,7 +329,6 @@ async function handleCompare(interaction: ChatInputCommandInteraction, locale: S
         .setColor(0xf39c12)
         .setTimestamp();
 
-    const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
-        .addComponents(buildPremiumButton(locale));
+    const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(buildPremiumButton(locale));
     await Reply.embedEditComponents(interaction, embed, [row]);
 }

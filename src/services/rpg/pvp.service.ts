@@ -276,19 +276,29 @@ interface PlayerView {
 function getPlayerView(state: PvPMatchState, role: "challenger" | "defender"): PlayerView {
     if (role === "challenger") {
         return {
-            hp: state.challengerHp, maxHp: state.challengerMaxHp,
-            mp: state.challengerMp, maxMp: state.challengerMaxMp,
-            stats: state.challengerStats, classType: state.challengerClass,
-            advancedClass: state.challengerAdvanced, effects: state.challengerEffects,
-            ultimateUsed: state.challengerUltimateUsed, action: state.challengerAction,
+            hp: state.challengerHp,
+            maxHp: state.challengerMaxHp,
+            mp: state.challengerMp,
+            maxMp: state.challengerMaxMp,
+            stats: state.challengerStats,
+            classType: state.challengerClass,
+            advancedClass: state.challengerAdvanced,
+            effects: state.challengerEffects,
+            ultimateUsed: state.challengerUltimateUsed,
+            action: state.challengerAction,
         };
     }
     return {
-        hp: state.defenderHp, maxHp: state.defenderMaxHp,
-        mp: state.defenderMp, maxMp: state.defenderMaxMp,
-        stats: state.defenderStats, classType: state.defenderClass,
-        advancedClass: state.defenderAdvanced, effects: state.defenderEffects,
-        ultimateUsed: state.defenderUltimateUsed, action: state.defenderAction,
+        hp: state.defenderHp,
+        maxHp: state.defenderMaxHp,
+        mp: state.defenderMp,
+        maxMp: state.defenderMaxMp,
+        stats: state.defenderStats,
+        classType: state.defenderClass,
+        advancedClass: state.defenderAdvanced,
+        effects: state.defenderEffects,
+        ultimateUsed: state.defenderUltimateUsed,
+        action: state.defenderAction,
     };
 }
 
@@ -375,9 +385,13 @@ function applyActionEffects(
     // Damage calculation
     const isDefending = defender.action === "defend";
     const { damage: dmg, statusApplied } = calcPvPDamage(
-        attacker.stats, defender.stats,
-        attacker.effects, defender.effects,
-        skill, attacker.classType, isDefending
+        attacker.stats,
+        defender.stats,
+        attacker.effects,
+        defender.effects,
+        skill,
+        attacker.classType,
+        isDefending
     );
 
     damage = dmg;
@@ -591,25 +605,20 @@ async function endMatch(matchId: string, winnerId: string, loserId: string): Pro
 
     // Update PvP stats atomically
     await Promise.all([
-        GuildMemberModel.updateOne(
-            { userId: winnerId },
-            { $inc: { pvpWins: 1, pvpRating: PVP_WIN_RATING } }
-        ),
+        GuildMemberModel.updateOne({ userId: winnerId }, { $inc: { pvpWins: 1, pvpRating: PVP_WIN_RATING } }),
         // Use aggregation pipeline update for atomic clamp-to-zero
-        GuildMemberModel.updateOne(
-            { userId: loserId },
-            [{ $set: {
-                pvpLosses: { $add: ["$pvpLosses", 1] },
-                pvpRating: { $max: [0, { $subtract: ["$pvpRating", PVP_LOSE_RATING] }] },
-            }}]
-        ),
+        GuildMemberModel.updateOne({ userId: loserId }, [
+            {
+                $set: {
+                    pvpLosses: { $add: ["$pvpLosses", 1] },
+                    pvpRating: { $max: [0, { $subtract: ["$pvpRating", PVP_LOSE_RATING] }] },
+                },
+            },
+        ]),
     ]);
 
     // Clear caches
-    await Promise.all([
-        redis.deleteKey(`guild_member:${winnerId}`),
-        redis.deleteKey(`guild_member:${loserId}`),
-    ]);
+    await Promise.all([redis.deleteKey(`guild_member:${winnerId}`), redis.deleteKey(`guild_member:${loserId}`)]);
 }
 
 async function endMatchDraw(challengerId: string, defenderId: string): Promise<void> {
@@ -643,7 +652,11 @@ async function cleanupMatch(matchId: string, challengerId: string, defenderId: s
     ]);
 }
 
-function getActionLabel(action: string, classType: ClassType, advancedClass: AdvancedClassType | null): { key: string; emoji: string } {
+function getActionLabel(
+    action: string,
+    classType: ClassType,
+    advancedClass: AdvancedClassType | null
+): { key: string; emoji: string } {
     if (action === "attack") return { key: "attack", emoji: "⚔️" };
     if (action === "defend") return { key: "defend", emoji: "🛡️" };
     if (action === "skill1") {

@@ -16,7 +16,20 @@ import type { MerchantState } from "../../services/economy/merchant.service";
 import CharacterService from "../../services/rpg/character.service";
 import CombatService from "../../services/rpg/combat.service";
 import type { RpgCombatState } from "../../services/rpg/combat.service";
-import { getMonsterStats, getBossStats, RARITY_CONFIG, MATERIALS, SKILL1_MP_COST, SKILL2_MP_COST, ULTIMATE_MP_COST, ADVANCED_CLASS_CONFIG, ENCOUNTERS_PER_RUN, type ClassType, type Rarity, type AdvancedClassType } from "../../services/rpg/rpg.config";
+import {
+    getMonsterStats,
+    getBossStats,
+    RARITY_CONFIG,
+    MATERIALS,
+    SKILL1_MP_COST,
+    SKILL2_MP_COST,
+    ULTIMATE_MP_COST,
+    ADVANCED_CLASS_CONFIG,
+    ENCOUNTERS_PER_RUN,
+    type ClassType,
+    type Rarity,
+    type AdvancedClassType,
+} from "../../services/rpg/rpg.config";
 import PremiumService from "../../services/premium/premium.service";
 import { buildPremiumButton } from "../../util/premium/upgradeButton";
 import { TIER_CONFIG } from "../../services/premium/premium.config";
@@ -88,21 +101,18 @@ export function buildCombatRow(
 
             // 2 rows: Row 1 = Attack + Skill1 + Skill2 + Ultimate, Row 2 = Defend + Run
             const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                attackBtn, skill1Btn, skill2Btn, ultimateBtn
+                attackBtn,
+                skill1Btn,
+                skill2Btn,
+                ultimateBtn
             );
-            const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                defendBtn, runBtn
-            );
+            const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(defendBtn, runBtn);
             return [row1, row2];
         }
     }
 
     // Base class: single row with 5 buttons
-    return [
-        new ActionRowBuilder<ButtonBuilder>().addComponents(
-            attackBtn, skill1Btn, skill2Btn, defendBtn, runBtn
-        ),
-    ];
+    return [new ActionRowBuilder<ButtonBuilder>().addComponents(attackBtn, skill1Btn, skill2Btn, defendBtn, runBtn)];
 }
 
 export function buildContinueLeaveText(locale: SupportedLocale, encountersLeft: number): string {
@@ -198,16 +208,31 @@ export interface TreasureEmbedOptions {
 }
 
 export function buildTreasureEmbed(locale: SupportedLocale, opts: TreasureEmbedOptions): EmbedBuilder {
-    const { floor, checkpoint, goldReward, expReward, starReward, equipDrop, materialDrops, newFloor, checkpointReached, leveled, oldLevel, newLevel } = opts;
+    const {
+        floor,
+        checkpoint,
+        goldReward,
+        expReward,
+        starReward,
+        equipDrop,
+        materialDrops,
+        newFloor,
+        checkpointReached,
+        leveled,
+        oldLevel,
+        newLevel,
+    } = opts;
     const descLines = [
         t(locale, "dungeon.encounter.treasure", { floor: String(floor) }),
         t(locale, "dungeon.reward.gold", { amount: String(goldReward) }),
         t(locale, "dungeon.reward.exp", { amount: String(expReward) }),
         ...(equipDrop
-            ? [t(locale, "dungeon.reward.equip_drop", {
-                rarity: RARITY_CONFIG[equipDrop.rarity as Rarity].emoji,
-                name: equipDrop.name,
-            })]
+            ? [
+                  t(locale, "dungeon.reward.equip_drop", {
+                      rarity: RARITY_CONFIG[equipDrop.rarity as Rarity].emoji,
+                      name: equipDrop.name,
+                  }),
+              ]
             : []),
         ...(materialDrops.length > 0 ? formatMaterialDrops(locale, materialDrops) : []),
         "",
@@ -257,11 +282,7 @@ export function formatMaterialDrops(locale: SupportedLocale, materialDrops: { ke
     });
 }
 
-export function buildRpgCombatEmbed(
-    locale: SupportedLocale,
-    state: RpgCombatState,
-    checkpoint: number
-): EmbedBuilder {
+export function buildRpgCombatEmbed(locale: SupportedLocale, state: RpgCombatState, checkpoint: number): EmbedBuilder {
     const titlePrefix = state.isBoss ? "👑" : state.monsterEmoji;
     const monsterLabel = state.isBoss
         ? t(locale, "dungeon.combat.boss_appear", { monster: state.monsterName, floor: String(checkpoint) })
@@ -307,9 +328,7 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
         // Load character stats for combat
         const char = await CharacterService.requireCharacter(userId);
         const stats = await CharacterService.getEffectiveStats(userId);
-        const monsterStats = isBoss
-            ? getBossStats(floor, char.level)
-            : getMonsterStats(floor, char.level);
+        const monsterStats = isBoss ? getBossStats(floor, char.level) : getMonsterStats(floor, char.level);
 
         const advancedClass = (char.advancedClass as AdvancedClassType) ?? null;
         const combatState = CombatService.initCombat({
@@ -508,7 +527,13 @@ function buildLobbyEmbed(locale: SupportedLocale, party: TeamPartyState): EmbedB
     if (party.members.length === 1) {
         const leader = party.members[0];
         const cls = TeamDungeonService.getClassLabel(leader.classType, leader.advancedClass);
-        lines.push(t(locale, "dungeon.team.leader", { user: leader.userId, class: `${cls.name} ${cls.emoji}`, level: String(leader.level) }));
+        lines.push(
+            t(locale, "dungeon.team.leader", {
+                user: leader.userId,
+                class: `${cls.name} ${cls.emoji}`,
+                level: String(leader.level),
+            })
+        );
         lines.push(`\n${t(locale, "dungeon.team.members", { current: "1" })}`);
     } else {
         lines.push(t(locale, "dungeon.team.members", { current: String(party.members.length) }));
@@ -516,12 +541,14 @@ function buildLobbyEmbed(locale: SupportedLocale, party: TeamPartyState): EmbedB
             const m = party.members[i];
             const cls = TeamDungeonService.getClassLabel(m.classType, m.advancedClass);
             const suffix = m.userId === party.leaderId ? " (Leader)" : "";
-            lines.push(t(locale, "dungeon.team.member", {
-                index: String(i + 1),
-                user: m.userId,
-                class: `${cls.name} ${cls.emoji}`,
-                level: String(m.level),
-            }) + suffix);
+            lines.push(
+                t(locale, "dungeon.team.member", {
+                    index: String(i + 1),
+                    user: m.userId,
+                    class: `${cls.name} ${cls.emoji}`,
+                    level: String(m.level),
+                }) + suffix
+            );
         }
     }
 
@@ -560,27 +587,33 @@ function buildTeamCombatEmbed(locale: SupportedLocale, party: TeamPartyState): E
         ? t(locale, "dungeon.combat.boss_appear", { monster: monster.name, floor: String(party.floor) })
         : t(locale, "dungeon.encounter.monster", { monster: monster.name, floor: String(party.floor) });
 
-    const partyLines = party.members.map((m) => {
-        const cls = TeamDungeonService.getClassLabel(m.classType, m.advancedClass);
-        const status = m.alive
-            ? `HP: **${m.hp}**/${m.maxHp} | MP: **${m.mp}**/${m.maxMp}`
-            : "**DOWNED**";
-        return `${cls.emoji} <@${m.userId}> (${cls.name}) — ${status}`;
-    }).join("\n");
+    const partyLines = party.members
+        .map((m) => {
+            const cls = TeamDungeonService.getClassLabel(m.classType, m.advancedClass);
+            const status = m.alive ? `HP: **${m.hp}**/${m.maxHp} | MP: **${m.mp}**/${m.maxMp}` : "**DOWNED**";
+            return `${cls.emoji} <@${m.userId}> (${cls.name}) — ${status}`;
+        })
+        .join("\n");
 
     return new EmbedBuilder()
         .setTitle(`${titlePrefix} ${monsterLabel}`)
-        .setDescription([
-            `${monster.emoji} ${monster.name} HP: **${monster.hp}**/${monster.maxHp}`,
-            "",
-            partyLines,
-            "",
-            t(locale, "dungeon.team.turn", { turn: String(party.turn), max: String(party.maxTurns) }),
-        ].join("\n"))
+        .setDescription(
+            [
+                `${monster.emoji} ${monster.name} HP: **${monster.hp}**/${monster.maxHp}`,
+                "",
+                partyLines,
+                "",
+                t(locale, "dungeon.team.turn", { turn: String(party.turn), max: String(party.maxTurns) }),
+            ].join("\n")
+        )
         .setColor(monster.isBoss ? 0xe74c3c : 0xe67e22);
 }
 
-function buildTeamCombatRow(locale: SupportedLocale, partyId: string, hasAdvanced: boolean): ActionRowBuilder<ButtonBuilder>[] {
+function buildTeamCombatRow(
+    locale: SupportedLocale,
+    partyId: string,
+    hasAdvanced: boolean
+): ActionRowBuilder<ButtonBuilder>[] {
     const attackBtn = new ButtonBuilder()
         .setCustomId(`td_attack:${partyId}`)
         .setLabel(t(locale, "dungeon.btn.attack"))
@@ -646,17 +679,30 @@ function buildRevealLines(locale: SupportedLocale, party: TeamPartyState, result
     const lines = result.memberActions.map((ma) => formatMemberActionLine(ma, party)).filter(Boolean);
 
     if (result.revivedThisTurn) {
-        lines.push(t(locale, "dungeon.team.revived", { user: result.revivedThisTurn.userId, healer: result.revivedThisTurn.healerId }));
+        lines.push(
+            t(locale, "dungeon.team.revived", {
+                user: result.revivedThisTurn.userId,
+                healer: result.revivedThisTurn.healerId,
+            })
+        );
     }
 
     if (result.monsterDamagePerTarget > 0 && !result.monsterDefeated) {
-        lines.push(t(locale, "dungeon.team.monster_attack", { monster: party.monster?.name ?? "Monster", damage: String(result.monsterDamagePerTarget) }));
+        lines.push(
+            t(locale, "dungeon.team.monster_attack", {
+                monster: party.monster?.name ?? "Monster",
+                damage: String(result.monsterDamagePerTarget),
+            })
+        );
     }
 
     lines.push(...result.downedThisTurn.map((id) => t(locale, "dungeon.team.downed", { user: id })));
 
     if (party.monster && !result.monsterDefeated) {
-        lines.push("", `${party.monster.emoji} ${party.monster.name} HP: **${party.monster.hp}**/${party.monster.maxHp}`);
+        lines.push(
+            "",
+            `${party.monster.emoji} ${party.monster.name} HP: **${party.monster.hp}**/${party.monster.maxHp}`
+        );
     }
 
     lines.push("", ...formatPartyStatusLines(party));
@@ -705,10 +751,13 @@ async function collectTeamActions(
                 await TeamDungeonService.submitAction(partyId, userId, actionPart);
                 submitted.add(userId);
 
-                await btnInteraction.reply({ content: t(locale, "dungeon.team.joined"), flags: MessageFlags.Ephemeral });
+                await btnInteraction.reply({
+                    content: t(locale, "dungeon.team.joined"),
+                    flags: MessageFlags.Ephemeral,
+                });
 
                 const freshParty = await TeamDungeonService.getParty(partyId);
-                if (freshParty && await TeamDungeonService.allAliveSubmitted(freshParty)) {
+                if (freshParty && (await TeamDungeonService.allAliveSubmitted(freshParty))) {
                     collector.stop("all_submitted");
                 }
             });
@@ -724,7 +773,11 @@ async function collectTeamActions(
 
 // --- Team dungeon: auto-defend missing members ---
 
-async function autoDefendMissing(partyId: string, members: TeamPartyState["members"], submitted: Set<string>): Promise<void> {
+async function autoDefendMissing(
+    partyId: string,
+    members: TeamPartyState["members"],
+    submitted: Set<string>
+): Promise<void> {
     for (const m of members) {
         if (m.alive && !submitted.has(m.userId)) {
             await TeamDungeonService.submitAction(partyId, m.userId, "defend");
@@ -822,7 +875,10 @@ async function runTeamLobby(
                     const joinResult = await TeamDungeonService.joinParty(party.partyId, btnInteraction.user.id);
 
                     if (!joinResult.success) {
-                        await btnInteraction.reply({ content: resolveJoinError(locale, joinResult.reason), flags: MessageFlags.Ephemeral });
+                        await btnInteraction.reply({
+                            content: resolveJoinError(locale, joinResult.reason),
+                            flags: MessageFlags.Ephemeral,
+                        });
                         return;
                     }
 
@@ -840,7 +896,10 @@ async function runTeamLobby(
 
                 const currentParty = await TeamDungeonService.getParty(party.partyId);
                 if (btnInteraction.user.id !== party.leaderId || !currentParty || currentParty.members.length < 2) {
-                    await btnInteraction.reply({ content: t(locale, "dungeon.team.need_more"), flags: MessageFlags.Ephemeral });
+                    await btnInteraction.reply({
+                        content: t(locale, "dungeon.team.need_more"),
+                        flags: MessageFlags.Ephemeral,
+                    });
                     return;
                 }
 
@@ -892,20 +951,31 @@ async function handleTeamMonsterEncounter(
         await TeamDungeonService.saveParty(afterCombat);
 
         const rewardLines = [
-            t(locale, "dungeon.team.reward_split", { gold: String(rewards.goldPerMember), exp: String(rewards.expPerMember) }),
+            t(locale, "dungeon.team.reward_split", {
+                gold: String(rewards.goldPerMember),
+                exp: String(rewards.expPerMember),
+            }),
             ...rewards.memberRewards.flatMap((mr) => {
                 const lines: string[] = [];
-                if (mr.equipDrop) lines.push(`<@${mr.userId}>: ${RARITY_CONFIG[mr.equipDrop.rarity as Rarity].emoji} **${mr.equipDrop.name}**`);
-                if (mr.leveled) lines.push(t(locale, "dungeon.levelup", { old: String(mr.oldLevel), new: String(mr.newLevel) }));
+                if (mr.equipDrop)
+                    lines.push(
+                        `<@${mr.userId}>: ${RARITY_CONFIG[mr.equipDrop.rarity as Rarity].emoji} **${mr.equipDrop.name}**`
+                    );
+                if (mr.leveled)
+                    lines.push(t(locale, "dungeon.levelup", { old: String(mr.oldLevel), new: String(mr.newLevel) }));
                 if (mr.starReward) lines.push(`<@${mr.userId}>: ${t(locale, "star_drop.found")}`);
                 return lines;
             }),
-            ...(checkpointReached ? ["🔖 " + t(locale, "dungeon.checkpoint_reached", { floor: String(afterCombat.floor) })] : []),
+            ...(checkpointReached
+                ? ["🔖 " + t(locale, "dungeon.checkpoint_reached", { floor: String(afterCombat.floor) })]
+                : []),
         ];
 
         const monsterLabel = isBoss ? "Boss" : "Monster";
         const rewardEmbed = new EmbedBuilder()
-            .setTitle(`${t(locale, "dungeon.team.title")} — ${t(locale, "dungeon.combat.win", { monster: monsterLabel })}`)
+            .setTitle(
+                `${t(locale, "dungeon.team.title")} — ${t(locale, "dungeon.combat.win", { monster: monsterLabel })}`
+            )
             .setDescription(rewardLines.join("\n"))
             .setColor(0x2ecc71);
 
@@ -946,10 +1016,16 @@ function buildTeamTreasureLines(
 ): string[] {
     return [
         t(locale, "dungeon.encounter.treasure", { floor: String(floor) }),
-        t(locale, "dungeon.team.reward_split", { gold: String(rewards.goldPerMember), exp: String(rewards.expPerMember) }),
+        t(locale, "dungeon.team.reward_split", {
+            gold: String(rewards.goldPerMember),
+            exp: String(rewards.expPerMember),
+        }),
         ...rewards.memberRewards.flatMap((mr) => {
             const lines: string[] = [];
-            if (mr.equipDrop) lines.push(`<@${mr.userId}>: ${RARITY_CONFIG[mr.equipDrop.rarity as Rarity].emoji} **${mr.equipDrop.name}**`);
+            if (mr.equipDrop)
+                lines.push(
+                    `<@${mr.userId}>: ${RARITY_CONFIG[mr.equipDrop.rarity as Rarity].emoji} **${mr.equipDrop.name}**`
+                );
             if (mr.starReward) lines.push(`<@${mr.userId}>: ${t(locale, "star_drop.found")}`);
             return lines;
         }),
@@ -987,7 +1063,9 @@ async function handleTeamTrapEncounter(
     if (trapResult.collapsed) {
         const embed = new EmbedBuilder()
             .setTitle(title)
-            .setDescription(`${t(locale, "dungeon.encounter.trap", { floor: String(party.floor) })}\n${t(locale, "dungeon.team.wipe")}`)
+            .setDescription(
+                `${t(locale, "dungeon.encounter.trap", { floor: String(party.floor) })}\n${t(locale, "dungeon.team.wipe")}`
+            )
             .setColor(0xed4245);
         await interaction.editReply({ embeds: [embed], components: [] });
         return true;
@@ -995,7 +1073,9 @@ async function handleTeamTrapEncounter(
 
     const embed = new EmbedBuilder()
         .setTitle(title)
-        .setDescription(`${t(locale, "dungeon.encounter.trap", { floor: String(party.floor) })}\n${t(locale, "dungeon.trap.damage", { hp: String(trapResult.hpLost), coin: String(trapResult.goldLost) })}`)
+        .setDescription(
+            `${t(locale, "dungeon.encounter.trap", { floor: String(party.floor) })}\n${t(locale, "dungeon.trap.damage", { hp: String(trapResult.hpLost), coin: String(trapResult.goldLost) })}`
+        )
         .setColor(0xe67e22);
     await interaction.editReply({ embeds: [embed], components: [] });
     return false;
@@ -1015,7 +1095,9 @@ async function handleTeamNpcEncounter(
 
     const embed = new EmbedBuilder()
         .setTitle(`🏪 ${t(locale, "dungeon.team.title")}`)
-        .setDescription(`${t(locale, "dungeon.encounter.npc")}\n${t(locale, "dungeon.team.reward_split", { gold: String(rewards.goldPerMember), exp: String(rewards.expPerMember) })}`)
+        .setDescription(
+            `${t(locale, "dungeon.encounter.npc")}\n${t(locale, "dungeon.team.reward_split", { gold: String(rewards.goldPerMember), exp: String(rewards.expPerMember) })}`
+        )
         .setColor(0x9b59b6);
     await interaction.editReply({ embeds: [embed], components: [] });
 }
@@ -1093,7 +1175,9 @@ async function handleTeam(interaction: ChatInputCommandInteraction, locale: Supp
     const started = await runTeamLobby(interaction, locale, party);
 
     if (!started) {
-        const timeoutEmbed = new EmbedBuilder().setDescription(t(locale, "dungeon.team.lobby_timeout")).setColor(0x95a5a6);
+        const timeoutEmbed = new EmbedBuilder()
+            .setDescription(t(locale, "dungeon.team.lobby_timeout"))
+            .setColor(0x95a5a6);
         await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
         await TeamDungeonService.cleanupParty(party);
         return;
@@ -1132,9 +1216,7 @@ async function handleSolo(interaction: ChatInputCommandInteraction, locale: Supp
     // Character gate
     const char = await CharacterService.getCharacter(userId);
     if (!char) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "dungeon.require_character"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "dungeon.require_character")).setColor(0xed4245);
         return void Reply.embedEdit(interaction, embed);
     }
 
@@ -1152,8 +1234,9 @@ async function handleSolo(interaction: ChatInputCommandInteraction, locale: Supp
         }
         const embed = new EmbedBuilder().setDescription(description).setColor(0xed4245);
         if (isFreeTier) {
-            const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
-                .addComponents(buildPremiumButton(locale));
+            const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+                buildPremiumButton(locale)
+            );
             return void Reply.embedEditComponents(interaction, embed, [row]);
         }
         return void Reply.embedEdit(interaction, embed);
@@ -1163,9 +1246,7 @@ async function handleSolo(interaction: ChatInputCommandInteraction, locale: Supp
     const runKey = `dungeon_run:${userId}`;
     const existingRun = await redis.getJson(runKey);
     if (existingRun) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "dungeon.run.in_progress"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "dungeon.run.in_progress")).setColor(0xed4245);
         return void Reply.embedEdit(interaction, embed);
     }
 

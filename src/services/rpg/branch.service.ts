@@ -80,9 +80,8 @@ function generateWeeklyQuests(weekKey: string): BranchQuest[] {
     for (let i = 0; i < WEEKLY_QUESTS_COUNT; i++) {
         // Pick a unique action for each quest
         const available = WEEKLY_QUEST_TEMPLATES.filter((t) => !usedActions.has(t.action));
-        const template: WeeklyQuestTemplate = available.length > 0
-            ? pickFromArray(available, rng)
-            : pickFromArray(WEEKLY_QUEST_TEMPLATES, rng);
+        const template: WeeklyQuestTemplate =
+            available.length > 0 ? pickFromArray(available, rng) : pickFromArray(WEEKLY_QUEST_TEMPLATES, rng);
 
         usedActions.add(template.action);
         quests.push({
@@ -167,7 +166,7 @@ async function claimWeeklyReward(
     userId: string,
     guildId: string,
     weekKey: string,
-    completedCount: number,
+    completedCount: number
 ): Promise<{ gold: number; exp: number; gp: number; crate: "silver" | null } | null> {
     // Check if already claimed
     if (await isRewardClaimed(userId, guildId, weekKey)) return null;
@@ -252,7 +251,7 @@ async function claimEventReward(
     userId: string,
     guildId: string,
     monthKey: string,
-    rank: number,
+    rank: number
 ): Promise<EventRewardTier | null> {
     if (await isEventRewardClaimed(userId, guildId, monthKey)) return null;
 

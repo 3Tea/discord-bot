@@ -45,16 +45,15 @@ async function register(userId: string): Promise<IGuildMember> {
     return member;
 }
 
-async function addGP(userId: string, amount: number): Promise<{ gp: number; rankedUp: boolean; oldRank: AdventurerRank; newRank: AdventurerRank }> {
+async function addGP(
+    userId: string,
+    amount: number
+): Promise<{ gp: number; rankedUp: boolean; oldRank: AdventurerRank; newRank: AdventurerRank }> {
     const member = await requireMember(userId);
     const oldRank = member.rank as AdventurerRank;
 
     // Atomically increment GP and read the updated document
-    const updated = await GuildMemberModel.findOneAndUpdate(
-        { userId },
-        { $inc: { gp: amount } },
-        { new: true }
-    );
+    const updated = await GuildMemberModel.findOneAndUpdate({ userId }, { $inc: { gp: amount } }, { new: true });
     if (!updated) throw new GuildMemberNotFoundError(userId);
 
     const newGP = updated.gp;

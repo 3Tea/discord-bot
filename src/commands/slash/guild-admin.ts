@@ -27,9 +27,7 @@ async function handleSetup(interaction: ChatInputCommandInteraction, locale: Sup
     // Check if branch already exists
     const existing = await BranchService.getBranch(guildId);
     if (existing) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "branch.setup.already_exists"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "branch.setup.already_exists")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -52,24 +50,17 @@ async function handleConfig(interaction: ChatInputCommandInteraction, locale: Su
     const branch = await BranchService.getBranch(guildId);
 
     if (!branch) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "branch.not_setup"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "branch.not_setup")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
 
     // Show current config
-    const channelDisplay = branch.questChannelId
-        ? `<#${branch.questChannelId}>`
-        : "—";
+    const channelDisplay = branch.questChannelId ? `<#${branch.questChannelId}>` : "—";
 
     const configEmbed = new EmbedBuilder()
         .setTitle(t(locale, "branch.config.title"))
-        .setDescription([
-            `**${branch.name}**`,
-            `Quest Channel: ${channelDisplay}`,
-        ].join("\n"))
+        .setDescription([`**${branch.name}**`, `Quest Channel: ${channelDisplay}`].join("\n"))
         .setColor(0x3498db);
 
     const channelSelectRow = new ActionRowBuilder<ChannelSelectMenuBuilder>().addComponents(
@@ -115,9 +106,7 @@ async function handleDisband(interaction: ChatInputCommandInteraction, locale: S
     const branch = await BranchService.getBranch(guildId);
 
     if (!branch) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "branch.not_setup"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "branch.not_setup")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -128,14 +117,8 @@ async function handleDisband(interaction: ChatInputCommandInteraction, locale: S
         .setColor(0xe67e22);
 
     const confirmRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-            .setCustomId("branch_disband_confirm")
-            .setLabel("\u2705")
-            .setStyle(ButtonStyle.Danger),
-        new ButtonBuilder()
-            .setCustomId("branch_disband_cancel")
-            .setLabel("\u274c")
-            .setStyle(ButtonStyle.Secondary)
+        new ButtonBuilder().setCustomId("branch_disband_confirm").setLabel("\u2705").setStyle(ButtonStyle.Danger),
+        new ButtonBuilder().setCustomId("branch_disband_cancel").setLabel("\u274c").setStyle(ButtonStyle.Secondary)
     );
 
     const message = await interaction.editReply({ embeds: [confirmEmbed], components: [confirmRow] });
@@ -149,18 +132,14 @@ async function handleDisband(interaction: ChatInputCommandInteraction, locale: S
         .catch(() => null);
 
     if (!btnInteraction || btnInteraction.customId !== "branch_disband_confirm") {
-        const cancelEmbed = new EmbedBuilder()
-            .setDescription(t(locale, "branch.disband.cancelled"))
-            .setColor(0x95a5a6);
+        const cancelEmbed = new EmbedBuilder().setDescription(t(locale, "branch.disband.cancelled")).setColor(0x95a5a6);
         await interaction.editReply({ embeds: [cancelEmbed], components: [] }).catch(() => {});
         return;
     }
 
     await BranchService.deleteBranch(guildId);
 
-    const successEmbed = new EmbedBuilder()
-        .setDescription(t(locale, "branch.disband.success"))
-        .setColor(0x57f287);
+    const successEmbed = new EmbedBuilder().setDescription(t(locale, "branch.disband.success")).setColor(0x57f287);
 
     await btnInteraction.update({ embeds: [successEmbed], components: [] });
 }
@@ -179,9 +158,7 @@ export default {
                 .setDescription("Set up a branch guild for this server")
                 .setDescriptionLocalizations(descriptionLocales("cmd.guild_admin.setup.desc"))
                 .addStringOption((opt) =>
-                    opt
-                        .setName("name")
-                        .setDescription("Branch guild name (default: server name)")
+                    opt.setName("name").setDescription("Branch guild name (default: server name)")
                 )
         )
         .addSubcommand((sub) =>

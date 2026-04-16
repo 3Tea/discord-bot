@@ -78,7 +78,11 @@ export default {
         }
 
         // Apply heal using maxHp from merchant state
-        const actualHeal = MerchantService.calculateHeal(merchantState.currentHp, merchantState.healAmount, merchantState.maxHp);
+        const actualHeal = MerchantService.calculateHeal(
+            merchantState.currentHp,
+            merchantState.healAmount,
+            merchantState.maxHp
+        );
         const newHp = merchantState.currentHp + actualHeal;
 
         runState.hp = newHp;

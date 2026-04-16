@@ -1,4 +1,11 @@
-import { ActionRowBuilder, ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder, type MessageActionRowComponentBuilder } from "discord.js";
+import {
+    ActionRowBuilder,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    MessageFlags,
+    SlashCommandBuilder,
+    type MessageActionRowComponentBuilder,
+} from "discord.js";
 import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
 import WorkService from "../../services/economy/work.service";
@@ -79,8 +86,9 @@ export default {
                 }
                 const embed = new EmbedBuilder().setDescription(description).setColor(0xed4245);
                 if (isFreeTier) {
-                    const row = new ActionRowBuilder<MessageActionRowComponentBuilder>()
-                        .addComponents(buildPremiumButton(locale));
+                    const row = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+                        buildPremiumButton(locale)
+                    );
                     return Reply.embedEditComponents(interaction, embed, [row]);
                 }
                 return Reply.embedEdit(interaction, embed);

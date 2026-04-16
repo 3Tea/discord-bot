@@ -208,18 +208,18 @@ async function handleProfile(interaction: ChatInputCommandInteraction, locale: S
 
     // Build equipment display
     const slotNames: EquipmentSlot[] = ["weapon", "shield", "helmet", "armor", "boots", "accessory"];
-    const equipLines = slotNames.map((slot) => {
-        const item = equippedItems.find((i) => i.slot === slot);
-        const slotLabel = t(locale, `rpg.slot.${slot}`);
-        if (!item) return `**${slotLabel}**: ${t(locale, "adventure.profile.empty_slot")}`;
-        const rarityEmoji = RARITY_CONFIG[item.rarity].emoji;
-        return `**${slotLabel}**: ${rarityEmoji} ${item.name}`;
-    }).join("\n");
+    const equipLines = slotNames
+        .map((slot) => {
+            const item = equippedItems.find((i) => i.slot === slot);
+            const slotLabel = t(locale, `rpg.slot.${slot}`);
+            if (!item) return `**${slotLabel}**: ${t(locale, "adventure.profile.empty_slot")}`;
+            const rarityEmoji = RARITY_CONFIG[item.rarity].emoji;
+            return `**${slotLabel}**: ${rarityEmoji} ${item.name}`;
+        })
+        .join("\n");
 
     // EXP bar
-    const expBar = progress.needed > 0
-        ? `${progress.current} / ${progress.needed}`
-        : "MAX";
+    const expBar = progress.needed > 0 ? `${progress.current} / ${progress.needed}` : "MAX";
 
     // Crate counts
     const crates = char.crates ?? { bronze: 0, silver: 0, gold: 0 };
@@ -231,10 +231,16 @@ async function handleProfile(interaction: ChatInputCommandInteraction, locale: S
 
     const embed = new EmbedBuilder()
         .setTitle(t(locale, "adventure.profile.title", { username: interaction.user.displayName }))
-        .setDescription(`${config.emoji} ${className} — ${t(locale, "adventure.profile.level", { level: String(char.level) })}`)
+        .setDescription(
+            `${config.emoji} ${className} — ${t(locale, "adventure.profile.level", { level: String(char.level) })}`
+        )
         .addFields(
             { name: t(locale, "adventure.profile.exp"), value: expBar, inline: true },
-            { name: t(locale, "adventure.profile.gold"), value: t(locale, "rpg.gold", { amount: String(char.gold) }), inline: true },
+            {
+                name: t(locale, "adventure.profile.gold"),
+                value: t(locale, "rpg.gold", { amount: String(char.gold) }),
+                inline: true,
+            },
             { name: t(locale, "adventure.crate.title"), value: crateDisplay, inline: true },
             { name: t(locale, "adventure.profile.stats"), value: statLines },
             { name: t(locale, "adventure.profile.equipment"), value: equipLines }
@@ -254,29 +260,21 @@ async function handleEquip(interaction: ChatInputCommandInteraction, locale: Sup
     // Find item by name (case-insensitive partial match) or by ObjectId
     const inventory = await EquipmentService.getInventory(interaction.user.id);
     const item = inventory.find(
-        (i) =>
-            i._id.toString() === itemQuery ||
-            i.name.toLowerCase().includes(itemQuery.toLowerCase())
+        (i) => i._id.toString() === itemQuery || i.name.toLowerCase().includes(itemQuery.toLowerCase())
     );
 
     if (!item) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "adventure.equip.no_item"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "adventure.equip.no_item")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
 
     try {
-        const oldEquipped = (await EquipmentService.getEquippedItems(interaction.user.id))
-            .find((i) => i.slot === item.slot);
-
-        await EquipmentService.equipItem(
-            interaction.user.id,
-            item._id.toString(),
-            char.class,
-            char.level
+        const oldEquipped = (await EquipmentService.getEquippedItems(interaction.user.id)).find(
+            (i) => i.slot === item.slot
         );
+
+        await EquipmentService.equipItem(interaction.user.id, item._id.toString(), char.class, char.level);
 
         const rarityEmoji = RARITY_CONFIG[item.rarity].emoji;
         const slotLabel = t(locale, `rpg.slot.${item.slot}`);
@@ -312,15 +310,12 @@ async function handleInventory(interaction: ChatInputCommandInteraction, locale:
     const inventory = await EquipmentService.getInventory(interaction.user.id);
 
     // Build materials display
-    const materialsDisplay = MATERIALS
-        .filter((m) => (char.materials.get(m.key) ?? 0) > 0)
+    const materialsDisplay = MATERIALS.filter((m) => (char.materials.get(m.key) ?? 0) > 0)
         .map((m) => m.emoji + " " + t(locale, "rpg.material." + m.key) + " x" + char.materials.get(m.key))
         .join(" | ");
 
     if (inventory.length === 0 && !materialsDisplay) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "adventure.inventory.empty"))
-            .setColor(0x95a5a6);
+        const embed = new EmbedBuilder().setDescription(t(locale, "adventure.inventory.empty")).setColor(0x95a5a6);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -351,7 +346,9 @@ async function handleInventory(interaction: ChatInputCommandInteraction, locale:
         return new EmbedBuilder()
             .setTitle(t(locale, "adventure.inventory.title", { username: interaction.user.displayName }))
             .setDescription(sections.join("\n\n") || t(locale, "adventure.inventory.empty"))
-            .setFooter({ text: t(locale, "adventure.inventory.page", { current: String(p + 1), total: String(totalPages) }) })
+            .setFooter({
+                text: t(locale, "adventure.inventory.page", { current: String(p + 1), total: String(totalPages) }),
+            })
             .setColor(0x3498db);
     };
 
@@ -403,13 +400,10 @@ async function handleUnequip(interaction: ChatInputCommandInteraction, locale: S
     await CharacterService.requireCharacter(interaction.user.id);
     const slot = interaction.options.getString("slot", true) as EquipmentSlot;
 
-    const equipped = (await EquipmentService.getEquippedItems(interaction.user.id))
-        .find((i) => i.slot === slot);
+    const equipped = (await EquipmentService.getEquippedItems(interaction.user.id)).find((i) => i.slot === slot);
 
     if (!equipped) {
-        const embed = new EmbedBuilder()
-            .setDescription(t(locale, "adventure.unequip.empty"))
-            .setColor(0xed4245);
+        const embed = new EmbedBuilder().setDescription(t(locale, "adventure.unequip.empty")).setColor(0xed4245);
         await Reply.embedEdit(interaction, embed);
         return;
     }
@@ -435,16 +429,12 @@ async function handleCraft(interaction: ChatInputCommandInteraction, locale: Sup
             .setPlaceholder(t(locale, "adventure.craft.select_slot"))
             .addOptions(
                 EQUIPMENT_SLOTS.map((slot) =>
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel(t(locale, `rpg.slot.${slot}`))
-                        .setValue(slot)
+                    new StringSelectMenuOptionBuilder().setLabel(t(locale, `rpg.slot.${slot}`)).setValue(slot)
                 )
             )
     );
 
-    const craftEmbed = new EmbedBuilder()
-        .setTitle(t(locale, "adventure.craft.title"))
-        .setColor(0xf39c12);
+    const craftEmbed = new EmbedBuilder().setTitle(t(locale, "adventure.craft.title")).setColor(0xf39c12);
 
     const message = await interaction.editReply({ embeds: [craftEmbed], components: [slotSelectRow] });
 
@@ -466,9 +456,7 @@ async function handleCraft(interaction: ChatInputCommandInteraction, locale: Sup
     // Step 2: Select rarity — only show affordable recipes
     const affordableRecipes = CRAFT_RECIPES.filter((recipe) => {
         const hasGold = char.gold >= recipe.goldCost;
-        const hasMats = recipe.materials.every(
-            ({ key, qty }) => (char.materials.get(key) ?? 0) >= qty
-        );
+        const hasMats = recipe.materials.every(({ key, qty }) => (char.materials.get(key) ?? 0) >= qty);
         return hasGold && hasMats;
     });
 
@@ -486,7 +474,8 @@ async function handleCraft(interaction: ChatInputCommandInteraction, locale: Sup
             .setPlaceholder(t(locale, "adventure.craft.select_rarity"))
             .addOptions(
                 affordableRecipes.map((recipe) => {
-                    const rarityLabel = RARITY_CONFIG[recipe.rarity].emoji + " " + t(locale, "rpg.rarity." + recipe.rarity);
+                    const rarityLabel =
+                        RARITY_CONFIG[recipe.rarity].emoji + " " + t(locale, "rpg.rarity." + recipe.rarity);
                     return new StringSelectMenuOptionBuilder()
                         .setLabel(rarityLabel)
                         .setValue(recipe.rarity)
@@ -588,7 +577,9 @@ async function handleCraft(interaction: ChatInputCommandInteraction, locale: Sup
 
     await confirmInteraction.update({ embeds: [successEmbed], components: [] });
     CharacterService.incrementItemsCrafted(interaction.user.id, 1).catch(() => {});
-    GuildQuestService.trackProgress(interaction.user.id, "craft_equipment", 1, interaction.guildId ?? undefined).catch(() => {});
+    GuildQuestService.trackProgress(interaction.user.id, "craft_equipment", 1, interaction.guildId ?? undefined).catch(
+        () => {}
+    );
 }
 
 // --- /adventure crate ---
@@ -599,31 +590,27 @@ async function handleCrate(interaction: ChatInputCommandInteraction, locale: Sup
     const total = crates.bronze + crates.silver + crates.gold;
 
     if (total === 0) {
-        const emptyEmbed = new EmbedBuilder()
-            .setDescription(t(locale, "adventure.crate.empty"))
-            .setColor(0x95a5a6);
+        const emptyEmbed = new EmbedBuilder().setDescription(t(locale, "adventure.crate.empty")).setColor(0x95a5a6);
         await Reply.embedEdit(interaction, emptyEmbed);
         return;
     }
 
     const crateEmbed = new EmbedBuilder()
         .setTitle(t(locale, "adventure.crate.title"))
-        .setDescription(t(locale, "adventure.crate.counts", {
-            bronze: String(crates.bronze),
-            silver: String(crates.silver),
-            gold: String(crates.gold),
-        }))
+        .setDescription(
+            t(locale, "adventure.crate.counts", {
+                bronze: String(crates.bronze),
+                silver: String(crates.silver),
+                gold: String(crates.gold),
+            })
+        )
         .setColor(0xf39c12);
 
     const options: StringSelectMenuOptionBuilder[] = [];
     for (const type of CRATE_TYPES) {
         if (crates[type] > 0) {
             const label = CRATES[type].emoji + " " + t(locale, "rpg.crate." + type) + " (x" + crates[type] + ")";
-            options.push(
-                new StringSelectMenuOptionBuilder()
-                    .setLabel(label)
-                    .setValue(type)
-            );
+            options.push(new StringSelectMenuOptionBuilder().setLabel(label).setValue(type));
         }
     }
 
@@ -651,9 +638,7 @@ async function handleCrate(interaction: ChatInputCommandInteraction, locale: Sup
     const crateType = selectInteraction.values[0] as CrateType;
     const deducted = await CharacterService.deductCrate(interaction.user.id, crateType);
     if (!deducted) {
-        const failEmbed = new EmbedBuilder()
-            .setDescription(t(locale, "adventure.crate.empty"))
-            .setColor(0xed4245);
+        const failEmbed = new EmbedBuilder().setDescription(t(locale, "adventure.crate.empty")).setColor(0xed4245);
         await selectInteraction.update({ embeds: [failEmbed], components: [] });
         return;
     }
@@ -674,7 +659,9 @@ async function handleCrate(interaction: ChatInputCommandInteraction, locale: Sup
         .setColor(RARITY_CONFIG[item.rarity].color);
 
     await selectInteraction.update({ embeds: [resultEmbed], components: [] });
-    GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1, interaction.guildId ?? undefined).catch(() => {});
+    GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1, interaction.guildId ?? undefined).catch(
+        () => {}
+    );
 }
 
 // --- /adventure shop ---
@@ -691,9 +678,11 @@ async function handleShop(interaction: ChatInputCommandInteraction, locale: Supp
     const shopEmbed = new EmbedBuilder()
         .setTitle(t(locale, "adventure.shop.title"))
         .setDescription(
-            t(locale, "adventure.shop.desc") + "\n\n" +
-            t(locale, "rpg.gold", { amount: String(char.gold) }) + "\n\n" +
-            crateLines
+            t(locale, "adventure.shop.desc") +
+                "\n\n" +
+                t(locale, "rpg.gold", { amount: String(char.gold) }) +
+                "\n\n" +
+                crateLines
         )
         .setColor(0xf39c12);
 
@@ -752,7 +741,9 @@ async function handleShop(interaction: ChatInputCommandInteraction, locale: Supp
         .setColor(RARITY_CONFIG[item.rarity].color);
 
     await buyInteraction.update({ embeds: [resultEmbed], components: [] });
-    GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1, interaction.guildId ?? undefined).catch(() => {});
+    GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1, interaction.guildId ?? undefined).catch(
+        () => {}
+    );
 }
 
 // --- /adventure advance ---
@@ -768,12 +759,18 @@ function checkAdvancementQuest(
     questsCompleted: number
 ): AdvancementQuestCheck {
     switch (baseClass) {
-        case "swordsman": return { key: "adventure.advance.quest.defeat_bosses", met: char.bossKills >= 15 };
-        case "tank":      return { key: "adventure.advance.quest.reach_floor", met: char.dungeonDepth >= 25 };
-        case "mage":      return { key: "adventure.advance.quest.earn_gold", met: char.goldEarned >= 20000 };
-        case "archer":    return { key: "adventure.advance.quest.kill_monsters", met: char.monstersKilled >= 200 };
-        case "assassin":  return { key: "adventure.advance.quest.complete_quests", met: questsCompleted >= 50 };
-        case "healer":    return { key: "adventure.advance.quest.craft_equipment", met: char.itemsCrafted >= 20 };
+        case "swordsman":
+            return { key: "adventure.advance.quest.defeat_bosses", met: char.bossKills >= 15 };
+        case "tank":
+            return { key: "adventure.advance.quest.reach_floor", met: char.dungeonDepth >= 25 };
+        case "mage":
+            return { key: "adventure.advance.quest.earn_gold", met: char.goldEarned >= 20000 };
+        case "archer":
+            return { key: "adventure.advance.quest.kill_monsters", met: char.monstersKilled >= 200 };
+        case "assassin":
+            return { key: "adventure.advance.quest.complete_quests", met: questsCompleted >= 50 };
+        case "healer":
+            return { key: "adventure.advance.quest.craft_equipment", met: char.itemsCrafted >= 20 };
     }
 }
 
@@ -816,7 +813,13 @@ async function handleAdvance(interaction: ChatInputCommandInteraction, locale: S
     const questsCompleted = guildMember?.questsCompleted ?? 0;
     const questCheck = checkAdvancementQuest(
         char.class as ClassType,
-        { bossKills: char.bossKills, dungeonDepth: char.dungeonDepth, goldEarned: char.goldEarned, monstersKilled: char.monstersKilled, itemsCrafted: char.itemsCrafted },
+        {
+            bossKills: char.bossKills,
+            dungeonDepth: char.dungeonDepth,
+            goldEarned: char.goldEarned,
+            monstersKilled: char.monstersKilled,
+            itemsCrafted: char.itemsCrafted,
+        },
         questsCompleted
     );
 
@@ -851,17 +854,19 @@ async function handleAdvance(interaction: ChatInputCommandInteraction, locale: S
 
     const embed = new EmbedBuilder()
         .setTitle(t(locale, "adventure.advance.title"))
-        .setDescription([
-            `**${t(locale, "adventure.advance.path", { num: "1" })}: ${path1.emoji} ${path1Name}**`,
-            buildStatBonusLine(locale, path1.statBonus),
-            `${t(locale, "adventure.advance.ultimate")}: ${path1.ultimate.emoji} ${path1UltName} — ${path1UltDesc}`,
-            "",
-            `**${t(locale, "adventure.advance.path", { num: "2" })}: ${path2.emoji} ${path2Name}**`,
-            buildStatBonusLine(locale, path2.statBonus),
-            `${t(locale, "adventure.advance.ultimate")}: ${path2.ultimate.emoji} ${path2UltName} — ${path2UltDesc}`,
-            "",
-            `**${t(locale, "adventure.advance.cost")}:** ${matDisplay} + **${ADVANCEMENT_REQUIREMENTS.goldCost}** Gold 🪙`,
-        ].join("\n"))
+        .setDescription(
+            [
+                `**${t(locale, "adventure.advance.path", { num: "1" })}: ${path1.emoji} ${path1Name}**`,
+                buildStatBonusLine(locale, path1.statBonus),
+                `${t(locale, "adventure.advance.ultimate")}: ${path1.ultimate.emoji} ${path1UltName} — ${path1UltDesc}`,
+                "",
+                `**${t(locale, "adventure.advance.path", { num: "2" })}: ${path2.emoji} ${path2Name}**`,
+                buildStatBonusLine(locale, path2.statBonus),
+                `${t(locale, "adventure.advance.ultimate")}: ${path2.ultimate.emoji} ${path2UltName} — ${path2UltDesc}`,
+                "",
+                `**${t(locale, "adventure.advance.cost")}:** ${matDisplay} + **${ADVANCEMENT_REQUIREMENTS.goldCost}** Gold 🪙`,
+            ].join("\n")
+        )
         .setColor(0xf39c12);
 
     const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
