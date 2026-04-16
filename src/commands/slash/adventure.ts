@@ -12,7 +12,20 @@ import {
 } from "discord.js";
 import CharacterService from "../../services/rpg/character.service";
 import EquipmentService from "../../services/rpg/equipment.service";
-import { CLASS_CONFIG, CLASS_TYPES, RARITY_CONFIG, type ClassType, type EquipmentSlot } from "../../services/rpg/rpg.config";
+import {
+    CLASS_CONFIG,
+    CLASS_TYPES,
+    CRAFT_RECIPES,
+    CRATES,
+    CRATE_TYPES,
+    EQUIPMENT_SLOTS,
+    MATERIALS,
+    RARITY_CONFIG,
+    type ClassType,
+    type CrateType,
+    type EquipmentSlot,
+    type Rarity,
+} from "../../services/rpg/rpg.config";
 import Reply from "../../util/decorator/reply";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
@@ -202,12 +215,21 @@ async function handleProfile(interaction: ChatInputCommandInteraction, locale: S
         ? `${progress.current} / ${progress.needed}`
         : "MAX";
 
+    // Crate counts
+    const crates = char.crates ?? { bronze: 0, silver: 0, gold: 0 };
+    const crateDisplay = t(locale, "adventure.crate.counts", {
+        bronze: String(crates.bronze),
+        silver: String(crates.silver),
+        gold: String(crates.gold),
+    });
+
     const embed = new EmbedBuilder()
         .setTitle(t(locale, "adventure.profile.title", { username: interaction.user.displayName }))
         .setDescription(`${config.emoji} ${className} — ${t(locale, "adventure.profile.level", { level: String(char.level) })}`)
         .addFields(
             { name: t(locale, "adventure.profile.exp"), value: expBar, inline: true },
             { name: t(locale, "adventure.profile.gold"), value: t(locale, "rpg.gold", { amount: String(char.gold) }), inline: true },
+            { name: t(locale, "adventure.crate.title"), value: crateDisplay, inline: true },
             { name: t(locale, "adventure.profile.stats"), value: statLines },
             { name: t(locale, "adventure.profile.equipment"), value: equipLines }
         )
@@ -280,10 +302,16 @@ async function handleEquip(interaction: ChatInputCommandInteraction, locale: Sup
 // --- /adventure inventory ---
 
 async function handleInventory(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
-    await CharacterService.requireCharacter(interaction.user.id);
+    const char = await CharacterService.requireCharacter(interaction.user.id);
     const inventory = await EquipmentService.getInventory(interaction.user.id);
 
-    if (inventory.length === 0) {
+    // Build materials display
+    const materialsDisplay = MATERIALS
+        .filter((m) => (char.materials.get(m.key) ?? 0) > 0)
+        .map((m) => m.emoji + " " + t(locale, "rpg.material." + m.key) + " x" + char.materials.get(m.key))
+        .join(" | ");
+
+    if (inventory.length === 0 && !materialsDisplay) {
         const embed = new EmbedBuilder()
             .setDescription(t(locale, "adventure.inventory.empty"))
             .setColor(0x95a5a6);
@@ -292,7 +320,7 @@ async function handleInventory(interaction: ChatInputCommandInteraction, locale:
     }
 
     const ITEMS_PER_PAGE = 10;
-    const totalPages = Math.ceil(inventory.length / ITEMS_PER_PAGE);
+    const totalPages = Math.max(1, Math.ceil(inventory.length / ITEMS_PER_PAGE));
     let page = 0;
 
     const buildPage = (p: number): EmbedBuilder => {
@@ -306,9 +334,17 @@ async function handleInventory(interaction: ChatInputCommandInteraction, locale:
             return `${equipped}${rarityEmoji} **${item.name}** (Lv.${item.requiredLevel}) — ${slotLabel}`;
         });
 
+        const sections: string[] = [];
+        if (materialsDisplay && p === 0) {
+            sections.push(materialsDisplay);
+        }
+        if (lines.length > 0) {
+            sections.push(lines.join("\n"));
+        }
+
         return new EmbedBuilder()
             .setTitle(t(locale, "adventure.inventory.title", { username: interaction.user.displayName }))
-            .setDescription(lines.join("\n"))
+            .setDescription(sections.join("\n\n") || t(locale, "adventure.inventory.empty"))
             .setFooter({ text: t(locale, "adventure.inventory.page", { current: String(p + 1), total: String(totalPages) }) })
             .setColor(0x3498db);
     };
@@ -381,6 +417,334 @@ async function handleUnequip(interaction: ChatInputCommandInteraction, locale: S
     await Reply.embedEdit(interaction, embed);
 }
 
+// --- /adventure craft ---
+
+async function handleCraft(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
+    const char = await CharacterService.requireCharacter(interaction.user.id);
+
+    // Step 1: Select slot
+    const slotSelectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId("craft_slot")
+            .setPlaceholder(t(locale, "adventure.craft.select_slot"))
+            .addOptions(
+                EQUIPMENT_SLOTS.map((slot) =>
+                    new StringSelectMenuOptionBuilder()
+                        .setLabel(t(locale, `rpg.slot.${slot}`))
+                        .setValue(slot)
+                )
+            )
+    );
+
+    const craftEmbed = new EmbedBuilder()
+        .setTitle(t(locale, "adventure.craft.title"))
+        .setColor(0xf39c12);
+
+    const message = await interaction.editReply({ embeds: [craftEmbed], components: [slotSelectRow] });
+
+    // Await slot selection
+    const slotInteraction = await message
+        .awaitMessageComponent({
+            filter: (i) => i.user.id === interaction.user.id && i.customId === "craft_slot",
+            time: 60_000,
+        })
+        .catch(() => null);
+
+    if (!slotInteraction?.isStringSelectMenu()) {
+        await interaction.editReply({ components: [] }).catch(() => {});
+        return;
+    }
+
+    const selectedSlot = slotInteraction.values[0] as EquipmentSlot;
+
+    // Step 2: Select rarity — only show affordable recipes
+    const affordableRecipes = CRAFT_RECIPES.filter((recipe) => {
+        const hasGold = char.gold >= recipe.goldCost;
+        const hasMats = recipe.materials.every(
+            ({ key, qty }) => (char.materials.get(key) ?? 0) >= qty
+        );
+        return hasGold && hasMats;
+    });
+
+    if (affordableRecipes.length === 0) {
+        const noRecipeEmbed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.craft.no_recipes"))
+            .setColor(0xed4245);
+        await slotInteraction.update({ embeds: [noRecipeEmbed], components: [] });
+        return;
+    }
+
+    const raritySelectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId("craft_rarity")
+            .setPlaceholder(t(locale, "adventure.craft.select_rarity"))
+            .addOptions(
+                affordableRecipes.map((recipe) => {
+                    const rarityLabel = RARITY_CONFIG[recipe.rarity].emoji + " " + t(locale, "rpg.rarity." + recipe.rarity);
+                    return new StringSelectMenuOptionBuilder()
+                        .setLabel(rarityLabel)
+                        .setValue(recipe.rarity)
+                        .setDescription(recipe.goldCost + " Gold");
+                })
+            )
+    );
+
+    await slotInteraction.update({ embeds: [craftEmbed], components: [raritySelectRow] });
+
+    const rarityInteraction = await message
+        .awaitMessageComponent({
+            filter: (i) => i.user.id === interaction.user.id && i.customId === "craft_rarity",
+            time: 60_000,
+        })
+        .catch(() => null);
+
+    if (!rarityInteraction?.isStringSelectMenu()) {
+        await interaction.editReply({ components: [] }).catch(() => {});
+        return;
+    }
+
+    const selectedRarity = rarityInteraction.values[0] as Rarity;
+    const recipe = CRAFT_RECIPES.find((r) => r.rarity === selectedRarity)!;
+
+    // Step 3: Confirm
+    const matDisplay = recipe.materials
+        .map(({ key, qty }) => {
+            const mat = MATERIALS.find((m) => m.key === key);
+            const matName = t(locale, "rpg.material." + key);
+            return (mat?.emoji ?? "") + " " + matName + " x" + qty;
+        })
+        .join(" + ");
+
+    const rarityDisplay = RARITY_CONFIG[selectedRarity].emoji + " " + t(locale, "rpg.rarity." + selectedRarity);
+    const confirmEmbed = new EmbedBuilder()
+        .setTitle(t(locale, "adventure.craft.title"))
+        .setDescription(
+            t(locale, "adventure.craft.confirm", {
+                rarity: rarityDisplay,
+                slot: t(locale, "rpg.slot." + selectedSlot),
+                materials: matDisplay,
+                gold: String(recipe.goldCost),
+            })
+        )
+        .setColor(RARITY_CONFIG[selectedRarity].color);
+
+    const confirmRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setCustomId("craft_confirm").setLabel("✅").setStyle(ButtonStyle.Success),
+        new ButtonBuilder().setCustomId("craft_cancel").setLabel("❌").setStyle(ButtonStyle.Danger)
+    );
+
+    await rarityInteraction.update({ embeds: [confirmEmbed], components: [confirmRow] });
+
+    const confirmInteraction = await message
+        .awaitMessageComponent({
+            filter: (i) => i.user.id === interaction.user.id,
+            time: 30_000,
+        })
+        .catch(() => null);
+
+    if (confirmInteraction?.customId !== "craft_confirm") {
+        const cancelEmbed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.craft.cancelled"))
+            .setColor(0x95a5a6);
+        await interaction.editReply({ embeds: [cancelEmbed], components: [] }).catch(() => {});
+        return;
+    }
+
+    // Execute craft
+    try {
+        await CharacterService.deductMaterials(interaction.user.id, recipe.materials);
+        await CharacterService.deductGold(interaction.user.id, recipe.goldCost);
+    } catch {
+        const errEmbed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.craft.no_materials"))
+            .setColor(0xed4245);
+        await confirmInteraction.update({ embeds: [errEmbed], components: [] });
+        return;
+    }
+
+    const item = await EquipmentService.craftEquipment(
+        interaction.user.id,
+        selectedSlot,
+        selectedRarity,
+        char.class,
+        char.level
+    );
+
+    const successEmbed = new EmbedBuilder()
+        .setDescription(
+            t(locale, "adventure.craft.success", {
+                rarity: RARITY_CONFIG[item.rarity].emoji,
+                name: item.name,
+                slot: t(locale, "rpg.slot." + item.slot),
+            })
+        )
+        .setColor(RARITY_CONFIG[item.rarity].color);
+
+    await confirmInteraction.update({ embeds: [successEmbed], components: [] });
+}
+
+// --- /adventure crate ---
+
+async function handleCrate(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
+    const char = await CharacterService.requireCharacter(interaction.user.id);
+    const crates = char.crates ?? { bronze: 0, silver: 0, gold: 0 };
+    const total = crates.bronze + crates.silver + crates.gold;
+
+    if (total === 0) {
+        const emptyEmbed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.crate.empty"))
+            .setColor(0x95a5a6);
+        await Reply.embedEdit(interaction, emptyEmbed);
+        return;
+    }
+
+    const crateEmbed = new EmbedBuilder()
+        .setTitle(t(locale, "adventure.crate.title"))
+        .setDescription(t(locale, "adventure.crate.counts", {
+            bronze: String(crates.bronze),
+            silver: String(crates.silver),
+            gold: String(crates.gold),
+        }))
+        .setColor(0xf39c12);
+
+    const options: StringSelectMenuOptionBuilder[] = [];
+    for (const type of CRATE_TYPES) {
+        if (crates[type] > 0) {
+            const label = CRATES[type].emoji + " " + t(locale, "rpg.crate." + type) + " (x" + crates[type] + ")";
+            options.push(
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(label)
+                    .setValue(type)
+            );
+        }
+    }
+
+    const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId("crate_select")
+            .setPlaceholder(t(locale, "adventure.crate.select"))
+            .addOptions(options)
+    );
+
+    const message = await interaction.editReply({ embeds: [crateEmbed], components: [selectRow] });
+
+    const selectInteraction = await message
+        .awaitMessageComponent({
+            filter: (i) => i.user.id === interaction.user.id && i.customId === "crate_select",
+            time: 60_000,
+        })
+        .catch(() => null);
+
+    if (!selectInteraction?.isStringSelectMenu()) {
+        await interaction.editReply({ components: [] }).catch(() => {});
+        return;
+    }
+
+    const crateType = selectInteraction.values[0] as CrateType;
+    const deducted = await CharacterService.deductCrate(interaction.user.id, crateType);
+    if (!deducted) {
+        const failEmbed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.crate.empty"))
+            .setColor(0xed4245);
+        await selectInteraction.update({ embeds: [failEmbed], components: [] });
+        return;
+    }
+
+    const item = await EquipmentService.openCrate(interaction.user.id, crateType, char.class, char.level);
+
+    const crateTitle = CRATES[crateType].emoji + " " + t(locale, "rpg.crate." + crateType);
+    const crateRarityDisplay = RARITY_CONFIG[item.rarity].emoji + " " + t(locale, "rpg.rarity." + item.rarity);
+    const resultEmbed = new EmbedBuilder()
+        .setTitle(crateTitle)
+        .setDescription(
+            t(locale, "adventure.crate.result", {
+                rarity: crateRarityDisplay,
+                name: item.name,
+                slot: t(locale, "rpg.slot." + item.slot),
+            })
+        )
+        .setColor(RARITY_CONFIG[item.rarity].color);
+
+    await selectInteraction.update({ embeds: [resultEmbed], components: [] });
+}
+
+// --- /adventure shop ---
+
+async function handleShop(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
+    const char = await CharacterService.requireCharacter(interaction.user.id);
+
+    const crateLines = CRATE_TYPES.map((type) => {
+        const crate = CRATES[type];
+        const crateName = t(locale, "rpg.crate." + type);
+        return crate.emoji + " **" + crateName + "** — " + crate.shopCost + " Gold 🪙";
+    }).join("\n");
+
+    const shopEmbed = new EmbedBuilder()
+        .setTitle(t(locale, "adventure.shop.title"))
+        .setDescription(
+            t(locale, "adventure.shop.desc") + "\n\n" +
+            t(locale, "rpg.gold", { amount: String(char.gold) }) + "\n\n" +
+            crateLines
+        )
+        .setColor(0xf39c12);
+
+    const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        ...CRATE_TYPES.map((type) => {
+            const crate = CRATES[type];
+            return new ButtonBuilder()
+                .setCustomId("shop_buy_" + type)
+                .setLabel(crate.emoji + " " + crate.shopCost + " 🪙")
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(char.gold < crate.shopCost);
+        })
+    );
+
+    const message = await interaction.editReply({ embeds: [shopEmbed], components: [buttonRow] });
+
+    const buyInteraction = await message
+        .awaitMessageComponent({
+            filter: (i) => i.user.id === interaction.user.id && i.customId.startsWith("shop_buy_"),
+            time: 60_000,
+        })
+        .catch(() => null);
+
+    if (!buyInteraction) {
+        await interaction.editReply({ components: [] }).catch(() => {});
+        return;
+    }
+
+    const crateType = buyInteraction.customId.replace("shop_buy_", "") as CrateType;
+    const cost = CRATES[crateType].shopCost;
+
+    try {
+        await CharacterService.deductGold(interaction.user.id, cost);
+    } catch {
+        await buyInteraction.update({
+            embeds: [new EmbedBuilder().setDescription(t(locale, "adventure.shop.no_gold")).setColor(0xed4245)],
+            components: [],
+        });
+        return;
+    }
+
+    const item = await EquipmentService.openCrate(interaction.user.id, crateType, char.class, char.level);
+
+    const shopCrateName = t(locale, "rpg.crate." + crateType);
+    const shopTitle = CRATES[crateType].emoji + " " + t(locale, "adventure.shop.bought", { crate: shopCrateName });
+    const shopRarityDisplay = RARITY_CONFIG[item.rarity].emoji + " " + t(locale, "rpg.rarity." + item.rarity);
+    const resultEmbed = new EmbedBuilder()
+        .setTitle(shopTitle)
+        .setDescription(
+            t(locale, "adventure.crate.result", {
+                rarity: shopRarityDisplay,
+                name: item.name,
+                slot: t(locale, "rpg.slot." + item.slot),
+            })
+        )
+        .setColor(RARITY_CONFIG[item.rarity].color);
+
+    await buyInteraction.update({ embeds: [resultEmbed], components: [] });
+}
+
 // --- Command definition ---
 
 export default {
@@ -434,6 +798,24 @@ export default {
                             { name: "Accessory", value: "accessory" }
                         )
                 )
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("craft")
+                .setDescription("Craft equipment from materials")
+                .setDescriptionLocalizations(descriptionLocales("cmd.adventure.craft.desc"))
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("crate")
+                .setDescription("Open crates from your inventory")
+                .setDescriptionLocalizations(descriptionLocales("cmd.adventure.crate.desc"))
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("shop")
+                .setDescription("Buy equipment crates with Gold")
+                .setDescriptionLocalizations(descriptionLocales("cmd.adventure.shop.desc"))
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -457,6 +839,15 @@ export default {
                     return;
                 case "unequip":
                     await handleUnequip(interaction, locale);
+                    return;
+                case "craft":
+                    await handleCraft(interaction, locale);
+                    return;
+                case "crate":
+                    await handleCrate(interaction, locale);
+                    return;
+                case "shop":
+                    await handleShop(interaction, locale);
                     return;
                 default: {
                     const embed = new EmbedBuilder()
