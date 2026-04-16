@@ -256,10 +256,12 @@ function buildReplayComponents(
         buttonRow.addComponents(
             new ButtonBuilder()
                 .setCustomId(CUSTOM_ID.DICE_HIGH)
+                .setEmoji("🎲")
                 .setLabel(t(locale, "gamble.dice_high_btn"))
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setCustomId(CUSTOM_ID.DICE_LOW)
+                .setEmoji("🎲")
                 .setLabel(t(locale, "gamble.dice_low_btn"))
                 .setStyle(ButtonStyle.Primary)
         );
@@ -267,6 +269,7 @@ function buildReplayComponents(
         buttonRow.addComponents(
             new ButtonBuilder()
                 .setCustomId(CUSTOM_ID.PLAY_AGAIN)
+                .setEmoji("🔄")
                 .setLabel(t(locale, "gamble.play_again"))
                 .setStyle(ButtonStyle.Primary)
         );
@@ -275,6 +278,7 @@ function buildReplayComponents(
     buttonRow.addComponents(
         new ButtonBuilder()
             .setCustomId(CUSTOM_ID.CHANGE_BET)
+            .setEmoji("💰")
             .setLabel(t(locale, "gamble.change_bet"))
             .setStyle(ButtonStyle.Secondary)
     );
@@ -284,29 +288,41 @@ function buildReplayComponents(
 
     if (currentGame !== "coinflip") {
         selectOptions.push(
-            new StringSelectMenuOptionBuilder().setLabel("Coinflip").setValue("coinflip").setEmoji("🪙")
+            new StringSelectMenuOptionBuilder()
+                .setLabel(t(locale, "gamble.coinflip.title"))
+                .setValue("coinflip")
+                .setEmoji("🪙")
         );
     }
     if (currentGame !== "slots") {
         selectOptions.push(
-            new StringSelectMenuOptionBuilder().setLabel("Slots").setValue("slots").setEmoji("🎰")
+            new StringSelectMenuOptionBuilder()
+                .setLabel(t(locale, "gamble.slots.title"))
+                .setValue("slots")
+                .setEmoji("🎰")
         );
     }
     if (!(currentGame === "dice" && currentDiceMode === "high")) {
         selectOptions.push(
-            new StringSelectMenuOptionBuilder().setLabel("Dice (High)").setValue("dice:high").setEmoji("🎲")
+            new StringSelectMenuOptionBuilder()
+                .setLabel(`${t(locale, "gamble.dice.title")} — ${t(locale, "gamble.dice.high")}`)
+                .setValue("dice:high")
+                .setEmoji("🎲")
         );
     }
     if (!(currentGame === "dice" && currentDiceMode === "low")) {
         selectOptions.push(
-            new StringSelectMenuOptionBuilder().setLabel("Dice (Low)").setValue("dice:low").setEmoji("🎲")
+            new StringSelectMenuOptionBuilder()
+                .setLabel(`${t(locale, "gamble.dice.title")} — ${t(locale, "gamble.dice.low")}`)
+                .setValue("dice:low")
+                .setEmoji("🎲")
         );
     }
 
     const selectRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
         new StringSelectMenuBuilder()
             .setCustomId(CUSTOM_ID.SWITCH_GAME)
-            .setPlaceholder(t(locale, "gamble.switch_game"))
+            .setPlaceholder(`🎮 ${t(locale, "gamble.switch_game")}`)
             .addOptions(selectOptions)
     );
 
@@ -480,8 +496,17 @@ export default {
                     const raw = submitted.fields.getTextInputValue(CUSTOM_ID.NEW_BET_INPUT);
                     const newBet = parseInt(raw, 10);
 
-                    // Reload config for up-to-date min/max
+                    // Reload config for up-to-date min/max and enabled status
                     const freshConfig = await getGamblingConfig(guildId);
+
+                    if (!freshConfig.enabled) {
+                        await submitted.reply({
+                            content: t(locale, "gamble.disabled"),
+                            flags: MessageFlags.Ephemeral,
+                        });
+                        collector.stop();
+                        return;
+                    }
 
                     if (isNaN(newBet) || newBet < freshConfig.minBet || newBet > freshConfig.maxBet) {
                         await submitted.reply({
