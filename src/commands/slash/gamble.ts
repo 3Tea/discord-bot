@@ -1,4 +1,18 @@
-import { ChatInputCommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    ChatInputCommandInteraction,
+    EmbedBuilder,
+    MessageFlags,
+    ModalBuilder,
+    SlashCommandBuilder,
+    StringSelectMenuBuilder,
+    StringSelectMenuOptionBuilder,
+    TextInputBuilder,
+    TextInputStyle,
+    type MessageActionRowComponentBuilder,
+} from "discord.js";
 import redis from "../../connector/redis";
 import CurrencyService from "../../services/economy/currency.service";
 import GamblingService from "../../services/economy/gambling.service";
@@ -15,6 +29,19 @@ import EconomyLogService from "../../services/economy/economyLog.service";
 const CONFIG_CACHE_TTL = 300;
 const GAMBLE_COOLDOWN = 30; // seconds
 
+// --- Custom IDs (local to this command, not in BUTTON_ID) ---
+const CUSTOM_ID = {
+    PLAY_AGAIN: "gamble_play_again",
+    DICE_HIGH: "gamble_dice_high",
+    DICE_LOW: "gamble_dice_low",
+    CHANGE_BET: "gamble_change_bet",
+    SWITCH_GAME: "gamble_switch_game",
+    CHANGE_BET_MODAL: "gamble_change_bet_modal",
+    NEW_BET_INPUT: "gamble_new_bet_input",
+} as const;
+
+type GameType = "coinflip" | "slots" | "dice";
+
 async function getGamblingConfig(guildId: string): Promise<IGuildGamblingConfig> {
     const cacheKey = `gambling_config:${guildId}`;
     const cached = await redis.getJson(cacheKey);
@@ -28,6 +55,281 @@ async function getGamblingConfig(guildId: string): Promise<IGuildGamblingConfig>
 
     await redis.setJson(cacheKey, config.toObject(), CONFIG_CACHE_TTL);
     return config;
+}
+
+// --- playGame: extracted game execution logic ---
+
+interface PlayGameParams {
+    game: GameType;
+    bet: number;
+    diceMode?: "high" | "low";
+    userId: string;
+    guildId: string;
+    locale: SupportedLocale;
+}
+
+async function playGame(params: PlayGameParams): Promise<EmbedBuilder> {
+    const { game, bet, diceMode, userId, guildId, locale } = params;
+    const cdKey = `gamble_cd:${guildId}:${userId}`;
+
+    // Deduct bet — throws InsufficientFundsError if balance too low
+    await CurrencyService.deduct(userId, guildId, bet, 0, "gambling", {
+        game,
+        bet,
+        phase: "deduct",
+    });
+
+    let embed: EmbedBuilder;
+
+    switch (game) {
+        case "coinflip": {
+            const result = GamblingService.coinflip();
+            const payout = Math.floor(bet * result.multiplier);
+
+            if (payout > 0) {
+                await CurrencyService.addCoin(userId, guildId, payout, "gambling", {
+                    game: "coinflip",
+                    bet,
+                    result: result.result,
+                    won: true,
+                    payout,
+                });
+                await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
+                EconomyLogService.shouldLog(guildId, "gambling_win", payout)
+                    .then((should) => {
+                        if (!should) return;
+                        const logEmbed = new EmbedBuilder()
+                            .setTitle("Gambling Win")
+                            .setDescription(`<@${userId}> won **${payout.toLocaleString()}** coin on coinflip`)
+                            .setColor(0x57f287)
+                            .setTimestamp();
+                        EconomyLogService.sendLog(guildId, logEmbed);
+                    })
+                    .catch(() => {});
+            }
+
+            const resultText =
+                result.result === "heads"
+                    ? t(locale, "gamble.coinflip.heads")
+                    : t(locale, "gamble.coinflip.tails");
+
+            embed = new EmbedBuilder()
+                .setTitle(`🪙 ${t(locale, "gamble.coinflip.title")}`)
+                .setDescription(
+                    [
+                        t(locale, "gamble.bet", { amount: String(bet) }),
+                        `${resultText} ${result.won ? "✅" : "❌"}`,
+                        result.won
+                            ? t(locale, "gamble.payout.win", { amount: String(payout - bet), multiplier: "2" })
+                            : t(locale, "gamble.payout.lose", { amount: String(bet) }),
+                    ].join("\n")
+                )
+                .setColor(result.won ? 0x57f287 : 0xed4245);
+            break;
+        }
+
+        case "slots": {
+            const result = GamblingService.slots();
+            const payout = Math.floor(bet * result.multiplier);
+
+            if (payout > 0) {
+                await CurrencyService.addCoin(userId, guildId, payout, "gambling", {
+                    game: "slots",
+                    bet,
+                    reels: result.reels,
+                    combo: result.combo,
+                    won: result.won,
+                    payout,
+                });
+                await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
+                EconomyLogService.shouldLog(guildId, "gambling_win", payout)
+                    .then((should) => {
+                        if (!should) return;
+                        const logEmbed = new EmbedBuilder()
+                            .setTitle("Gambling Win")
+                            .setDescription(`<@${userId}> won **${payout.toLocaleString()}** coin on slots`)
+                            .setColor(0x57f287)
+                            .setTimestamp();
+                        EconomyLogService.sendLog(guildId, logEmbed);
+                    })
+                    .catch(() => {});
+            }
+
+            const comboText = t(locale, `gamble.slots.combo.${result.combo}`);
+            const payoutLine =
+                result.multiplier >= 1
+                    ? t(locale, "gamble.payout.win", {
+                          amount: String(payout - bet),
+                          multiplier: String(result.multiplier),
+                      })
+                    : result.multiplier > 0
+                      ? t(locale, "gamble.payout.partial", {
+                            amount: String(payout),
+                            multiplier: String(result.multiplier),
+                        })
+                      : t(locale, "gamble.payout.lose", { amount: String(bet) });
+
+            embed = new EmbedBuilder()
+                .setTitle(`🎰 ${t(locale, "gamble.slots.title")}`)
+                .setDescription(
+                    [
+                        `┃ ${result.reels[0]} ┃ ${result.reels[1]} ┃ ${result.reels[2]} ┃`,
+                        t(locale, "gamble.bet", { amount: String(bet) }),
+                        `${comboText} ${result.won ? "✅" : "❌"}`,
+                        payoutLine,
+                    ].join("\n")
+                )
+                .setColor(result.won ? 0x57f287 : 0xed4245);
+            break;
+        }
+
+        case "dice": {
+            const mode = diceMode ?? "high";
+            const result = GamblingService.dice(mode);
+            const payout = Math.floor(bet * result.multiplier);
+
+            if (payout > 0) {
+                await CurrencyService.addCoin(userId, guildId, payout, "gambling", {
+                    game: "dice",
+                    bet,
+                    dice: result.dice,
+                    total: result.total,
+                    mode,
+                    won: true,
+                    payout,
+                });
+                await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
+                EconomyLogService.shouldLog(guildId, "gambling_win", payout)
+                    .then((should) => {
+                        if (!should) return;
+                        const logEmbed = new EmbedBuilder()
+                            .setTitle("Gambling Win")
+                            .setDescription(`<@${userId}> won **${payout.toLocaleString()}** coin on dice`)
+                            .setColor(0x57f287)
+                            .setTimestamp();
+                        EconomyLogService.sendLog(guildId, logEmbed);
+                    })
+                    .catch(() => {});
+            }
+
+            const modeText = mode === "high" ? t(locale, "gamble.dice.high") : t(locale, "gamble.dice.low");
+
+            embed = new EmbedBuilder()
+                .setTitle(`🎲 ${t(locale, "gamble.dice.title")} — ${modeText}`)
+                .setDescription(
+                    [
+                        `🎲 ${result.dice[0]} + 🎲 ${result.dice[1]} = **${result.total}**`,
+                        t(locale, "gamble.bet", { amount: String(bet) }),
+                        result.won
+                            ? t(locale, "gamble.payout.win", { amount: String(payout - bet), multiplier: "2" })
+                            : t(locale, "gamble.payout.lose", { amount: String(bet) }),
+                    ].join("\n")
+                )
+                .setColor(result.won ? 0x57f287 : 0xed4245);
+            break;
+        }
+
+        default: {
+            embed = new EmbedBuilder()
+                .setDescription(t(locale, "common.unknown_subcommand"))
+                .setColor(0xed4245);
+        }
+    }
+
+    // Set cooldown
+    await redis.setJson(cdKey, 1, GAMBLE_COOLDOWN);
+
+    return embed;
+}
+
+// --- buildReplayComponents: buttons + select menu ---
+
+function buildReplayComponents(
+    currentGame: GameType,
+    currentDiceMode: "high" | "low" | undefined,
+    locale: SupportedLocale
+): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
+    // Row 1: Game buttons + Change Bet
+    const buttonRow = new ActionRowBuilder<MessageActionRowComponentBuilder>();
+
+    if (currentGame === "dice") {
+        buttonRow.addComponents(
+            new ButtonBuilder()
+                .setCustomId(CUSTOM_ID.DICE_HIGH)
+                .setLabel(t(locale, "gamble.dice_high_btn"))
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId(CUSTOM_ID.DICE_LOW)
+                .setLabel(t(locale, "gamble.dice_low_btn"))
+                .setStyle(ButtonStyle.Primary)
+        );
+    } else {
+        buttonRow.addComponents(
+            new ButtonBuilder()
+                .setCustomId(CUSTOM_ID.PLAY_AGAIN)
+                .setLabel(t(locale, "gamble.play_again"))
+                .setStyle(ButtonStyle.Primary)
+        );
+    }
+
+    buttonRow.addComponents(
+        new ButtonBuilder()
+            .setCustomId(CUSTOM_ID.CHANGE_BET)
+            .setLabel(t(locale, "gamble.change_bet"))
+            .setStyle(ButtonStyle.Secondary)
+    );
+
+    // Row 2: Game switch select menu
+    const selectOptions: StringSelectMenuOptionBuilder[] = [];
+
+    if (currentGame !== "coinflip") {
+        selectOptions.push(
+            new StringSelectMenuOptionBuilder().setLabel("Coinflip").setValue("coinflip").setEmoji("🪙")
+        );
+    }
+    if (currentGame !== "slots") {
+        selectOptions.push(
+            new StringSelectMenuOptionBuilder().setLabel("Slots").setValue("slots").setEmoji("🎰")
+        );
+    }
+    if (!(currentGame === "dice" && currentDiceMode === "high")) {
+        selectOptions.push(
+            new StringSelectMenuOptionBuilder().setLabel("Dice (High)").setValue("dice:high").setEmoji("🎲")
+        );
+    }
+    if (!(currentGame === "dice" && currentDiceMode === "low")) {
+        selectOptions.push(
+            new StringSelectMenuOptionBuilder().setLabel("Dice (Low)").setValue("dice:low").setEmoji("🎲")
+        );
+    }
+
+    const selectRow = new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId(CUSTOM_ID.SWITCH_GAME)
+            .setPlaceholder(t(locale, "gamble.switch_game"))
+            .addOptions(selectOptions)
+    );
+
+    return [buttonRow, selectRow];
+}
+
+// --- buildChangeBetModal ---
+
+function buildChangeBetModal(locale: SupportedLocale): ModalBuilder {
+    return new ModalBuilder()
+        .setCustomId(CUSTOM_ID.CHANGE_BET_MODAL)
+        .setTitle(t(locale, "gamble.new_bet_title"))
+        .addComponents(
+            new ActionRowBuilder<TextInputBuilder>().addComponents(
+                new TextInputBuilder()
+                    .setCustomId(CUSTOM_ID.NEW_BET_INPUT)
+                    .setLabel(t(locale, "gamble.new_bet_label"))
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true)
+                    .setMinLength(1)
+                    .setMaxLength(10)
+            )
+        );
 }
 
 export default {
@@ -89,7 +391,7 @@ export default {
         const guildId = interaction.guildId!;
         const userId = interaction.user.id;
         const subcommand = interaction.options.getSubcommand(true);
-        const bet = interaction.options.getInteger("bet", true);
+        const initialBet = interaction.options.getInteger("bet", true);
 
         try {
             // Load config
@@ -102,13 +404,13 @@ export default {
             }
 
             // Validate bet
-            if (bet < config.minBet) {
+            if (initialBet < config.minBet) {
                 const embed = new EmbedBuilder()
                     .setDescription(t(locale, "gamble.min_bet", { min: String(config.minBet) }))
                     .setColor(0xed4245);
                 return Reply.embedEdit(interaction, embed);
             }
-            if (bet > config.maxBet) {
+            if (initialBet > config.maxBet) {
                 const embed = new EmbedBuilder()
                     .setDescription(t(locale, "gamble.max_bet", { max: String(config.maxBet) }))
                     .setColor(0xed4245);
@@ -125,187 +427,282 @@ export default {
                 return Reply.embedEdit(interaction, embed);
             }
 
-            // Deduct bet
-            try {
-                await CurrencyService.deduct(userId, guildId, bet, 0, "gambling", {
-                    game: subcommand,
-                    bet,
-                    phase: "deduct",
-                });
-            } catch (error) {
-                if (error instanceof CurrencyService.InsufficientFundsError) {
+            // --- Closure state for replay ---
+            let currentGame: GameType = subcommand as GameType;
+            let currentBet = initialBet;
+            let currentDiceMode: "high" | "low" | undefined =
+                subcommand === "dice"
+                    ? (interaction.options.getString("mode", true) as "high" | "low")
+                    : undefined;
+
+            // Initial play
+            const embed = await playGame({
+                game: currentGame,
+                bet: currentBet,
+                diceMode: currentDiceMode,
+                userId,
+                guildId,
+                locale,
+            });
+
+            const components = buildReplayComponents(currentGame, currentDiceMode, locale);
+            await Reply.embedEditComponents(interaction, embed, components);
+
+            // --- Collector loop ---
+            const message = await interaction.fetchReply();
+            const collector = message.createMessageComponentCollector({ idle: 30_000 });
+
+            collector.on("collect", async (i) => {
+                // Owner-only check
+                if (i.user.id !== userId) {
+                    await i.reply({
+                        content: t(locale, "gamble.not_your_game"),
+                        flags: MessageFlags.Ephemeral,
+                    });
+                    return;
+                }
+
+                // --- Change Bet (opens modal) ---
+                if (i.isButton() && i.customId === CUSTOM_ID.CHANGE_BET) {
+                    const modal = buildChangeBetModal(locale);
+                    await i.showModal(modal);
+
+                    const submitted = await i
+                        .awaitModalSubmit({
+                            filter: (mi) =>
+                                mi.customId === CUSTOM_ID.CHANGE_BET_MODAL && mi.user.id === userId,
+                            time: 30_000,
+                        })
+                        .catch(() => null);
+
+                    if (!submitted) return;
+
+                    const raw = submitted.fields.getTextInputValue(CUSTOM_ID.NEW_BET_INPUT);
+                    const newBet = parseInt(raw, 10);
+
+                    // Reload config for up-to-date min/max
+                    const freshConfig = await getGamblingConfig(guildId);
+
+                    if (isNaN(newBet) || newBet < freshConfig.minBet || newBet > freshConfig.maxBet) {
+                        await submitted.reply({
+                            content: t(locale, "gamble.invalid_bet"),
+                            flags: MessageFlags.Ephemeral,
+                        });
+                        return;
+                    }
+
+                    // Check balance
                     const balance = await CurrencyService.getBalance(userId, guildId);
-                    const embed = new EmbedBuilder()
-                        .setDescription(t(locale, "gamble.insufficient", { balance: String(balance.coin) }))
-                        .setColor(0xed4245);
-                    return Reply.embedEdit(interaction, embed);
-                }
-                throw error;
-            }
-
-            // Play game
-            let embed: EmbedBuilder;
-
-            switch (subcommand) {
-                case "coinflip": {
-                    const result = GamblingService.coinflip();
-                    const payout = Math.floor(bet * result.multiplier);
-
-                    if (payout > 0) {
-                        await CurrencyService.addCoin(userId, guildId, payout, "gambling", {
-                            game: "coinflip",
-                            bet,
-                            result: result.result,
-                            won: true,
-                            payout,
+                    if (balance.coin < newBet) {
+                        await submitted.reply({
+                            content: t(locale, "gamble.insufficient", { balance: String(balance.coin) }),
+                            flags: MessageFlags.Ephemeral,
                         });
-                        await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
-                        EconomyLogService.shouldLog(guildId, "gambling_win", payout)
-                            .then((should) => {
-                                if (!should) return;
-                                const logEmbed = new EmbedBuilder()
-                                    .setTitle("Gambling Win")
-                                    .setDescription(`<@${userId}> won **${payout.toLocaleString()}** coin on coinflip`)
-                                    .setColor(0x57f287)
-                                    .setTimestamp();
-                                EconomyLogService.sendLog(guildId, logEmbed);
-                            })
-                            .catch(() => {});
+                        return;
                     }
 
-                    const resultText =
-                        result.result === "heads"
-                            ? t(locale, "gamble.coinflip.heads")
-                            : t(locale, "gamble.coinflip.tails");
-
-                    embed = new EmbedBuilder()
-                        .setTitle(`🪙 ${t(locale, "gamble.coinflip.title")}`)
-                        .setDescription(
-                            [
-                                t(locale, "gamble.bet", { amount: String(bet) }),
-                                `${resultText} ${result.won ? "✅" : "❌"}`,
-                                result.won
-                                    ? t(locale, "gamble.payout.win", { amount: String(payout - bet), multiplier: "2" })
-                                    : t(locale, "gamble.payout.lose", { amount: String(bet) }),
-                            ].join("\n")
-                        )
-                        .setColor(result.won ? 0x57f287 : 0xed4245);
-                    break;
-                }
-
-                case "slots": {
-                    const result = GamblingService.slots();
-                    const payout = Math.floor(bet * result.multiplier);
-
-                    if (payout > 0) {
-                        await CurrencyService.addCoin(userId, guildId, payout, "gambling", {
-                            game: "slots",
-                            bet,
-                            reels: result.reels,
-                            combo: result.combo,
-                            won: result.won,
-                            payout,
+                    // Check cooldown
+                    const cdRemaining = await redis.ttlKey(cdKey);
+                    if (cdRemaining > 0) {
+                        await submitted.reply({
+                            content: t(locale, "gamble.cooldown", { seconds: String(cdRemaining) }),
+                            flags: MessageFlags.Ephemeral,
                         });
-                        await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
-                        EconomyLogService.shouldLog(guildId, "gambling_win", payout)
-                            .then((should) => {
-                                if (!should) return;
-                                const logEmbed = new EmbedBuilder()
-                                    .setTitle("Gambling Win")
-                                    .setDescription(`<@${userId}> won **${payout.toLocaleString()}** coin on slots`)
-                                    .setColor(0x57f287)
-                                    .setTimestamp();
-                                EconomyLogService.sendLog(guildId, logEmbed);
-                            })
-                            .catch(() => {});
+                        return;
                     }
 
-                    const comboText = t(locale, `gamble.slots.combo.${result.combo}`);
-                    const payoutLine =
-                        result.multiplier >= 1
-                            ? t(locale, "gamble.payout.win", {
-                                  amount: String(payout - bet),
-                                  multiplier: String(result.multiplier),
-                              })
-                            : result.multiplier > 0
-                              ? t(locale, "gamble.payout.partial", {
-                                    amount: String(payout),
-                                    multiplier: String(result.multiplier),
-                                })
-                              : t(locale, "gamble.payout.lose", { amount: String(bet) });
-
-                    embed = new EmbedBuilder()
-                        .setTitle(`🎰 ${t(locale, "gamble.slots.title")}`)
-                        .setDescription(
-                            [
-                                `┃ ${result.reels[0]} ┃ ${result.reels[1]} ┃ ${result.reels[2]} ┃`,
-                                t(locale, "gamble.bet", { amount: String(bet) }),
-                                `${comboText} ${result.won ? "✅" : "❌"}`,
-                                payoutLine,
-                            ].join("\n")
-                        )
-                        .setColor(result.won ? 0x57f287 : 0xed4245);
-                    break;
-                }
-
-                case "dice": {
-                    const mode = interaction.options.getString("mode", true) as "high" | "low";
-                    const result = GamblingService.dice(mode);
-                    const payout = Math.floor(bet * result.multiplier);
-
-                    if (payout > 0) {
-                        await CurrencyService.addCoin(userId, guildId, payout, "gambling", {
-                            game: "dice",
-                            bet,
-                            dice: result.dice,
-                            total: result.total,
-                            mode,
-                            won: true,
-                            payout,
+                    // Check freeze
+                    if (await EconomyAdminService.isFrozen(userId, guildId)) {
+                        await submitted.reply({
+                            content: t(locale, "common.frozen"),
+                            flags: MessageFlags.Ephemeral,
                         });
-                        await QuestService.trackProgress(userId, guildId, "gamble_win").catch(() => {});
-                        EconomyLogService.shouldLog(guildId, "gambling_win", payout)
-                            .then((should) => {
-                                if (!should) return;
-                                const logEmbed = new EmbedBuilder()
-                                    .setTitle("Gambling Win")
-                                    .setDescription(`<@${userId}> won **${payout.toLocaleString()}** coin on dice`)
-                                    .setColor(0x57f287)
-                                    .setTimestamp();
-                                EconomyLogService.sendLog(guildId, logEmbed);
-                            })
-                            .catch(() => {});
+                        return;
                     }
 
-                    const modeText = mode === "high" ? t(locale, "gamble.dice.high") : t(locale, "gamble.dice.low");
+                    await submitted.deferUpdate();
 
-                    embed = new EmbedBuilder()
-                        .setTitle(`🎲 ${t(locale, "gamble.dice.title")} — ${modeText}`)
-                        .setDescription(
-                            [
-                                `🎲 ${result.dice[0]} + 🎲 ${result.dice[1]} = **${result.total}**`,
-                                t(locale, "gamble.bet", { amount: String(bet) }),
-                                result.won
-                                    ? t(locale, "gamble.payout.win", { amount: String(payout - bet), multiplier: "2" })
-                                    : t(locale, "gamble.payout.lose", { amount: String(bet) }),
-                            ].join("\n")
-                        )
-                        .setColor(result.won ? 0x57f287 : 0xed4245);
-                    break;
+                    currentBet = newBet;
+
+                    try {
+                        const replayEmbed = await playGame({
+                            game: currentGame,
+                            bet: currentBet,
+                            diceMode: currentDiceMode,
+                            userId,
+                            guildId,
+                            locale,
+                        });
+                        const replayComponents = buildReplayComponents(currentGame, currentDiceMode, locale);
+                        await Reply.embedEditComponents(interaction, replayEmbed, replayComponents);
+                    } catch (error) {
+                        if (error instanceof CurrencyService.InsufficientFundsError) {
+                            const bal = await CurrencyService.getBalance(userId, guildId);
+                            await submitted.followUp({
+                                content: t(locale, "gamble.insufficient", { balance: String(bal.coin) }),
+                                flags: MessageFlags.Ephemeral,
+                            });
+                            return;
+                        }
+                        throw error;
+                    }
+                    return;
                 }
 
-                default: {
-                    embed = new EmbedBuilder()
-                        .setDescription(t(locale, "common.unknown_subcommand"))
-                        .setColor(0xed4245);
+                // --- Button replays (Play Again / Dice High / Dice Low) ---
+                if (i.isButton() && (i.customId === CUSTOM_ID.PLAY_AGAIN || i.customId === CUSTOM_ID.DICE_HIGH || i.customId === CUSTOM_ID.DICE_LOW)) {
+                    await i.deferUpdate();
+
+                    // Check cooldown
+                    const cdRemaining = await redis.ttlKey(cdKey);
+                    if (cdRemaining > 0) {
+                        await i.followUp({
+                            content: t(locale, "gamble.cooldown", { seconds: String(cdRemaining) }),
+                            flags: MessageFlags.Ephemeral,
+                        });
+                        return;
+                    }
+
+                    // Check freeze
+                    if (await EconomyAdminService.isFrozen(userId, guildId)) {
+                        await i.followUp({
+                            content: t(locale, "common.frozen"),
+                            flags: MessageFlags.Ephemeral,
+                        });
+                        return;
+                    }
+
+                    // Check gambling still enabled
+                    const freshConfig = await getGamblingConfig(guildId);
+                    if (!freshConfig.enabled) {
+                        await i.followUp({
+                            content: t(locale, "gamble.disabled"),
+                            flags: MessageFlags.Ephemeral,
+                        });
+                        collector.stop();
+                        return;
+                    }
+
+                    // Auto-clamp bet if config changed
+                    currentBet = Math.max(freshConfig.minBet, Math.min(freshConfig.maxBet, currentBet));
+
+                    // Update dice mode if clicking High/Low
+                    if (i.customId === CUSTOM_ID.DICE_HIGH) {
+                        currentDiceMode = "high";
+                    } else if (i.customId === CUSTOM_ID.DICE_LOW) {
+                        currentDiceMode = "low";
+                    }
+
+                    try {
+                        const replayEmbed = await playGame({
+                            game: currentGame,
+                            bet: currentBet,
+                            diceMode: currentDiceMode,
+                            userId,
+                            guildId,
+                            locale,
+                        });
+                        const replayComponents = buildReplayComponents(currentGame, currentDiceMode, locale);
+                        await Reply.embedEditComponents(interaction, replayEmbed, replayComponents);
+                    } catch (error) {
+                        if (error instanceof CurrencyService.InsufficientFundsError) {
+                            const bal = await CurrencyService.getBalance(userId, guildId);
+                            await i.followUp({
+                                content: t(locale, "gamble.insufficient", { balance: String(bal.coin) }),
+                                flags: MessageFlags.Ephemeral,
+                            });
+                            return;
+                        }
+                        throw error;
+                    }
+                    return;
                 }
-            }
 
-            // Set cooldown
-            await redis.setJson(cdKey, 1, GAMBLE_COOLDOWN);
+                // --- Game switch (StringSelectMenu) ---
+                if (i.isStringSelectMenu() && i.customId === CUSTOM_ID.SWITCH_GAME) {
+                    await i.deferUpdate();
 
-            return Reply.embedEdit(interaction, embed);
+                    const value = i.values[0];
+
+                    // Check cooldown
+                    const cdRemaining = await redis.ttlKey(cdKey);
+                    if (cdRemaining > 0) {
+                        await i.followUp({
+                            content: t(locale, "gamble.cooldown", { seconds: String(cdRemaining) }),
+                            flags: MessageFlags.Ephemeral,
+                        });
+                        return;
+                    }
+
+                    // Check freeze
+                    if (await EconomyAdminService.isFrozen(userId, guildId)) {
+                        await i.followUp({
+                            content: t(locale, "common.frozen"),
+                            flags: MessageFlags.Ephemeral,
+                        });
+                        return;
+                    }
+
+                    // Check gambling still enabled
+                    const freshConfig = await getGamblingConfig(guildId);
+                    if (!freshConfig.enabled) {
+                        await i.followUp({
+                            content: t(locale, "gamble.disabled"),
+                            flags: MessageFlags.Ephemeral,
+                        });
+                        collector.stop();
+                        return;
+                    }
+
+                    // Auto-clamp bet
+                    currentBet = Math.max(freshConfig.minBet, Math.min(freshConfig.maxBet, currentBet));
+
+                    // Parse selected game
+                    if (value.startsWith("dice:")) {
+                        currentGame = "dice";
+                        currentDiceMode = value.split(":")[1] as "high" | "low";
+                    } else {
+                        currentGame = value as GameType;
+                        currentDiceMode = undefined;
+                    }
+
+                    try {
+                        const replayEmbed = await playGame({
+                            game: currentGame,
+                            bet: currentBet,
+                            diceMode: currentDiceMode,
+                            userId,
+                            guildId,
+                            locale,
+                        });
+                        const replayComponents = buildReplayComponents(currentGame, currentDiceMode, locale);
+                        await Reply.embedEditComponents(interaction, replayEmbed, replayComponents);
+                    } catch (error) {
+                        if (error instanceof CurrencyService.InsufficientFundsError) {
+                            const bal = await CurrencyService.getBalance(userId, guildId);
+                            await i.followUp({
+                                content: t(locale, "gamble.insufficient", { balance: String(bal.coin) }),
+                                flags: MessageFlags.Ephemeral,
+                            });
+                            return;
+                        }
+                        throw error;
+                    }
+                    return;
+                }
+            });
+
+            collector.on("end", async () => {
+                await interaction.editReply({ components: [] }).catch(() => {});
+            });
         } catch (error) {
+            if (error instanceof CurrencyService.InsufficientFundsError) {
+                const balance = await CurrencyService.getBalance(userId, guildId);
+                const embed = new EmbedBuilder()
+                    .setDescription(t(locale, "gamble.insufficient", { balance: String(balance.coin) }))
+                    .setColor(0xed4245);
+                return Reply.embedEdit(interaction, embed);
+            }
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
             const embed = new EmbedBuilder().setDescription(t(errLocale, "common.error")).setColor(0xed4245);
             return Reply.embedEdit(interaction, embed);
