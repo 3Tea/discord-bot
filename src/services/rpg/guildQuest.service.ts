@@ -146,22 +146,29 @@ async function getProgress(userId: string, questId: string): Promise<number> {
     return (val as number) ?? 0;
 }
 
-async function trackProgress(userId: string, action: QuestAction, amount: number = 1): Promise<void> {
+async function trackProgress(userId: string, action: QuestAction, amount: number = 1, guildId?: string): Promise<void> {
     const member = await GuildService.getMember(userId);
-    if (!member || member.activeQuests.length === 0) return;
+    if (member && member.activeQuests.length > 0) {
+        const date = getUTCDateString();
+        const boardQuests = generateBoardQuests(date);
+        const personalQuests = generatePersonalQuests(userId, date, member.rank as AdventurerRank);
+        const allQuests = [...boardQuests, ...personalQuests];
 
-    const date = getUTCDateString();
-    const boardQuests = generateBoardQuests(date);
-    const personalQuests = generatePersonalQuests(userId, date, member.rank as AdventurerRank);
-    const allQuests = [...boardQuests, ...personalQuests];
+        for (const questId of member.activeQuests) {
+            const quest = allQuests.find((q) => q.id === questId);
+            if (!quest || quest.action !== action) continue;
 
-    for (const questId of member.activeQuests) {
-        const quest = allQuests.find((q) => q.id === questId);
-        if (!quest || quest.action !== action) continue;
+            const key = `guild_quest_progress:${userId}:${questId}`;
+            const current = ((await redis.getJson(key)) as number) ?? 0;
+            await redis.setJson(key, current + amount, QUEST_PROGRESS_TTL);
+        }
+    }
 
-        const key = `guild_quest_progress:${userId}:${questId}`;
-        const current = ((await redis.getJson(key)) as number) ?? 0;
-        await redis.setJson(key, current + amount, QUEST_PROGRESS_TTL);
+    // Branch quest tracking (if guildId provided)
+    if (guildId) {
+        import("./branch.service").then(({ default: BranchService }) => {
+            BranchService.trackBranchProgress(guildId, action, amount).catch(() => {});
+        }).catch(() => {});
     }
 }
 
