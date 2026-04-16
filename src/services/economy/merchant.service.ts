@@ -13,7 +13,6 @@ export interface Buff {
 export interface MerchantState {
     encounterId: string;
     userId: string;
-    guildId: string;
     locale: string;
     floor: number;
     checkpoint: number;
@@ -21,8 +20,9 @@ export interface MerchantState {
     healAmount: number;
     buffType: BuffType;
     buffCost: number;
-    exchangeRate: number;
+    equipCost: number;
     currentHp: number;
+    maxHp: number;
 }
 
 export interface MerchantOffer {
@@ -30,7 +30,7 @@ export interface MerchantOffer {
     healAmount: number;
     buffType: BuffType;
     buffCost: number;
-    exchangeRate: number;
+    equipCost: number;
 }
 
 // --- Helpers ---
@@ -45,23 +45,22 @@ function generateOffer(floor: number): MerchantOffer {
         healAmount: 30 + floor * 2,
         buffType: BUFF_TYPES[randomInRange(0, BUFF_TYPES.length - 1)],
         buffCost: 100 + floor * 5,
-        exchangeRate: randomInRange(300, 600),
+        equipCost: 200 + floor * 10,
     };
 }
 
 function buildMerchantState(
     userId: string,
-    guildId: string,
     locale: string,
     floor: number,
     checkpoint: number,
-    currentHp: number
+    currentHp: number,
+    maxHp: number
 ): MerchantState {
     const offer = generateOffer(floor);
     return {
         encounterId: crypto.randomUUID(),
         userId,
-        guildId,
         locale,
         floor,
         checkpoint,
@@ -69,13 +68,14 @@ function buildMerchantState(
         healAmount: offer.healAmount,
         buffType: offer.buffType,
         buffCost: offer.buffCost,
-        exchangeRate: offer.exchangeRate,
+        equipCost: offer.equipCost,
         currentHp,
+        maxHp,
     };
 }
 
-function calculateHeal(currentHp: number, healAmount: number): number {
-    return Math.min(currentHp + healAmount, 100) - currentHp;
+function calculateHeal(currentHp: number, healAmount: number, maxHp: number): number {
+    return Math.min(currentHp + healAmount, maxHp) - currentHp;
 }
 
 const MerchantService = { generateOffer, buildMerchantState, calculateHeal };

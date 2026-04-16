@@ -1,5 +1,6 @@
-import UserEconomyModel from "../../models/userEconomy.model";
-import CurrencyService from "./currency.service";
+import CharacterService from "../rpg/character.service";
+import EquipmentService from "../rpg/equipment.service";
+import { DUNGEON_REWARDS, ENCOUNTERS_PER_RUN, type ClassType } from "../rpg/rpg.config";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import { randomInRange } from "../../util/math/random";
 import { isPrime } from "../../util/math/prime";
@@ -9,58 +10,60 @@ import type { Buff } from "./merchant.service";
 
 export type EncounterType = "monster" | "treasure" | "trap" | "npc";
 
-export interface CombatState {
-    encounterId: string;
-    userId: string;
-    monsterHp: number;
-    userHp: number;
-    floor: number;
-    checkpoint: number;
-    turnsLeft: number;
-    guildId: string;
-    locale: string;
-    monsterName: string;
-    monsterEmoji: string;
-}
-
-export interface CombatActionResult {
-    userDmg: number;
-    monsterDmg: number;
-    userHp: number;
-    monsterHp: number;
-    turnsLeft: number;
-    won: boolean;
-    lost: boolean;
-    fled: boolean;
-    timedOut: boolean;
-    turnsUp: boolean;
-}
-
 export interface CombatResolveResult {
-    coinReward: number;
-    gemReward: number;
+    goldReward: number;
+    expReward: number;
     starReward: boolean;
+    equipDrop: { name: string; rarity: string; slot: string; id: string } | null;
     floorAdvanced: boolean;
     newFloor: number;
     checkpoint: number;
     checkpointReached: boolean;
+    isBoss: boolean;
+    leveled: boolean;
+    oldLevel: number;
+    newLevel: number;
 }
 
 export interface CombatLossResult {
-    coinLost: number;
+    goldLost: number;
     newFloor: number;
     checkpoint: number;
 }
 
+export interface TreasureResult {
+    goldReward: number;
+    expReward: number;
+    starReward: boolean;
+    equipDrop: { name: string; rarity: string; slot: string; id: string } | null;
+    newFloor: number;
+    checkpoint: number;
+    checkpointReached: boolean;
+    leveled: boolean;
+    oldLevel: number;
+    newLevel: number;
+}
+
+export interface TrapResult {
+    hpLost: number;
+    goldLost: number;
+    collapsed: boolean;
+    collapseResult?: CombatLossResult;
+}
+
 export interface DungeonRunState {
     userId: string;
-    guildId: string;
     locale: string;
+    classType: ClassType;
     hp: number;
+    maxHp: number;
     floor: number;
     checkpoint: number;
     encountersLeft: number;
     activeBuff: Buff | null;
+    accumulatedGold: number;
+    accumulatedExp: number;
+    drops: string[];
     messageId: string;
 }
 
@@ -112,167 +115,156 @@ function rollEncounterType(hasLuckBuff = false): EncounterType {
     return "npc";
 }
 
+function isBossFloor(floor: number): boolean {
+    return floor % 5 === 0;
+}
+
 // --- Core functions ---
 
-function processCombatAction(
-    state: CombatState,
-    action: "attack" | "defend" | "run" | "timeout",
-    buff?: Buff | null
-): CombatActionResult {
-    if (action === "run") {
-        return {
-            userDmg: 0,
-            monsterDmg: 0,
-            userHp: state.userHp,
-            monsterHp: state.monsterHp,
-            turnsLeft: state.turnsLeft,
-            won: false,
-            lost: false,
-            fled: true,
-            timedOut: false,
-            turnsUp: false,
-        };
-    }
-
-    if (action === "timeout") {
-        return {
-            userDmg: 0,
-            monsterDmg: 0,
-            userHp: state.userHp,
-            monsterHp: state.monsterHp,
-            turnsLeft: state.turnsLeft,
-            won: false,
-            lost: false,
-            fled: false,
-            timedOut: true,
-            turnsUp: false,
-        };
-    }
-
-    const baseUserDmg = randomInRange(15, 25) + state.floor * 2;
-    const baseMonsterDmg = randomInRange(10, 20) + state.floor * 3;
-
-    let userDmg: number;
-    let monsterDmg: number;
-
-    if (action === "attack") {
-        userDmg = baseUserDmg;
-        monsterDmg = baseMonsterDmg;
-    } else {
-        // defend: 70% user damage, 50% monster damage
-        userDmg = Math.floor(baseUserDmg * 0.7);
-        monsterDmg = Math.floor(baseMonsterDmg * 0.5);
-    }
-
-    // Apply buff effects
-    if (buff?.type === "attack") {
-        userDmg = Math.floor(userDmg * 1.3);
-    }
-    if (buff?.type === "defense") {
-        monsterDmg = Math.floor(monsterDmg * 0.7);
-    }
-
-    const newMonsterHp = state.monsterHp - userDmg;
-    const newUserHp = state.userHp - monsterDmg;
-    const newTurnsLeft = state.turnsLeft - 1;
-
-    const won = newMonsterHp <= 0;
-    const lost = newUserHp <= 0 && !won;
-    const turnsUp = newTurnsLeft <= 0 && !won && !lost;
+async function startRun(userId: string, locale: string): Promise<DungeonRunState> {
+    const char = await CharacterService.requireCharacter(userId);
+    const stats = await CharacterService.getEffectiveStats(userId);
 
     return {
-        userDmg,
-        monsterDmg,
-        userHp: newUserHp,
-        monsterHp: newMonsterHp,
-        turnsLeft: newTurnsLeft,
-        won,
-        lost,
-        fled: false,
-        timedOut: false,
-        turnsUp,
+        userId,
+        locale,
+        classType: char.class,
+        hp: stats.hp,
+        maxHp: stats.hp,
+        floor: char.dungeonDepth,
+        checkpoint: char.dungeonCheckpoint,
+        encountersLeft: ENCOUNTERS_PER_RUN,
+        activeBuff: null,
+        accumulatedGold: 0,
+        accumulatedExp: 0,
+        drops: [],
+        messageId: "",
     };
 }
 
-async function resolveCombatWin(userId: string, guildId: string, floor: number): Promise<CombatResolveResult> {
-    const coinReward = randomInRange(50, 150) + floor * 10;
-    const gemReward = Math.random() < 0.1 ? 1 : 0;
+async function resolveCombatWin(
+    userId: string,
+    floor: number,
+    isBoss: boolean,
+    classType: ClassType
+): Promise<CombatResolveResult> {
+    const rewards = DUNGEON_REWARDS.monster;
+    const multiplier = isBoss ? DUNGEON_REWARDS.boss.rewardMultiplier : 1;
+
+    const goldReward = Math.floor((rewards.goldBase + floor * rewards.goldPerFloor) * multiplier);
+    const expReward = Math.floor((rewards.expBase + floor * rewards.expPerFloor) * multiplier);
     const starReward = await tryStarDrop(userId, 0.03, "dungeon");
 
-    await CurrencyService.addCoin(userId, guildId, coinReward, "dungeon", { encounter: "monster_win", floor });
-    if (gemReward > 0) {
-        await CurrencyService.addGem(userId, guildId, gemReward, "dungeon", { encounter: "monster_win", floor });
+    // Gold + EXP added to character (global)
+    await CharacterService.addGold(userId, goldReward);
+    const levelResult = await CharacterService.addExp(userId, expReward);
+
+    // Equipment drop check
+    const equipChance = isBoss ? DUNGEON_REWARDS.boss.equipChance : rewards.equipChance;
+    let equipDrop: CombatResolveResult["equipDrop"] = null;
+    if (Math.random() < equipChance) {
+        const item = await EquipmentService.createEquipmentDrop(userId, floor, classType);
+        equipDrop = { name: item.name, rarity: item.rarity, slot: item.slot, id: item._id.toString() };
     }
 
+    // Floor advancement
     const newFloor = floor + 1;
     const checkpointReached = isPrime(newFloor);
-    const economy = await UserEconomyModel.findOne({ userId, guildId });
-    const currentCheckpoint = economy?.dungeonCheckpoint ?? 1;
+    const char = await CharacterService.getCharacter(userId);
+    const currentCheckpoint = char?.dungeonCheckpoint ?? 1;
     const newCheckpoint = checkpointReached ? newFloor : currentCheckpoint;
 
-    await UserEconomyModel.updateOne(
-        { userId, guildId },
-        { $set: { dungeonDepth: newFloor, dungeonCheckpoint: newCheckpoint } }
-    );
+    await CharacterService.updateDungeonProgress(userId, newFloor, newCheckpoint);
 
     return {
-        coinReward,
-        gemReward,
+        goldReward,
+        expReward,
         starReward,
+        equipDrop,
         floorAdvanced: true,
         newFloor,
         checkpoint: newCheckpoint,
         checkpointReached,
+        isBoss,
+        leveled: levelResult.leveled,
+        oldLevel: levelResult.oldLevel,
+        newLevel: levelResult.newLevel,
     };
 }
 
-async function resolveCombatLoss(userId: string, guildId: string): Promise<CombatLossResult> {
-    const economy = await UserEconomyModel.findOne({ userId, guildId });
-    const checkpoint = economy?.dungeonCheckpoint ?? 1;
-
-    const coinLost = randomInRange(100, 200);
-
-    await UserEconomyModel.updateOne({ userId, guildId }, [
-        { $set: { coin: { $max: [{ $subtract: ["$coin", coinLost] }, 0] }, dungeonDepth: checkpoint } },
-    ]);
-
-    return {
-        coinLost,
-        newFloor: checkpoint,
-        checkpoint,
-    };
-}
-
-async function startRun(userId: string, guildId: string, locale: string): Promise<DungeonRunState> {
-    const economy = await UserEconomyModel.findOneAndUpdate(
-        { userId, guildId },
-        {
-            $setOnInsert: {
-                userId,
-                guildId,
-                coin: 0,
-                gem: 0,
-                prayStreak: 0,
-                mineDepth: 1,
-                mineCheckpoint: 1,
-                dungeonDepth: 1,
-                dungeonCheckpoint: 1,
-            },
-        },
-        { upsert: true, new: true }
+async function resolveCombatLoss(userId: string): Promise<CombatLossResult> {
+    const char = await CharacterService.requireCharacter(userId);
+    const checkpoint = char.dungeonCheckpoint;
+    const goldLost = Math.min(
+        char.gold,
+        randomInRange(DUNGEON_REWARDS.collapse.goldLossBase, DUNGEON_REWARDS.collapse.goldLossMax)
     );
 
+    if (goldLost > 0) {
+        await CharacterService.deductGold(userId, goldLost).catch(() => {});
+    }
+    await CharacterService.updateDungeonProgress(userId, checkpoint, checkpoint);
+
+    return { goldLost, newFloor: checkpoint, checkpoint };
+}
+
+async function resolveTreasure(
+    userId: string,
+    floor: number,
+    classType: ClassType
+): Promise<TreasureResult> {
+    const rewards = DUNGEON_REWARDS.treasure;
+    const goldReward = rewards.goldBase + floor * rewards.goldPerFloor;
+    const expReward = rewards.expBase + floor * rewards.expPerFloor;
+    const starReward = await tryStarDrop(userId, 0.03, "dungeon");
+
+    await CharacterService.addGold(userId, goldReward);
+    const levelResult = await CharacterService.addExp(userId, expReward);
+
+    let equipDrop: TreasureResult["equipDrop"] = null;
+    if (Math.random() < rewards.equipChance) {
+        const item = await EquipmentService.createEquipmentDrop(userId, floor, classType);
+        equipDrop = { name: item.name, rarity: item.rarity, slot: item.slot, id: item._id.toString() };
+    }
+
+    const newFloor = floor + 1;
+    const checkpointReached = isPrime(newFloor);
+    const char = await CharacterService.getCharacter(userId);
+    const currentCheckpoint = char?.dungeonCheckpoint ?? 1;
+    const newCheckpoint = checkpointReached ? newFloor : currentCheckpoint;
+    await CharacterService.updateDungeonProgress(userId, newFloor, newCheckpoint);
+
     return {
-        userId,
-        guildId,
-        locale,
-        hp: 100,
-        floor: economy.dungeonDepth ?? 1,
-        checkpoint: economy.dungeonCheckpoint ?? 1,
-        encountersLeft: 5,
-        activeBuff: null,
-        messageId: "",
+        goldReward,
+        expReward,
+        starReward,
+        equipDrop,
+        newFloor,
+        checkpoint: newCheckpoint,
+        checkpointReached,
+        leveled: levelResult.leveled,
+        oldLevel: levelResult.oldLevel,
+        newLevel: levelResult.newLevel,
     };
+}
+
+async function resolveTrap(userId: string, floor: number, currentHp: number): Promise<TrapResult> {
+    const hpLost = randomInRange(10, 20);
+    const goldLoss = DUNGEON_REWARDS.trap.goldLossBase + floor * DUNGEON_REWARDS.trap.goldLossPerFloor;
+
+    const char = await CharacterService.requireCharacter(userId);
+    const actualGoldLost = Math.min(char.gold, goldLoss);
+    if (actualGoldLost > 0) {
+        await CharacterService.deductGold(userId, actualGoldLost).catch(() => {});
+    }
+
+    const collapsed = currentHp - hpLost <= 0;
+    let collapseResult: CombatLossResult | undefined;
+    if (collapsed) {
+        collapseResult = await resolveCombatLoss(userId);
+    }
+
+    return { hpLost, goldLost: actualGoldLost, collapsed, collapseResult };
 }
 
 function rollEncounterForRun(runState: DungeonRunState): EncounterType {
@@ -290,11 +282,13 @@ function tickBuff(runState: DungeonRunState): void {
 }
 
 const DungeonService = {
-    processCombatAction,
+    startRun,
     resolveCombatWin,
     resolveCombatLoss,
+    resolveTreasure,
+    resolveTrap,
+    isBossFloor,
     isPrime,
-    startRun,
     rollEncounterForRun,
     rollEncounterType,
     tickBuff,
