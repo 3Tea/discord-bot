@@ -28,6 +28,8 @@ const guildMemberSchema = new Schema(
 );
 
 guildMemberSchema.index({ userId: 1 }, { unique: true });
+guildMemberSchema.index({ gp: -1 });
+guildMemberSchema.index({ questsCompleted: -1 });
 
 const GuildMemberModel = model<IGuildMember>("GuildMember", guildMemberSchema);
 export default GuildMemberModel;
