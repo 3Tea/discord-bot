@@ -1,5 +1,6 @@
 import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
+import CharacterService from "../services/rpg/character.service";
 import DungeonService from "../services/economy/dungeon.service";
 import type {
     CombatResolveResult,
@@ -64,9 +65,47 @@ function buildSkillLine(
     return lines;
 }
 
+function buildUltimateLine(
+    locale: SupportedLocale,
+    result: CombatActionResult,
+    state: RpgCombatState
+): string[] {
+    if (!state.advancedClass) return [];
+    const labels = CombatService.getSkillLabels(state.classType, state.advancedClass);
+    const ultimateLabel = labels[2];
+    if (!ultimateLabel) return [];
+    const skillName = t(locale, `rpg.skill.${ultimateLabel.key}`);
+    const mpCostSuffix = result.mpCost > 0
+        ? ` ${t(locale, "dungeon.combat.mp_cost", { cost: String(result.mpCost) })}`
+        : "";
+    const lines = [
+        t(locale, "dungeon.combat.skill", {
+            skill: skillName,
+            userDmg: String(result.userDamage),
+            monsterDmg: String(result.monsterDamage),
+        }) + mpCostSuffix,
+    ];
+    if (result.healAmount) {
+        lines.push(t(locale, "dungeon.combat.heal_skill", { amount: String(result.healAmount) }));
+    }
+    if (result.selfDamage) {
+        lines.push(t(locale, "dungeon.combat.self_damage", { amount: String(result.selfDamage) }));
+    }
+    if (result.instantKill) {
+        lines.push(t(locale, "dungeon.combat.instant_kill"));
+    }
+    if (result.stoneWallReflect) {
+        lines.push(t(locale, "dungeon.combat.reflect", { amount: String(result.stoneWallReflect) }));
+    }
+    if (result.divineShieldBlocked) {
+        lines.push(t(locale, "dungeon.combat.divine_block"));
+    }
+    return lines;
+}
+
 function buildActionLine(
     locale: SupportedLocale,
-    action: "attack" | "skill1" | "skill2" | "defend",
+    action: "attack" | "skill1" | "skill2" | "defend" | "ultimate",
     result: CombatActionResult,
     state: RpgCombatState
 ): string {
@@ -78,6 +117,8 @@ function buildActionLine(
 
     if (action === "defend") {
         lines.push(...buildDefendLine(locale, result));
+    } else if (action === "ultimate") {
+        lines.push(...buildUltimateLine(locale, result, state));
     } else if (action === "skill1" || action === "skill2") {
         lines.push(...buildSkillLine(locale, action, result, state.classType));
     } else {
@@ -177,6 +218,7 @@ async function handleWin(
         components: [buildContinueLeaveRow(locale, runState.encountersLeft)],
     });
 
+    CharacterService.incrementMonstersKilled(state.userId, 1).catch(() => {});
     GuildQuestService.trackProgress(state.userId, "kill_monsters", 1, interaction.guildId ?? undefined).catch(() => {});
     if (state.isBoss) {
         GuildQuestService.trackProgress(state.userId, "defeat_boss", 1, interaction.guildId ?? undefined).catch(() => {});
@@ -244,7 +286,7 @@ async function handleTurnsUp(
 
 export async function handleCombatAction(
     interaction: ButtonInteraction,
-    action: "attack" | "skill1" | "skill2" | "defend"
+    action: "attack" | "skill1" | "skill2" | "defend" | "ultimate"
 ): Promise<void> {
     const userId = interaction.user.id;
     const combatKey = `dungeon_combat:${userId}`;
@@ -335,9 +377,10 @@ export async function handleCombatAction(
         .setColor(state.isBoss ? 0xe74c3c : 0xe67e22);
 
     const currentMp = runState?.mp ?? result.currentMp;
+    const combatRows = buildCombatRow(locale, state.classType, currentMp, state.advancedClass, state.ultimateUsed);
     await interaction.editReply({
         embeds: [continueEmbed],
-        components: [buildCombatRow(locale, state.classType, currentMp)],
+        components: combatRows,
     });
 }
 

@@ -67,7 +67,7 @@ export default {
         runState.encountersLeft -= 1;
 
         // Process next encounter
-        const { embed, row, runEnded } = await processEncounter(runState);
+        const { embed, rows, runEnded } = await processEncounter(runState);
 
         if (runEnded) {
             await redis.deleteKey(runKey);
@@ -79,7 +79,7 @@ export default {
             await interaction.editReply({ embeds: [embed], components: [] });
         } else {
             await redis.setJson(runKey, runState, RUN_TTL);
-            await interaction.editReply({ embeds: [embed], components: [row] });
+            await interaction.editReply({ embeds: [embed], components: rows });
             // Schedule timeouts for combat/merchant encounters
             const combatState = await redis.getJson<RpgCombatState>(`dungeon_combat:${userId}`);
             const merchantState = await redis.getJson<MerchantState>(`dungeon_merchant:${userId}`);

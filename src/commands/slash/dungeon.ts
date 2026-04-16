@@ -15,7 +15,7 @@ import type { MerchantState } from "../../services/economy/merchant.service";
 import CharacterService from "../../services/rpg/character.service";
 import CombatService from "../../services/rpg/combat.service";
 import type { RpgCombatState } from "../../services/rpg/combat.service";
-import { getMonsterStats, getBossStats, RARITY_CONFIG, MATERIALS, SKILL1_MP_COST, SKILL2_MP_COST, type ClassType, type Rarity } from "../../services/rpg/rpg.config";
+import { getMonsterStats, getBossStats, RARITY_CONFIG, MATERIALS, SKILL1_MP_COST, SKILL2_MP_COST, ULTIMATE_MP_COST, ADVANCED_CLASS_CONFIG, type ClassType, type Rarity, type AdvancedClassType } from "../../services/rpg/rpg.config";
 import PremiumService from "../../services/premium/premium.service";
 import { buildPremiumButton } from "../../util/premium/upgradeButton";
 import { TIER_CONFIG } from "../../services/premium/premium.config";
@@ -35,37 +35,71 @@ export const COMBAT_TIMEOUT_MS = 30_000;
 
 // --- Embed builders (exported for button handlers) ---
 
-export function buildCombatRow(locale: SupportedLocale, classType: ClassType, currentMp: number): ActionRowBuilder<ButtonBuilder> {
+export function buildCombatRow(
+    locale: SupportedLocale,
+    classType: ClassType,
+    currentMp: number,
+    advancedClass?: AdvancedClassType | null,
+    ultimateUsed?: boolean
+): ActionRowBuilder<ButtonBuilder>[] {
     const [skill1, skill2] = CombatService.getSkillLabels(classType);
-    return new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-            .setCustomId(BUTTON_ID.DUNGEON_ATTACK)
-            .setLabel(t(locale, "dungeon.btn.attack"))
-            .setEmoji("⚔️")
-            .setStyle(ButtonStyle.Danger),
-        new ButtonBuilder()
-            .setCustomId(BUTTON_ID.DUNGEON_SKILL1)
-            .setLabel(t(locale, `rpg.skill.${skill1.key}`))
-            .setEmoji(skill1.emoji)
-            .setStyle(ButtonStyle.Primary)
-            .setDisabled(currentMp < SKILL1_MP_COST),
-        new ButtonBuilder()
-            .setCustomId(BUTTON_ID.DUNGEON_SKILL2)
-            .setLabel(t(locale, `rpg.skill.${skill2.key}`))
-            .setEmoji(skill2.emoji)
-            .setStyle(ButtonStyle.Primary)
-            .setDisabled(currentMp < SKILL2_MP_COST),
-        new ButtonBuilder()
-            .setCustomId(BUTTON_ID.DUNGEON_DEFEND)
-            .setLabel(t(locale, "dungeon.btn.defend"))
-            .setEmoji("🛡️")
-            .setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder()
-            .setCustomId(BUTTON_ID.DUNGEON_RUN)
-            .setLabel(t(locale, "dungeon.btn.run"))
-            .setEmoji("🏃")
-            .setStyle(ButtonStyle.Secondary)
-    );
+
+    const attackBtn = new ButtonBuilder()
+        .setCustomId(BUTTON_ID.DUNGEON_ATTACK)
+        .setLabel(t(locale, "dungeon.btn.attack"))
+        .setEmoji("⚔️")
+        .setStyle(ButtonStyle.Danger);
+    const skill1Btn = new ButtonBuilder()
+        .setCustomId(BUTTON_ID.DUNGEON_SKILL1)
+        .setLabel(t(locale, `rpg.skill.${skill1.key}`))
+        .setEmoji(skill1.emoji)
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(currentMp < SKILL1_MP_COST);
+    const skill2Btn = new ButtonBuilder()
+        .setCustomId(BUTTON_ID.DUNGEON_SKILL2)
+        .setLabel(t(locale, `rpg.skill.${skill2.key}`))
+        .setEmoji(skill2.emoji)
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(currentMp < SKILL2_MP_COST);
+    const defendBtn = new ButtonBuilder()
+        .setCustomId(BUTTON_ID.DUNGEON_DEFEND)
+        .setLabel(t(locale, "dungeon.btn.defend"))
+        .setEmoji("🛡️")
+        .setStyle(ButtonStyle.Secondary);
+    const runBtn = new ButtonBuilder()
+        .setCustomId(BUTTON_ID.DUNGEON_RUN)
+        .setLabel(t(locale, "dungeon.btn.run"))
+        .setEmoji("🏃")
+        .setStyle(ButtonStyle.Secondary);
+
+    if (advancedClass) {
+        const advConfig = ADVANCED_CLASS_CONFIG[advancedClass];
+        if (advConfig) {
+            const ultimateLabel = t(locale, `rpg.skill.${advConfig.ultimate.key}`);
+            const ultimateBtn = new ButtonBuilder()
+                .setCustomId(BUTTON_ID.DUNGEON_ULTIMATE)
+                .setLabel(ultimateLabel)
+                .setEmoji(advConfig.ultimate.emoji)
+                .setStyle(ButtonStyle.Danger)
+                .setDisabled(!!ultimateUsed || currentMp < ULTIMATE_MP_COST);
+
+            // 2 rows: Row 1 = Attack + Skill1 + Skill2 + Ultimate, Row 2 = Defend + Run
+            const row1 = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                attackBtn, skill1Btn, skill2Btn, ultimateBtn
+            );
+            const row2 = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                defendBtn, runBtn
+            );
+            return [row1, row2];
+        }
+    }
+
+    // Base class: single row with 5 buttons
+    return [
+        new ActionRowBuilder<ButtonBuilder>().addComponents(
+            attackBtn, skill1Btn, skill2Btn, defendBtn, runBtn
+        ),
+    ];
 }
 
 export function buildContinueLeaveText(locale: SupportedLocale, encountersLeft: number): string {
@@ -253,7 +287,7 @@ export function buildRpgCombatEmbed(
 
 export async function processEncounter(runState: DungeonRunState): Promise<{
     embed: EmbedBuilder;
-    row: ActionRowBuilder<ButtonBuilder>;
+    rows: ActionRowBuilder<ButtonBuilder>[];
     runEnded: boolean;
 }> {
     const locale = runState.locale as SupportedLocale;
@@ -274,9 +308,11 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
             ? getBossStats(floor, char.level)
             : getMonsterStats(floor, char.level);
 
+        const advancedClass = (char.advancedClass as AdvancedClassType) ?? null;
         const combatState = CombatService.initCombat({
             userId,
             classType,
+            advancedClass,
             userStats: stats,
             userHp: runState.hp,
             maxHp: runState.maxHp,
@@ -288,10 +324,11 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
 
         const combatKey = `dungeon_combat:${userId}`;
         await redis.setJson(combatKey, combatState, COMBAT_TTL);
+        const currentMp = runState.mp ?? runState.maxMp ?? 55;
 
         return {
             embed: buildRpgCombatEmbed(locale, combatState, checkpoint),
-            row: buildCombatRow(locale, classType, runState.mp ?? runState.maxMp ?? 55),
+            rows: buildCombatRow(locale, classType, currentMp, advancedClass),
             runEnded: false,
         };
     }
@@ -323,7 +360,7 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
 
         return {
             embed,
-            row: buildContinueLeaveRow(locale, runState.encountersLeft),
+            rows: [buildContinueLeaveRow(locale, runState.encountersLeft)],
             runEnded: false,
         };
     }
@@ -345,7 +382,7 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
                 currentHp: 0,
                 maxHp: runState.maxHp,
             });
-            return { embed, row: new ActionRowBuilder<ButtonBuilder>(), runEnded: true };
+            return { embed, rows: [], runEnded: true };
         }
 
         const embed = buildTrapEmbed(locale, {
@@ -360,7 +397,7 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
         embed.setFooter({ text: buildContinueLeaveText(locale, runState.encountersLeft) });
         return {
             embed,
-            row: buildContinueLeaveRow(locale, runState.encountersLeft),
+            rows: [buildContinueLeaveRow(locale, runState.encountersLeft)],
             runEnded: false,
         };
     }
@@ -380,7 +417,7 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
 
     return {
         embed: buildMerchantEmbed(locale, merchantState, char.gold),
-        row: buildMerchantRow(locale, merchantState, char.gold),
+        rows: [buildMerchantRow(locale, merchantState, char.gold)],
         runEnded: false,
     };
 }
@@ -528,10 +565,10 @@ export default {
             runState.encountersLeft -= 1;
 
             // Process first encounter
-            const { embed, row, runEnded } = await processEncounter(runState);
+            const { embed, rows, runEnded } = await processEncounter(runState);
 
             // Save run state
-            const reply = await interaction.editReply({ embeds: [embed], components: runEnded ? [] : [row] });
+            const reply = await interaction.editReply({ embeds: [embed], components: runEnded ? [] : rows });
             runState.messageId = reply.id;
 
             if (runEnded) {
