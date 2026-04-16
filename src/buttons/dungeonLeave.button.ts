@@ -13,7 +13,7 @@ export default {
         const userId = interaction.user.id;
         const runKey = `dungeon_run:${userId}`;
 
-        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+        const runState = await redis.getJson<DungeonRunState>(runKey);
         if (!runState) {
             const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
             await interaction.reply({
@@ -37,9 +37,9 @@ export default {
         await redis.deleteKey(`dungeon_combat:${userId}`);
         await redis.deleteKey(`dungeon_merchant:${userId}`);
 
-        // Set cooldown
+        // Set cooldown (global key)
         const tierConfig = await PremiumService.getConfig(userId);
-        const cdKey = `dungeon_cd:${runState.guildId}:${userId}`;
+        const cdKey = `dungeon_cd:${userId}`;
         await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
 
         const embed = new EmbedBuilder()
@@ -47,6 +47,11 @@ export default {
             .setDescription(
                 [
                     t(locale, "dungeon.run.leave"),
+                    "",
+                    t(locale, "dungeon.run.gold_summary", {
+                        gold: String(runState.accumulatedGold),
+                        exp: String(runState.accumulatedExp),
+                    }),
                     "",
                     t(locale, "dungeon.floor", {
                         floor: String(runState.floor),

@@ -4,23 +4,22 @@ import {
     ButtonStyle,
     ChatInputCommandInteraction,
     EmbedBuilder,
-    MessageFlags,
     SlashCommandBuilder,
     type MessageActionRowComponentBuilder,
 } from "discord.js";
-import crypto from "node:crypto";
 import redis from "../../connector/redis";
 import DungeonService from "../../services/economy/dungeon.service";
-import type { CombatState, DungeonRunState } from "../../services/economy/dungeon.service";
+import type { DungeonRunState } from "../../services/economy/dungeon.service";
 import MerchantService from "../../services/economy/merchant.service";
 import type { MerchantState } from "../../services/economy/merchant.service";
-import CurrencyService from "../../services/economy/currency.service";
+import CharacterService from "../../services/rpg/character.service";
+import CombatService from "../../services/rpg/combat.service";
+import type { RpgCombatState } from "../../services/rpg/combat.service";
+import { getMonsterStats, getBossStats, RARITY_CONFIG, type ClassType, type Rarity } from "../../services/rpg/rpg.config";
 import PremiumService from "../../services/premium/premium.service";
 import { buildPremiumButton } from "../../util/premium/upgradeButton";
 import { TIER_CONFIG } from "../../services/premium/premium.config";
-import WorkService from "../../services/economy/work.service";
-import { tryStarDrop } from "../../util/economy/starDrop";
-import UserEconomyModel from "../../models/userEconomy.model";
+import { formatCooldown } from "../../util/date/format";
 import Reply from "../../util/decorator/reply";
 import { BUTTON_ID } from "../../util/config/button";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
@@ -28,7 +27,6 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import QuestService from "../../services/quest/quest.service";
-import EconomyAdminService from "../../services/economy/economyAdmin.service";
 
 export const RUN_TTL = 900;
 export const COMBAT_TTL = 60;
@@ -37,7 +35,8 @@ export const COMBAT_TIMEOUT_MS = 30_000;
 
 // --- Embed builders (exported for button handlers) ---
 
-export function buildCombatRow(locale: SupportedLocale): ActionRowBuilder<ButtonBuilder> {
+export function buildCombatRow(locale: SupportedLocale, classType: ClassType): ActionRowBuilder<ButtonBuilder> {
+    const [skill1, skill2] = CombatService.getSkillLabels(classType);
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.DUNGEON_ATTACK)
@@ -45,10 +44,20 @@ export function buildCombatRow(locale: SupportedLocale): ActionRowBuilder<Button
             .setEmoji("⚔️")
             .setStyle(ButtonStyle.Danger),
         new ButtonBuilder()
+            .setCustomId(BUTTON_ID.DUNGEON_SKILL1)
+            .setLabel(t(locale, `rpg.skill.${skill1.key}`))
+            .setEmoji(skill1.emoji)
+            .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
+            .setCustomId(BUTTON_ID.DUNGEON_SKILL2)
+            .setLabel(t(locale, `rpg.skill.${skill2.key}`))
+            .setEmoji(skill2.emoji)
+            .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder()
             .setCustomId(BUTTON_ID.DUNGEON_DEFEND)
             .setLabel(t(locale, "dungeon.btn.defend"))
             .setEmoji("🛡️")
-            .setStyle(ButtonStyle.Primary),
+            .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.DUNGEON_RUN)
             .setLabel(t(locale, "dungeon.btn.run"))
@@ -83,7 +92,7 @@ export function buildContinueLeaveRow(
 export function buildMerchantRow(
     locale: SupportedLocale,
     merchantState: MerchantState,
-    userCoin: number
+    userGold: number
 ): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
@@ -91,26 +100,26 @@ export function buildMerchantRow(
             .setLabel(t(locale, "dungeon.btn.heal"))
             .setEmoji("🧪")
             .setStyle(ButtonStyle.Success)
-            .setDisabled(merchantState.currentHp >= 100 || userCoin < merchantState.healCost),
+            .setDisabled(merchantState.currentHp >= merchantState.maxHp || userGold < merchantState.healCost),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.DUNGEON_BUFF)
             .setLabel(t(locale, "dungeon.btn.buff"))
             .setEmoji("✨")
             .setStyle(ButtonStyle.Primary)
-            .setDisabled(userCoin < merchantState.buffCost),
+            .setDisabled(userGold < merchantState.buffCost),
         new ButtonBuilder()
-            .setCustomId(BUTTON_ID.DUNGEON_EXCHANGE)
+            .setCustomId(BUTTON_ID.DUNGEON_EQUIP_BUY)
             .setLabel(t(locale, "dungeon.btn.exchange"))
-            .setEmoji("💎")
+            .setEmoji("🎁")
             .setStyle(ButtonStyle.Secondary)
-            .setDisabled(userCoin < merchantState.exchangeRate)
+            .setDisabled(userGold < merchantState.equipCost)
     );
 }
 
 export function buildMerchantEmbed(
     locale: SupportedLocale,
     merchantState: MerchantState,
-    userCoin: number
+    userGold: number
 ): EmbedBuilder {
     const buffLabel = t(locale, `dungeon.buff.${merchantState.buffType}`);
     return new EmbedBuilder()
@@ -122,9 +131,9 @@ export function buildMerchantEmbed(
                 "",
                 `🧪 ${t(locale, "dungeon.merchant.heal_option", { amount: String(merchantState.healAmount), cost: String(merchantState.healCost) })}`,
                 `✨ ${t(locale, "dungeon.merchant.buff_option", { buffType: buffLabel, cost: String(merchantState.buffCost) })}`,
-                `💎 ${t(locale, "dungeon.merchant.exchange_option", { rate: String(merchantState.exchangeRate) })}`,
+                `🎁 ${t(locale, "dungeon.merchant.equip_option", { cost: String(merchantState.equipCost) })}`,
                 "",
-                `HP: **${merchantState.currentHp}**/100 | Coin: **${userCoin}**`,
+                `HP: **${merchantState.currentHp}**/${merchantState.maxHp} | Gold: **${userGold}** 🪙`,
                 t(locale, "dungeon.floor", {
                     floor: String(merchantState.floor),
                     checkpoint: String(merchantState.checkpoint),
@@ -137,23 +146,34 @@ export function buildMerchantEmbed(
 export interface TreasureEmbedOptions {
     floor: number;
     checkpoint: number;
-    coinReward: number;
-    gemReward: number;
+    goldReward: number;
+    expReward: number;
     starReward: boolean;
+    equipDrop: { name: string; rarity: string; slot: string } | null;
     newFloor: number;
     checkpointReached: boolean;
+    leveled: boolean;
+    oldLevel: number;
+    newLevel: number;
 }
 
 export function buildTreasureEmbed(locale: SupportedLocale, opts: TreasureEmbedOptions): EmbedBuilder {
-    const { floor, checkpoint, coinReward, gemReward, starReward, newFloor, checkpointReached } = opts;
+    const { floor, checkpoint, goldReward, expReward, starReward, equipDrop, newFloor, checkpointReached, leveled, oldLevel, newLevel } = opts;
     const descLines = [
         t(locale, "dungeon.encounter.treasure", { floor: String(floor) }),
-        t(locale, "dungeon.reward.coin", { amount: String(coinReward) }),
-        ...(gemReward > 0 ? [t(locale, "dungeon.reward.gem", { amount: String(gemReward) })] : []),
+        t(locale, "dungeon.reward.gold", { amount: String(goldReward) }),
+        t(locale, "dungeon.reward.exp", { amount: String(expReward) }),
+        ...(equipDrop
+            ? [t(locale, "dungeon.reward.equip_drop", {
+                rarity: RARITY_CONFIG[equipDrop.rarity as Rarity].emoji,
+                name: equipDrop.name,
+            })]
+            : []),
         "",
         t(locale, "dungeon.floor", { floor: String(newFloor), checkpoint: String(checkpoint) }),
         ...(checkpointReached ? ["🔖 " + t(locale, "dungeon.checkpoint_reached", { floor: String(newFloor) })] : []),
         ...(starReward ? ["\n⭐ " + t(locale, "star_drop.found")] : []),
+        ...(leveled ? [t(locale, "dungeon.levelup", { old: String(oldLevel), new: String(newLevel) })] : []),
     ];
     return new EmbedBuilder()
         .setTitle(`🎁 ${t(locale, "dungeon.title")}`)
@@ -165,19 +185,20 @@ export interface TrapEmbedOptions {
     floor: number;
     checkpoint: number;
     hpLost: number;
-    coinLost: number;
+    goldLost: number;
     collapsed: boolean;
     currentHp: number;
+    maxHp: number;
 }
 
 export function buildTrapEmbed(locale: SupportedLocale, opts: TrapEmbedOptions): EmbedBuilder {
-    const { floor, checkpoint, hpLost, coinLost, collapsed, currentHp } = opts;
+    const { floor, checkpoint, hpLost, goldLost, collapsed, currentHp, maxHp } = opts;
     const descLines = [
         t(locale, "dungeon.encounter.trap", { floor: String(floor) }),
-        t(locale, "dungeon.trap.damage", { hp: String(hpLost), coin: String(coinLost) }),
+        t(locale, "dungeon.trap.damage", { hp: String(hpLost), coin: String(goldLost) }),
         ...(collapsed ? ["", t(locale, "dungeon.collapse", { checkpoint: String(checkpoint) })] : []),
         "",
-        `HP: **${currentHp}**/100`,
+        `HP: **${currentHp}**/${maxHp}`,
         t(locale, "dungeon.floor", { floor: String(collapsed ? checkpoint : floor), checkpoint: String(checkpoint) }),
     ];
     return new EmbedBuilder()
@@ -186,23 +207,32 @@ export function buildTrapEmbed(locale: SupportedLocale, opts: TrapEmbedOptions):
         .setColor(collapsed ? 0xed4245 : 0xe67e22);
 }
 
-export function buildCombatEmbed(locale: SupportedLocale, state: CombatState, checkpoint: number): EmbedBuilder {
+export function buildRpgCombatEmbed(
+    locale: SupportedLocale,
+    state: RpgCombatState,
+    checkpoint: number
+): EmbedBuilder {
+    const titlePrefix = state.isBoss ? "👑" : state.monsterEmoji;
+    const monsterLabel = state.isBoss
+        ? t(locale, "dungeon.combat.boss_appear", { monster: state.monsterName, floor: String(checkpoint) })
+        : t(locale, "dungeon.encounter.monster", { monster: state.monsterName, floor: String(checkpoint) });
+
     return new EmbedBuilder()
-        .setTitle(
-            `${state.monsterEmoji} ${t(locale, "dungeon.encounter.monster", { monster: state.monsterName, floor: String(state.floor) })}`
-        )
+        .setTitle(`${titlePrefix} ${monsterLabel}`)
         .setDescription(
             [
                 t(locale, "dungeon.combat.hp", {
-                    userHp: String(state.userHp),
+                    userHp: String(state.user.hp),
+                    maxHp: String(state.user.maxHp),
                     monster: state.monsterName,
-                    monsterHp: String(state.monsterHp),
+                    monsterHp: String(state.monster.hp),
+                    maxMonsterHp: String(state.monster.maxHp),
                 }),
                 "",
-                t(locale, "dungeon.floor", { floor: String(state.floor), checkpoint: String(checkpoint) }),
+                t(locale, "dungeon.floor", { floor: String(checkpoint), checkpoint: String(checkpoint) }),
             ].join("\n")
         )
-        .setColor(0xe67e22);
+        .setColor(state.isBoss ? 0xe74c3c : 0xe67e22);
 }
 
 // --- Encounter processing for a run ---
@@ -213,69 +243,64 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
     runEnded: boolean;
 }> {
     const locale = runState.locale as SupportedLocale;
-    const { userId, guildId, floor, checkpoint } = runState;
+    const { userId, floor, checkpoint, classType } = runState;
     const encounterType = DungeonService.rollEncounterForRun(runState);
 
     // Tick buff (decrement encounters left)
     DungeonService.tickBuff(runState);
 
     if (encounterType === "monster") {
+        const isBoss = DungeonService.isBossFloor(floor);
         const monster = DungeonService.rollMonster(floor);
-        const combatState: CombatState = {
-            encounterId: crypto.randomUUID(),
+
+        // Load character stats for combat
+        const char = await CharacterService.requireCharacter(userId);
+        const stats = await CharacterService.getEffectiveStats(userId);
+        const monsterStats = isBoss
+            ? getBossStats(floor, char.level)
+            : getMonsterStats(floor, char.level);
+
+        const combatState = CombatService.initCombat(
             userId,
-            monsterHp: 30 + floor * 5,
-            userHp: runState.hp,
-            floor,
-            checkpoint,
-            turnsLeft: 3,
-            guildId,
-            locale: runState.locale,
-            monsterName: monster.name,
-            monsterEmoji: monster.emoji,
-        };
+            classType,
+            stats,
+            runState.hp,
+            runState.maxHp,
+            { name: monster.name, emoji: monster.emoji, stats: monsterStats },
+            isBoss
+        );
 
         const combatKey = `dungeon_combat:${userId}`;
         await redis.setJson(combatKey, combatState, COMBAT_TTL);
 
         return {
-            embed: buildCombatEmbed(locale, combatState, checkpoint),
-            row: buildCombatRow(locale),
+            embed: buildRpgCombatEmbed(locale, combatState, checkpoint),
+            row: buildCombatRow(locale, classType),
             runEnded: false,
         };
     }
 
     if (encounterType === "treasure") {
-        const coinReward = DungeonService.randomInRange(30, 100) + floor * 8;
-        const gemReward = Math.random() < 0.15 ? 1 : 0;
+        const result = await DungeonService.resolveTreasure(userId, floor, classType);
 
-        await CurrencyService.addCoin(userId, guildId, coinReward, "dungeon", { encounter: "treasure", floor });
-        if (gemReward > 0) {
-            await CurrencyService.addGem(userId, guildId, gemReward, "dungeon", { encounter: "treasure", floor });
-        }
-        const starReward = await tryStarDrop(userId, 0.03, "dungeon");
-
-        // Advance floor
-        const newFloor = floor + 1;
-        const checkpointReached = DungeonService.isPrime(newFloor);
-        const newCheckpoint = checkpointReached ? newFloor : checkpoint;
-
-        await UserEconomyModel.updateOne(
-            { userId, guildId },
-            { $set: { dungeonDepth: newFloor, dungeonCheckpoint: newCheckpoint } }
-        );
-
-        runState.floor = newFloor;
-        runState.checkpoint = newCheckpoint;
+        runState.floor = result.newFloor;
+        runState.checkpoint = result.checkpoint;
+        runState.accumulatedGold += result.goldReward;
+        runState.accumulatedExp += result.expReward;
+        if (result.equipDrop) runState.drops.push(result.equipDrop.id);
 
         const embed = buildTreasureEmbed(locale, {
             floor,
-            checkpoint: newCheckpoint,
-            coinReward,
-            gemReward,
-            starReward,
-            newFloor,
-            checkpointReached,
+            checkpoint: result.checkpoint,
+            goldReward: result.goldReward,
+            expReward: result.expReward,
+            starReward: result.starReward,
+            equipDrop: result.equipDrop,
+            newFloor: result.newFloor,
+            checkpointReached: result.checkpointReached,
+            leveled: result.leveled,
+            oldLevel: result.oldLevel,
+            newLevel: result.newLevel,
         });
         embed.setFooter({ text: buildContinueLeaveText(locale, runState.encountersLeft) });
 
@@ -287,46 +312,33 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
     }
 
     if (encounterType === "trap") {
-        const hpLost = DungeonService.randomInRange(10, 20);
-        const coinLost = DungeonService.randomInRange(30, 60);
+        const trapResult = await DungeonService.resolveTrap(userId, floor, runState.hp);
 
-        runState.hp -= hpLost;
+        runState.hp = Math.max(0, runState.hp - trapResult.hpLost);
 
-        if (runState.hp <= 0) {
-            // Collapse: reset to checkpoint + additional coin loss
-            const additionalLoss = DungeonService.randomInRange(100, 200);
-            const totalLoss = coinLost + additionalLoss;
-
-            await UserEconomyModel.updateOne({ userId, guildId }, [
-                { $set: { coin: { $max: [{ $subtract: ["$coin", totalLoss] }, 0] }, dungeonDepth: checkpoint } },
-            ]);
-
-            runState.floor = checkpoint;
+        if (trapResult.collapsed && trapResult.collapseResult) {
+            runState.floor = trapResult.collapseResult.checkpoint;
 
             const embed = buildTrapEmbed(locale, {
                 floor,
-                checkpoint,
-                hpLost,
-                coinLost: totalLoss,
+                checkpoint: trapResult.collapseResult.checkpoint,
+                hpLost: trapResult.hpLost,
+                goldLost: trapResult.goldLost + trapResult.collapseResult.goldLost,
                 collapsed: true,
                 currentHp: 0,
+                maxHp: runState.maxHp,
             });
             return { embed, row: new ActionRowBuilder<ButtonBuilder>(), runEnded: true };
-        }
-
-        if (coinLost > 0) {
-            await UserEconomyModel.updateOne({ userId, guildId }, [
-                { $set: { coin: { $max: [{ $subtract: ["$coin", coinLost] }, 0] } } },
-            ]);
         }
 
         const embed = buildTrapEmbed(locale, {
             floor,
             checkpoint,
-            hpLost,
-            coinLost,
+            hpLost: trapResult.hpLost,
+            goldLost: trapResult.goldLost,
             collapsed: false,
             currentHp: runState.hp,
+            maxHp: runState.maxHp,
         });
         embed.setFooter({ text: buildContinueLeaveText(locale, runState.encountersLeft) });
         return {
@@ -337,22 +349,21 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
     }
 
     // NPC Merchant encounter
+    const char = await CharacterService.requireCharacter(userId);
     const merchantState = MerchantService.buildMerchantState(
         userId,
-        guildId,
         runState.locale,
         floor,
         checkpoint,
-        runState.hp
+        runState.hp,
+        runState.maxHp
     );
     const merchantKey = `dungeon_merchant:${userId}`;
     await redis.setJson(merchantKey, merchantState, MERCHANT_TTL);
 
-    const balance = await CurrencyService.getBalance(userId, guildId);
-
     return {
-        embed: buildMerchantEmbed(locale, merchantState, balance.coin),
-        row: buildMerchantRow(locale, merchantState, balance.coin),
+        embed: buildMerchantEmbed(locale, merchantState, char.gold),
+        row: buildMerchantRow(locale, merchantState, char.gold),
         runEnded: false,
     };
 }
@@ -373,11 +384,11 @@ export function scheduleCombatTimeout(
 
     setTimeout(async () => {
         try {
-            const active = (await redis.getJson(combatKey)) as CombatState | null;
-            if (!active || active.encounterId !== encounterId) return;
+            const active = await redis.getJson<RpgCombatState>(combatKey);
+            if (!active || active.userId !== userId) return;
             await redis.deleteKey(combatKey);
 
-            const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+            const runState = await redis.getJson<DungeonRunState>(runKey);
             const timeoutEmbed = new EmbedBuilder()
                 .setTitle(`🏃 ${t(locale, "dungeon.title")}`)
                 .setDescription(t(locale, "dungeon.combat.timeout"))
@@ -408,11 +419,11 @@ export function scheduleMerchantTimeout(
 
     setTimeout(async () => {
         try {
-            const active = (await redis.getJson(merchantKey)) as MerchantState | null;
+            const active = await redis.getJson<MerchantState>(merchantKey);
             if (!active || active.encounterId !== encounterId) return;
             await redis.deleteKey(merchantKey);
 
-            const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+            const runState = await redis.getJson<DungeonRunState>(runKey);
             const timeoutEmbed = new EmbedBuilder()
                 .setTitle(`🧙 ${t(locale, "dungeon.title")}`)
                 .setDescription(t(locale, "dungeon.merchant.timeout"))
@@ -441,35 +452,31 @@ export default {
         .setDescriptionLocalizations(descriptionLocales("cmd.dungeon.desc")),
 
     async execute(interaction: ChatInputCommandInteraction) {
-        if (!interaction.inGuild()) {
-            const locale = await resolveLocale(interaction).catch(() => "en" as const);
-            await interaction.reply({ content: t(locale, "common.guild_only"), flags: MessageFlags.Ephemeral });
-            return;
-        }
-
         await interaction.deferReply();
 
         const locale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-
-        if (await EconomyAdminService.isFrozen(interaction.user.id, interaction.guildId!)) {
-            await interaction.editReply(t(locale, "common.frozen"));
-            return;
-        }
-
-        const guildId = interaction.guildId ?? "";
         const userId = interaction.user.id;
 
         try {
+            // Character gate
+            const char = await CharacterService.getCharacter(userId);
+            if (!char) {
+                const embed = new EmbedBuilder()
+                    .setDescription(t(locale, "dungeon.require_character"))
+                    .setColor(0xed4245);
+                return Reply.embedEdit(interaction, embed);
+            }
+
             const tierConfig = await PremiumService.getConfig(userId);
 
-            // Check cooldown
-            const cdKey = `dungeon_cd:${guildId}:${userId}`;
+            // Check cooldown (global, not per-guild)
+            const cdKey = `dungeon_cd:${userId}`;
             const remaining = await redis.ttlKey(cdKey);
             if (remaining > 0) {
-                let description = t(locale, "dungeon.cooldown", { time: WorkService.formatCooldown(remaining) });
+                let description = t(locale, "dungeon.cooldown", { time: formatCooldown(remaining) });
                 const isFreeTier = tierConfig.dungeonCooldownMs === TIER_CONFIG.free.dungeonCooldownMs;
                 if (isFreeTier) {
-                    const reduced = WorkService.formatCooldown(TIER_CONFIG.star.dungeonCooldownMs / 1000);
+                    const reduced = formatCooldown(TIER_CONFIG.star.dungeonCooldownMs / 1000);
                     description += `\n${t(locale, "premium.cooldown_hint", { reduced })}`;
                 }
                 const embed = new EmbedBuilder().setDescription(description).setColor(0xed4245);
@@ -500,7 +507,7 @@ export default {
             }
 
             // Start run
-            const runState = await DungeonService.startRun(userId, guildId, locale);
+            const runState = await DungeonService.startRun(userId, locale);
             runState.encountersLeft -= 1;
 
             // Process first encounter
@@ -512,14 +519,14 @@ export default {
 
             if (runEnded) {
                 await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
-                await QuestService.trackProgress(userId, guildId, "dungeon").catch(() => {});
+                await QuestService.trackProgress(userId, interaction.guildId ?? "", "dungeon").catch(() => {});
             } else {
                 await redis.setJson(runKey, runState, RUN_TTL);
                 // Schedule timeouts for combat/merchant encounters
-                const combatState = (await redis.getJson(`dungeon_combat:${userId}`)) as CombatState | null;
-                const merchantState = (await redis.getJson(`dungeon_merchant:${userId}`)) as MerchantState | null;
+                const combatState = await redis.getJson<RpgCombatState>(`dungeon_combat:${userId}`);
+                const merchantState = await redis.getJson<MerchantState>(`dungeon_merchant:${userId}`);
                 if (combatState) {
-                    scheduleCombatTimeout(interaction, userId, locale, combatState.encounterId);
+                    scheduleCombatTimeout(interaction, userId, locale, combatState.userId);
                 } else if (merchantState) {
                     scheduleMerchantTimeout(interaction, userId, locale, merchantState.encounterId);
                 }

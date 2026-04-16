@@ -2,50 +2,126 @@ import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
 import DungeonService from "../services/economy/dungeon.service";
 import type {
-    CombatState,
-    CombatActionResult,
     CombatResolveResult,
     DungeonRunState,
 } from "../services/economy/dungeon.service";
+import CombatService from "../services/rpg/combat.service";
+import type { RpgCombatState, CombatActionResult } from "../services/rpg/combat.service";
+import { RARITY_CONFIG, type Rarity } from "../services/rpg/rpg.config";
+import PremiumService from "../services/premium/premium.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
-import PremiumService from "../services/premium/premium.service";
-import { buildContinueLeaveRow, buildCombatRow, RUN_TTL } from "../commands/slash/dungeon";
+import {
+    buildContinueLeaveRow,
+    buildCombatRow,
+    buildRpgCombatEmbed,
+    RUN_TTL,
+} from "../commands/slash/dungeon";
+
+function buildActionLine(
+    locale: SupportedLocale,
+    action: "attack" | "skill1" | "skill2" | "defend",
+    result: CombatActionResult,
+    state: RpgCombatState
+): string {
+    const lines: string[] = [];
+
+    if (result.critHit) {
+        lines.push(t(locale, "dungeon.combat.crit"));
+    }
+
+    if (action === "defend") {
+        const healLine = result.healAmount
+            ? t(locale, "dungeon.combat.heal_skill", { amount: String(result.healAmount) })
+            : "";
+        lines.push(
+            t(locale, "dungeon.combat.defend", {
+                userDmg: String(result.userDamage),
+                monsterDmg: String(result.monsterDamage),
+            })
+        );
+        if (healLine) lines.push(healLine);
+    } else if (action === "skill1" || action === "skill2") {
+        const [s1, s2] = CombatService.getSkillLabels(state.classType);
+        const skillLabel = action === "skill1" ? s1 : s2;
+        const skillName = t(locale, `rpg.skill.${skillLabel.key}`);
+        lines.push(
+            t(locale, "dungeon.combat.skill", {
+                skill: skillName,
+                userDmg: String(result.userDamage),
+                monsterDmg: String(result.monsterDamage),
+            })
+        );
+        if (result.healAmount) {
+            lines.push(t(locale, "dungeon.combat.heal_skill", { amount: String(result.healAmount) }));
+        }
+    } else {
+        lines.push(
+            t(locale, "dungeon.combat.attack", {
+                userDmg: String(result.userDamage),
+                monsterDmg: String(result.monsterDamage),
+            })
+        );
+    }
+
+    if (result.statusApplied) {
+        lines.push(t(locale, "dungeon.combat.status_applied", { effect: result.statusApplied }));
+    }
+    if (result.poisonDamage && result.poisonDamage > 0) {
+        lines.push(t(locale, "dungeon.combat.poison_tick", { dmg: String(result.poisonDamage) }));
+    }
+
+    return lines.join("\n");
+}
 
 function buildWinDesc(
     locale: SupportedLocale,
     actionLine: string,
-    state: CombatState,
+    state: RpgCombatState,
     resolve: CombatResolveResult
 ): string {
     const lines = [
         actionLine,
         "",
         t(locale, "dungeon.combat.win", { monster: state.monsterName }),
-        t(locale, "dungeon.reward.coin", { amount: String(resolve.coinReward) }),
-        ...(resolve.gemReward > 0 ? [t(locale, "dungeon.reward.gem", { amount: String(resolve.gemReward) })] : []),
+        t(locale, "dungeon.reward.gold", { amount: String(resolve.goldReward) }),
+        t(locale, "dungeon.reward.exp", { amount: String(resolve.expReward) }),
+        ...(resolve.equipDrop
+            ? [t(locale, "dungeon.reward.equip_drop", {
+                rarity: RARITY_CONFIG[resolve.equipDrop.rarity as Rarity].emoji,
+                name: resolve.equipDrop.name,
+            })]
+            : []),
         "",
         t(locale, "dungeon.floor", { floor: String(resolve.newFloor), checkpoint: String(resolve.checkpoint) }),
         ...(resolve.checkpointReached
             ? ["🔖 " + t(locale, "dungeon.checkpoint_reached", { floor: String(resolve.newFloor) })]
             : []),
         ...(resolve.starReward ? ["\n⭐ " + t(locale, "star_drop.found")] : []),
+        ...(resolve.leveled
+            ? [t(locale, "dungeon.levelup", { old: String(resolve.oldLevel), new: String(resolve.newLevel) })]
+            : []),
     ];
     return lines.join("\n");
 }
 
 async function handleWin(
     interaction: ButtonInteraction,
-    state: CombatState,
+    state: RpgCombatState,
     result: CombatActionResult,
     runState: DungeonRunState | null,
     runKey: string,
     locale: SupportedLocale,
     actionLine: string
 ): Promise<void> {
-    const resolve = await DungeonService.resolveCombatWin(state.userId, state.guildId, state.floor);
+    const resolve = await DungeonService.resolveCombatWin(
+        state.userId,
+        runState?.floor ?? 1,
+        state.isBoss,
+        state.classType
+    );
 
     const embed = new EmbedBuilder()
         .setTitle(`⚔️ ${t(locale, "dungeon.title")}`)
@@ -60,6 +136,9 @@ async function handleWin(
     runState.hp = result.userHp;
     runState.floor = resolve.newFloor;
     runState.checkpoint = resolve.checkpoint;
+    runState.accumulatedGold += resolve.goldReward;
+    runState.accumulatedExp += resolve.expReward;
+    if (resolve.equipDrop) runState.drops.push(resolve.equipDrop.id);
     await redis.setJson(runKey, runState, RUN_TTL);
     await interaction.editReply({
         embeds: [embed],
@@ -69,13 +148,13 @@ async function handleWin(
 
 async function handleLoss(
     interaction: ButtonInteraction,
-    state: CombatState,
+    state: RpgCombatState,
     runState: DungeonRunState | null,
     runKey: string,
     locale: SupportedLocale,
     actionLine: string
 ): Promise<void> {
-    const loss = await DungeonService.resolveCombatLoss(state.userId, state.guildId);
+    const loss = await DungeonService.resolveCombatLoss(state.userId);
 
     const embed = new EmbedBuilder()
         .setTitle(`💀 ${t(locale, "dungeon.title")}`)
@@ -84,7 +163,7 @@ async function handleLoss(
                 actionLine,
                 "",
                 t(locale, "dungeon.combat.lose", { checkpoint: String(loss.checkpoint) }),
-                t(locale, "dungeon.penalty", { amount: String(loss.coinLost) }),
+                t(locale, "dungeon.penalty", { amount: String(loss.goldLost) }),
             ].join("\n")
         )
         .setColor(0xed4245);
@@ -93,7 +172,7 @@ async function handleLoss(
     await redis.deleteKey(runKey);
     await redis.deleteKey(`dungeon_merchant:${state.userId}`);
     const tierConfig = await PremiumService.getConfig(state.userId);
-    const cdKey = `dungeon_cd:${state.guildId}:${state.userId}`;
+    const cdKey = `dungeon_cd:${state.userId}`;
     await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
     await interaction.editReply({ embeds: [embed], components: [] });
 }
@@ -124,12 +203,15 @@ async function handleTurnsUp(
     });
 }
 
-export async function handleCombatAction(interaction: ButtonInteraction, action: "attack" | "defend"): Promise<void> {
+export async function handleCombatAction(
+    interaction: ButtonInteraction,
+    action: "attack" | "skill1" | "skill2" | "defend"
+): Promise<void> {
     const userId = interaction.user.id;
     const combatKey = `dungeon_combat:${userId}`;
     const runKey = `dungeon_run:${userId}`;
 
-    const state = (await redis.getJson(combatKey)) as CombatState | null;
+    const state = await redis.getJson<RpgCombatState>(combatKey);
     if (!state) {
         const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
         await interaction.reply({
@@ -146,20 +228,11 @@ export async function handleCombatAction(interaction: ButtonInteraction, action:
 
     await interaction.deferUpdate();
 
-    const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
-    const locale = state.locale as SupportedLocale;
-    const result = DungeonService.processCombatAction(state, action, runState?.activeBuff);
+    const runState = await redis.getJson<DungeonRunState>(runKey);
+    const locale = (runState?.locale ?? "en") as SupportedLocale;
+    const result = CombatService.executeAction(state, action);
 
-    const actionLine =
-        action === "attack"
-            ? t(locale, "dungeon.combat.attack", {
-                  userDmg: String(result.userDmg),
-                  monsterDmg: String(result.monsterDmg),
-              })
-            : t(locale, "dungeon.combat.defend", {
-                  userDmg: String(result.userDmg),
-                  monsterDmg: String(result.monsterDmg),
-              });
+    const actionLine = buildActionLine(locale, action, result, state);
 
     if (result.won) {
         await redis.deleteKey(combatKey);
@@ -179,34 +252,35 @@ export async function handleCombatAction(interaction: ButtonInteraction, action:
         return;
     }
 
-    // Combat continues
-    const updatedState: CombatState = {
-        ...state,
-        monsterHp: result.monsterHp,
-        userHp: result.userHp,
-        turnsLeft: result.turnsLeft,
-    };
-    await redis.setJson(combatKey, updatedState, 60);
+    // Combat continues — state was mutated by executeAction, save it
+    await redis.setJson(combatKey, state, 60);
 
-    const embed = new EmbedBuilder()
-        .setTitle(
-            `${state.monsterEmoji} ${t(locale, "dungeon.encounter.monster", { monster: state.monsterName, floor: String(state.floor) })}`
-        )
-        .setDescription(
-            [
-                actionLine,
-                "",
-                t(locale, "dungeon.combat.hp", {
-                    userHp: String(result.userHp),
-                    monster: state.monsterName,
-                    monsterHp: String(result.monsterHp),
-                }),
-                t(locale, "dungeon.floor", { floor: String(state.floor), checkpoint: String(state.checkpoint) }),
-            ].join("\n")
-        )
-        .setColor(0xe67e22);
+    const embed = buildRpgCombatEmbed(locale, state, runState?.checkpoint ?? state.user.hp);
+    const descLines = [
+        actionLine,
+        "",
+        t(locale, "dungeon.combat.hp", {
+            userHp: String(result.userHp),
+            maxHp: String(state.user.maxHp),
+            monster: state.monsterName,
+            monsterHp: String(result.monsterHp),
+            maxMonsterHp: String(state.monster.maxHp),
+        }),
+        t(locale, "dungeon.floor", {
+            floor: String(runState?.floor ?? 1),
+            checkpoint: String(runState?.checkpoint ?? 1),
+        }),
+    ];
 
-    await interaction.editReply({ embeds: [embed], components: [buildCombatRow(locale)] });
+    const continueEmbed = new EmbedBuilder()
+        .setTitle(embed.data.title ?? `${state.monsterEmoji} ${state.monsterName}`)
+        .setDescription(descLines.join("\n"))
+        .setColor(state.isBoss ? 0xe74c3c : 0xe67e22);
+
+    await interaction.editReply({
+        embeds: [continueEmbed],
+        components: [buildCombatRow(locale, state.classType)],
+    });
 }
 
 export default {

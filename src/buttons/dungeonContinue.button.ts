@@ -1,6 +1,7 @@
 import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
-import type { CombatState, DungeonRunState } from "../services/economy/dungeon.service";
+import type { DungeonRunState } from "../services/economy/dungeon.service";
+import type { RpgCombatState } from "../services/rpg/combat.service";
 import type { MerchantState } from "../services/economy/merchant.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
@@ -16,7 +17,7 @@ export default {
         const userId = interaction.user.id;
         const runKey = `dungeon_run:${userId}`;
 
-        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+        const runState = await redis.getJson<DungeonRunState>(runKey);
         if (!runState) {
             const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
             await interaction.reply({
@@ -41,13 +42,22 @@ export default {
             await redis.deleteKey(runKey);
             await redis.deleteKey(`dungeon_combat:${userId}`);
             await redis.deleteKey(`dungeon_merchant:${userId}`);
-            const cdKey = `dungeon_cd:${runState.guildId}:${userId}`;
+            const cdKey = `dungeon_cd:${userId}`;
             await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
-            await QuestService.trackProgress(userId, runState.guildId, "dungeon").catch(() => {});
+            await QuestService.trackProgress(userId, interaction.guildId ?? "", "dungeon").catch(() => {});
 
             const embed = new EmbedBuilder()
                 .setTitle(`🏰 ${t(locale, "dungeon.title")}`)
-                .setDescription(t(locale, "dungeon.run.max_reached"))
+                .setDescription(
+                    [
+                        t(locale, "dungeon.run.max_reached"),
+                        "",
+                        t(locale, "dungeon.run.gold_summary", {
+                            gold: String(runState.accumulatedGold),
+                            exp: String(runState.accumulatedExp),
+                        }),
+                    ].join("\n")
+                )
                 .setColor(0x3498db);
             await interaction.editReply({ embeds: [embed], components: [] });
             return;
@@ -63,18 +73,18 @@ export default {
             await redis.deleteKey(runKey);
             await redis.deleteKey(`dungeon_combat:${userId}`);
             await redis.deleteKey(`dungeon_merchant:${userId}`);
-            const cdKey = `dungeon_cd:${runState.guildId}:${userId}`;
+            const cdKey = `dungeon_cd:${userId}`;
             await redis.setJson(cdKey, 1, tierConfig.dungeonCooldownMs / 1000);
-            await QuestService.trackProgress(userId, runState.guildId, "dungeon").catch(() => {});
+            await QuestService.trackProgress(userId, interaction.guildId ?? "", "dungeon").catch(() => {});
             await interaction.editReply({ embeds: [embed], components: [] });
         } else {
             await redis.setJson(runKey, runState, RUN_TTL);
             await interaction.editReply({ embeds: [embed], components: [row] });
             // Schedule timeouts for combat/merchant encounters
-            const combatState = (await redis.getJson(`dungeon_combat:${userId}`)) as CombatState | null;
-            const merchantState = (await redis.getJson(`dungeon_merchant:${userId}`)) as MerchantState | null;
+            const combatState = await redis.getJson<RpgCombatState>(`dungeon_combat:${userId}`);
+            const merchantState = await redis.getJson<MerchantState>(`dungeon_merchant:${userId}`);
             if (combatState) {
-                scheduleCombatTimeout(interaction, userId, locale, combatState.encounterId);
+                scheduleCombatTimeout(interaction, userId, locale, combatState.userId);
             } else if (merchantState) {
                 scheduleMerchantTimeout(interaction, userId, locale, merchantState.encounterId);
             }

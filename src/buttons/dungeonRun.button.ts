@@ -1,10 +1,12 @@
 import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
-import type { CombatState, DungeonRunState } from "../services/economy/dungeon.service";
+import type { RpgCombatState } from "../services/rpg/combat.service";
+import type { DungeonRunState } from "../services/economy/dungeon.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
 import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
+import CombatService from "../services/rpg/combat.service";
 import { buildContinueLeaveRow, RUN_TTL } from "../commands/slash/dungeon";
 
 export default {
@@ -14,7 +16,7 @@ export default {
         const combatKey = `dungeon_combat:${userId}`;
         const runKey = `dungeon_run:${userId}`;
 
-        const state = (await redis.getJson(combatKey)) as CombatState | null;
+        const state = await redis.getJson<RpgCombatState>(combatKey);
         if (!state) {
             const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
             await interaction.reply({
@@ -30,10 +32,13 @@ export default {
         }
 
         await interaction.deferUpdate();
+
+        // Execute run action via CombatService (always succeeds)
+        CombatService.executeAction(state, "run");
         await redis.deleteKey(combatKey);
 
-        const locale = state.locale as SupportedLocale;
-        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+        const runState = await redis.getJson<DungeonRunState>(runKey);
+        const locale = (runState?.locale ?? "en") as SupportedLocale;
 
         const embed = new EmbedBuilder()
             .setTitle(`🏃 ${t(locale, "dungeon.title")}`)

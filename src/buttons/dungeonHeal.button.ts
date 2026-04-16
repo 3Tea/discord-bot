@@ -1,6 +1,6 @@
 import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
-import CurrencyService from "../services/economy/currency.service";
+import CharacterService from "../services/rpg/character.service";
 import MerchantService from "../services/economy/merchant.service";
 import type { MerchantState } from "../services/economy/merchant.service";
 import type { DungeonRunState } from "../services/economy/dungeon.service";
@@ -18,7 +18,7 @@ export default {
         const runKey = `dungeon_run:${userId}`;
 
         // Atomic claim: delete merchant key first to prevent double-spend
-        const merchantState = (await redis.getJson(merchantKey)) as MerchantState | null;
+        const merchantState = await redis.getJson<MerchantState>(merchantKey);
         if (!merchantState) {
             const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
             await interaction.reply({
@@ -38,15 +38,15 @@ export default {
 
         const locale = merchantState.locale as SupportedLocale;
 
-        // Validate run state exists before spending coin
-        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+        // Validate run state exists before spending gold
+        const runState = await redis.getJson<DungeonRunState>(runKey);
         if (!runState) {
             await interaction.reply({ content: t(locale, "dungeon.run.timeout"), flags: MessageFlags.Ephemeral });
             return;
         }
 
         // Check HP already full
-        if (merchantState.currentHp >= 100) {
+        if (merchantState.currentHp >= merchantState.maxHp) {
             await interaction.reply({ content: t(locale, "dungeon.merchant.hp_full"), flags: MessageFlags.Ephemeral });
             // Restore merchant state since no purchase happened
             await redis.setJson(merchantKey, merchantState, 30);
@@ -55,18 +55,13 @@ export default {
 
         await interaction.deferUpdate();
 
-        // Deduct coin
+        // Deduct gold from character
         try {
-            await CurrencyService.deduct(userId, merchantState.guildId, merchantState.healCost, 0, "dungeon", {
-                action: "merchant_heal",
-                floor: merchantState.floor,
-                cost: merchantState.healCost,
-                healAmount: merchantState.healAmount,
-            });
+            await CharacterService.deductGold(userId, merchantState.healCost);
         } catch (error) {
             const msg =
-                error instanceof Error && error.name === "InsufficientFundsError"
-                    ? t(locale, "dungeon.merchant.no_coin")
+                error instanceof Error && error.name === "InsufficientGoldError"
+                    ? t(locale, "dungeon.merchant.no_gold")
                     : t(locale, "common.error");
             await interaction.followUp({ content: msg, flags: MessageFlags.Ephemeral });
             // Clear stale merchant embed — show continue/leave
@@ -77,13 +72,13 @@ export default {
                         .setDescription(t(locale, "dungeon.merchant.timeout"))
                         .setColor(0x95a5a6),
                 ],
-                components: runState ? [buildContinueLeaveRow(locale, runState.encountersLeft)] : [],
+                components: [buildContinueLeaveRow(locale, runState.encountersLeft)],
             });
             return;
         }
 
-        // Apply heal
-        const actualHeal = MerchantService.calculateHeal(merchantState.currentHp, merchantState.healAmount);
+        // Apply heal using maxHp from merchant state
+        const actualHeal = MerchantService.calculateHeal(merchantState.currentHp, merchantState.healAmount, merchantState.maxHp);
         const newHp = merchantState.currentHp + actualHeal;
 
         runState.hp = newHp;
@@ -93,7 +88,11 @@ export default {
             .setTitle(`🧪 ${t(locale, "dungeon.title")}`)
             .setDescription(
                 [
-                    t(locale, "dungeon.merchant.heal_result", { amount: String(actualHeal), hp: String(newHp) }),
+                    t(locale, "dungeon.merchant.heal_result", {
+                        amount: String(actualHeal),
+                        hp: String(newHp),
+                        maxHp: String(merchantState.maxHp),
+                    }),
                     "",
                     t(locale, "dungeon.floor", {
                         floor: String(merchantState.floor),

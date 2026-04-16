@@ -1,6 +1,8 @@
 import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
-import CurrencyService from "../services/economy/currency.service";
+import CharacterService from "../services/rpg/character.service";
+import EquipmentService from "../services/rpg/equipment.service";
+import { RARITY_CONFIG } from "../services/rpg/rpg.config";
 import type { MerchantState } from "../services/economy/merchant.service";
 import type { DungeonRunState } from "../services/economy/dungeon.service";
 import { BUTTON_ID } from "../util/config/button";
@@ -10,14 +12,14 @@ import { t } from "../util/i18n/t";
 import { buildContinueLeaveRow, RUN_TTL } from "../commands/slash/dungeon";
 
 export default {
-    id: BUTTON_ID.DUNGEON_EXCHANGE,
+    id: BUTTON_ID.DUNGEON_EQUIP_BUY,
     async execute(interaction: ButtonInteraction) {
         const userId = interaction.user.id;
         const merchantKey = `dungeon_merchant:${userId}`;
         const runKey = `dungeon_run:${userId}`;
 
         // Atomic claim: delete merchant key first to prevent double-spend
-        const merchantState = (await redis.getJson(merchantKey)) as MerchantState | null;
+        const merchantState = await redis.getJson<MerchantState>(merchantKey);
         if (!merchantState) {
             const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
             await interaction.reply({
@@ -37,8 +39,8 @@ export default {
 
         const locale = merchantState.locale as SupportedLocale;
 
-        // Validate run state exists before spending coin
-        const runState = (await redis.getJson(runKey)) as DungeonRunState | null;
+        // Validate run state exists before spending gold
+        const runState = await redis.getJson<DungeonRunState>(runKey);
         if (!runState) {
             await interaction.reply({ content: t(locale, "dungeon.run.timeout"), flags: MessageFlags.Ephemeral });
             return;
@@ -46,18 +48,13 @@ export default {
 
         await interaction.deferUpdate();
 
-        // Deduct coin
+        // Deduct gold from character
         try {
-            await CurrencyService.deduct(userId, merchantState.guildId, merchantState.exchangeRate, 0, "dungeon", {
-                action: "merchant_exchange",
-                floor: merchantState.floor,
-                cost: merchantState.exchangeRate,
-                gemGained: 1,
-            });
+            await CharacterService.deductGold(userId, merchantState.equipCost);
         } catch (error) {
             const msg =
-                error instanceof Error && error.name === "InsufficientFundsError"
-                    ? t(locale, "dungeon.merchant.no_coin")
+                error instanceof Error && error.name === "InsufficientGoldError"
+                    ? t(locale, "dungeon.merchant.no_gold")
                     : t(locale, "common.error");
             await interaction.followUp({ content: msg, flags: MessageFlags.Ephemeral });
             await interaction.editReply({
@@ -67,25 +64,28 @@ export default {
                         .setDescription(t(locale, "dungeon.merchant.timeout"))
                         .setColor(0x95a5a6),
                 ],
-                components: runState ? [buildContinueLeaveRow(locale, runState.encountersLeft)] : [],
+                components: [buildContinueLeaveRow(locale, runState.encountersLeft)],
             });
             return;
         }
 
-        // Add 1 gem
-        await CurrencyService.addGem(userId, merchantState.guildId, 1, "dungeon", {
-            action: "merchant_exchange",
-            floor: merchantState.floor,
-        });
+        // Create equipment drop
+        const item = await EquipmentService.createEquipmentDrop(userId, runState.floor, runState.classType);
+        runState.drops.push(item._id.toString());
 
         // Refresh run TTL
         await redis.setJson(runKey, runState, RUN_TTL);
 
+        const rarityEmoji = RARITY_CONFIG[item.rarity].emoji;
         const embed = new EmbedBuilder()
-            .setTitle(`💎 ${t(locale, "dungeon.title")}`)
+            .setTitle(`🎁 ${t(locale, "dungeon.title")}`)
             .setDescription(
                 [
-                    t(locale, "dungeon.merchant.exchange_result", { cost: String(merchantState.exchangeRate) }),
+                    t(locale, "dungeon.merchant.equip_result", {
+                        rarity: rarityEmoji,
+                        name: item.name,
+                        slot: item.slot,
+                    }),
                     "",
                     t(locale, "dungeon.floor", {
                         floor: String(merchantState.floor),
@@ -93,7 +93,7 @@ export default {
                     }),
                 ].join("\n")
             )
-            .setColor(0x3498db);
+            .setColor(RARITY_CONFIG[item.rarity].color);
 
         await interaction.editReply({
             embeds: [embed],
