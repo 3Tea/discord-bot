@@ -1,4 +1,6 @@
 import {
+    ActionRowBuilder,
+    ButtonBuilder,
     ChannelType,
     ChatInputCommandInteraction,
     EmbedBuilder,
@@ -48,6 +50,7 @@ import QuestService from "../../services/quest/quest.service";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
+import { buildPremiumButton } from "../../util/premium/upgradeButton";
 
 export default {
     data: new SlashCommandBuilder()
@@ -557,7 +560,11 @@ async function executeSubmit(
     let confessionAudio: IConfessionAudio | null = null;
     if (audioAttachment) {
         if (!tierConfig.confessionAudioEnabled) {
-            await interaction.editReply({ content: t(locale, "confession.audio_premium_only") });
+            const embed = new EmbedBuilder()
+                .setDescription(t(locale, "confession.audio_premium_only"))
+                .setColor(0xed4245);
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(buildPremiumButton(locale));
+            await interaction.editReply({ embeds: [embed], components: [row] });
             return;
         }
 
@@ -574,13 +581,21 @@ async function executeSubmit(
 
         if (audioAttachment.size > tierConfig.confessionAudioMaxSize) {
             const maxMB = Math.round(tierConfig.confessionAudioMaxSize / 1_048_576);
-            await interaction.editReply({ content: t(locale, "confession.audio_too_large", { max: String(maxMB) }) });
+            const embed = new EmbedBuilder()
+                .setDescription(t(locale, "confession.audio_too_large", { max: String(maxMB) }))
+                .setColor(0xed4245);
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(buildPremiumButton(locale));
+            await interaction.editReply({ embeds: [embed], components: [row] });
             return;
         }
 
         const allowed = await checkAndIncrementAudioLimit(userId, tierConfig.confessionAudioDailyLimit);
         if (!allowed) {
-            await interaction.editReply({ content: t(locale, "confession.audio_daily_limit") });
+            const embed = new EmbedBuilder()
+                .setDescription(t(locale, "confession.audio_daily_limit"))
+                .setColor(0xed4245);
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(buildPremiumButton(locale));
+            await interaction.editReply({ embeds: [embed], components: [row] });
             return;
         }
 
