@@ -10,6 +10,7 @@ export interface ICharacter extends Document {
     gold: number;
     dungeonDepth: number;
     dungeonCheckpoint: number;
+    bossKills: number;
     equipment: {
         weapon: Types.ObjectId | null;
         shield: Types.ObjectId | null;
@@ -41,6 +42,7 @@ const characterSchema = new Schema(
         gold: { type: Number, default: 0, min: 0 },
         dungeonDepth: { type: Number, default: 1, min: 1 },
         dungeonCheckpoint: { type: Number, default: 1, min: 1 },
+        bossKills: { type: Number, default: 0, min: 0 },
         equipment: {
             weapon: { type: Schema.Types.ObjectId, ref: "Equipment", default: null },
             shield: { type: Schema.Types.ObjectId, ref: "Equipment", default: null },
