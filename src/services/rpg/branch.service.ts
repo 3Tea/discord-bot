@@ -10,9 +10,15 @@ import {
     WEEKLY_QUESTS_COUNT,
     WEEKLY_REWARD_TIERS,
     BRANCH_QUEST_TTL,
+    EVENT_REWARD_TIERS,
+    EVENT_SCORE_TTL,
+    EVENT_THEMES,
     scaleTarget,
     getWeekKey,
+    getMonthKey,
+    getCurrentEventTheme,
     type WeeklyQuestTemplate,
+    type EventRewardTier,
 } from "./branch.config";
 
 const BRANCH_CACHE_TTL = 300; // 5 minutes
@@ -120,6 +126,9 @@ async function trackBranchProgress(guildId: string, action: QuestAction, amount:
         const current = (await redis.getJson<number>(key)) ?? 0;
         await redis.setJson(key, current + amount, BRANCH_QUEST_TTL);
     }
+
+    // Track monthly event progress
+    await trackEventProgress(guildId, action, amount);
 }
 
 // --- Target Scaling ---
@@ -182,6 +191,106 @@ async function claimWeeklyReward(
     return { gold: tier.gold, exp: tier.exp, gp: tier.gp, crate: tier.crate };
 }
 
+// --- Monthly Event Functions ---
+
+function eventScoreKey(guildId: string, monthKey: string): string {
+    return `branch_event:${guildId}:${monthKey}`;
+}
+
+function eventRewardClaimedKey(userId: string, guildId: string, monthKey: string): string {
+    return `event_reward_claimed:${guildId}:${monthKey}:${userId}`;
+}
+
+async function trackEventProgress(guildId: string, action: QuestAction, amount: number): Promise<void> {
+    const theme = getCurrentEventTheme();
+    if (theme.action !== action) return;
+
+    const monthKey = getMonthKey();
+    const key = eventScoreKey(guildId, monthKey);
+    const current = (await redis.getJson<number>(key)) ?? 0;
+    await redis.setJson(key, current + amount, EVENT_SCORE_TTL);
+}
+
+async function getEventScore(guildId: string, monthKey: string): Promise<number> {
+    const key = eventScoreKey(guildId, monthKey);
+    return (await redis.getJson<number>(key)) ?? 0;
+}
+
+interface EventRankingEntry {
+    guildId: string;
+    name: string;
+    rawScore: number;
+    memberCount: number;
+    perCapita: number;
+}
+
+async function getEventRanking(monthKey: string): Promise<EventRankingEntry[]> {
+    const branches = await BranchGuildModel.find().lean();
+    const entries: EventRankingEntry[] = [];
+
+    for (const branch of branches) {
+        const rawScore = await getEventScore(branch.guildId, monthKey);
+        if (rawScore <= 0) continue;
+
+        const memberCount = await getMemberCountInServer(branch.guildId);
+        const safeCount = Math.max(1, memberCount);
+        entries.push({
+            guildId: branch.guildId,
+            name: branch.name,
+            rawScore,
+            memberCount: safeCount,
+            perCapita: Math.round((rawScore / safeCount) * 10) / 10,
+        });
+    }
+
+    // Sort by perCapita desc, then rawScore desc as tiebreaker
+    entries.sort((a, b) => b.perCapita - a.perCapita || b.rawScore - a.rawScore);
+    return entries;
+}
+
+async function claimEventReward(
+    userId: string,
+    guildId: string,
+    monthKey: string,
+    rank: number,
+): Promise<EventRewardTier | null> {
+    if (await isEventRewardClaimed(userId, guildId, monthKey)) return null;
+
+    const tier = EVENT_REWARD_TIERS.find((t) => rank <= t.maxRank);
+    if (!tier) return null;
+
+    // Mark as claimed first to prevent race conditions
+    await redis.setJson(eventRewardClaimedKey(userId, guildId, monthKey), true, EVENT_SCORE_TTL);
+
+    // Distribute rewards
+    await CharacterService.addGold(userId, tier.gold);
+    await CharacterService.addExp(userId, tier.exp);
+    await GuildService.addGP(userId, tier.gp);
+
+    if (tier.crate) {
+        await CharacterService.addCrate(userId, tier.crate);
+    }
+
+    return tier;
+}
+
+async function isEventRewardClaimed(userId: string, guildId: string, monthKey: string): Promise<boolean> {
+    const val = await redis.getJson<boolean>(eventRewardClaimedKey(userId, guildId, monthKey));
+    return val === true;
+}
+
+function getPreviousMonthKey(): string {
+    const d = new Date();
+    d.setUTCMonth(d.getUTCMonth() - 1);
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+function getPreviousEventTheme() {
+    const d = new Date();
+    const prevMonth = (d.getUTCMonth() + 11) % 12; // 0-11
+    return EVENT_THEMES[prevMonth % EVENT_THEMES.length];
+}
+
 const BranchService = {
     getBranch,
     createBranch,
@@ -195,6 +304,14 @@ const BranchService = {
     claimWeeklyReward,
     isRewardClaimed,
     getWeekKey,
+    // Monthly events
+    getEventScore,
+    getEventRanking,
+    claimEventReward,
+    isEventRewardClaimed,
+    getMonthKey,
+    getPreviousMonthKey,
+    getPreviousEventTheme,
 };
 
 export default BranchService;

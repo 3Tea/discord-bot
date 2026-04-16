@@ -12,7 +12,8 @@ import GuildService, { GuildMemberNotFoundError, AlreadyRegisteredError } from "
 import GuildQuestService from "../../services/rpg/guildQuest.service";
 import type { GuildQuest } from "../../services/rpg/guildQuest.service";
 import BranchService from "../../services/rpg/branch.service";
-import { getWeekKey, WEEKLY_QUESTS_COUNT } from "../../services/rpg/branch.config";
+import { getWeekKey, WEEKLY_QUESTS_COUNT, getCurrentEventTheme, getDaysRemainingInMonth } from "../../services/rpg/branch.config";
+import { CRATES as RPG_CRATES } from "../../services/rpg/rpg.config";
 import GuildMemberModel from "../../models/guildMember.model";
 import redis from "../../connector/redis";
 import {
@@ -835,6 +836,149 @@ async function handleBranch(interaction: ChatInputCommandInteraction, locale: Su
     await Reply.embedEdit(interaction, embed);
 }
 
+// --- /guild event ---
+
+function getMonthLabel(monthKey: string): string {
+    const [year, month] = monthKey.split("-");
+    const date = new Date(Date.UTC(parseInt(year, 10), parseInt(month, 10) - 1, 1));
+    return date.toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+}
+
+function getMedalEmoji(rank: number): string {
+    if (rank === 1) return "🥇";
+    if (rank === 2) return "🥈";
+    if (rank === 3) return "🥉";
+    return "  ";
+}
+
+async function handleEvent(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
+    const guildId = interaction.guildId;
+    if (!guildId) {
+        const embed = new EmbedBuilder()
+            .setDescription(t(locale, "common.guild_only"))
+            .setColor(0xed4245);
+        await Reply.embedEdit(interaction, embed);
+        return;
+    }
+
+    // Check branch exists
+    const branch = await BranchService.getBranch(guildId);
+    if (!branch) {
+        const embed = new EmbedBuilder()
+            .setDescription(t(locale, "guild.event.no_branch"))
+            .setColor(0xed4245);
+        await Reply.embedEdit(interaction, embed);
+        return;
+    }
+
+    // Current month event
+    const theme = getCurrentEventTheme();
+    const monthKey = BranchService.getMonthKey();
+    const monthLabel = getMonthLabel(monthKey);
+    const daysRemaining = getDaysRemainingInMonth();
+
+    const ranking = await BranchService.getEventRanking(monthKey);
+    const serverEntry = ranking.find((e) => e.guildId === guildId);
+    const serverRank = serverEntry ? ranking.indexOf(serverEntry) + 1 : 0;
+
+    const sections: string[] = [];
+
+    // Server info
+    sections.push(t(locale, "guild.event.your_server", { name: branch.name }));
+
+    if (serverEntry) {
+        sections.push(t(locale, "guild.event.score", {
+            raw: String(serverEntry.rawScore),
+            perCapita: String(serverEntry.perCapita),
+        }));
+        sections.push(t(locale, "guild.event.rank", {
+            rank: String(serverRank),
+            total: String(ranking.length),
+        }));
+    } else {
+        sections.push(t(locale, "guild.event.no_data"));
+    }
+
+    // Top 5
+    sections.push("");
+    if (ranking.length > 0) {
+        sections.push(t(locale, "guild.event.top"));
+        const top5 = ranking.slice(0, 5);
+        for (let i = 0; i < top5.length; i++) {
+            const entry = top5[i];
+            const pos = i + 1;
+            sections.push(t(locale, "guild.event.entry", {
+                pos: String(pos),
+                medal: getMedalEmoji(pos),
+                name: entry.name,
+                perCapita: String(entry.perCapita),
+                raw: String(entry.rawScore),
+                members: String(entry.memberCount),
+            }));
+        }
+    } else {
+        sections.push(t(locale, "guild.event.no_data"));
+    }
+
+    // Days remaining
+    sections.push("");
+    sections.push(t(locale, "guild.event.remaining", { days: String(daysRemaining) }));
+
+    // Lazy-claim previous month rewards
+    const prevMonthKey = BranchService.getPreviousMonthKey();
+    const prevClaimed = await BranchService.isEventRewardClaimed(interaction.user.id, guildId, prevMonthKey);
+
+    if (!prevClaimed) {
+        const prevRanking = await BranchService.getEventRanking(prevMonthKey);
+        const prevEntry = prevRanking.find((e) => e.guildId === guildId);
+        const prevRank = prevEntry ? prevRanking.indexOf(prevEntry) + 1 : 0;
+
+        if (prevRank > 0 && prevRank <= 10) {
+            const reward = await BranchService.claimEventReward(
+                interaction.user.id,
+                guildId,
+                prevMonthKey,
+                prevRank,
+            );
+
+            if (reward) {
+                const prevTheme = BranchService.getPreviousEventTheme();
+                const prevMonthLabel = getMonthLabel(prevMonthKey);
+                let rewardLine = t(locale, "guild.event.reward_claimed", {
+                    month: prevMonthLabel,
+                    theme: t(locale, `guild.event.theme.${prevTheme.key}`),
+                    rank: String(prevRank),
+                    medal: getMedalEmoji(prevRank),
+                    gold: String(reward.gold),
+                    exp: String(reward.exp),
+                    gp: String(reward.gp),
+                });
+                if (reward.crate) {
+                    rewardLine += t(locale, "guild.event.reward_crate", {
+                        emoji: RPG_CRATES[reward.crate].emoji,
+                        crate: reward.crate.charAt(0).toUpperCase() + reward.crate.slice(1),
+                    });
+                }
+                sections.push("", rewardLine);
+            }
+        } else if (prevRank === 0 || prevRank > 10) {
+            sections.push("", t(locale, "guild.event.no_rank"));
+        }
+    }
+
+    const embed = new EmbedBuilder()
+        .setTitle(t(locale, "guild.event.title", {
+            emoji: theme.emoji,
+            theme: t(locale, `guild.event.theme.${theme.key}`),
+            month: monthLabel,
+        }))
+        .setDescription(sections.join("\n"))
+        .setColor(0xf1c40f)
+        .setTimestamp();
+
+    await Reply.embedEdit(interaction, embed);
+}
+
 // --- Command definition ---
 
 export default {
@@ -887,6 +1031,12 @@ export default {
                 .setName("branch")
                 .setDescription("View branch guild info and weekly quests")
                 .setDescriptionLocalizations(descriptionLocales("cmd.guild.branch.desc"))
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("event")
+                .setDescription("View monthly competitive event and server ranking")
+                .setDescriptionLocalizations(descriptionLocales("cmd.guild.event.desc"))
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -913,6 +1063,9 @@ export default {
                     return;
                 case "branch":
                     await handleBranch(interaction, locale);
+                    return;
+                case "event":
+                    await handleEvent(interaction, locale);
                     return;
                 default: {
                     const embed = new EmbedBuilder()
