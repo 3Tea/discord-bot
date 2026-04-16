@@ -345,3 +345,188 @@ export const CRATE_DROP_RATES = {
     treasure: { bronze: 0.15, silver: 0.05 },
     boss: { silver: 0.5, gold: 0.15 },
 } as const;
+
+// --- Advanced Class Types ---
+
+export const ADVANCED_CLASSES = [
+    "berserker", "knight", "fortress", "paladin", "warlock", "archmage",
+    "sniper", "ranger", "phantom", "shadow", "druid", "priest",
+] as const;
+export type AdvancedClassType = (typeof ADVANCED_CLASSES)[number];
+
+// --- Advanced Class Config ---
+
+export interface AdvancedClassConfig {
+    key: AdvancedClassType;
+    emoji: string;
+    baseClass: ClassType;
+    path: "offensive" | "defensive";
+    statBonus: Partial<Record<keyof StatBlock, number>>;
+    ultimate: SkillDef & { mpCost: number };
+}
+
+export const ULTIMATE_MP_COST = 50;
+
+export const ADVANCED_CLASS_CONFIG: Record<AdvancedClassType, AdvancedClassConfig> = {
+    // --- Offensive Path ---
+    berserker: {
+        key: "berserker",
+        emoji: "⚔️",
+        baseClass: "swordsman",
+        path: "offensive",
+        statBonus: { str: 0.2, hp: -0.1 },
+        ultimate: {
+            key: "blood_frenzy", emoji: "🩸", damageType: "physical", multiplier: 3,
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    fortress: {
+        key: "fortress",
+        emoji: "🏰",
+        baseClass: "tank",
+        path: "offensive",
+        statBonus: { def: 0.25, spd: -0.15 },
+        ultimate: {
+            key: "stone_wall", emoji: "🪨", damageType: "buff", multiplier: 0,
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    warlock: {
+        key: "warlock",
+        emoji: "😈",
+        baseClass: "mage",
+        path: "offensive",
+        statBonus: { mag: 0.25, hp: -0.15 },
+        ultimate: {
+            key: "soul_burn", emoji: "💀", damageType: "magical", multiplier: 4,
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    sniper: {
+        key: "sniper",
+        emoji: "🎯",
+        baseClass: "archer",
+        path: "offensive",
+        statBonus: { str: 0.15, spd: 0.1, def: -0.15 },
+        ultimate: {
+            key: "headshot", emoji: "💥", damageType: "physical", multiplier: 5,
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    phantom: {
+        key: "phantom",
+        emoji: "👻",
+        baseClass: "assassin",
+        path: "offensive",
+        statBonus: { str: 0.2, spd: 0.1, hp: -0.2 },
+        ultimate: {
+            key: "shadow_strike", emoji: "🌀", damageType: "physical", multiplier: 3.5,
+            ignoreDefPercent: 1,
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    druid: {
+        key: "druid",
+        emoji: "🌱",
+        baseClass: "healer",
+        path: "offensive",
+        statBonus: { mag: 0.15, hp: 0.1 },
+        ultimate: {
+            key: "natures_wrath", emoji: "🌿", damageType: "magical", multiplier: 2.5,
+            healPercent: 0.25,
+            statusEffect: { type: "poison", value: 0.1, turns: 3 }, statusTarget: "monster",
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    // --- Defensive Path ---
+    knight: {
+        key: "knight",
+        emoji: "🛡️",
+        baseClass: "swordsman",
+        path: "defensive",
+        statBonus: { def: 0.15, str: 0.05 },
+        ultimate: {
+            key: "guardians_oath", emoji: "⚔️", damageType: "physical", multiplier: 1.5,
+            statusEffect: { type: "def_buff", value: 1, turns: 3 }, statusTarget: "self",
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    paladin: {
+        key: "paladin",
+        emoji: "✨",
+        baseClass: "tank",
+        path: "defensive",
+        statBonus: { hp: 0.2, magDef: 0.15 },
+        ultimate: {
+            key: "divine_shield", emoji: "✨", damageType: "heal", multiplier: 0,
+            healPercent: 0.5,
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    archmage: {
+        key: "archmage",
+        emoji: "🔮",
+        baseClass: "mage",
+        path: "defensive",
+        statBonus: { mag: 0.1, magDef: 0.2 },
+        ultimate: {
+            key: "arcane_barrier", emoji: "🌟", damageType: "magical", multiplier: 2.5,
+            statusEffect: { type: "def_buff", value: 1, turns: 2 }, statusTarget: "self",
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    ranger: {
+        key: "ranger",
+        emoji: "🌿",
+        baseClass: "archer",
+        path: "defensive",
+        statBonus: { spd: 0.2, def: 0.1 },
+        ultimate: {
+            key: "arrow_rain", emoji: "🏹", damageType: "physical", multiplier: 1,
+            hits: 5,
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    shadow: {
+        key: "shadow",
+        emoji: "🌑",
+        baseClass: "assassin",
+        path: "defensive",
+        statBonus: { spd: 0.15, mag: 0.1 },
+        ultimate: {
+            key: "toxic_cloud", emoji: "☠️", damageType: "physical", multiplier: 0,
+            statusEffect: { type: "poison", value: 0.2, turns: 4 }, statusTarget: "monster",
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+    priest: {
+        key: "priest",
+        emoji: "🙏",
+        baseClass: "healer",
+        path: "defensive",
+        statBonus: { hp: 0.15, mag: 0.1, magDef: 0.15 },
+        ultimate: {
+            key: "resurrection", emoji: "💫", damageType: "buff", multiplier: 0,
+            mpCost: ULTIMATE_MP_COST,
+        },
+    },
+};
+
+// --- Advancement Requirements ---
+
+export const ADVANCEMENT_REQUIREMENTS = {
+    level: 20,
+    materials: [{ key: "epic_core", qty: 5 }, { key: "rare_essence", qty: 10 }],
+    goldCost: 3000,
+};
+
+// --- Base Class → Advanced Class Mapping ---
+
+export const BASE_TO_ADVANCED: Record<ClassType, [AdvancedClassType, AdvancedClassType]> = {
+    swordsman: ["berserker", "knight"],
+    tank: ["fortress", "paladin"],
+    mage: ["warlock", "archmage"],
+    archer: ["sniper", "ranger"],
+    assassin: ["phantom", "shadow"],
+    healer: ["druid", "priest"],
+};

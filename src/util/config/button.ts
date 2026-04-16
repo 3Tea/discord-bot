@@ -51,6 +51,7 @@ export const BUTTON_ID = {
     // Dungeon skill buttons (RPG)
     DUNGEON_SKILL1: "dungeon_skill1",
     DUNGEON_SKILL2: "dungeon_skill2",
+    DUNGEON_ULTIMATE: "dungeon_ultimate",
     // Dungeon merchant equipment purchase (replaces exchange)
     DUNGEON_EQUIP_BUY: "dungeon_equip_buy",
 };
