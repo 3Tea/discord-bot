@@ -15,7 +15,7 @@ import type { MerchantState } from "../../services/economy/merchant.service";
 import CharacterService from "../../services/rpg/character.service";
 import CombatService from "../../services/rpg/combat.service";
 import type { RpgCombatState } from "../../services/rpg/combat.service";
-import { getMonsterStats, getBossStats, RARITY_CONFIG, type ClassType, type Rarity } from "../../services/rpg/rpg.config";
+import { getMonsterStats, getBossStats, RARITY_CONFIG, MATERIALS, SKILL1_MP_COST, SKILL2_MP_COST, type ClassType, type Rarity } from "../../services/rpg/rpg.config";
 import PremiumService from "../../services/premium/premium.service";
 import { buildPremiumButton } from "../../util/premium/upgradeButton";
 import { TIER_CONFIG } from "../../services/premium/premium.config";
@@ -35,7 +35,7 @@ export const COMBAT_TIMEOUT_MS = 30_000;
 
 // --- Embed builders (exported for button handlers) ---
 
-export function buildCombatRow(locale: SupportedLocale, classType: ClassType): ActionRowBuilder<ButtonBuilder> {
+export function buildCombatRow(locale: SupportedLocale, classType: ClassType, currentMp: number): ActionRowBuilder<ButtonBuilder> {
     const [skill1, skill2] = CombatService.getSkillLabels(classType);
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
@@ -47,12 +47,14 @@ export function buildCombatRow(locale: SupportedLocale, classType: ClassType): A
             .setCustomId(BUTTON_ID.DUNGEON_SKILL1)
             .setLabel(t(locale, `rpg.skill.${skill1.key}`))
             .setEmoji(skill1.emoji)
-            .setStyle(ButtonStyle.Primary),
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(currentMp < SKILL1_MP_COST),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.DUNGEON_SKILL2)
             .setLabel(t(locale, `rpg.skill.${skill2.key}`))
             .setEmoji(skill2.emoji)
-            .setStyle(ButtonStyle.Primary),
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(currentMp < SKILL2_MP_COST),
         new ButtonBuilder()
             .setCustomId(BUTTON_ID.DUNGEON_DEFEND)
             .setLabel(t(locale, "dungeon.btn.defend"))
@@ -150,6 +152,7 @@ export interface TreasureEmbedOptions {
     expReward: number;
     starReward: boolean;
     equipDrop: { name: string; rarity: string; slot: string } | null;
+    materialDrops: { key: string; qty: number }[];
     newFloor: number;
     checkpointReached: boolean;
     leveled: boolean;
@@ -158,7 +161,7 @@ export interface TreasureEmbedOptions {
 }
 
 export function buildTreasureEmbed(locale: SupportedLocale, opts: TreasureEmbedOptions): EmbedBuilder {
-    const { floor, checkpoint, goldReward, expReward, starReward, equipDrop, newFloor, checkpointReached, leveled, oldLevel, newLevel } = opts;
+    const { floor, checkpoint, goldReward, expReward, starReward, equipDrop, materialDrops, newFloor, checkpointReached, leveled, oldLevel, newLevel } = opts;
     const descLines = [
         t(locale, "dungeon.encounter.treasure", { floor: String(floor) }),
         t(locale, "dungeon.reward.gold", { amount: String(goldReward) }),
@@ -169,6 +172,7 @@ export function buildTreasureEmbed(locale: SupportedLocale, opts: TreasureEmbedO
                 name: equipDrop.name,
             })]
             : []),
+        ...(materialDrops.length > 0 ? formatMaterialDrops(locale, materialDrops) : []),
         "",
         t(locale, "dungeon.floor", { floor: String(newFloor), checkpoint: String(checkpoint) }),
         ...(checkpointReached ? ["🔖 " + t(locale, "dungeon.checkpoint_reached", { floor: String(newFloor) })] : []),
@@ -207,6 +211,15 @@ export function buildTrapEmbed(locale: SupportedLocale, opts: TrapEmbedOptions):
         .setColor(collapsed ? 0xed4245 : 0xe67e22);
 }
 
+export function formatMaterialDrops(locale: SupportedLocale, materialDrops: { key: string; qty: number }[]): string[] {
+    return materialDrops.map((drop) => {
+        const mat = MATERIALS.find((m) => m.key === drop.key);
+        const emoji = mat?.emoji ?? "⬜";
+        const name = t(locale, `rpg.material.${drop.key}`);
+        return `${emoji} ${name} ×${drop.qty}`;
+    });
+}
+
 export function buildRpgCombatEmbed(
     locale: SupportedLocale,
     state: RpgCombatState,
@@ -228,6 +241,7 @@ export function buildRpgCombatEmbed(
                     monsterHp: String(state.monster.hp),
                     maxMonsterHp: String(state.monster.maxHp),
                 }),
+                t(locale, "dungeon.combat.mp", { mp: String(state.user.mp), maxMp: String(state.user.maxMp) }),
                 "",
                 t(locale, "dungeon.floor", { floor: String(checkpoint), checkpoint: String(checkpoint) }),
             ].join("\n")
@@ -266,8 +280,8 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
             userStats: stats,
             userHp: runState.hp,
             maxHp: runState.maxHp,
-            userMp: (runState as { mp?: number }).mp ?? 0,
-            maxMp: (runState as { maxMp?: number }).maxMp ?? 0,
+            userMp: runState.mp,
+            maxMp: runState.maxMp,
             monster: { name: monster.name, emoji: monster.emoji, stats: monsterStats },
             isBoss,
         });
@@ -277,7 +291,7 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
 
         return {
             embed: buildRpgCombatEmbed(locale, combatState, checkpoint),
-            row: buildCombatRow(locale, classType),
+            row: buildCombatRow(locale, classType, runState.mp ?? runState.maxMp ?? 55),
             runEnded: false,
         };
     }
@@ -298,6 +312,7 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
             expReward: result.expReward,
             starReward: result.starReward,
             equipDrop: result.equipDrop,
+            materialDrops: result.materialDrops,
             newFloor: result.newFloor,
             checkpointReached: result.checkpointReached,
             leveled: result.leveled,

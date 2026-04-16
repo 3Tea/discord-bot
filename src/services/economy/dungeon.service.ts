@@ -15,6 +15,7 @@ export interface CombatResolveResult {
     expReward: number;
     starReward: boolean;
     equipDrop: { name: string; rarity: string; slot: string; id: string } | null;
+    materialDrops: { key: string; qty: number }[];
     floorAdvanced: boolean;
     newFloor: number;
     checkpoint: number;
@@ -36,6 +37,7 @@ export interface TreasureResult {
     expReward: number;
     starReward: boolean;
     equipDrop: { name: string; rarity: string; slot: string; id: string } | null;
+    materialDrops: { key: string; qty: number }[];
     newFloor: number;
     checkpoint: number;
     checkpointReached: boolean;
@@ -57,6 +59,8 @@ export interface DungeonRunState {
     classType: ClassType;
     hp: number;
     maxHp: number;
+    mp: number;
+    maxMp: number;
     floor: number;
     checkpoint: number;
     encountersLeft: number;
@@ -124,6 +128,7 @@ function isBossFloor(floor: number): boolean {
 async function startRun(userId: string, locale: string): Promise<DungeonRunState> {
     const char = await CharacterService.requireCharacter(userId);
     const stats = await CharacterService.getEffectiveStats(userId);
+    const maxMp = CharacterService.getMaxMp(char.level);
 
     return {
         userId,
@@ -131,6 +136,8 @@ async function startRun(userId: string, locale: string): Promise<DungeonRunState
         classType: char.class,
         hp: stats.hp,
         maxHp: stats.hp,
+        mp: maxMp,
+        maxMp,
         floor: char.dungeonDepth,
         checkpoint: char.dungeonCheckpoint,
         encountersLeft: ENCOUNTERS_PER_RUN,
@@ -150,6 +157,7 @@ async function resolveCombatWin(
 ): Promise<CombatResolveResult> {
     const rewards = DUNGEON_REWARDS.monster;
     const multiplier = isBoss ? DUNGEON_REWARDS.boss.rewardMultiplier : 1;
+    const source = isBoss ? "boss" : "monster" as const;
 
     const goldReward = Math.floor((rewards.goldBase + floor * rewards.goldPerFloor) * multiplier);
     const expReward = Math.floor((rewards.expBase + floor * rewards.expPerFloor) * multiplier);
@@ -159,11 +167,17 @@ async function resolveCombatWin(
     await CharacterService.addGold(userId, goldReward);
     const levelResult = await CharacterService.addExp(userId, expReward);
 
+    // Material drops
+    const materialDrops = EquipmentService.rollMaterialDrops(floor, source);
+    if (materialDrops.length > 0) {
+        await CharacterService.addMaterials(userId, materialDrops);
+    }
+
     // Equipment drop check
     const equipChance = isBoss ? DUNGEON_REWARDS.boss.equipChance : rewards.equipChance;
     let equipDrop: CombatResolveResult["equipDrop"] = null;
     if (Math.random() < equipChance) {
-        const item = await EquipmentService.createEquipmentDrop(userId, floor, classType);
+        const item = await EquipmentService.createEquipmentDrop(userId, floor, classType, source);
         equipDrop = { name: item.name, rarity: item.rarity, slot: item.slot, id: item._id.toString() };
     }
 
@@ -181,6 +195,7 @@ async function resolveCombatWin(
         expReward,
         starReward,
         equipDrop,
+        materialDrops,
         floorAdvanced: true,
         newFloor,
         checkpoint: newCheckpoint,
@@ -221,9 +236,15 @@ async function resolveTreasure(
     await CharacterService.addGold(userId, goldReward);
     const levelResult = await CharacterService.addExp(userId, expReward);
 
+    // Material drops
+    const materialDrops = EquipmentService.rollMaterialDrops(floor, "treasure");
+    if (materialDrops.length > 0) {
+        await CharacterService.addMaterials(userId, materialDrops);
+    }
+
     let equipDrop: TreasureResult["equipDrop"] = null;
     if (Math.random() < rewards.equipChance) {
-        const item = await EquipmentService.createEquipmentDrop(userId, floor, classType);
+        const item = await EquipmentService.createEquipmentDrop(userId, floor, classType, "treasure");
         equipDrop = { name: item.name, rarity: item.rarity, slot: item.slot, id: item._id.toString() };
     }
 
@@ -239,6 +260,7 @@ async function resolveTreasure(
         expReward,
         starReward,
         equipDrop,
+        materialDrops,
         newFloor,
         checkpoint: newCheckpoint,
         checkpointReached,
