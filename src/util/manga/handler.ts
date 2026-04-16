@@ -23,6 +23,7 @@ import WalletService, { InsufficientStarError } from "../../services/economy/wal
 import PremiumService from "../../services/premium/premium.service";
 import { secondsUntilUTCMidnight } from "../date/utc";
 import type { MangaSource } from "./sources";
+import { buildPremiumButton } from "../premium/upgradeButton";
 
 const CACHE_TTL = 60 * 10; // 10 minutes
 const BUTTON_REMOVE_DELAY = 20_000; // 20 seconds
@@ -88,13 +89,7 @@ function buildResultRow(
                 .setStyle(ButtonStyle.Primary)
         );
     } else {
-        row.addComponents(
-            new ButtonBuilder()
-                .setCustomId(BUTTON_ID.MANGA_READ)
-                .setLabel(t(locale, "manga.premium_only"))
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(true)
-        );
+        row.addComponents(buildPremiumButton(locale));
     }
 
     row.addComponents(
@@ -168,7 +163,11 @@ export function mangaCommand(source: MangaSource) {
                 charged = await applyStarCharge(interaction.user.id, source.name);
             } catch (error) {
                 if (error instanceof InsufficientStarError) {
-                    await interaction.reply({ content: t(locale, "manga.no_stars"), flags: MessageFlags.Ephemeral });
+                    const embed = new EmbedBuilder()
+                        .setDescription(t(locale, "manga.no_stars"))
+                        .setColor(0xed4245);
+                    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(buildPremiumButton(locale));
+                    await interaction.reply({ embeds: [embed], components: [row], flags: MessageFlags.Ephemeral });
                     return;
                 }
                 throw error;
