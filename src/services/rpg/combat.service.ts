@@ -186,169 +186,147 @@ function tickStatusEffects(combatant: CombatantState): number {
     return poisonDmg;
 }
 
-// --- Execute Action ---
+// --- MP helpers ---
 
-function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "skill2" | "defend" | "run"): CombatActionResult {
-    // --- Run ---
-    if (action === "run") {
-        return {
-            userDamage: 0,
-            monsterDamage: 0,
-            userHp: state.user.hp,
-            monsterHp: state.monster.hp,
-            turnsLeft: state.turnsLeft,
-            won: false,
-            lost: false,
-            fled: true,
-            turnsUp: false,
-            mpCost: 0,
-            mpRegen: 0,
-            currentMp: state.user.mp,
-            insufficientMp: false,
-        };
-    }
+function resolveMpCost(action: string): number {
+    if (action === "skill1") return SKILL1_MP_COST;
+    if (action === "skill2") return SKILL2_MP_COST;
+    return 0;
+}
 
-    // --- MP cost check ---
-    let mpCost = 0;
-    if (action === "skill1") mpCost = SKILL1_MP_COST;
-    if (action === "skill2") mpCost = SKILL2_MP_COST;
+function regenMp(user: CombatantState, action: string): number {
+    const regen = MP_REGEN_PER_TURN + (action === "defend" ? MP_REGEN_ON_DEFEND : 0);
+    user.mp = Math.min(user.maxMp, user.mp + regen);
+    return regen;
+}
 
-    if (mpCost > 0 && state.user.mp < mpCost) {
-        return {
-            userDamage: 0, monsterDamage: 0,
-            userHp: state.user.hp, monsterHp: state.monster.hp,
-            turnsLeft: state.turnsLeft,
-            won: false, lost: false, fled: false, turnsUp: false,
-            mpCost: 0, mpRegen: 0, currentMp: state.user.mp,
-            insufficientMp: true,
-        };
-    }
+// --- Action branch: Defend ---
 
-    if (mpCost > 0) state.user.mp -= mpCost;
+function executeDefend(state: RpgCombatState, mpCost: number): CombatActionResult {
+    const healAmount = Math.floor(state.user.maxHp * 0.05);
+    state.user.hp = Math.min(state.user.maxHp, state.user.hp + healAmount);
 
-    const classConfig = CLASS_CONFIG[state.classType];
-    let userDamage = 0;
+    const rawMonsterDmg = monsterAttack(state);
+    const monsterDmg = Math.max(1, Math.floor(rawMonsterDmg * 0.5));
+    state.user.hp = Math.max(0, state.user.hp - monsterDmg);
+
+    state.turnsLeft--;
+    const monsterPoisonDmg = tickStatusEffects(state.monster);
+    const userPoisonDmg = tickStatusEffects(state.user);
+    const mpRegen = regenMp(state.user, "defend");
+
+    return {
+        userDamage: 0,
+        monsterDamage: monsterDmg,
+        userHp: state.user.hp,
+        monsterHp: state.monster.hp,
+        turnsLeft: state.turnsLeft,
+        won: state.monster.hp <= 0,
+        lost: state.user.hp <= 0,
+        fled: false,
+        turnsUp: state.turnsLeft <= 0 && state.monster.hp > 0 && state.user.hp > 0,
+        healAmount,
+        poisonDamage: monsterPoisonDmg + userPoisonDmg,
+        mpCost,
+        mpRegen,
+        currentMp: state.user.mp,
+        insufficientMp: false,
+    };
+}
+
+// --- Action branch: Heal skill ---
+
+function executeHealSkill(state: RpgCombatState, skill: SkillDef, action: string, mpCost: number): CombatActionResult {
     let healAmount = 0;
     let statusApplied: string | undefined;
-    let critHit = false;
 
-    // --- Defend ---
-    if (action === "defend") {
-        // Heal 5% max HP
-        healAmount = Math.floor(state.user.maxHp * 0.05);
+    if (skill.healPercent) {
+        healAmount = Math.floor(state.user.maxHp * skill.healPercent);
         state.user.hp = Math.min(state.user.maxHp, state.user.hp + healAmount);
-
-        // Monster attacks at 50% damage
-        const rawMonsterDmg = monsterAttack(state);
-        const monsterDmg = Math.max(1, Math.floor(rawMonsterDmg * 0.5));
-        state.user.hp = Math.max(0, state.user.hp - monsterDmg);
-
-        state.turnsLeft--;
-        const monsterPoisonDmg = tickStatusEffects(state.monster);
-        const userPoisonDmg = tickStatusEffects(state.user);
-
-        // MP regen on defend (passive + defend bonus)
-        const mpRegenDefend = MP_REGEN_PER_TURN + MP_REGEN_ON_DEFEND;
-        state.user.mp = Math.min(state.user.maxMp, state.user.mp + mpRegenDefend);
-
-        return {
-            userDamage: 0,
-            monsterDamage: monsterDmg,
-            userHp: state.user.hp,
-            monsterHp: state.monster.hp,
-            turnsLeft: state.turnsLeft,
-            won: state.monster.hp <= 0,
-            lost: state.user.hp <= 0,
-            fled: false,
-            turnsUp: state.turnsLeft <= 0 && state.monster.hp > 0 && state.user.hp > 0,
-            healAmount,
-            poisonDamage: monsterPoisonDmg + userPoisonDmg,
-            mpCost,
-            mpRegen: mpRegenDefend,
-            currentMp: state.user.mp,
-            insufficientMp: false,
-        };
     }
 
-    // --- Attack / Skill ---
-    let skill: SkillDef | null = null;
-    if (action === "skill1") skill = CLASS_SKILLS[state.classType][0];
-    if (action === "skill2") skill = CLASS_SKILLS[state.classType][1];
+    if (skill.statusEffect && skill.statusTarget === "self") {
+        state.user.statusEffects.push({
+            type: skill.statusEffect.type,
+            value: skill.statusEffect.value,
+            turnsLeft: skill.statusEffect.turns,
+        });
+        statusApplied = skill.statusEffect.type;
+    }
 
+    const monsterDmg = monsterAttack(state);
+    state.user.hp = Math.max(0, state.user.hp - monsterDmg);
+
+    state.turnsLeft--;
+    tickStatusEffects(state.monster);
+    tickStatusEffects(state.user);
+    const mpRegen = regenMp(state.user, action);
+
+    return {
+        userDamage: 0,
+        monsterDamage: monsterDmg,
+        userHp: state.user.hp,
+        monsterHp: state.monster.hp,
+        turnsLeft: state.turnsLeft,
+        won: state.monster.hp <= 0,
+        lost: state.user.hp <= 0,
+        fled: false,
+        turnsUp: state.turnsLeft <= 0 && state.monster.hp > 0 && state.user.hp > 0,
+        healAmount,
+        statusApplied,
+        mpCost,
+        mpRegen,
+        currentMp: state.user.mp,
+        insufficientMp: false,
+    };
+}
+
+// --- Single-hit damage calculation ---
+
+function calcHitDamage(
+    state: RpgCombatState,
+    skill: SkillDef | null,
+    monsterDef: number,
+    monsterMagDef: number
+): { dmg: number; crit: boolean } {
+    const classConfig = CLASS_CONFIG[state.classType];
     const multiplier = skill?.multiplier ?? 1.0;
     const ignoreDefPercent = skill?.ignoreDefPercent ?? 0;
-    const hits = skill?.hits ?? 1;
 
-    // Handle heal-type skills
-    if (skill?.damageType === "heal") {
-        if (skill.healPercent) {
-            healAmount = Math.floor(state.user.maxHp * skill.healPercent);
-            state.user.hp = Math.min(state.user.maxHp, state.user.hp + healAmount);
-        }
-        // Apply status effect if any (e.g., Tank Fortify gives DEF buff + heal)
-        if (skill.statusEffect && skill.statusTarget === "self") {
-            state.user.statusEffects.push({
-                type: skill.statusEffect.type,
-                value: skill.statusEffect.value,
-                turnsLeft: skill.statusEffect.turns,
-            });
-            statusApplied = skill.statusEffect.type;
-        }
-
-        // Monster still attacks
-        const monsterDmg = monsterAttack(state);
-        state.user.hp = Math.max(0, state.user.hp - monsterDmg);
-
-        state.turnsLeft--;
-        tickStatusEffects(state.monster);
-        tickStatusEffects(state.user);
-
-        // MP passive regen
-        const mpRegenHeal = MP_REGEN_PER_TURN;
-        state.user.mp = Math.min(state.user.maxMp, state.user.mp + mpRegenHeal);
-
-        return {
-            userDamage: 0,
-            monsterDamage: monsterDmg,
-            userHp: state.user.hp,
-            monsterHp: state.monster.hp,
-            turnsLeft: state.turnsLeft,
-            won: state.monster.hp <= 0,
-            lost: state.user.hp <= 0,
-            fled: false,
-            turnsUp: state.turnsLeft <= 0 && state.monster.hp > 0 && state.user.hp > 0,
-            healAmount,
-            statusApplied,
-            mpCost,
-            mpRegen: mpRegenHeal,
-            currentMp: state.user.mp,
-            insufficientMp: false,
-        };
+    let dmg: number;
+    if (skill?.damageType === "magical" || (!skill && classConfig.primaryDamage === "mag")) {
+        dmg = calcMagicalDamage(state.user.stats.mag, monsterMagDef, multiplier, ignoreDefPercent);
+    } else {
+        dmg = calcPhysicalDamage(state.user.stats.str, monsterDef, multiplier, ignoreDefPercent);
     }
 
-    // Damage-dealing actions
+    let crit = false;
+    if (skill?.critChance && Math.random() < skill.critChance) {
+        dmg = Math.floor(dmg * (skill.critMultiplier ?? 2));
+        crit = true;
+    }
+
+    return { dmg, crit };
+}
+
+// --- Action branch: Damage (attack / damage skills) ---
+
+function executeDamageAction(state: RpgCombatState, skill: SkillDef | null, action: string, mpCost: number): CombatActionResult {
+    const hits = skill?.hits ?? 1;
     const monsterDef = getEffectiveStat(state.monster.stats.def, state.monster.statusEffects, "def");
     const monsterMagDef = getEffectiveStat(state.monster.stats.magDef, state.monster.statusEffects, "magDef");
 
+    let userDamage = 0;
+    let critHit = false;
+
     for (let h = 0; h < hits; h++) {
-        let dmg: number;
-        if (skill?.damageType === "magical" || (!skill && classConfig.primaryDamage === "mag")) {
-            dmg = calcMagicalDamage(state.user.stats.mag, monsterMagDef, multiplier, ignoreDefPercent);
-        } else {
-            dmg = calcPhysicalDamage(state.user.stats.str, monsterDef, multiplier, ignoreDefPercent);
-        }
-
-        // Crit check
-        if (skill?.critChance && Math.random() < skill.critChance) {
-            dmg = Math.floor(dmg * (skill.critMultiplier ?? 2.0));
-            critHit = true;
-        }
-
+        const { dmg, crit } = calcHitDamage(state, skill, monsterDef, monsterMagDef);
+        if (crit) critHit = true;
         userDamage += dmg;
         state.monster.hp = Math.max(0, state.monster.hp - dmg);
     }
 
-    // Apply skill status effect
+    let statusApplied: string | undefined;
     if (skill?.statusEffect) {
         const target = skill.statusTarget === "self" ? state.user : state.monster;
         target.statusEffects.push({
@@ -359,7 +337,6 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
         statusApplied = skill.statusEffect.type;
     }
 
-    // Monster attacks back (if alive)
     let monsterDmg = 0;
     if (state.monster.hp > 0) {
         monsterDmg = monsterAttack(state);
@@ -369,10 +346,7 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
     state.turnsLeft--;
     const monsterPoisonDmg = tickStatusEffects(state.monster);
     tickStatusEffects(state.user);
-
-    // MP passive regen
-    const mpRegenAttack = MP_REGEN_PER_TURN;
-    state.user.mp = Math.min(state.user.maxMp, state.user.mp + mpRegenAttack);
+    const mpRegen = regenMp(state.user, action);
 
     return {
         userDamage,
@@ -388,10 +362,49 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
         statusApplied,
         poisonDamage: monsterPoisonDmg,
         mpCost,
-        mpRegen: mpRegenAttack,
+        mpRegen,
         currentMp: state.user.mp,
         insufficientMp: false,
     };
+}
+
+// --- Execute Action (dispatcher) ---
+
+function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "skill2" | "defend" | "run"): CombatActionResult {
+    if (action === "run") {
+        return {
+            userDamage: 0, monsterDamage: 0,
+            userHp: state.user.hp, monsterHp: state.monster.hp,
+            turnsLeft: state.turnsLeft,
+            won: false, lost: false, fled: true, turnsUp: false,
+            mpCost: 0, mpRegen: 0, currentMp: state.user.mp,
+            insufficientMp: false,
+        };
+    }
+
+    const mpCost = resolveMpCost(action);
+    if (mpCost > 0 && state.user.mp < mpCost) {
+        return {
+            userDamage: 0, monsterDamage: 0,
+            userHp: state.user.hp, monsterHp: state.monster.hp,
+            turnsLeft: state.turnsLeft,
+            won: false, lost: false, fled: false, turnsUp: false,
+            mpCost: 0, mpRegen: 0, currentMp: state.user.mp,
+            insufficientMp: true,
+        };
+    }
+
+    if (mpCost > 0) state.user.mp -= mpCost;
+
+    if (action === "defend") return executeDefend(state, mpCost);
+
+    let skill: SkillDef | null = null;
+    if (action === "skill1") skill = CLASS_SKILLS[state.classType][0];
+    if (action === "skill2") skill = CLASS_SKILLS[state.classType][1];
+
+    if (skill?.damageType === "heal") return executeHealSkill(state, skill, action, mpCost);
+
+    return executeDamageAction(state, skill, action, mpCost);
 }
 
 // --- Get available actions ---

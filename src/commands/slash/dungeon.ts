@@ -260,15 +260,17 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
             ? getBossStats(floor, char.level)
             : getMonsterStats(floor, char.level);
 
-        const combatState = CombatService.initCombat(
+        const combatState = CombatService.initCombat({
             userId,
             classType,
-            stats,
-            runState.hp,
-            runState.maxHp,
-            { name: monster.name, emoji: monster.emoji, stats: monsterStats },
-            isBoss
-        );
+            userStats: stats,
+            userHp: runState.hp,
+            maxHp: runState.maxHp,
+            userMp: (runState as { mp?: number }).mp ?? 0,
+            maxMp: (runState as { maxMp?: number }).maxMp ?? 0,
+            monster: { name: monster.name, emoji: monster.emoji, stats: monsterStats },
+            isBoss,
+        });
 
         const combatKey = `dungeon_combat:${userId}`;
         await redis.setJson(combatKey, combatState, COMBAT_TTL);
