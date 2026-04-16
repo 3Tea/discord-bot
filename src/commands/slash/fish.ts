@@ -117,7 +117,7 @@ export default {
                 .setColor(WorkService.getRarityColor(fish.rarity));
 
             await QuestService.trackProgress(userId, guildId, "fish").catch(() => {});
-            GuildQuestService.trackProgress(userId, "use_fish", 1).catch(() => {});
+            GuildQuestService.trackProgress(userId, "use_fish", 1, interaction.guildId ?? undefined).catch(() => {});
             return Reply.embedEdit(interaction, embed);
         } catch {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");

@@ -582,7 +582,7 @@ async function handleCraft(interaction: ChatInputCommandInteraction, locale: Sup
         .setColor(RARITY_CONFIG[item.rarity].color);
 
     await confirmInteraction.update({ embeds: [successEmbed], components: [] });
-    GuildQuestService.trackProgress(interaction.user.id, "craft_equipment", 1).catch(() => {});
+    GuildQuestService.trackProgress(interaction.user.id, "craft_equipment", 1, interaction.guildId ?? undefined).catch(() => {});
 }
 
 // --- /adventure crate ---
@@ -668,7 +668,7 @@ async function handleCrate(interaction: ChatInputCommandInteraction, locale: Sup
         .setColor(RARITY_CONFIG[item.rarity].color);
 
     await selectInteraction.update({ embeds: [resultEmbed], components: [] });
-    GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1).catch(() => {});
+    GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1, interaction.guildId ?? undefined).catch(() => {});
 }
 
 // --- /adventure shop ---
@@ -746,7 +746,7 @@ async function handleShop(interaction: ChatInputCommandInteraction, locale: Supp
         .setColor(RARITY_CONFIG[item.rarity].color);
 
     await buyInteraction.update({ embeds: [resultEmbed], components: [] });
-    GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1).catch(() => {});
+    GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1, interaction.guildId ?? undefined).catch(() => {});
 }
 
 // --- Command definition ---

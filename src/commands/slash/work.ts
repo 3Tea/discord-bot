@@ -113,7 +113,7 @@ export default {
                 .setColor(0x57f287);
 
             await QuestService.trackProgress(userId, guildId, "work").catch(() => {});
-            GuildQuestService.trackProgress(userId, "use_work", 1).catch(() => {});
+            GuildQuestService.trackProgress(userId, "use_work", 1, interaction.guildId ?? undefined).catch(() => {});
             return Reply.embedEdit(interaction, embed);
         } catch {
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");

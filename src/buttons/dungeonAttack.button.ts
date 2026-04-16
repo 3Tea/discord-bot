@@ -177,9 +177,9 @@ async function handleWin(
         components: [buildContinueLeaveRow(locale, runState.encountersLeft)],
     });
 
-    GuildQuestService.trackProgress(state.userId, "kill_monsters", 1).catch(() => {});
+    GuildQuestService.trackProgress(state.userId, "kill_monsters", 1, interaction.guildId ?? undefined).catch(() => {});
     if (state.isBoss) {
-        GuildQuestService.trackProgress(state.userId, "defeat_boss", 1).catch(() => {});
+        GuildQuestService.trackProgress(state.userId, "defeat_boss", 1, interaction.guildId ?? undefined).catch(() => {});
         GuildService.incrementBossKills(state.userId).catch(() => {});
     }
 }

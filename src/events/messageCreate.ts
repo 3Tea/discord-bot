@@ -83,7 +83,7 @@ export default {
             if (charExp > 0) {
                 CharacterService.addExp(message.author.id, charExp).catch(() => {});
             }
-            GuildQuestService.trackProgress(message.author.id, "send_messages", 1).catch(() => {});
+            GuildQuestService.trackProgress(message.author.id, "send_messages", 1, message.guild?.id).catch(() => {});
 
             // Check level up
             const newLevel = levelFromXP(updated.xp);
