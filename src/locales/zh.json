@@ -789,6 +789,8 @@
     "premium.compare.unlimited": "无限",
     "premium.compare.yes": "✅",
     "premium.compare.no": "❌",
+    "premium.upgrade_btn": "升级高级版",
+    "premium.cooldown_hint": "⚡ 高级版可缩短至 **{{reduced}}**",
     "cmd.premium.desc": "高级会员状态与管理",
     "cmd.quest.desc": "每日任务 — 完成任务获取金币和星星奖励",
     "quest.name.e_pray": "为某人祈祷",

@@ -789,6 +789,8 @@
     "premium.compare.unlimited": "무제한",
     "premium.compare.yes": "✅",
     "premium.compare.no": "❌",
+    "premium.upgrade_btn": "프리미엄 업그레이드",
+    "premium.cooldown_hint": "⚡ 프리미엄으로 **{{reduced}}**로 단축",
     "cmd.premium.desc": "프리미엄 상태 및 관리",
     "cmd.quest.desc": "일일 퀘스트 — 임무를 완료하여 코인과 별 보상 획득",
     "quest.name.e_pray": "누군가를 위해 기도하기",

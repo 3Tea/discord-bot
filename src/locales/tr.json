@@ -789,6 +789,8 @@
     "premium.compare.unlimited": "Sınırsız",
     "premium.compare.yes": "✅",
     "premium.compare.no": "❌",
+    "premium.upgrade_btn": "Premium'a Yükselt",
+    "premium.cooldown_hint": "⚡ Premium bunu **{{reduced}}**'a düşürür",
     "cmd.premium.desc": "Premium durumu ve yönetimi",
     "cmd.quest.desc": "Günlük görevler — görevleri tamamlayarak jeton ve yıldız kazan",
     "quest.name.e_pray": "Biri için dua et",

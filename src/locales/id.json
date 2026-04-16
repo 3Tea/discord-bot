@@ -789,6 +789,8 @@
     "premium.compare.unlimited": "Tidak terbatas",
     "premium.compare.yes": "✅",
     "premium.compare.no": "❌",
+    "premium.upgrade_btn": "Upgrade Premium",
+    "premium.cooldown_hint": "⚡ Premium mengurangi ini menjadi **{{reduced}}**",
     "cmd.premium.desc": "Status dan manajemen premium",
     "cmd.quest.desc": "Misi harian — selesaikan tugas untuk hadiah koin dan bintang",
     "quest.name.e_pray": "Doakan seseorang",

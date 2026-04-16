@@ -789,6 +789,8 @@
     "premium.compare.unlimited": "Không giới hạn",
     "premium.compare.yes": "✅",
     "premium.compare.no": "❌",
+    "premium.upgrade_btn": "Nâng cấp Premium",
+    "premium.cooldown_hint": "⚡ Premium giảm còn **{{reduced}}**",
     "cmd.premium.desc": "Trạng thái và quản lý premium",
     "cmd.quest.desc": "Nhiệm vụ hàng ngày — hoàn thành để nhận coin và sao",
     "quest.name.e_pray": "Cầu nguyện cho ai đó",

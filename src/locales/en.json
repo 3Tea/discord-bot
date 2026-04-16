@@ -837,6 +837,8 @@
     "premium.compare.unlimited": "Unlimited",
     "premium.compare.yes": "✅",
     "premium.compare.no": "❌",
+    "premium.upgrade_btn": "Upgrade Premium",
+    "premium.cooldown_hint": "⚡ Premium reduces this to **{{reduced}}**",
     "cmd.premium.desc": "Premium status and management",
     "cmd.quest.desc": "Daily quests — complete tasks for coin and star rewards",
     "quest.name.e_pray": "Pray for someone",

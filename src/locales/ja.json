@@ -789,6 +789,8 @@
     "premium.compare.unlimited": "無制限",
     "premium.compare.yes": "✅",
     "premium.compare.no": "❌",
+    "premium.upgrade_btn": "プレミアムにアップグレード",
+    "premium.cooldown_hint": "⚡ プレミアムなら **{{reduced}}** に短縮",
     "cmd.premium.desc": "プレミアムのステータスと管理",
     "cmd.quest.desc": "デイリークエスト — タスクを完了してコインとスターを獲得",
     "quest.name.e_pray": "誰かのために祈る",

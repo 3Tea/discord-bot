@@ -789,6 +789,8 @@
     "premium.compare.unlimited": "Ilimitado",
     "premium.compare.yes": "✅",
     "premium.compare.no": "❌",
+    "premium.upgrade_btn": "Upgrade Premium",
+    "premium.cooldown_hint": "⚡ Premium reduz para **{{reduced}}**",
     "cmd.premium.desc": "Status e gerenciamento de premium",
     "cmd.quest.desc": "Missões diárias — complete tarefas para ganhar moedas e estrelas",
     "quest.name.e_pray": "Rezar por alguém",

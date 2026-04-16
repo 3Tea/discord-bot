@@ -789,6 +789,8 @@
     "premium.compare.unlimited": "Безлимитно",
     "premium.compare.yes": "✅",
     "premium.compare.no": "❌",
+    "premium.upgrade_btn": "Улучшить до Premium",
+    "premium.cooldown_hint": "⚡ Premium сокращает до **{{reduced}}**",
     "cmd.premium.desc": "Статус и управление премиумом",
     "cmd.quest.desc": "Ежедневные задания — выполняйте задачи за монеты и звёзды",
     "quest.name.e_pray": "Помолиться за кого-то",

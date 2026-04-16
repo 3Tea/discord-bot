@@ -789,6 +789,8 @@
     "premium.compare.unlimited": "Onbeperkt",
     "premium.compare.yes": "✅",
     "premium.compare.no": "❌",
+    "premium.upgrade_btn": "Upgrade naar Premium",
+    "premium.cooldown_hint": "⚡ Premium verkort dit naar **{{reduced}}**",
     "cmd.premium.desc": "Premium status en beheer",
     "cmd.quest.desc": "Dagelijkse missies — voltooi taken voor munten en sterren",
     "quest.name.e_pray": "Bid voor iemand",
