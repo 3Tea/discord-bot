@@ -5,12 +5,16 @@ import type { ClassType } from "../services/rpg/rpg.config";
 export interface ICharacter extends Document {
     userId: string;
     class: ClassType;
+    advancedClass: string | null;
     level: number;
     exp: number;
     gold: number;
     dungeonDepth: number;
     dungeonCheckpoint: number;
     bossKills: number;
+    monstersKilled: number;
+    goldEarned: number;
+    itemsCrafted: number;
     equipment: {
         weapon: Types.ObjectId | null;
         shield: Types.ObjectId | null;
@@ -37,12 +41,16 @@ const characterSchema = new Schema(
             required: true,
             enum: ["swordsman", "tank", "mage", "archer", "assassin", "healer"],
         },
+        advancedClass: { type: String, default: null },
         level: { type: Number, default: 1, min: 1 },
         exp: { type: Number, default: 0, min: 0 },
         gold: { type: Number, default: 0, min: 0 },
         dungeonDepth: { type: Number, default: 1, min: 1 },
         dungeonCheckpoint: { type: Number, default: 1, min: 1 },
         bossKills: { type: Number, default: 0, min: 0 },
+        monstersKilled: { type: Number, default: 0, min: 0 },
+        goldEarned: { type: Number, default: 0, min: 0 },
+        itemsCrafted: { type: Number, default: 0, min: 0 },
         equipment: {
             weapon: { type: Schema.Types.ObjectId, ref: "Equipment", default: null },
             shield: { type: Schema.Types.ObjectId, ref: "Equipment", default: null },

@@ -4,6 +4,7 @@ import EquipmentModel from "../../models/equipment.model";
 import redis from "../../connector/redis";
 import {
     CLASS_CONFIG,
+    ADVANCED_CLASS_CONFIG,
     expForLevel,
     levelFromExp,
     MAX_LEVEL,
@@ -14,6 +15,7 @@ import {
     type ClassType,
     type CrateType,
     type StatBlock,
+    type AdvancedClassType,
 } from "./rpg.config";
 
 const CHARACTER_CACHE_TTL = 300;
@@ -136,6 +138,16 @@ async function getEffectiveStats(userId: string): Promise<StatBlock> {
         base.spd += item.stats.spd;
     }
 
+    if (char.advancedClass) {
+        const advConfig = ADVANCED_CLASS_CONFIG[char.advancedClass as AdvancedClassType];
+        if (advConfig) {
+            for (const [stat, bonus] of Object.entries(advConfig.statBonus)) {
+                const key = stat as keyof StatBlock;
+                base[key] = Math.floor(base[key] * (1 + (bonus as number)));
+            }
+        }
+    }
+
     return base;
 }
 
@@ -178,9 +190,12 @@ function getExpProgress(exp: number, level: number): { current: number; needed: 
 }
 
 async function addGold(userId: string, amount: number): Promise<number> {
+    const inc: Record<string, number> = { gold: amount };
+    if (amount > 0) inc.goldEarned = amount;
+
     const result = await CharacterModel.findOneAndUpdate(
         { userId },
-        { $inc: { gold: amount } },
+        { $inc: inc },
         { new: true }
     );
     if (!result) throw new CharacterNotFoundError(userId);
@@ -267,6 +282,24 @@ async function deductCrate(userId: string, crateType: CrateType): Promise<boolea
     return true;
 }
 
+async function advanceClass(userId: string, advancedClass: AdvancedClassType): Promise<void> {
+    await CharacterModel.updateOne(
+        { userId },
+        { $set: { advancedClass } }
+    );
+    await redis.deleteKey(`rpg_char:${userId}`);
+}
+
+async function incrementMonstersKilled(userId: string, qty: number = 1): Promise<void> {
+    await CharacterModel.updateOne({ userId }, { $inc: { monstersKilled: qty } });
+    await redis.deleteKey(`rpg_char:${userId}`);
+}
+
+async function incrementItemsCrafted(userId: string, qty: number = 1): Promise<void> {
+    await CharacterModel.updateOne({ userId }, { $inc: { itemsCrafted: qty } });
+    await redis.deleteKey(`rpg_char:${userId}`);
+}
+
 const CharacterService = {
     getCharacter,
     requireCharacter,
@@ -284,6 +317,9 @@ const CharacterService = {
     deductMaterials,
     addCrate,
     deductCrate,
+    advanceClass,
+    incrementMonstersKilled,
+    incrementItemsCrafted,
     CharacterNotFoundError,
     CharacterAlreadyExistsError,
     InsufficientGoldError,

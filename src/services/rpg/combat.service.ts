@@ -2,6 +2,8 @@
 import {
     CLASS_CONFIG,
     CLASS_SKILLS,
+    ADVANCED_CLASS_CONFIG,
+    ULTIMATE_MP_COST,
     NORMAL_TURNS,
     BOSS_TURNS,
     MP_REGEN_PER_TURN,
@@ -12,6 +14,7 @@ import {
     type StatBlock,
     type SkillDef,
     type MonsterStats,
+    type AdvancedClassType,
 } from "./rpg.config";
 
 // --- Combat State Types ---
@@ -34,6 +37,7 @@ export interface CombatantState {
 export interface RpgCombatState {
     userId: string;
     classType: ClassType;
+    advancedClass: AdvancedClassType | null;
     isBoss: boolean;
     monsterName: string;
     monsterEmoji: string;
@@ -41,6 +45,10 @@ export interface RpgCombatState {
     monster: CombatantState;
     turnsLeft: number;
     turnOrder: "user_first" | "monster_first";
+    ultimateUsed: boolean;
+    resurrectionReady: boolean;
+    stoneWallActive: boolean;
+    divineShieldActive: boolean;
 }
 
 export interface CombatActionResult {
@@ -61,6 +69,12 @@ export interface CombatActionResult {
     mpRegen: number;
     currentMp: number;
     insufficientMp: boolean;
+    ultimateUsed?: boolean;    // ultimate was used this action
+    resurrectionTriggered?: boolean; // priest auto-revive triggered
+    stoneWallReflect?: number; // damage reflected by stone wall
+    divineShieldBlocked?: boolean; // divine shield blocked damage
+    instantKill?: boolean;     // sniper headshot instant kill
+    selfDamage?: number;       // warlock soul burn HP cost
 }
 
 // --- Combat Initialization ---
@@ -68,6 +82,7 @@ export interface CombatActionResult {
 interface InitCombatOptions {
     userId: string;
     classType: ClassType;
+    advancedClass?: AdvancedClassType | null;
     userStats: StatBlock;
     userHp: number;
     maxHp: number;
@@ -80,6 +95,7 @@ interface InitCombatOptions {
 function initCombat({
     userId,
     classType,
+    advancedClass,
     userStats,
     userHp,
     maxHp,
@@ -90,10 +106,12 @@ function initCombat({
 }: InitCombatOptions): RpgCombatState {
     const maxTurns = isBoss ? BOSS_TURNS : NORMAL_TURNS;
     const turnOrder = userStats.spd >= monster.stats.spd ? "user_first" : "monster_first";
+    const advClass = advancedClass ?? null;
 
     return {
         userId,
         classType,
+        advancedClass: advClass,
         isBoss,
         monsterName: monster.name,
         monsterEmoji: monster.emoji,
@@ -122,6 +140,10 @@ function initCombat({
         },
         turnsLeft: maxTurns,
         turnOrder,
+        ultimateUsed: false,
+        resurrectionReady: advClass === "priest",
+        stoneWallActive: false,
+        divineShieldActive: false,
     };
 }
 
@@ -164,11 +186,29 @@ function getEffectiveStat(base: number, effects: StatusEffect[], statType: strin
 
 // --- Monster Attack ---
 
-function monsterAttack(state: RpgCombatState): number {
+interface MonsterAttackResult {
+    damage: number;
+    reflected: number;
+    blocked: boolean;
+}
+
+function monsterAttack(state: RpgCombatState): MonsterAttackResult {
     const monsterStr = state.monster.stats.str;
     const userDef = getEffectiveStat(state.user.stats.def, state.user.statusEffects, "def");
-    const raw = (monsterStr * 1.5) - (userDef * 0.5);
-    return Math.max(1, Math.floor(raw));
+    const raw = Math.max(1, Math.floor((monsterStr * 1.5) - (userDef * 0.5)));
+
+    if (state.divineShieldActive) {
+        state.divineShieldActive = false;
+        return { damage: 0, reflected: 0, blocked: true };
+    }
+
+    if (state.stoneWallActive) {
+        state.stoneWallActive = false;
+        state.monster.hp = Math.max(0, state.monster.hp - raw);
+        return { damage: 0, reflected: raw, blocked: false };
+    }
+
+    return { damage: raw, reflected: 0, blocked: false };
 }
 
 // --- Tick Status Effects ---
@@ -202,13 +242,24 @@ function regenMp(user: CombatantState, action: string): number {
 
 // --- Action branch: Defend ---
 
+function checkResurrection(state: RpgCombatState): boolean {
+    if (state.user.hp <= 0 && state.resurrectionReady) {
+        state.resurrectionReady = false;
+        state.user.hp = Math.floor(state.user.maxHp * 0.5);
+        return true;
+    }
+    return false;
+}
+
 function executeDefend(state: RpgCombatState, mpCost: number): CombatActionResult {
     const healAmount = Math.floor(state.user.maxHp * 0.05);
     state.user.hp = Math.min(state.user.maxHp, state.user.hp + healAmount);
 
-    const rawMonsterDmg = monsterAttack(state);
-    const monsterDmg = Math.max(1, Math.floor(rawMonsterDmg * 0.5));
+    const mAtk = monsterAttack(state);
+    const monsterDmg = mAtk.damage > 0 ? Math.max(1, Math.floor(mAtk.damage * 0.5)) : 0;
     state.user.hp = Math.max(0, state.user.hp - monsterDmg);
+
+    const resurrectionTriggered = checkResurrection(state);
 
     state.turnsLeft--;
     const monsterPoisonDmg = tickStatusEffects(state.monster);
@@ -231,6 +282,9 @@ function executeDefend(state: RpgCombatState, mpCost: number): CombatActionResul
         mpRegen,
         currentMp: state.user.mp,
         insufficientMp: false,
+        resurrectionTriggered: resurrectionTriggered || undefined,
+        stoneWallReflect: mAtk.reflected || undefined,
+        divineShieldBlocked: mAtk.blocked || undefined,
     };
 }
 
@@ -254,8 +308,10 @@ function executeHealSkill(state: RpgCombatState, skill: SkillDef, action: string
         statusApplied = skill.statusEffect.type;
     }
 
-    const monsterDmg = monsterAttack(state);
-    state.user.hp = Math.max(0, state.user.hp - monsterDmg);
+    const mAtk = monsterAttack(state);
+    state.user.hp = Math.max(0, state.user.hp - mAtk.damage);
+
+    const resurrectionTriggered = checkResurrection(state);
 
     state.turnsLeft--;
     tickStatusEffects(state.monster);
@@ -264,7 +320,7 @@ function executeHealSkill(state: RpgCombatState, skill: SkillDef, action: string
 
     return {
         userDamage: 0,
-        monsterDamage: monsterDmg,
+        monsterDamage: mAtk.damage,
         userHp: state.user.hp,
         monsterHp: state.monster.hp,
         turnsLeft: state.turnsLeft,
@@ -278,6 +334,9 @@ function executeHealSkill(state: RpgCombatState, skill: SkillDef, action: string
         mpRegen,
         currentMp: state.user.mp,
         insufficientMp: false,
+        resurrectionTriggered: resurrectionTriggered || undefined,
+        stoneWallReflect: mAtk.reflected || undefined,
+        divineShieldBlocked: mAtk.blocked || undefined,
     };
 }
 
@@ -290,7 +349,7 @@ function calcHitDamage(
     monsterMagDef: number
 ): { dmg: number; crit: boolean } {
     const classConfig = CLASS_CONFIG[state.classType];
-    const multiplier = skill?.multiplier ?? 1.0;
+    const multiplier = skill?.multiplier ?? 1;
     const ignoreDefPercent = skill?.ignoreDefPercent ?? 0;
 
     let dmg: number;
@@ -338,10 +397,17 @@ function executeDamageAction(state: RpgCombatState, skill: SkillDef | null, acti
     }
 
     let monsterDmg = 0;
+    let stoneWallReflect: number | undefined;
+    let divineShieldBlocked: boolean | undefined;
     if (state.monster.hp > 0) {
-        monsterDmg = monsterAttack(state);
-        state.user.hp = Math.max(0, state.user.hp - monsterDmg);
+        const mAtk = monsterAttack(state);
+        monsterDmg = mAtk.damage;
+        state.user.hp = Math.max(0, state.user.hp - mAtk.damage);
+        if (mAtk.reflected) stoneWallReflect = mAtk.reflected;
+        if (mAtk.blocked) divineShieldBlocked = true;
     }
+
+    const resurrectionTriggered = checkResurrection(state);
 
     state.turnsLeft--;
     const monsterPoisonDmg = tickStatusEffects(state.monster);
@@ -365,12 +431,214 @@ function executeDamageAction(state: RpgCombatState, skill: SkillDef | null, acti
         mpRegen,
         currentMp: state.user.mp,
         insufficientMp: false,
+        resurrectionTriggered: resurrectionTriggered || undefined,
+        stoneWallReflect,
+        divineShieldBlocked,
     };
+}
+
+// --- Action branch: Ultimate skill ---
+
+function executeUltimateHeadshot(state: RpgCombatState, skill: SkillDef & { mpCost: number }): CombatActionResult {
+    const monsterDef = getEffectiveStat(state.monster.stats.def, state.monster.statusEffects, "def");
+    const { dmg } = calcHitDamage(state, skill, monsterDef, state.monster.stats.magDef);
+
+    let instantKill = false;
+    const hpRatio = state.monster.hp / state.monster.maxHp;
+    if (hpRatio < 0.3 && Math.random() < 0.5) {
+        state.monster.hp = 0;
+        instantKill = true;
+    } else {
+        state.monster.hp = Math.max(0, state.monster.hp - dmg);
+    }
+
+    return buildUltimateResult(state, instantKill ? state.monster.maxHp : dmg, skill.mpCost, { instantKill });
+}
+
+function executeUltimateSoulBurn(state: RpgCombatState, skill: SkillDef & { mpCost: number }): CombatActionResult {
+    const selfDamage = Math.floor(state.user.hp * 0.2);
+    state.user.hp = Math.max(1, state.user.hp - selfDamage);
+
+    const monsterMagDef = getEffectiveStat(state.monster.stats.magDef, state.monster.statusEffects, "magDef");
+    const { dmg } = calcHitDamage(state, skill, state.monster.stats.def, monsterMagDef);
+    state.monster.hp = Math.max(0, state.monster.hp - dmg);
+
+    return buildUltimateResult(state, dmg, skill.mpCost, { selfDamage });
+}
+
+function executeUltimateBloodFrenzy(state: RpgCombatState, skill: SkillDef & { mpCost: number }): CombatActionResult {
+    const monsterDef = getEffectiveStat(state.monster.stats.def, state.monster.statusEffects, "def");
+    const { dmg } = calcHitDamage(state, skill, monsterDef, state.monster.stats.magDef);
+    state.monster.hp = Math.max(0, state.monster.hp - dmg);
+
+    const healAmount = Math.floor(dmg * 0.3);
+    state.user.hp = Math.min(state.user.maxHp, state.user.hp + healAmount);
+
+    return buildUltimateResult(state, dmg, skill.mpCost, { healAmount });
+}
+
+function applyUltimateBuff(state: RpgCombatState): void {
+    if (state.advancedClass === "fortress") state.stoneWallActive = true;
+}
+
+function applyUltimateHeal(state: RpgCombatState, skill: SkillDef): number | undefined {
+    let healAmount: number | undefined;
+    if (skill.healPercent) {
+        healAmount = Math.floor(state.user.maxHp * skill.healPercent);
+        state.user.hp = Math.min(state.user.maxHp, state.user.hp + healAmount);
+    }
+    if (state.advancedClass === "paladin") state.divineShieldActive = true;
+    return healAmount;
+}
+
+function applyUltimateDamage(state: RpgCombatState, skill: SkillDef): { damage: number; healAmount?: number } {
+    const hits = skill.hits ?? 1;
+    const monsterDef = getEffectiveStat(state.monster.stats.def, state.monster.statusEffects, "def");
+    const monsterMagDef = getEffectiveStat(state.monster.stats.magDef, state.monster.statusEffects, "magDef");
+    let damage = 0;
+
+    for (let h = 0; h < hits; h++) {
+        const { dmg } = calcHitDamage(state, skill, monsterDef, monsterMagDef);
+        damage += dmg;
+        state.monster.hp = Math.max(0, state.monster.hp - dmg);
+    }
+
+    let healAmount: number | undefined;
+    if (skill.healPercent) {
+        healAmount = Math.floor(state.user.maxHp * skill.healPercent);
+        state.user.hp = Math.min(state.user.maxHp, state.user.hp + healAmount);
+    }
+    return { damage, healAmount };
+}
+
+function applyUltimateStatus(state: RpgCombatState, skill: SkillDef): string | undefined {
+    let statusApplied: string | undefined;
+    if (skill.statusEffect) {
+        const target = skill.statusTarget === "self" ? state.user : state.monster;
+        target.statusEffects.push({
+            type: skill.statusEffect.type,
+            value: skill.statusEffect.value,
+            turnsLeft: skill.statusEffect.turns,
+        });
+        statusApplied = skill.statusEffect.type;
+    }
+    if (state.advancedClass === "shadow") {
+        state.monster.statusEffects.push({ type: "spd_debuff", value: 0.5, turnsLeft: 3 });
+        statusApplied = statusApplied ?? "spd_debuff";
+    }
+    return statusApplied;
+}
+
+function executeUltimateGeneric(state: RpgCombatState, skill: SkillDef & { mpCost: number }): CombatActionResult {
+    let userDamage = 0;
+    let healAmount: number | undefined;
+
+    if (skill.damageType === "buff") {
+        applyUltimateBuff(state);
+    } else if (skill.damageType === "heal") {
+        healAmount = applyUltimateHeal(state, skill);
+    } else {
+        const result = applyUltimateDamage(state, skill);
+        userDamage = result.damage;
+        healAmount = result.healAmount;
+    }
+
+    const statusApplied = applyUltimateStatus(state, skill);
+    return buildUltimateResult(state, userDamage, skill.mpCost, { healAmount, statusApplied });
+}
+
+function buildUltimateResult(
+    state: RpgCombatState,
+    userDamage: number,
+    mpCost: number,
+    extra: {
+        healAmount?: number;
+        statusApplied?: string;
+        instantKill?: boolean;
+        selfDamage?: number;
+    } = {}
+): CombatActionResult {
+    let monsterDmg = 0;
+    let stoneWallReflect: number | undefined;
+    let divineShieldBlocked: boolean | undefined;
+    if (state.monster.hp > 0) {
+        const mAtk = monsterAttack(state);
+        monsterDmg = mAtk.damage;
+        state.user.hp = Math.max(0, state.user.hp - mAtk.damage);
+        if (mAtk.reflected) stoneWallReflect = mAtk.reflected;
+        if (mAtk.blocked) divineShieldBlocked = true;
+    }
+
+    const resurrectionTriggered = checkResurrection(state);
+
+    state.turnsLeft--;
+    const monsterPoisonDmg = tickStatusEffects(state.monster);
+    tickStatusEffects(state.user);
+    const mpRegen = regenMp(state.user, "ultimate");
+
+    return {
+        userDamage,
+        monsterDamage: monsterDmg,
+        userHp: state.user.hp,
+        monsterHp: state.monster.hp,
+        turnsLeft: state.turnsLeft,
+        won: state.monster.hp <= 0,
+        lost: state.user.hp <= 0,
+        fled: false,
+        turnsUp: state.turnsLeft <= 0 && state.monster.hp > 0 && state.user.hp > 0,
+        healAmount: extra.healAmount,
+        statusApplied: extra.statusApplied,
+        poisonDamage: monsterPoisonDmg || undefined,
+        mpCost,
+        mpRegen,
+        currentMp: state.user.mp,
+        insufficientMp: false,
+        ultimateUsed: true,
+        resurrectionTriggered: resurrectionTriggered || undefined,
+        stoneWallReflect,
+        divineShieldBlocked,
+        instantKill: extra.instantKill,
+        selfDamage: extra.selfDamage,
+    };
+}
+
+function executeUltimate(state: RpgCombatState): CombatActionResult {
+    if (!state.advancedClass) {
+        return { userDamage: 0, monsterDamage: 0, userHp: state.user.hp, monsterHp: state.monster.hp,
+            turnsLeft: state.turnsLeft, won: false, lost: false, fled: false, turnsUp: false,
+            mpCost: 0, mpRegen: 0, currentMp: state.user.mp, insufficientMp: false };
+    }
+
+    if (state.ultimateUsed) {
+        return { userDamage: 0, monsterDamage: 0, userHp: state.user.hp, monsterHp: state.monster.hp,
+            turnsLeft: state.turnsLeft, won: false, lost: false, fled: false, turnsUp: false,
+            mpCost: 0, mpRegen: 0, currentMp: state.user.mp, insufficientMp: false };
+    }
+
+    const advConfig = ADVANCED_CLASS_CONFIG[state.advancedClass];
+    const mpCost = advConfig.ultimate.mpCost;
+
+    if (state.user.mp < mpCost) {
+        return { userDamage: 0, monsterDamage: 0, userHp: state.user.hp, monsterHp: state.monster.hp,
+            turnsLeft: state.turnsLeft, won: false, lost: false, fled: false, turnsUp: false,
+            mpCost: 0, mpRegen: 0, currentMp: state.user.mp, insufficientMp: true };
+    }
+
+    state.user.mp -= mpCost;
+    state.ultimateUsed = true;
+
+    const skill = advConfig.ultimate;
+    switch (state.advancedClass) {
+        case "berserker":  return executeUltimateBloodFrenzy(state, skill);
+        case "warlock":    return executeUltimateSoulBurn(state, skill);
+        case "sniper":     return executeUltimateHeadshot(state, skill);
+        default:           return executeUltimateGeneric(state, skill);
+    }
 }
 
 // --- Execute Action (dispatcher) ---
 
-function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "skill2" | "defend" | "run"): CombatActionResult {
+function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "skill2" | "defend" | "run" | "ultimate"): CombatActionResult {
     if (action === "run") {
         return {
             userDamage: 0, monsterDamage: 0,
@@ -381,6 +649,8 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
             insufficientMp: false,
         };
     }
+
+    if (action === "ultimate") return executeUltimate(state);
 
     const mpCost = resolveMpCost(action);
     if (mpCost > 0 && state.user.mp < mpCost) {
@@ -409,12 +679,19 @@ function executeAction(state: RpgCombatState, action: "attack" | "skill1" | "ski
 
 // --- Get available actions ---
 
-function getSkillLabels(classType: ClassType): [{ key: string; emoji: string }, { key: string; emoji: string }] {
+interface SkillLabel { key: string; emoji: string }
+
+function getSkillLabels(classType: ClassType, advancedClass?: AdvancedClassType | null): SkillLabel[] {
     const [s1, s2] = CLASS_SKILLS[classType];
-    return [
+    const labels: SkillLabel[] = [
         { key: s1.key, emoji: s1.emoji },
         { key: s2.key, emoji: s2.emoji },
     ];
+    if (advancedClass) {
+        const advConfig = ADVANCED_CLASS_CONFIG[advancedClass];
+        labels.push({ key: advConfig.ultimate.key, emoji: advConfig.ultimate.emoji });
+    }
+    return labels;
 }
 
 // --- Export ---
