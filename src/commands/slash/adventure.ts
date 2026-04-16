@@ -12,6 +12,7 @@ import {
 } from "discord.js";
 import CharacterService from "../../services/rpg/character.service";
 import EquipmentService from "../../services/rpg/equipment.service";
+import GuildMemberModel from "../../models/guildMember.model";
 import {
     CLASS_CONFIG,
     CLASS_TYPES,
@@ -21,10 +22,14 @@ import {
     EQUIPMENT_SLOTS,
     MATERIALS,
     RARITY_CONFIG,
+    ADVANCED_CLASS_CONFIG,
+    ADVANCEMENT_REQUIREMENTS,
+    BASE_TO_ADVANCED,
     type ClassType,
     type CrateType,
     type EquipmentSlot,
     type Rarity,
+    type AdvancedClassType,
 } from "../../services/rpg/rpg.config";
 import Reply from "../../util/decorator/reply";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
@@ -582,6 +587,7 @@ async function handleCraft(interaction: ChatInputCommandInteraction, locale: Sup
         .setColor(RARITY_CONFIG[item.rarity].color);
 
     await confirmInteraction.update({ embeds: [successEmbed], components: [] });
+    CharacterService.incrementItemsCrafted(interaction.user.id, 1).catch(() => {});
     GuildQuestService.trackProgress(interaction.user.id, "craft_equipment", 1, interaction.guildId ?? undefined).catch(() => {});
 }
 
@@ -749,6 +755,206 @@ async function handleShop(interaction: ChatInputCommandInteraction, locale: Supp
     GuildQuestService.trackProgress(interaction.user.id, "open_crates", 1, interaction.guildId ?? undefined).catch(() => {});
 }
 
+// --- /adventure advance ---
+
+interface AdvancementQuestCheck {
+    key: string;
+    met: boolean;
+}
+
+function checkAdvancementQuest(
+    baseClass: ClassType,
+    char: { bossKills: number; dungeonDepth: number; goldEarned: number; monstersKilled: number; itemsCrafted: number },
+    questsCompleted: number
+): AdvancementQuestCheck {
+    switch (baseClass) {
+        case "swordsman": return { key: "adventure.advance.quest.defeat_bosses", met: char.bossKills >= 15 };
+        case "tank":      return { key: "adventure.advance.quest.reach_floor", met: char.dungeonDepth >= 25 };
+        case "mage":      return { key: "adventure.advance.quest.earn_gold", met: char.goldEarned >= 20000 };
+        case "archer":    return { key: "adventure.advance.quest.kill_monsters", met: char.monstersKilled >= 200 };
+        case "assassin":  return { key: "adventure.advance.quest.complete_quests", met: questsCompleted >= 50 };
+        case "healer":    return { key: "adventure.advance.quest.craft_equipment", met: char.itemsCrafted >= 20 };
+    }
+}
+
+function buildStatBonusLine(locale: SupportedLocale, statBonus: Partial<Record<string, number>>): string {
+    return Object.entries(statBonus)
+        .map(([stat, value]) => {
+            const statKey = stat === "magDef" ? "rpg.stat.mag_def" : `rpg.stat.${stat}`;
+            const sign = (value as number) > 0 ? "+" : "";
+            return `${t(locale, statKey)} ${sign}${Math.round((value as number) * 100)}%`;
+        })
+        .join(", ");
+}
+
+async function handleAdvance(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
+    const userId = interaction.user.id;
+    const char = await CharacterService.requireCharacter(userId);
+
+    // Check: already advanced
+    if (char.advancedClass) {
+        const advConfig = ADVANCED_CLASS_CONFIG[char.advancedClass as AdvancedClassType];
+        const className = advConfig ? t(locale, `rpg.advanced.${advConfig.key}`) : char.advancedClass;
+        const embed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.advance.already", { class: className }))
+            .setColor(0xed4245);
+        await Reply.embedEdit(interaction, embed);
+        return;
+    }
+
+    // Check: level requirement
+    if (char.level < ADVANCEMENT_REQUIREMENTS.level) {
+        const embed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.advance.not_ready", { level: String(ADVANCEMENT_REQUIREMENTS.level) }))
+            .setColor(0xed4245);
+        await Reply.embedEdit(interaction, embed);
+        return;
+    }
+
+    // Check: advancement quest
+    const guildMember = await GuildMemberModel.findOne({ userId });
+    const questsCompleted = guildMember?.questsCompleted ?? 0;
+    const questCheck = checkAdvancementQuest(
+        char.class as ClassType,
+        { bossKills: char.bossKills, dungeonDepth: char.dungeonDepth, goldEarned: char.goldEarned, monstersKilled: char.monstersKilled, itemsCrafted: char.itemsCrafted },
+        questsCompleted
+    );
+
+    if (!questCheck.met) {
+        const questDesc = t(locale, questCheck.key);
+        const embed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.advance.quest_incomplete", { quest: questDesc }))
+            .setColor(0xed4245);
+        await Reply.embedEdit(interaction, embed);
+        return;
+    }
+
+    // Build preview embed with 2 paths
+    const baseClass = char.class as ClassType;
+    const [path1Key, path2Key] = BASE_TO_ADVANCED[baseClass];
+    const path1 = ADVANCED_CLASS_CONFIG[path1Key];
+    const path2 = ADVANCED_CLASS_CONFIG[path2Key];
+
+    const path1Name = t(locale, `rpg.advanced.${path1.key}`);
+    const path2Name = t(locale, `rpg.advanced.${path2.key}`);
+    const path1UltName = t(locale, `rpg.skill.${path1.ultimate.key}`);
+    const path2UltName = t(locale, `rpg.skill.${path2.ultimate.key}`);
+    const path1UltDesc = t(locale, `rpg.ultimate.${path1.ultimate.key}.desc`);
+    const path2UltDesc = t(locale, `rpg.ultimate.${path2.ultimate.key}.desc`);
+
+    const matDisplay = ADVANCEMENT_REQUIREMENTS.materials
+        .map(({ key, qty }) => {
+            const mat = MATERIALS.find((m) => m.key === key);
+            return `${mat?.emoji ?? "⬜"} ${t(locale, `rpg.material.${key}`)} x${qty}`;
+        })
+        .join(" + ");
+
+    const embed = new EmbedBuilder()
+        .setTitle(t(locale, "adventure.advance.title"))
+        .setDescription([
+            `**${t(locale, "adventure.advance.path", { num: "1" })}: ${path1.emoji} ${path1Name}**`,
+            buildStatBonusLine(locale, path1.statBonus),
+            `${t(locale, "adventure.advance.ultimate")}: ${path1.ultimate.emoji} ${path1UltName} — ${path1UltDesc}`,
+            "",
+            `**${t(locale, "adventure.advance.path", { num: "2" })}: ${path2.emoji} ${path2Name}**`,
+            buildStatBonusLine(locale, path2.statBonus),
+            `${t(locale, "adventure.advance.ultimate")}: ${path2.ultimate.emoji} ${path2UltName} — ${path2UltDesc}`,
+            "",
+            `**${t(locale, "adventure.advance.cost")}:** ${matDisplay} + **${ADVANCEMENT_REQUIREMENTS.goldCost}** Gold 🪙`,
+        ].join("\n"))
+        .setColor(0xf39c12);
+
+    const selectRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+        new StringSelectMenuBuilder()
+            .setCustomId("advance_select")
+            .setPlaceholder(t(locale, "adventure.advance.select"))
+            .addOptions(
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(path1Name)
+                    .setValue(path1.key)
+                    .setDescription(buildStatBonusLine(locale, path1.statBonus).slice(0, 100))
+                    .setEmoji(path1.emoji),
+                new StringSelectMenuOptionBuilder()
+                    .setLabel(path2Name)
+                    .setValue(path2.key)
+                    .setDescription(buildStatBonusLine(locale, path2.statBonus).slice(0, 100))
+                    .setEmoji(path2.emoji)
+            )
+    );
+
+    const message = await interaction.editReply({
+        embeds: [embed],
+        components: [selectRow as unknown as ActionRowBuilder<MessageActionRowComponentBuilder>],
+    });
+
+    // Await path selection (60s)
+    const selectInteraction = await message
+        .awaitMessageComponent({
+            filter: (i) => i.user.id === userId && i.customId === "advance_select",
+            time: 60_000,
+        })
+        .catch(() => null);
+
+    if (!selectInteraction?.isStringSelectMenu()) {
+        await interaction.editReply({ components: [] }).catch(() => {});
+        return;
+    }
+
+    const selectedClass = selectInteraction.values[0] as AdvancedClassType;
+    const selectedConfig = ADVANCED_CLASS_CONFIG[selectedClass];
+    const selectedName = t(locale, `rpg.advanced.${selectedClass}`);
+
+    // Show confirmation
+    const confirmEmbed = new EmbedBuilder()
+        .setTitle(t(locale, "adventure.advance.title"))
+        .setDescription(t(locale, "adventure.advance.confirm", { class: `${selectedConfig.emoji} ${selectedName}` }))
+        .setColor(0xf39c12);
+
+    const confirmRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder().setCustomId("advance_confirm").setLabel("✅").setStyle(ButtonStyle.Success),
+        new ButtonBuilder().setCustomId("advance_cancel").setLabel("❌").setStyle(ButtonStyle.Danger)
+    );
+
+    await selectInteraction.update({ embeds: [confirmEmbed], components: [confirmRow] });
+
+    const confirmInteraction = await message
+        .awaitMessageComponent({
+            filter: (i) => i.user.id === userId,
+            time: 30_000,
+        })
+        .catch(() => null);
+
+    if (confirmInteraction?.customId !== "advance_confirm") {
+        const cancelEmbed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.advance.cancelled"))
+            .setColor(0x95a5a6);
+        await interaction.editReply({ embeds: [cancelEmbed], components: [] }).catch(() => {});
+        return;
+    }
+
+    // Deduct materials and gold
+    try {
+        await CharacterService.deductMaterials(userId, ADVANCEMENT_REQUIREMENTS.materials);
+        await CharacterService.deductGold(userId, ADVANCEMENT_REQUIREMENTS.goldCost);
+    } catch {
+        const errEmbed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.advance.insufficient"))
+            .setColor(0xed4245);
+        await confirmInteraction.update({ embeds: [errEmbed], components: [] });
+        return;
+    }
+
+    // Advance class
+    await CharacterService.advanceClass(userId, selectedClass);
+
+    const successEmbed = new EmbedBuilder()
+        .setTitle(t(locale, "adventure.advance.success_title"))
+        .setDescription(t(locale, "adventure.advance.success", { class: `${selectedConfig.emoji} ${selectedName}` }))
+        .setColor(0x57f287);
+
+    await confirmInteraction.update({ embeds: [successEmbed], components: [] });
+}
+
 // --- Command definition ---
 
 export default {
@@ -820,6 +1026,12 @@ export default {
                 .setName("shop")
                 .setDescription("Buy equipment crates with Gold")
                 .setDescriptionLocalizations(descriptionLocales("cmd.adventure.shop.desc"))
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("advance")
+                .setDescription("Advance to a specialized class")
+                .setDescriptionLocalizations(descriptionLocales("cmd.adventure.advance.desc"))
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -852,6 +1064,9 @@ export default {
                     return;
                 case "shop":
                     await handleShop(interaction, locale);
+                    return;
+                case "advance":
+                    await handleAdvance(interaction, locale);
                     return;
                 default: {
                     const embed = new EmbedBuilder()
