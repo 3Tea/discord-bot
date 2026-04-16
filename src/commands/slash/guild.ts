@@ -11,6 +11,8 @@ import CharacterService from "../../services/rpg/character.service";
 import GuildService, { GuildMemberNotFoundError, AlreadyRegisteredError } from "../../services/rpg/guild.service";
 import GuildQuestService from "../../services/rpg/guildQuest.service";
 import type { GuildQuest } from "../../services/rpg/guildQuest.service";
+import BranchService from "../../services/rpg/branch.service";
+import { getWeekKey, WEEKLY_QUESTS_COUNT } from "../../services/rpg/branch.config";
 import GuildMemberModel from "../../models/guildMember.model";
 import redis from "../../connector/redis";
 import {
@@ -692,6 +694,147 @@ async function handleRanking(interaction: ChatInputCommandInteraction, locale: S
     });
 }
 
+// --- /guild branch ---
+
+function getPreviousWeekKey(): string {
+    const d = new Date();
+    d.setDate(d.getDate() - 7);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const dayOfYear = Math.floor((d.getTime() - yearStart.getTime()) / 86400000);
+    const weekNum = Math.ceil((dayOfYear + yearStart.getUTCDay() + 1) / 7);
+    return `${d.getUTCFullYear()}-W${String(weekNum).padStart(2, "0")}`;
+}
+
+async function handleBranch(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
+    const guildId = interaction.guildId;
+    if (!guildId) {
+        const embed = new EmbedBuilder()
+            .setDescription(t(locale, "common.guild_only"))
+            .setColor(0xed4245);
+        await Reply.embedEdit(interaction, embed);
+        return;
+    }
+
+    // Check branch exists
+    const branch = await BranchService.getBranch(guildId);
+    if (!branch) {
+        const embed = new EmbedBuilder()
+            .setDescription(t(locale, "branch.not_setup"))
+            .setColor(0xed4245);
+        await Reply.embedEdit(interaction, embed);
+        return;
+    }
+
+    // Check user is guild member
+    const member = await GuildService.getMember(interaction.user.id);
+    if (!member) {
+        const embed = new EmbedBuilder()
+            .setDescription(t(locale, "guild.require_member"))
+            .setColor(0xed4245);
+        await Reply.embedEdit(interaction, embed);
+        return;
+    }
+
+    // Get current week quests
+    const weekKey = getWeekKey();
+    const quests = BranchService.generateWeeklyQuests(weekKey);
+    const progress = await BranchService.getWeeklyProgress(guildId, weekKey);
+
+    // Count members and sum GP
+    const memberCount = await BranchService.getMemberCountInServer(guildId);
+    const gpSum = await GuildMemberModel.aggregate<{ total: number }>([
+        { $group: { _id: null, total: { $sum: "$gp" } } },
+    ]).then((res) => res[0]?.total ?? 0);
+
+    // Build quest lines
+    const questLines: string[] = [];
+    let completedCount = 0;
+
+    for (const quest of quests) {
+        const scaledTarget = await BranchService.getScaledTarget(quest.baseTarget, guildId);
+        const current = progress[quest.index] ?? 0;
+        const isComplete = current >= scaledTarget;
+        if (isComplete) completedCount++;
+
+        const desc = t(locale, `guild.quest.action.${quest.action}`, { target: String(scaledTarget) });
+        const bar = buildProgressBar(current, scaledTarget, 10);
+
+        questLines.push(
+            t(locale, "branch.weekly.quest", {
+                index: String(quest.index + 1),
+                desc,
+                bar,
+                current: String(Math.min(current, scaledTarget)),
+                target: String(scaledTarget),
+            })
+        );
+    }
+
+    // Progress summary
+    const progressLine = completedCount >= WEEKLY_QUESTS_COUNT
+        ? t(locale, "branch.weekly.complete")
+        : t(locale, "branch.weekly.progress", { done: String(completedCount) });
+
+    // Build embed sections
+    const sections: string[] = [
+        t(locale, "branch.info.members", { total: String(memberCount) }),
+        t(locale, "branch.info.total_gp", { gp: String(gpSum) }),
+        "",
+        `\ud83d\udccb ${t(locale, "branch.weekly.title", { week: weekKey })}:`,
+        ...questLines,
+        "",
+        progressLine,
+    ];
+
+    // Check for last week's unclaimed rewards
+    const prevWeekKey = getPreviousWeekKey();
+    const prevClaimed = await BranchService.isRewardClaimed(interaction.user.id, guildId, prevWeekKey);
+
+    if (!prevClaimed) {
+        // Calculate last week's completed count
+        const prevQuests = BranchService.generateWeeklyQuests(prevWeekKey);
+        const prevProgress = await BranchService.getWeeklyProgress(guildId, prevWeekKey);
+        let prevCompleted = 0;
+
+        for (const pq of prevQuests) {
+            const scaledTarget = await BranchService.getScaledTarget(pq.baseTarget, guildId);
+            if ((prevProgress[pq.index] ?? 0) >= scaledTarget) prevCompleted++;
+        }
+
+        // Auto-claim
+        const reward = await BranchService.claimWeeklyReward(
+            interaction.user.id,
+            guildId,
+            prevWeekKey,
+            prevCompleted
+        );
+
+        if (reward) {
+            let rewardLine = t(locale, "branch.weekly.reward_claimed", {
+                week: prevWeekKey,
+                done: String(prevCompleted),
+                gold: String(reward.gold),
+                exp: String(reward.exp),
+                gp: String(reward.gp),
+            });
+            if (reward.crate) {
+                rewardLine += t(locale, "branch.weekly.reward_crate");
+            }
+            sections.push("", rewardLine);
+        } else if (prevCompleted === 0) {
+            sections.push("", t(locale, "branch.weekly.no_reward"));
+        }
+    }
+
+    const embed = new EmbedBuilder()
+        .setTitle(t(locale, "branch.info.title", { name: branch.name }))
+        .setDescription(sections.join("\n"))
+        .setColor(0x3498db)
+        .setTimestamp();
+
+    await Reply.embedEdit(interaction, embed);
+}
+
 // --- Command definition ---
 
 export default {
@@ -738,6 +881,12 @@ export default {
                             { name: "Quests", value: "quests" }
                         )
                 )
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("branch")
+                .setDescription("View branch guild info and weekly quests")
+                .setDescriptionLocalizations(descriptionLocales("cmd.guild.branch.desc"))
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -761,6 +910,9 @@ export default {
                     return;
                 case "ranking":
                     await handleRanking(interaction, locale);
+                    return;
+                case "branch":
+                    await handleBranch(interaction, locale);
                     return;
                 default: {
                     const embed = new EmbedBuilder()
