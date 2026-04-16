@@ -7,7 +7,7 @@ import type {
 } from "../services/economy/dungeon.service";
 import CombatService from "../services/rpg/combat.service";
 import type { RpgCombatState, CombatActionResult } from "../services/rpg/combat.service";
-import { RARITY_CONFIG, type Rarity } from "../services/rpg/rpg.config";
+import { RARITY_CONFIG, CRATES, type Rarity } from "../services/rpg/rpg.config";
 import PremiumService from "../services/premium/premium.service";
 import { BUTTON_ID } from "../util/config/button";
 import type { SupportedLocale } from "../util/i18n/index";
@@ -116,6 +116,13 @@ function buildWinDesc(
             })]
             : []),
         ...(resolve.materialDrops.length > 0 ? formatMaterialDrops(locale, resolve.materialDrops) : []),
+        ...(resolve.crateDrops?.length
+            ? resolve.crateDrops.map(drop => t(locale, "dungeon.reward.crate", {
+                emoji: CRATES[drop.type].emoji,
+                name: t(locale, `rpg.crate.${drop.type}`),
+                amount: String(drop.qty),
+            }))
+            : []),
         "",
         t(locale, "dungeon.floor", { floor: String(resolve.newFloor), checkpoint: String(resolve.checkpoint) }),
         ...(resolve.checkpointReached

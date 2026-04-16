@@ -1,6 +1,6 @@
 import CharacterService from "../rpg/character.service";
 import EquipmentService from "../rpg/equipment.service";
-import { DUNGEON_REWARDS, ENCOUNTERS_PER_RUN, type ClassType } from "../rpg/rpg.config";
+import { DUNGEON_REWARDS, ENCOUNTERS_PER_RUN, CRATE_DROP_RATES, type ClassType, type CrateType } from "../rpg/rpg.config";
 import { tryStarDrop } from "../../util/economy/starDrop";
 import { randomInRange } from "../../util/math/random";
 import { isPrime } from "../../util/math/prime";
@@ -16,6 +16,7 @@ export interface CombatResolveResult {
     starReward: boolean;
     equipDrop: { name: string; rarity: string; slot: string; id: string } | null;
     materialDrops: { key: string; qty: number }[];
+    crateDrops: { type: CrateType; qty: number }[];
     floorAdvanced: boolean;
     newFloor: number;
     checkpoint: number;
@@ -38,6 +39,7 @@ export interface TreasureResult {
     starReward: boolean;
     equipDrop: { name: string; rarity: string; slot: string; id: string } | null;
     materialDrops: { key: string; qty: number }[];
+    crateDrops: { type: CrateType; qty: number }[];
     newFloor: number;
     checkpoint: number;
     checkpointReached: boolean;
@@ -181,6 +183,16 @@ async function resolveCombatWin(
         equipDrop = { name: item.name, rarity: item.rarity, slot: item.slot, id: item._id.toString() };
     }
 
+    // Crate drops
+    const crateDrops: { type: CrateType; qty: number }[] = [];
+    const dropRates = isBoss ? CRATE_DROP_RATES.boss : CRATE_DROP_RATES.monster;
+    for (const [type, chance] of Object.entries(dropRates)) {
+        if (Math.random() < chance) {
+            crateDrops.push({ type: type as CrateType, qty: 1 });
+            await CharacterService.addCrate(userId, type as CrateType);
+        }
+    }
+
     // Floor advancement
     const newFloor = floor + 1;
     const checkpointReached = isPrime(newFloor);
@@ -196,6 +208,7 @@ async function resolveCombatWin(
         starReward,
         equipDrop,
         materialDrops,
+        crateDrops,
         floorAdvanced: true,
         newFloor,
         checkpoint: newCheckpoint,
@@ -248,6 +261,15 @@ async function resolveTreasure(
         equipDrop = { name: item.name, rarity: item.rarity, slot: item.slot, id: item._id.toString() };
     }
 
+    // Crate drops
+    const crateDrops: { type: CrateType; qty: number }[] = [];
+    for (const [type, chance] of Object.entries(CRATE_DROP_RATES.treasure)) {
+        if (Math.random() < chance) {
+            crateDrops.push({ type: type as CrateType, qty: 1 });
+            await CharacterService.addCrate(userId, type as CrateType);
+        }
+    }
+
     const newFloor = floor + 1;
     const checkpointReached = isPrime(newFloor);
     const char = await CharacterService.getCharacter(userId);
@@ -261,6 +283,7 @@ async function resolveTreasure(
         starReward,
         equipDrop,
         materialDrops,
+        crateDrops,
         newFloor,
         checkpoint: newCheckpoint,
         checkpointReached,
