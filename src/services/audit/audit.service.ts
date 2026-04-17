@@ -16,12 +16,20 @@ import {
     startupSummaryEmbed,
 } from "./auditEmbeds";
 
-const ADMIN_COMMAND_NAMES = new Set<string>([
-    "economy",
+const ALWAYS_ADMIN_COMMANDS = new Set<string>([
     "guild-admin",
     "commandlog",
     "audit",
 ]);
+
+function isAdminCommand(entry: CommandEntry): boolean {
+    if (ALWAYS_ADMIN_COMMANDS.has(entry.commandName)) return true;
+    if (entry.commandName === "economy") {
+        const group = entry.options._group as string | undefined;
+        return group === "admin" || group === "bulk";
+    }
+    return false;
+}
 
 async function onGuildCreate(guild: Guild): Promise<void> {
     try {
@@ -130,7 +138,7 @@ function onCommandExecuted(entry: CommandEntry): void {
             return;
         }
         AuditDispatcherService.pushCommands(commandSuccessEmbed(entry));
-        if (ADMIN_COMMAND_NAMES.has(entry.commandName)) {
+        if (isAdminCommand(entry)) {
             AuditDispatcherService.pushCritical(adminActionEmbed(entry));
         }
     } catch (error) {
@@ -204,7 +212,7 @@ export const AuditService = {
     onCommandExecuted,
     snapshotAllGuilds,
     logBackgroundError,
-    ADMIN_COMMAND_NAMES,
+    isAdminCommand,
 };
 
 export type { IGuildAudit };

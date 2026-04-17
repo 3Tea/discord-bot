@@ -22,9 +22,12 @@ function toSnapshot(doc: IAuditConfig): AuditConfigSnapshot {
 }
 
 async function ensureDoc(): Promise<IAuditConfig> {
-    const existing = await AuditConfigModel.findById("singleton");
-    if (existing) return existing;
-    return AuditConfigModel.create({ _id: "singleton" });
+    const doc = await AuditConfigModel.findOneAndUpdate(
+        { _id: "singleton" },
+        { $setOnInsert: { snapshotEnabled: true } },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    return doc as IAuditConfig;
 }
 
 async function getConfig(): Promise<AuditConfigSnapshot> {

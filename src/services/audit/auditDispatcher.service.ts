@@ -55,6 +55,11 @@ async function flush(): Promise<void> {
 
     const config = await AuditConfigService.getConfig().catch(() => null);
     if (!config) {
+        if (criticalQueue.length > 0 || commandsQueue.length > 0) {
+            logger.warn(
+                `[AuditDispatcher] config unavailable — dropping ${criticalQueue.length} critical + ${commandsQueue.length} command embeds`
+            );
+        }
         criticalQueue = [];
         commandsQueue = [];
         return;

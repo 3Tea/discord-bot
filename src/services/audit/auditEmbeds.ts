@@ -51,7 +51,7 @@ export function guildLeaveEmbed(audit: IGuildAudit, totalGuildsNow: number): Emb
             { name: "Name", value: audit.name, inline: true },
             { name: "Guild ID", value: audit.guildId, inline: true },
             { name: "Last member count", value: String(audit.memberCount), inline: true },
-            { name: "Was in for", value: `<t:${Math.floor(audit.joinedAt.getTime() / 1000)}:R>`, inline: true },
+            { name: "Joined", value: `<t:${Math.floor(audit.joinedAt.getTime() / 1000)}:R>`, inline: true },
             { name: "Total guilds now", value: String(totalGuildsNow), inline: true }
         )
         .setTimestamp();

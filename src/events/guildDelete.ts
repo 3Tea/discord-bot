@@ -6,6 +6,7 @@ export default {
     name: Events.GuildDelete,
     once: false,
     async execute(guild: Guild) {
+        if (!guild.available) return;
         await AuditService.onGuildDelete(guild);
     },
 };
