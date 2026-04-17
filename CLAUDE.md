@@ -32,8 +32,15 @@ src/
     buttons.ts            # Scans buttons/ → client.buttons Collection
     deploy.ts             # PUT commands to Discord API (guild or global)
   commands/slash/         # One file per slash command (auto-loaded)
+    adventure.ts           # /adventure create/profile/equip/inventory/unequip/craft/crate/shop/advance
+    guild.ts               # /guild register/profile/board/quests/ranking/branch/event
+    guild-admin.ts         # /guild-admin setup/config/disband (admin only)
+    pvp.ts                 # /pvp challenge/stats
   events/                 # One file per event (auto-loaded)
   buttons/                # One file per button handler (auto-loaded)
+    dungeonSkill1.button.ts  # Class skill 1 in combat
+    dungeonSkill2.button.ts  # Class skill 2 in combat
+    dungeonUltimate.button.ts # Ultimate skill in combat (advanced classes)
   models/                 # Mongoose schemas
     guild.model.ts        # Guild metadata + locale
     user.model.ts         # Global user data + totalPoint
@@ -64,6 +71,10 @@ src/
     economyLogConfig.model.ts # Per-guild economy log channel config
     economySnapshot.model.ts # Economy snapshots for reset rollback
     userAchievement.model.ts # Per-user per-guild achievement unlocks
+    character.model.ts     # RPG character (class, level, stats, equipment, gold)
+    equipment.model.ts     # Equipment items (slot, rarity, stats)
+    guildMember.model.ts   # Adventurer Guild membership (rank, GP, quests)
+    branchGuild.model.ts   # Per-server branch guild
   services/
     economy/              # Currency, pray/curse, shop, gambling, work services
       currency.service.ts # Coin/gem balance operations
@@ -95,6 +106,18 @@ src/
     achievement/          # Achievement system
       achievement.config.ts # 50 achievement definitions, categories, rewards
       achievement.service.ts # Check, unlock, stats, caching
+    rpg/                   # RPG game system services
+      rpg.config.ts        # Classes, stats, skills, equipment, rarities, monsters
+      guild.config.ts      # Adventurer ranks, quest templates, reward scaling
+      branch.config.ts     # Branch guild weekly/monthly event config
+      character.service.ts # Character CRUD, stats, leveling, Gold currency
+      equipment.service.ts # Equipment generation, equip/unequip, crafting, crates
+      combat.service.ts    # Stat-based combat engine, skills, status effects
+      guild.service.ts     # Guild registration, rank up, GP management
+      guildQuest.service.ts # Quest generation, progress tracking, claim
+      branch.service.ts    # Branch guild CRUD, weekly quests, monthly events
+      pvp.service.ts       # PvP match state, simultaneous turns, rating
+      teamDungeon.service.ts # Team dungeon party management, scaled combat
     commandLog.service.ts # Buffered command usage analytics
   connector/
     mongo/index.ts        # MongoDB connection
@@ -150,6 +173,8 @@ src/
     profile/            # Profile card utilities
       profileEmbed.ts   # Embed builder for free tier
       canvasProfile.ts  # Canvas renderer for Star/Galaxy tier
+    premium/            # Premium utilities
+      upgradeButton.ts  # Shared ⭐ Upgrade Premium link button
   types/common/discord.d.ts  # Client type augmentation (commands, buttons)
 ```
 
@@ -492,6 +517,17 @@ Redis `setKeyNX` for atomic idempotency; `setKey` for cooldowns. Both keys clean
 - **`/economy admin`** — `dashboard`, `history`, `reverse`, `freeze`, `unfreeze`, `reset`, `rollback`, `log-setup`, `log-config`
 - **`/economy bulk`** — `distribute`, `tax`
 
+## RPG Adventure System
+
+### Character & Classes
+6 base classes (Swordsman, Tank, Mage, Archer, Assassin, Healer) with 12 advanced classes (2 paths each). Stats: HP, STR, DEF, MAG, MAG_DEF, SPD. Equipment: 6 slots x 6 rarities. Global Gold currency. Class advancement at level 20 with ultimate skills.
+
+### Dungeon (Reworked)
+Stat-based combat with 5 actions (Attack/Skill1/Skill2/Defend/Run) + Ultimate for advanced classes. Gold + EXP + material + equipment + crate rewards. Boss every 5 floors. MP system (50 + level*5). Team dungeon supports 2-4 players with simultaneous turns.
+
+### Adventurer Guild
+10 ranks (F->Legendary). Daily board quests (3 shared) + personal quests (2 per user). 12 quest action types. Branch guilds per server with weekly co-op quests. Monthly competitive events (server vs server). PvP with simultaneous turns and Elo rating.
+
 ## Premium Subscription System
 
 Two paid tiers (**Star**, **Galaxy**) on `UserWallet` model. `PremiumService.getConfig(userId)` returns a `TierConfig` with benefit values (cooldowns, limits, multipliers, flags). All premium-dependent code reads from this config — falls back to free-tier defaults for non-subscribers. Background job expires stale subscriptions every 10min. See [docs/steering/premium-system.md](docs/steering/premium-system.md) for full details.
@@ -560,6 +596,7 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/achievement-system.md](docs/steering/achievement-system.md) | Achievement system: 50 achievements across 10 categories, on-demand tracking, tiered rewards, profile integration |
 | [docs/steering/command-logging.md](docs/steering/command-logging.md) | Dev-only analytics: command stats, user/command history, buffered writes |
 | [docs/steering/premium-system.md](docs/steering/premium-system.md) | Premium tiers (Star/Galaxy): benefits, integration points, caching, expiry, admin commands |
+| [docs/steering/rpg-system.md](docs/steering/rpg-system.md) | RPG adventure: characters, classes, combat, dungeons, equipment, guilds, PvP, team dungeon |
 
 ## Changelog & release notes
 

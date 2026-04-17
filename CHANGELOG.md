@@ -38,6 +38,15 @@ All notable changes to this project are documented in this file. The format is b
   - Mutually exclusive with image attachment. Accepted formats: MP3, OGG, WAV, M4A, WebM.
   - Discord renders inline audio player. `🎙️ Voice Confession` label in embed.
   - Daily limit tracked via Redis with UTC midnight reset. Auto-refund on error.
+- **Gamble replay buttons** — Play Again, game-switch dropdown, Change Bet modal for `/gamble`. 30s collector with owner-only enforcement.
+- **Premium upgrade button** — ⭐ Upgrade Premium link button at all premium gates (manga, confession audio, cooldown hints, `/premium status` and `compare`).
+- **RPG character system** — `/adventure` command with character creation (6 classes), stat system (HP/STR/DEF/MAG/MAG_DEF/SPD), equipment (6 slots × 6 rarities), Gold global currency, leveling from dungeon + message XP.
+- **RPG dungeon rework** — Dungeon converted to global RPG system: stat-based combat, class skills (2 per class), MP system (50 + level×5), boss encounters every 5 floors, Gold/EXP/material/equipment/crate rewards. Team dungeon supports 2-4 player co-op.
+- **Equipment crafting & gacha** — `/adventure craft` (materials → equipment), `/adventure crate` (open crates), `/adventure shop` (buy crates with Gold). 6 material tiers, class-weighted drop tables.
+- **Adventurer Guild** — `/guild` command: registration, 10 ranks (F→Legendary), daily board quests (3 shared) + personal quests (2 per user), 12 quest action types with fire-and-forget tracking, guild ranking leaderboard.
+- **Branch guilds** — `/guild-admin setup/config/disband` for per-server branches. Weekly cooperative quests (3/week, scaled by server size). Monthly competitive events (6 rotating themes, per-capita scoring, top 3 rewards).
+- **Class advancement** — `/adventure advance` at level 20: 12 advanced classes (2 paths per base class), ultimate skills (1 per combat, 50 MP), stat percentage bonuses.
+- **PvP system** — `/pvp challenge @user` with simultaneous turn combat. Both players choose actions privately, reveal simultaneously. Elo rating (starting 1000), win/loss tracking.
 
 ## [5.6.0] - 2026-04-14
 

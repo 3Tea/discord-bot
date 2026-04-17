@@ -1,5 +1,7 @@
 # Dungeon System
 
+**Note:** The dungeon system was reworked in v6.0 to use RPG character stats, Gold currency, and class skills. See [rpg-system.md](rpg-system.md) for the current system.
+
 > Steering doc for AI assistants and contributors. Covers the dungeon mini-game — multi-encounter runs, turn-based combat, NPC merchants, buffs, traps, treasure, and floor progression.
 
 ## Overview
