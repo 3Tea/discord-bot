@@ -1,8 +1,8 @@
 ---
 title: Hầm ngục
 command: dungeon
-category: economy
-description: Khám phá hầm ngục với chiến đấu, bẫy, kho báu và thương nhân NPC qua nhiều trận liên tiếp.
+category: rpg
+description: Khám phá hầm ngục với chiến đấu RPG dựa trên chỉ số, kỹ năng nghề, boss và chơi nhóm để nhận Gold, EXP và trang bị.
 cooldown: "1h"
 ---
 
@@ -10,36 +10,49 @@ cooldown: "1h"
 
 ```
 /dungeon
+/dungeon team
 ```
+
+## Lệnh con
+
+| Lệnh con | Mô tả |
+|-----------|-------|
+| `/dungeon` | Vào hầm ngục chơi đơn |
+| `/dungeon team` | Tạo hoặc tham gia hầm ngục nhóm (2–4 người) |
+
+> **Yêu cầu nhân vật RPG.** Dùng `/adventure create` trước nếu chưa có.
 
 ## Cách hoạt động
 
-Bước vào hầm ngục và đối mặt tối đa **5 lượt gặp** mỗi lần chơi. Mỗi lượt có thể là trận chiến quái vật, rương kho báu, bẫy, hoặc thương nhân NPC. HP của bạn (100) được giữ nguyên trong suốt lượt chơi, hãy quản lý khéo léo.
+Bước vào hầm ngục và đối mặt tối đa **5 lượt gặp** mỗi lần chơi. Mỗi lượt có thể là trận chiến quái vật, rương kho báu, bẫy, hoặc thương nhân NPC. HP nhân vật của bạn được giữ nguyên trong suốt lượt chơi, hãy quản lý khéo léo.
 
 ### Các Loại Lượt Gặp
 
 | Lượt Gặp | Tỉ Lệ | Điều Gì Xảy Ra |
 |-----------|--------|----------------|
-| Quái vật | 50% | Chiến đấu theo lượt (tối đa 3 vòng) |
-| Kho báu | 25% | Thưởng coin/gem ngay lập tức, tiến tầng |
-| Bẫy | 15% | Mất HP và coin, giữ nguyên tầng |
-| Thương nhân | 10% | Mua hồi máu, buff, hoặc đổi coin lấy gem |
+| Quái vật | 50% | Chiến đấu dựa trên chỉ số với kỹ năng nghề |
+| Kho báu | 25% | Gold, nguyên liệu hoặc trang bị, tiến tầng |
+| Bẫy | 15% | Mất HP, giữ nguyên tầng |
+| Thương nhân | 10% | Mua hồi máu, buff, hoặc đổi Gold lấy gem |
 
 ### Chiến Đấu
 
-Chiến đấu quái vật bằng các nút hành động:
+Chiến đấu quái vật bằng các nút hành động gắn liền với nghề RPG:
 
 | Hành Động | Hiệu Ứng |
 |-----------|-----------|
-| ⚔️ Tấn công | Sát thương toàn bộ cho quái, nhận toàn bộ sát thương |
-| 🛡️ Phòng thủ | 70% sát thương cho quái, chỉ nhận 50% sát thương |
+| ⚔️ Tấn công | Đánh thường dựa trên STR/MAG |
+| 🎯 Kỹ năng 1 | Kỹ năng theo nghề (tốn MP) |
+| 🔥 Kỹ năng 2 | Kỹ năng theo nghề (tốn MP) |
+| 🛡️ Phòng thủ | Giảm sát thương nhận vào |
 | 🏃 Chạy | Thoát — không thưởng, không phạt |
+| 💥 Tuyệt chiêu | Kỹ năng mạnh cho nghề nâng cao (cấp 20+) |
 
-Chiến đấu kéo dài tối đa **3 lượt**. Nếu không hạ được quái trong thời gian, bạn tự động thoát.
+MP bắt đầu ở 50 + cấp x 5. Kỹ năng tốn MP — hãy quản lý tài nguyên qua các lượt gặp.
 
-**Thắng:** 50–150 coin + bonus tầng, 10% cơ hội gem, 3% cơ hội rơi star.
+**Thắng:** Gold + EXP + nguyên liệu + cơ hội rơi trang bị + rương. Boss mỗi 5 tầng.
 
-**Thua (HP về 0):** Mất 100–200 coin, tầng reset về checkpoint. Lượt chơi kết thúc.
+**Thua (HP về 0):** Tầng reset về checkpoint. Lượt chơi kết thúc.
 
 ### Quái Vật
 
@@ -55,11 +68,11 @@ Thương nhân cung cấp **một** dịch vụ mỗi lần gặp:
 
 | Dịch Vụ | Chi Phí | Hiệu Ứng |
 |----------|---------|-----------|
-| 🧪 Hồi máu | 80 + tầng × 5 coin | Hồi 30 + tầng × 2 HP (tối đa 100) |
-| ⚔️ Buff | 100 + tầng × 5 coin | Buff ngẫu nhiên cho các lượt còn lại |
-| 💱 Đổi tiền | 300–600 coin | 1 gem |
+| 🧪 Hồi máu | 80 + tầng x 5 Gold | Hồi HP theo độ sâu tầng |
+| ⚔️ Buff | 100 + tầng x 5 Gold | Buff ngẫu nhiên cho các lượt còn lại |
+| 💱 Đổi tiền | 300–600 Gold | 1 gem |
 
-**Loại buff:** Tấn công (sát thương ×1.3), Phòng thủ (nhận sát thương ×0.7), hoặc May mắn (nhiều kho báu hơn, ít bẫy hơn).
+**Loại buff:** Tấn công (sát thương x1.3), Phòng thủ (nhận sát thương x0.7), hoặc May mắn (nhiều kho báu hơn, ít bẫy hơn).
 
 ### Tiến Tầng
 
@@ -68,5 +81,9 @@ Tầng tăng khi thắng quái và tìm kho báu. Checkpoint tự động lưu t
 ### Luồng Chơi
 
 Sau mỗi lượt gặp bạn chọn **Tiếp tục** (lượt tiếp theo) hoặc **Rời đi** (thoát với phần thưởng). Lượt chơi kết thúc khi bạn rời đi, hoàn thành 5 lượt, chết, hoặc hết 15 phút.
+
+### Hầm Ngục Nhóm
+
+Dùng `/dungeon team` để tạo hoặc tham gia nhóm 2–4 người. Tất cả thành viên phải có nhân vật RPG. Quái vật được tăng sức mạnh theo số người. Lượt chơi đồng thời — tất cả người chơi chọn hành động cùng lúc.
 
 > **Mẹo:** Đừng tham lam — nếu HP thấp sau trận chiến khó, hãy cân nhắc rời đi để giữ phần thưởng. Hồi máu của thương nhân có thể cứu cả lượt chơi nếu bạn may mắn gặp được!

@@ -130,6 +130,7 @@ export const ui = {
     "commands.category.utility": "Utility",
     "commands.category.info": "Info",
     "commands.category.settings": "Settings",
+    "commands.category.rpg": "RPG",
     "commands.category.confession": "Confession",
 
     // Guide page
@@ -272,6 +273,7 @@ export const ui = {
     "commands.category.utility": "Tiện ích",
     "commands.category.info": "Thông tin",
     "commands.category.settings": "Cài đặt",
+    "commands.category.rpg": "RPG",
     "commands.category.confession": "Tâm sự",
 
     // Guide page

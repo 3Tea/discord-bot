@@ -1,8 +1,8 @@
 ---
 title: Dungeon
 command: dungeon
-category: economy
-description: Explore a dungeon with combat, traps, treasure, and NPC merchants across multi-encounter runs.
+category: rpg
+description: Explore dungeons with RPG stat-based combat, class skills, boss encounters, and team play for Gold, EXP, and equipment.
 cooldown: "1h"
 ---
 
@@ -10,36 +10,49 @@ cooldown: "1h"
 
 ```
 /dungeon
+/dungeon team
 ```
+
+## Subcommands
+
+| Subcommand | Description |
+|------------|-------------|
+| `/dungeon` | Enter a solo dungeon run |
+| `/dungeon team` | Create or join a team dungeon (2–4 players) |
+
+> **Requires an RPG character.** Use `/adventure create` first if you haven't already.
 
 ## How It Works
 
-Enter a dungeon and face up to **5 encounters** per run. Each encounter can be a monster battle, treasure chest, trap, or NPC merchant. Your HP (100) persists across the entire run, so manage it wisely.
+Enter a dungeon and face up to **5 encounters** per run. Each encounter can be a monster battle, treasure chest, trap, or NPC merchant. Your character's HP persists across the entire run, so manage it wisely.
 
 ### Encounter Types
 
 | Encounter | Chance | What Happens |
 |-----------|--------|-------------|
-| Monster | 50% | Turn-based combat (up to 3 rounds) |
-| Treasure | 25% | Instant coin/gem reward, floor advances |
-| Trap | 15% | HP and coin loss, floor stays |
-| Merchant | 10% | Buy healing, buffs, or exchange coins for gems |
+| Monster | 50% | Stat-based combat using your class skills |
+| Treasure | 25% | Gold, materials, or equipment drops, floor advances |
+| Trap | 15% | HP loss, floor stays |
+| Merchant | 10% | Buy healing, buffs, or exchange Gold for gems |
 
 ### Combat
 
-Fight monsters using button-based actions:
+Fight monsters using button-based actions tied to your RPG class:
 
 | Action | Effect |
 |--------|--------|
-| ⚔️ Attack | Full damage to monster, full damage to you |
-| 🛡️ Defend | 70% damage to monster, take only 50% damage |
+| ⚔️ Attack | Basic attack based on STR/MAG |
+| 🎯 Skill 1 | Class-specific skill (costs MP) |
+| 🔥 Skill 2 | Class-specific skill (costs MP) |
+| 🛡️ Defend | Reduce incoming damage |
 | 🏃 Run | Escape — no reward, no penalty |
+| 💥 Ultimate | Powerful skill for advanced classes (level 20+) |
 
-Combat lasts up to **3 turns**. If you don't defeat the monster in time, you escape automatically.
+MP starts at 50 + level x 5. Skills cost MP — manage your resources across encounters.
 
-**Win rewards:** 50–150 coins + depth bonus, 10% gem chance, 3% star drop chance.
+**Win rewards:** Gold + EXP + material drops + equipment chance + crate drops. Boss every 5 floors.
 
-**Lose (HP reaches 0):** Lose 100–200 coins, floor resets to checkpoint. Run ends.
+**Lose (HP reaches 0):** Floor resets to checkpoint. Run ends.
 
 ### Monsters
 
@@ -55,11 +68,11 @@ The merchant offers **one** service per visit:
 
 | Service | Cost | Effect |
 |---------|------|--------|
-| 🧪 Heal | 80 + floor × 5 coin | Restore 30 + floor × 2 HP (max 100) |
-| ⚔️ Buff | 100 + floor × 5 coin | Random buff for remaining encounters |
-| 💱 Exchange | 300–600 coin | 1 gem |
+| 🧪 Heal | 80 + floor x 5 Gold | Restore HP based on floor depth |
+| ⚔️ Buff | 100 + floor x 5 Gold | Random buff for remaining encounters |
+| 💱 Exchange | 300–600 Gold | 1 gem |
 
-**Buff types:** Attack (×1.3 damage), Defense (take ×0.7 damage), or Luck (more treasure, fewer traps).
+**Buff types:** Attack (x1.3 damage), Defense (take x0.7 damage), or Luck (more treasure, fewer traps).
 
 ### Floor Progression
 
@@ -68,5 +81,9 @@ Floors advance on monster wins and treasure finds. Checkpoints auto-save at **pr
 ### Run Flow
 
 After each encounter you choose **Continue** (next encounter) or **Leave** (exit with rewards). The run ends when you leave, finish 5 encounters, die, or the 15-minute timeout expires.
+
+### Team Dungeon
+
+Use `/dungeon team` to create or join a party of 2–4 players. All party members must have an RPG character. Monsters are scaled to the party size. Turns are simultaneous — all players choose actions at the same time.
 
 > **Tip:** Don't be greedy — if your HP is low after a tough fight, consider leaving to keep your rewards. The merchant's heal can save a run if you're lucky enough to encounter one!

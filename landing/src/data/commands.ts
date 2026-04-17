@@ -2,6 +2,7 @@ export type Category =
   | "voice"
   | "xp"
   | "economy"
+  | "rpg"
   | "moderation"
   | "manga"
   | "utility"
@@ -41,6 +42,7 @@ export const categoryMeta: Record<
     color: "#7289DA",
     bg: "rgba(114,137,218,0.15)",
   },
+  rpg: { labelKey: "commands.category.rpg", color: "#e67e22", bg: "rgba(230,126,34,0.15)" },
   confession: {
     labelKey: "commands.category.confession",
     color: "#9B59B6",
@@ -155,8 +157,33 @@ export const commands: Command[] = [
   },
   {
     name: "dungeon",
-    description: "Explore a dungeon with combat, traps, treasure, and NPC merchants across multi-encounter runs",
-    category: "economy",
+    description: "Explore dungeons with RPG combat, class skills, and boss encounters for Gold and equipment",
+    category: "rpg",
+    subcommands: ["enter", "team"],
+  },
+  {
+    name: "adventure",
+    description: "RPG adventure — manage your character, equipment, and stats",
+    category: "rpg",
+    subcommands: ["create", "profile", "equip", "inventory", "unequip", "craft", "crate", "shop", "advance"],
+  },
+  {
+    name: "guild",
+    description: "Adventurer Guild — quests, ranking, and rewards",
+    category: "rpg",
+    subcommands: ["register", "profile", "board", "quests", "ranking", "branch", "event"],
+  },
+  {
+    name: "guild-admin",
+    description: "Manage branch guild settings (Admin only)",
+    category: "rpg",
+    subcommands: ["setup", "config", "disband"],
+  },
+  {
+    name: "pvp",
+    description: "Player vs Player battles",
+    category: "rpg",
+    subcommands: ["challenge", "stats"],
   },
   {
     name: "premium",
