@@ -31,6 +31,10 @@ async function main(): Promise<void> {
 
     const { CommandLogService } = await import("../services/commandLog.service");
     CommandLogService.startFlusher();
+
+    const { startAuditSnapshotJob } = await import("../util/audit/snapshotJob");
+    const { default: clientSingleton } = await import("../client");
+    startAuditSnapshotJob(clientSingleton);
 }
 
 main().catch(console.error);
@@ -39,6 +43,10 @@ main().catch(console.error);
 async function shutdown(): Promise<void> {
     const { CommandLogService } = await import("../services/commandLog.service");
     await CommandLogService.flush();
+    const { AuditDispatcherService } = await import("../services/audit/auditDispatcher.service");
+    await AuditDispatcherService.drain();
+    const { stopAuditSnapshotJob } = await import("../util/audit/snapshotJob");
+    stopAuditSnapshotJob();
     const mongoose = await import("mongoose");
     await mongoose.default.disconnect().catch(() => {});
     const { default: client } = await import("../client");
