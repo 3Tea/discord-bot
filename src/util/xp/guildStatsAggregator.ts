@@ -5,6 +5,7 @@ import GuildStatsSnapshotModel from "../../models/guildStatsSnapshot.model";
 import XPSnapshotModel from "../../models/xpSnapshot.model";
 import { getCurrentPeriodKeys, ALL_PERIODS } from "./periodKey";
 import { logger } from "../log/logger.mixed";
+import { AuditService } from "../../services/audit/audit.service";
 
 const INTERVAL_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -57,14 +58,18 @@ export function startGuildStatsAggregator(): void {
     // Run once on startup after a short delay
     setTimeout(() => {
         aggregateActiveMembers().catch((error) => {
-            logger.error(`[guildStatsAggregator] ${error instanceof Error ? error.message : "Unknown error"}`);
+            const err = error instanceof Error ? error : new Error("Unknown error");
+            logger.error(`[guildStatsAggregator] ${err.message}`);
+            AuditService.logBackgroundError("guildStatsAggregator", err);
         });
     }, 5000);
 
     // Then every 10 minutes
     setInterval(() => {
         aggregateActiveMembers().catch((error) => {
-            logger.error(`[guildStatsAggregator] ${error instanceof Error ? error.message : "Unknown error"}`);
+            const err = error instanceof Error ? error : new Error("Unknown error");
+            logger.error(`[guildStatsAggregator] ${err.message}`);
+            AuditService.logBackgroundError("guildStatsAggregator", err);
         });
     }, INTERVAL_MS);
 }

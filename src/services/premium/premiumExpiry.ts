@@ -5,6 +5,7 @@ import redis from "../../connector/redis/index";
 import { logger } from "../../util/log/logger.mixed";
 import { resolveUserLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
+import { AuditService } from "../audit/audit.service";
 
 const INTERVAL_MS = 10 * 60 * 1000;
 const GLOBAL_GUILD_ID = "global";
@@ -74,13 +75,17 @@ async function expireStale(): Promise<void> {
 export function startPremiumExpiry(): void {
     setTimeout(() => {
         expireStale().catch((error) => {
-            logger.error(`[premiumExpiry] ${error instanceof Error ? error.message : "Unknown error"}`);
+            const err = error instanceof Error ? error : new Error("Unknown error");
+            logger.error(`[premiumExpiry] ${err.message}`);
+            AuditService.logBackgroundError("premiumExpiry", err);
         });
     }, 10_000);
 
     setInterval(() => {
         expireStale().catch((error) => {
-            logger.error(`[premiumExpiry] ${error instanceof Error ? error.message : "Unknown error"}`);
+            const err = error instanceof Error ? error : new Error("Unknown error");
+            logger.error(`[premiumExpiry] ${err.message}`);
+            AuditService.logBackgroundError("premiumExpiry", err);
         });
     }, INTERVAL_MS);
 }

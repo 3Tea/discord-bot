@@ -1,6 +1,7 @@
 // src/services/commandLog.service.ts
 import CommandLogModel from "../models/commandLog.model";
 import { logger } from "../util/log/logger.mixed";
+import { AuditService } from "./audit/audit.service";
 
 const FLUSH_INTERVAL_MS = 10_000;
 const BUFFER_THRESHOLD = 50;
@@ -29,7 +30,9 @@ async function flush(): Promise<void> {
     try {
         await CommandLogModel.insertMany(batch, { ordered: false });
     } catch (error) {
-        logger.error(`[CommandLogService] flush failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+        const err = error instanceof Error ? error : new Error("Unknown error");
+        logger.error(`[CommandLogService] flush failed: ${err.message}`);
+        AuditService.logBackgroundError("CommandLogService.flush", err);
     }
 }
 
