@@ -48,6 +48,14 @@ All notable changes to this project are documented in this file. The format is b
 - **Class advancement** — `/adventure advance` at level 20: 12 advanced classes (2 paths per base class), ultimate skills (1 per combat, 50 MP), stat percentage bonuses.
 - **PvP system** — `/pvp challenge @user` with simultaneous turn combat. Both players choose actions privately, reveal simultaneously. Elo rating (starting 1000), win/loss tracking.
 
+## [5.7.0] - 2026-04-17
+
+### Added
+
+- **Audit system** — dev-only runtime observability: `/audit setup` configures two Discord text channels (critical events + all commands) with permission checks, `/audit query guilds|guild|history|summary` for Mongo-backed lookups, and a 24h cron that snapshots per-guild member counts.
+- **Guild lifecycle tracking** — `guildCreate` / `guildDelete` events persist to `GuildAudit` collection and post embeds to the critical channel. `ready` reconciles guilds (marks bot-left guilds) and posts a startup summary.
+- **Background error forwarding** — `premiumExpiry`, `guildStatsAggregator`, and `CommandLogService.flush` now emit errors to the audit critical channel.
+
 ## [5.6.0] - 2026-04-14
 
 ### Added

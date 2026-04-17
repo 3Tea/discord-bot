@@ -75,6 +75,9 @@ src/
     equipment.model.ts     # Equipment items (slot, rarity, stats)
     guildMember.model.ts   # Adventurer Guild membership (rank, GP, quests)
     branchGuild.model.ts   # Per-server branch guild
+    auditConfig.model.ts   # Singleton: critical/commands channel IDs + snapshot toggle
+    guildAudit.model.ts    # Per-guild lifecycle (join/leave, memberCount)
+    guildSnapshot.model.ts # Daily member count snapshot for trend analysis
   services/
     economy/              # Currency, pray/curse, shop, gambling, work services
       currency.service.ts # Coin/gem balance operations
@@ -118,6 +121,11 @@ src/
       branch.service.ts    # Branch guild CRUD, weekly quests, monthly events
       pvp.service.ts       # PvP match state, simultaneous turns, rating
       teamDungeon.service.ts # Team dungeon party management, scaled combat
+    audit/                 # Dev-only audit pipeline
+      audit.service.ts     # Orchestrator: guildCreate/Delete/ready/commands/snapshots/errors
+      auditConfig.service.ts # Config CRUD + Redis cache
+      auditDispatcher.service.ts # Buffered Discord channel dispatcher
+      auditEmbeds.ts       # Embed builders (English, dev-facing)
     commandLog.service.ts # Buffered command usage analytics
   connector/
     mongo/index.ts        # MongoDB connection
@@ -597,6 +605,7 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/command-logging.md](docs/steering/command-logging.md) | Dev-only analytics: command stats, user/command history, buffered writes |
 | [docs/steering/premium-system.md](docs/steering/premium-system.md) | Premium tiers (Star/Galaxy): benefits, integration points, caching, expiry, admin commands |
 | [docs/steering/rpg-system.md](docs/steering/rpg-system.md) | RPG adventure: characters, classes, combat, dungeons, equipment, guilds, PvP, team dungeon |
+| [docs/steering/audit-system.md](docs/steering/audit-system.md) | Dev-only audit: dual-channel dispatcher, guild lifecycle, daily snapshots, `/audit` command |
 
 ## Changelog & release notes
 

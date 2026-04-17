@@ -1,6 +1,6 @@
 {
   "name": "3at-discord-bot",
-  "version": "5.6.0",
+  "version": "5.7.0",
   "description": "Make 3AT great again :)",
   "main": "www.ts",
   "engines": {
