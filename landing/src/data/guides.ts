@@ -24,4 +24,9 @@ export const guideMeta: Record<string, GuideMeta> = {
   moderation: { slug: "moderation", label: "Moderation", color: "#C0392B", bg: "rgba(192,57,43,0.15)", order: 13 },
   confessions: { slug: "confessions", label: "Confessions", color: "#E67E22", bg: "rgba(230,126,34,0.15)", order: 14 },
   manga: { slug: "manga", label: "Manga & NSFW", color: "#ED4245", bg: "rgba(237,66,69,0.15)", order: 15 },
+  "rpg-getting-started": { slug: "rpg-getting-started", label: "RPG Getting Started", color: "#e67e22", bg: "rgba(230, 126, 34, 0.1)", order: 18 },
+  "rpg-classes": { slug: "rpg-classes", label: "RPG Classes", color: "#e74c3c", bg: "rgba(231, 76, 60, 0.1)", order: 19 },
+  "rpg-equipment": { slug: "rpg-equipment", label: "Equipment & Crafting", color: "#3498db", bg: "rgba(52, 152, 219, 0.1)", order: 20 },
+  "adventurer-guild": { slug: "adventurer-guild", label: "Adventurer Guild", color: "#f39c12", bg: "rgba(243, 156, 18, 0.1)", order: 21 },
+  pvp: { slug: "pvp", label: "PvP Battles", color: "#9b59b6", bg: "rgba(155, 89, 182, 0.1)", order: 22 },
 };
