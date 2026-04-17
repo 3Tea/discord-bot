@@ -5,6 +5,7 @@ import { CommandLogService } from "../services/commandLog.service";
 import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
 import type { CommandInteractionOption } from "discord.js";
+import { AuditService } from "../services/audit/audit.service";
 
 function serializeOptions(data: readonly CommandInteractionOption[]): Record<string, unknown> {
     const result: Record<string, unknown> = {};
@@ -65,7 +66,7 @@ export default {
 
         const latencyMs = Date.now() - startTime;
 
-        CommandLogService.pushLog({
+        const entry = {
             commandName: interaction.commandName,
             userId: interaction.user.id,
             username: interaction.user.username,
@@ -75,6 +76,9 @@ export default {
             success,
             errorMessage,
             latencyMs,
-        });
+        };
+
+        CommandLogService.pushLog(entry);
+        AuditService.onCommandExecuted(entry);
     },
 };
