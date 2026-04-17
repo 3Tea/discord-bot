@@ -2,7 +2,7 @@
  * Maps each top-level slash command name to a help embed section.
  * Update this map when adding new commands so /help stays grouped correctly.
  */
-export const HELP_CATEGORY_ORDER = ["general", "xp", "economy", "voice", "moderation", "manga", "other"] as const;
+export const HELP_CATEGORY_ORDER = ["general", "xp", "economy", "rpg", "voice", "moderation", "manga", "other"] as const;
 
 export type HelpCategoryId = (typeof HELP_CATEGORY_ORDER)[number];
 
@@ -35,12 +35,17 @@ const COMMAND_TO_CATEGORY: Record<string, HelpCategoryId> = {
     gift: "economy",
     rob: "economy",
     mine: "economy",
-    dungeon: "economy",
     wallet: "economy",
     "global-shop": "economy",
     "global-inventory": "economy",
     premium: "economy",
     quest: "economy",
+    // RPG & Adventure
+    adventure: "rpg",
+    dungeon: "rpg",
+    guild: "rpg",
+    "guild-admin": "rpg",
+    pvp: "rpg",
     // Voice
     voice: "voice",
     // Moderation
