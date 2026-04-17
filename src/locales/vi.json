@@ -1445,5 +1445,22 @@
     "cmd.pvp.desc": "Đấu người chơi với người chơi",
     "cmd.pvp.challenge.desc": "Thách đấu người chơi khác",
     "cmd.pvp.challenge.user.desc": "Người chơi muốn thách đấu",
-    "cmd.pvp.stats.desc": "Xem thống kê và xếp hạng PvP"
+    "cmd.pvp.stats.desc": "Xem thống kê và xếp hạng PvP",
+    "cmd.audit.desc": "Hệ thống audit (chỉ dev)",
+    "cmd.audit.setup.desc": "Cấu hình channel audit và tùy chọn",
+    "cmd.audit.setup.critical_channel.desc": "Đặt channel nhận event critical",
+    "cmd.audit.setup.commands_channel.desc": "Đặt channel log command",
+    "cmd.audit.setup.clear.desc": "Xóa cấu hình channel",
+    "cmd.audit.setup.clear.target.desc": "Channel nào cần xóa",
+    "cmd.audit.setup.snapshot.desc": "Bật/tắt cron snapshot hằng ngày",
+    "cmd.audit.setup.snapshot.enabled.desc": "Bật hoặc tắt",
+    "cmd.audit.setup.view.desc": "Xem cấu hình audit hiện tại",
+    "cmd.audit.query.desc": "Truy vấn dữ liệu audit",
+    "cmd.audit.query.guilds.desc": "Liệt kê tất cả guild bot đang ở",
+    "cmd.audit.query.guilds.page.desc": "Số trang",
+    "cmd.audit.query.guild.desc": "Thông tin chi tiết 1 guild",
+    "cmd.audit.query.guild.target.desc": "Guild ID",
+    "cmd.audit.query.history.desc": "Các sự kiện join/leave gần đây",
+    "cmd.audit.query.history.limit.desc": "Số entry (1-25)",
+    "cmd.audit.query.summary.desc": "Tổng hợp realtime tất cả guild"
 }

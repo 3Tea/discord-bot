@@ -1445,5 +1445,22 @@
     "cmd.pvp.desc": "플레이어 대 플레이어 전투",
     "cmd.pvp.challenge.desc": "다른 플레이어에게 PvP 전투를 도전",
     "cmd.pvp.challenge.user.desc": "도전할 플레이어",
-    "cmd.pvp.stats.desc": "PvP 전적과 레이팅 보기"
+    "cmd.pvp.stats.desc": "PvP 전적과 레이팅 보기",
+    "cmd.audit.desc": "Audit system (dev only)",
+    "cmd.audit.setup.desc": "Configure audit channels and options",
+    "cmd.audit.setup.critical_channel.desc": "Set the critical-events channel",
+    "cmd.audit.setup.commands_channel.desc": "Set the command-log channel",
+    "cmd.audit.setup.clear.desc": "Clear an audit channel",
+    "cmd.audit.setup.clear.target.desc": "Which channel to clear",
+    "cmd.audit.setup.snapshot.desc": "Toggle daily snapshot cron",
+    "cmd.audit.setup.snapshot.enabled.desc": "Enable or disable",
+    "cmd.audit.setup.view.desc": "View current audit config",
+    "cmd.audit.query.desc": "Query audit data",
+    "cmd.audit.query.guilds.desc": "List all guilds the bot is currently in",
+    "cmd.audit.query.guilds.page.desc": "Page number",
+    "cmd.audit.query.guild.desc": "Detailed info for one guild",
+    "cmd.audit.query.guild.target.desc": "Guild ID",
+    "cmd.audit.query.history.desc": "Recent join/leave events",
+    "cmd.audit.query.history.limit.desc": "Number of entries (1-25)",
+    "cmd.audit.query.summary.desc": "Realtime summary of all guilds"
 }

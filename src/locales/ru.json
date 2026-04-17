@@ -1445,5 +1445,22 @@
     "cmd.pvp.desc": "Бои игрок против игрока",
     "cmd.pvp.challenge.desc": "Вызвать другого игрока на PvP-бой",
     "cmd.pvp.challenge.user.desc": "Игрок для вызова",
-    "cmd.pvp.stats.desc": "Посмотреть статистику и рейтинг PvP"
+    "cmd.pvp.stats.desc": "Посмотреть статистику и рейтинг PvP",
+    "cmd.audit.desc": "Audit system (dev only)",
+    "cmd.audit.setup.desc": "Configure audit channels and options",
+    "cmd.audit.setup.critical_channel.desc": "Set the critical-events channel",
+    "cmd.audit.setup.commands_channel.desc": "Set the command-log channel",
+    "cmd.audit.setup.clear.desc": "Clear an audit channel",
+    "cmd.audit.setup.clear.target.desc": "Which channel to clear",
+    "cmd.audit.setup.snapshot.desc": "Toggle daily snapshot cron",
+    "cmd.audit.setup.snapshot.enabled.desc": "Enable or disable",
+    "cmd.audit.setup.view.desc": "View current audit config",
+    "cmd.audit.query.desc": "Query audit data",
+    "cmd.audit.query.guilds.desc": "List all guilds the bot is currently in",
+    "cmd.audit.query.guilds.page.desc": "Page number",
+    "cmd.audit.query.guild.desc": "Detailed info for one guild",
+    "cmd.audit.query.guild.target.desc": "Guild ID",
+    "cmd.audit.query.history.desc": "Recent join/leave events",
+    "cmd.audit.query.history.limit.desc": "Number of entries (1-25)",
+    "cmd.audit.query.summary.desc": "Realtime summary of all guilds"
 }
