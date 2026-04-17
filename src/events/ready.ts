@@ -3,11 +3,13 @@ import { ActivityType, Client, Events } from "discord.js";
 import botInfo from "../../package.json";
 import { getNumberOfDays } from "../util/date/day";
 import EconomyLogService from "../services/economy/economyLog.service";
+import { AuditDispatcherService } from "../services/audit/auditDispatcher.service";
+import { AuditService } from "../services/audit/audit.service";
 
 export default {
     name: Events.ClientReady,
     once: true,
-    execute(client: Client<true>) {
+    async execute(client: Client<true>) {
         EconomyLogService.setClient(client);
 
         const guilds = client.guilds.cache.map((guild) => guild.id);
@@ -17,6 +19,9 @@ export default {
         console.log("Total users:", users.length);
 
         console.log(`Ready! Logged in as ${client.user.tag}`);
+
+        AuditDispatcherService.init(client);
+        await AuditService.onReady(client);
 
         const numberOfDays = getNumberOfDays(new Date("2019/08/25"), new Date());
         setTimeout(() => {
