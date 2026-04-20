@@ -9,7 +9,14 @@ import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
 import PremiumService from "../services/premium/premium.service";
 import QuestService from "../services/quest/quest.service";
-import { processEncounter, scheduleCombatTimeout, scheduleMerchantTimeout, RUN_TTL } from "../commands/slash/dungeon";
+import {
+    processEncounter,
+    scheduleCombatTimeout,
+    scheduleMerchantTimeout,
+    cancelCombatTimeout,
+    cancelMerchantTimeout,
+    RUN_TTL,
+} from "../commands/slash/dungeon";
 
 export default {
     id: BUTTON_ID.DUNGEON_CONTINUE,
@@ -28,11 +35,18 @@ export default {
         }
 
         if (runState.userId !== userId) {
-            await interaction.deferUpdate();
+            const foreignLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
+            await interaction.reply({
+                content: t(foreignLocale, "common.no_permission"),
+                flags: MessageFlags.Ephemeral,
+            });
             return;
         }
 
         await interaction.deferUpdate();
+        // Cancel any pending timers from the previous encounter before processing the next one
+        cancelCombatTimeout(userId);
+        cancelMerchantTimeout(userId);
 
         const locale = runState.locale as SupportedLocale;
         const tierConfig = await PremiumService.getConfig(userId);
