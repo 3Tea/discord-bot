@@ -17,5 +17,6 @@ const guildSnapshotSchema = new Schema<IGuildSnapshot>(
 );
 
 guildSnapshotSchema.index({ guildId: 1, takenAt: -1 });
+guildSnapshotSchema.index({ takenAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });
 
 export default model<IGuildSnapshot>("GuildSnapshot", guildSnapshotSchema);

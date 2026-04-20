@@ -108,6 +108,53 @@ export default {
                 )
                 .addSubcommand((sub) =>
                     sub
+                        .setName("alert")
+                        .setDescription("Configure threshold alerts (provide at least one option)")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.alert.desc"))
+                        .addIntegerOption((opt) =>
+                            opt
+                                .setName("member-drop-pct")
+                                .setDescription("Alert if total member drop % exceeds this (0 = disabled)")
+                                .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.alert.member_drop.desc"))
+                                .setMinValue(0)
+                                .setMaxValue(100)
+                        )
+                        .addIntegerOption((opt) =>
+                            opt
+                                .setName("bg-errors-per-hour")
+                                .setDescription("Alert if background errors/hour exceed this (0 = disabled)")
+                                .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.alert.bg_errors.desc"))
+                                .setMinValue(0)
+                        )
+                        .addIntegerOption((opt) =>
+                            opt
+                                .setName("guild-leaves-per-hour")
+                                .setDescription("Alert if guild leaves/hour exceed this (0 = disabled)")
+                                .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.alert.leaves.desc"))
+                                .setMinValue(0)
+                        )
+                        .addRoleOption((opt) =>
+                            opt
+                                .setName("role")
+                                .setDescription("Role to ping on alert (optional)")
+                                .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.alert.role.desc"))
+                        )
+                        .addBooleanOption((opt) =>
+                            opt
+                                .setName("clear-role")
+                                .setDescription("Unset the alert role")
+                                .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.alert.clear_role.desc"))
+                        )
+                        .addIntegerOption((opt) =>
+                            opt
+                                .setName("cooldown-minutes")
+                                .setDescription("Cooldown minutes between same-type alerts")
+                                .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.alert.cooldown.desc"))
+                                .setMinValue(1)
+                        )
+                )
+                .addSubcommand((sub) =>
+                    sub
                         .setName("view")
                         .setDescription("View current audit config")
                         .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.view.desc"))
@@ -225,8 +272,13 @@ async function handleSetup(interaction: ChatInputCommandInteraction, sub: string
             await interaction.editReply(`Snapshot cron ${enabled ? "enabled" : "disabled"}.`);
             return;
         }
+        case "alert": {
+            await handleSetupAlert(interaction, userId);
+            return;
+        }
         case "view": {
             const config = await AuditConfigService.getConfig();
+            const alertLabel = (v: number) => (v <= 0 ? "disabled" : String(v));
             const embed = new EmbedBuilder()
                 .setTitle("Audit config")
                 .setColor(0x3b82f6)
@@ -242,7 +294,28 @@ async function handleSetup(interaction: ChatInputCommandInteraction, sub: string
                         inline: false,
                     },
                     { name: "Snapshot enabled", value: String(config.snapshotEnabled), inline: true },
-                    { name: "Updated by", value: config.updatedBy ? `<@${config.updatedBy}>` : "—", inline: true }
+                    { name: "Updated by", value: config.updatedBy ? `<@${config.updatedBy}>` : "—", inline: true },
+                    {
+                        name: "Alert: member drop %",
+                        value: alertLabel(config.alertMemberDropPct),
+                        inline: true,
+                    },
+                    {
+                        name: "Alert: bg errors/hour",
+                        value: alertLabel(config.alertBgErrorsPerHour),
+                        inline: true,
+                    },
+                    {
+                        name: "Alert: guild leaves/hour",
+                        value: alertLabel(config.alertGuildLeavesPerHour),
+                        inline: true,
+                    },
+                    {
+                        name: "Alert role",
+                        value: config.alertRoleId ? `<@&${config.alertRoleId}>` : "— (dev DM fallback)",
+                        inline: true,
+                    },
+                    { name: "Alert cooldown (min)", value: String(config.alertCooldownMinutes), inline: true }
                 )
                 .setTimestamp();
             await interaction.editReply({ embeds: [embed] });
@@ -251,6 +324,37 @@ async function handleSetup(interaction: ChatInputCommandInteraction, sub: string
         default:
             await interaction.editReply("Unknown setup subcommand.");
     }
+}
+
+async function handleSetupAlert(interaction: ChatInputCommandInteraction, userId: string): Promise<void> {
+    const memberDrop = interaction.options.getInteger("member-drop-pct");
+    const bgErrors = interaction.options.getInteger("bg-errors-per-hour");
+    const leaves = interaction.options.getInteger("guild-leaves-per-hour");
+    const role = interaction.options.getRole("role");
+    const clearRole = interaction.options.getBoolean("clear-role") ?? false;
+    const cooldown = interaction.options.getInteger("cooldown-minutes");
+
+    const patch: Parameters<typeof AuditConfigService.setAlertThresholds>[0] = {};
+    if (memberDrop !== null) patch.memberDropPct = memberDrop;
+    if (bgErrors !== null) patch.bgErrorsPerHour = bgErrors;
+    if (leaves !== null) patch.guildLeavesPerHour = leaves;
+    if (clearRole) patch.roleId = null;
+    else if (role) patch.roleId = role.id;
+    if (cooldown !== null) patch.cooldownMinutes = cooldown;
+
+    if (Object.keys(patch).length === 0) {
+        await interaction.editReply("Provide at least one option to update.");
+        return;
+    }
+
+    await AuditConfigService.setAlertThresholds(patch, userId);
+    const parts: string[] = [];
+    if (patch.memberDropPct !== undefined) parts.push(`member-drop-pct=${patch.memberDropPct}`);
+    if (patch.bgErrorsPerHour !== undefined) parts.push(`bg-errors-per-hour=${patch.bgErrorsPerHour}`);
+    if (patch.guildLeavesPerHour !== undefined) parts.push(`guild-leaves-per-hour=${patch.guildLeavesPerHour}`);
+    if (patch.roleId !== undefined) parts.push(`role=${patch.roleId ? `<@&${patch.roleId}>` : "cleared"}`);
+    if (patch.cooldownMinutes !== undefined) parts.push(`cooldown-minutes=${patch.cooldownMinutes}`);
+    await interaction.editReply(`Alert config updated: ${parts.join(", ")}`);
 }
 
 async function handleQuery(interaction: ChatInputCommandInteraction, sub: string): Promise<void> {

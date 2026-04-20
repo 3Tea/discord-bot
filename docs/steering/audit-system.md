@@ -4,7 +4,7 @@
 
 ## Overview
 
-Dual-channel dispatcher writes audit events to Discord text channels configured at runtime. Two MongoDB models (`GuildAudit`, `GuildSnapshot`) persist history; one singleton (`AuditConfig`) holds channel IDs and toggles. A 24h cron captures per-guild member-count snapshots for trend analysis.
+Dual-channel dispatcher writes audit events to Discord text channels configured at runtime. Two MongoDB models (`GuildAudit`, `GuildSnapshot`) persist history; one singleton (`AuditConfig`) holds channel IDs, snapshot toggle, and alert thresholds. A 24h cron captures per-guild member-count snapshots for trend analysis and feeds threshold checks.
 
 ## Access Control
 
@@ -63,6 +63,11 @@ Collection: `AuditConfigs`. Single doc with `_id: "singleton"`.
 | `criticalChannelId` | String? | Critical channel, null = disabled |
 | `commandsChannelId` | String? | Commands channel, null = disabled |
 | `snapshotEnabled` | Boolean | Toggle daily snapshot cron |
+| `alertMemberDropPct` | Number | Member drop % threshold (default 20, 0 = disabled) |
+| `alertBgErrorsPerHour` | Number | Background errors/hour threshold (default 10, 0 = disabled) |
+| `alertGuildLeavesPerHour` | Number | Guild leaves/hour threshold (default 3, 0 = disabled) |
+| `alertRoleId` | String? | Role to ping on alert, null = fall back to `DEV_USER_ID` mention |
+| `alertCooldownMinutes` | Number | Cooldown between same-type alerts (default 60) |
 | `updatedBy` | String? | Dev userId that last changed config |
 
 Redis cache: key `audit:config`, TTL 300s. Invalidated on any setter.
@@ -96,7 +101,7 @@ Collection: `GuildSnapshots`. Insert-only, one doc per guild per day.
 | `memberCount` | Number |
 | `takenAt` | Date |
 
-Index: `{guildId, takenAt: -1}`. No TTL.
+Indexes: `{guildId, takenAt: -1}`, `{takenAt: 1}` with `expireAfterSeconds: 90d` (MongoDB TTL monitor drops old docs every 60s).
 
 ## Commands
 
@@ -108,7 +113,8 @@ Index: `{guildId, takenAt: -1}`. No TTL.
 | `commands-channel channel:#x` | Save commands channel after perm check |
 | `clear target:<critical\|commands>` | Unset the chosen channel |
 | `snapshot enabled:<bool>` | Toggle snapshot cron |
-| `view` | Show current config |
+| `alert [member-drop-pct] [bg-errors-per-hour] [guild-leaves-per-hour] [role] [clear-role] [cooldown-minutes]` | Update any subset of alert thresholds. Set any threshold to `0` to disable that alert. Provide `role` to set the ping target, or `clear-role:true` to clear it (falls back to dev DM mention). |
+| `view` | Show current config + alert thresholds |
 
 ### `/audit query`
 
@@ -131,6 +137,27 @@ Pure functions in `src/services/audit/auditEmbeds.ts` (English only — dev faci
 - `startupSummaryEmbed` (yellow)
 - `snapshotSummaryEmbed` (yellow)
 - `backgroundErrorEmbed` (red)
+- `memberDropAlertEmbed` (dark red) — triggered by snapshot member-drop threshold
+- `rateExceededAlertEmbed` (dark red) — triggered by bg-error or guild-leave per-hour thresholds
+
+## Threshold Alerts
+
+`AlertService` (`src/services/audit/alert.service.ts`) runs in three hot paths and sends **role/user-mention + embed** directly to the critical channel (bypasses buffer) so pings are instant.
+
+| Trigger | Source | Behavior |
+|---|---|---|
+| Member drop | `AuditService.snapshotAllGuilds` (24h) | Per-guild compares current snapshot vs. the latest prior snapshot in the last 2 days. Guilds whose `dropPct >= alertMemberDropPct` are aggregated into one embed. |
+| Background errors/hour | `AuditService.logBackgroundError` | Redis key `audit:alert:counter:bg_errors` (1h TTL). When counter ≥ `alertBgErrorsPerHour`, fires alert. |
+| Guild leaves/hour | `AuditService.onGuildDelete` | Redis key `audit:alert:counter:guild_leaves` (1h TTL). Same shape as bg errors. |
+
+Cooldown is per-alert-type via Redis keys:
+- `audit:alert:cooldown:member_drop`
+- `audit:alert:cooldown:bg_errors`
+- `audit:alert:cooldown:guild_leaves`
+
+TTL = `alertCooldownMinutes * 60`. While the cooldown key exists, subsequent trigger events are suppressed (the counter keeps ticking, but no embed is sent). Setting a threshold to `0` disables that alert entirely.
+
+Mention target: `alertRoleId` (`<@&id>`) if set, otherwise `<@DEV_USER_ID>`. `allowedMentions` explicitly permits roles + users so the ping fires even from bot messages.
 
 ## Key Files
 
@@ -139,10 +166,11 @@ Pure functions in `src/services/audit/auditEmbeds.ts` (English only — dev faci
 | `src/models/auditConfig.model.ts` | Singleton config schema |
 | `src/models/guildAudit.model.ts` | Guild lifecycle schema |
 | `src/models/guildSnapshot.model.ts` | Daily trend schema |
-| `src/services/audit/audit.service.ts` | Event orchestrator, admin command list |
-| `src/services/audit/auditConfig.service.ts` | Config CRUD + Redis cache |
-| `src/services/audit/auditDispatcher.service.ts` | Buffered dispatcher |
-| `src/services/audit/auditEmbeds.ts` | Embed builders |
+| `src/services/audit/audit.service.ts` | Event orchestrator, admin command list, member-drop detection hook |
+| `src/services/audit/auditConfig.service.ts` | Config CRUD + Redis cache (incl. alert thresholds) |
+| `src/services/audit/auditDispatcher.service.ts` | Buffered dispatcher + `sendAlert()` direct-send path |
+| `src/services/audit/alert.service.ts` | Threshold checks, counters, cooldowns |
+| `src/services/audit/auditEmbeds.ts` | Embed builders (incl. alert embeds) |
 | `src/events/guildCreate.ts` | Join handler |
 | `src/events/guildDelete.ts` | Leave handler |
 | `src/commands/slash/audit.ts` | Dev slash command |

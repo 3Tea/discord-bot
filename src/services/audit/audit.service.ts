@@ -3,6 +3,7 @@ import { Client, Guild } from "discord.js";
 import GuildAuditModel, { IGuildAudit } from "../../models/guildAudit.model";
 import GuildSnapshotModel from "../../models/guildSnapshot.model";
 import { logger } from "../../util/log/logger.mixed";
+import { AlertService, MemberDropCandidate } from "./alert.service";
 import { AuditDispatcherService } from "./auditDispatcher.service";
 import {
     adminActionEmbed,
@@ -74,6 +75,7 @@ async function onGuildDelete(guild: Guild): Promise<void> {
         }
         const total = guild.client.guilds.cache.size;
         AuditDispatcherService.pushCritical(guildLeaveEmbed(updated, total));
+        AlertService.recordGuildLeave().catch(() => {});
     } catch (error) {
         logger.error(`[AuditService] onGuildDelete failed: ${error instanceof Error ? error.message : "Unknown"}`);
     }
@@ -168,15 +170,32 @@ async function snapshotAllGuilds(client: Client): Promise<void> {
         await GuildAuditModel.bulkWrite(bulkOps);
 
         const twoDaysAgo = new Date(takenAt.getTime() - 2 * 24 * 60 * 60 * 1000);
-        const prev = await GuildSnapshotModel.aggregate<{ _id: null; total: number }>([
+        const prevPerGuild = await GuildSnapshotModel.aggregate<{ _id: string; memberCount: number }>([
             { $match: { takenAt: { $gte: twoDaysAgo, $lt: new Date(takenAt.getTime() - 60 * 60 * 1000) } } },
             { $sort: { takenAt: -1 } },
             { $group: { _id: "$guildId", memberCount: { $first: "$memberCount" } } },
-            { $group: { _id: null, total: { $sum: "$memberCount" } } },
         ]);
-        const prevTotal = prev[0]?.total ?? 0;
+        const prevMap = new Map(prevPerGuild.map((p) => [p._id, p.memberCount]));
+        const prevTotal = prevPerGuild.reduce((sum, p) => sum + p.memberCount, 0);
         const totalMembers = guilds.reduce((sum, g) => sum + g.memberCount, 0);
         const memberDelta = prevTotal === 0 ? 0 : totalMembers - prevTotal;
+
+        const dropCandidates: MemberDropCandidate[] = [];
+        for (const g of guilds) {
+            const prev = prevMap.get(g.id);
+            if (!prev || prev <= 0 || g.memberCount >= prev) continue;
+            const dropPct = ((prev - g.memberCount) / prev) * 100;
+            dropCandidates.push({
+                guildId: g.id,
+                name: g.name,
+                previous: prev,
+                current: g.memberCount,
+                dropPct,
+            });
+        }
+        if (dropCandidates.length > 0) {
+            AlertService.checkMemberDrops(dropCandidates).catch(() => {});
+        }
 
         const top5 = guilds
             .slice()
@@ -200,6 +219,7 @@ async function snapshotAllGuilds(client: Client): Promise<void> {
 function logBackgroundError(jobName: string, error: Error): void {
     try {
         AuditDispatcherService.pushCritical(backgroundErrorEmbed(jobName, error));
+        AlertService.recordBgError().catch(() => {});
     } catch {
         // never let audit logging crash the job
     }

@@ -9,7 +9,20 @@ export interface AuditConfigSnapshot {
     criticalChannelId: string | null;
     commandsChannelId: string | null;
     snapshotEnabled: boolean;
+    alertMemberDropPct: number;
+    alertBgErrorsPerHour: number;
+    alertGuildLeavesPerHour: number;
+    alertRoleId: string | null;
+    alertCooldownMinutes: number;
     updatedBy: string | null;
+}
+
+export interface AlertThresholdsPatch {
+    memberDropPct?: number;
+    bgErrorsPerHour?: number;
+    guildLeavesPerHour?: number;
+    roleId?: string | null;
+    cooldownMinutes?: number;
 }
 
 function toSnapshot(doc: IAuditConfig): AuditConfigSnapshot {
@@ -17,6 +30,11 @@ function toSnapshot(doc: IAuditConfig): AuditConfigSnapshot {
         criticalChannelId: doc.criticalChannelId ?? null,
         commandsChannelId: doc.commandsChannelId ?? null,
         snapshotEnabled: doc.snapshotEnabled,
+        alertMemberDropPct: doc.alertMemberDropPct ?? 20,
+        alertBgErrorsPerHour: doc.alertBgErrorsPerHour ?? 10,
+        alertGuildLeavesPerHour: doc.alertGuildLeavesPerHour ?? 3,
+        alertRoleId: doc.alertRoleId ?? null,
+        alertCooldownMinutes: doc.alertCooldownMinutes ?? 60,
         updatedBy: doc.updatedBy ?? null,
     };
 }
@@ -81,6 +99,18 @@ async function setSnapshotEnabled(enabled: boolean, updatedBy: string): Promise<
     await invalidate();
 }
 
+async function setAlertThresholds(patch: AlertThresholdsPatch, updatedBy: string): Promise<void> {
+    const set: Record<string, unknown> = { updatedBy };
+    if (patch.memberDropPct !== undefined) set.alertMemberDropPct = patch.memberDropPct;
+    if (patch.bgErrorsPerHour !== undefined) set.alertBgErrorsPerHour = patch.bgErrorsPerHour;
+    if (patch.guildLeavesPerHour !== undefined) set.alertGuildLeavesPerHour = patch.guildLeavesPerHour;
+    if (patch.roleId !== undefined) set.alertRoleId = patch.roleId;
+    if (patch.cooldownMinutes !== undefined) set.alertCooldownMinutes = patch.cooldownMinutes;
+
+    await AuditConfigModel.updateOne({ _id: "singleton" }, { $set: set }, { upsert: true });
+    await invalidate();
+}
+
 export const AuditConfigService = {
     getConfig,
     invalidate,
@@ -88,4 +118,5 @@ export const AuditConfigService = {
     setCommandsChannel,
     clearChannel,
     setSnapshotEnabled,
+    setAlertThresholds,
 };

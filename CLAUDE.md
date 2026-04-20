@@ -609,7 +609,7 @@ All variables documented in `.env.example`. Critical ones:
 
 ## Changelog & release notes
 
-- **`package.json` `version`** is the shipped semver (also shown by **`/info bot`**). In **`CHANGELOG.md`**, use **`## [Unreleased]`** for drafts and a **`## [x.y.z] - date`** block for each release where **`[x.y.z]`** matches `package.json`. CI sends **that release section** to Discord (not `[Unreleased]`) after a successful `develop` build when `CHANGELOG.md` changes, if `DISCORD_CHANGELOG_WEBHOOK_URL` is set. See [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md).
+- **`package.json` `version`** is the shipped semver (also shown by **`/info bot`**). In **`CHANGELOG.md`**, use **`## [Unreleased]`** for drafts and a **`## [x.y.z] - date`** block for each release where **`[x.y.z]`** matches `package.json`. CI sends **that release section** to Discord (not `[Unreleased]`) after a successful `main` build when `CHANGELOG.md` changes, if `DISCORD_CHANGELOG_WEBHOOK_URL` is set. See [docs/steering/changelog-ci.md](docs/steering/changelog-ci.md).
 
 ## Docker
 
