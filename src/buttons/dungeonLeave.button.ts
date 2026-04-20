@@ -6,6 +6,7 @@ import type { SupportedLocale } from "../util/i18n/index";
 import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
 import PremiumService from "../services/premium/premium.service";
+import { cancelCombatTimeout, cancelMerchantTimeout } from "../commands/slash/dungeon";
 
 export default {
     id: BUTTON_ID.DUNGEON_LEAVE,
@@ -24,11 +25,17 @@ export default {
         }
 
         if (runState.userId !== userId) {
-            await interaction.deferUpdate();
+            const foreignLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
+            await interaction.reply({
+                content: t(foreignLocale, "common.no_permission"),
+                flags: MessageFlags.Ephemeral,
+            });
             return;
         }
 
         await interaction.deferUpdate();
+        cancelCombatTimeout(userId);
+        cancelMerchantTimeout(userId);
 
         const locale = runState.locale as SupportedLocale;
 

@@ -305,10 +305,16 @@ async function incrementItemsCrafted(userId: string, qty: number = 1): Promise<v
     await redis.deleteKey(`rpg_char:${userId}`);
 }
 
+async function deleteCharacter(userId: string): Promise<void> {
+    await CharacterModel.deleteOne({ userId });
+    await redis.deleteKey(`rpg_char:${userId}`);
+}
+
 const CharacterService = {
     getCharacter,
     requireCharacter,
     createCharacter,
+    deleteCharacter,
     getBaseStats,
     getEffectiveStats,
     addExp,

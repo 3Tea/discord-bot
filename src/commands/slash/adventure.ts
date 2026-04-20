@@ -2,15 +2,18 @@
 import {
     ActionRowBuilder,
     ButtonBuilder,
+    ButtonInteraction,
     ButtonStyle,
     ChatInputCommandInteraction,
     EmbedBuilder,
+    MessageFlags,
     SlashCommandBuilder,
     StringSelectMenuBuilder,
     StringSelectMenuOptionBuilder,
     type MessageActionRowComponentBuilder,
 } from "discord.js";
 import CharacterService from "../../services/rpg/character.service";
+import EquipmentModel from "../../models/equipment.model";
 import EquipmentService from "../../services/rpg/equipment.service";
 import GuildMemberModel from "../../models/guildMember.model";
 import {
@@ -37,6 +40,10 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import GuildQuestService from "../../services/rpg/guildQuest.service";
+import { AuditDispatcherService } from "../../services/audit/auditDispatcher.service";
+import redis from "../../connector/redis";
+import { BUTTON_ID } from "../../util/config/button";
+import { DEV_USER_ID, GUILD_ID } from "../../util/config/index";
 
 // --- Helpers ---
 
@@ -74,7 +81,13 @@ async function handleCreate(interaction: ChatInputCommandInteraction, locale: Su
         await Reply.embedEdit(interaction, embed);
         return;
     }
+    await runCreateFlow(interaction, locale);
+}
 
+async function runCreateFlow(
+    interaction: ChatInputCommandInteraction | ButtonInteraction,
+    locale: SupportedLocale
+): Promise<void> {
     // Build class selection embed
     const classDescriptions = CLASS_TYPES.map((cls) => {
         const config = CLASS_CONFIG[cls];
@@ -960,6 +973,134 @@ async function handleAdvance(interaction: ChatInputCommandInteraction, locale: S
     await confirmInteraction.update({ embeds: [successEmbed], components: [] });
 }
 
+// --- /adventure dev-reset ---
+
+async function handleDevReset(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
+    // Gate: must be the developer, in the dev guild.
+    if (interaction.guildId !== GUILD_ID || interaction.user.id !== DEV_USER_ID) {
+        const embed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.dev_reset.not_authorized"))
+            .setColor(0xed4245);
+        await Reply.embedEdit(interaction, embed);
+        return;
+    }
+
+    const userId = interaction.user.id;
+
+    const confirmEmbed = new EmbedBuilder()
+        .setTitle(t(locale, "adventure.dev_reset.confirm_title"))
+        .setDescription(t(locale, "adventure.dev_reset.confirm_desc"))
+        .setColor(0xed4245);
+
+    const confirmRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+            .setCustomId("dev_reset_confirm")
+            .setLabel(t(locale, "adventure.dev_reset.confirm_button"))
+            .setStyle(ButtonStyle.Danger),
+        new ButtonBuilder()
+            .setCustomId("dev_reset_cancel")
+            .setLabel(t(locale, "adventure.dev_reset.cancel_button"))
+            .setStyle(ButtonStyle.Secondary)
+    );
+
+    const message = await interaction.editReply({ embeds: [confirmEmbed], components: [confirmRow] });
+
+    const click = await message
+        .awaitMessageComponent({
+            filter: (i) => i.user.id === userId,
+            time: 30_000,
+        })
+        .catch(() => null);
+
+    if (click?.customId !== "dev_reset_confirm") {
+        const cancelEmbed = new EmbedBuilder()
+            .setDescription(t(locale, "adventure.dev_reset.cancelled"))
+            .setColor(0x95a5a6);
+        if (click) {
+            await click.update({ embeds: [cancelEmbed], components: [] });
+        } else {
+            await interaction.editReply({ embeds: [cancelEmbed], components: [] }).catch(() => {});
+        }
+        return;
+    }
+
+    await click.deferUpdate();
+
+    const errors: string[] = [];
+    let characterDeleted = 0;
+    let equipmentDeleted = 0;
+    let guildMembersDeleted = 0;
+    let redisKeysDeleted = 0;
+    let redisDown = false;
+
+    try {
+        await CharacterService.deleteCharacter(userId);
+        characterDeleted = 1;
+    } catch (err) {
+        errors.push(`character: ${err instanceof Error ? err.message : "unknown"}`);
+    }
+
+    try {
+        const res = await EquipmentModel.deleteMany({ ownerId: userId });
+        equipmentDeleted = res.deletedCount ?? 0;
+    } catch (err) {
+        errors.push(`equipment: ${err instanceof Error ? err.message : "unknown"}`);
+    }
+
+    try {
+        const res = await GuildMemberModel.deleteMany({ userId });
+        guildMembersDeleted = res.deletedCount ?? 0;
+    } catch (err) {
+        errors.push(`guildMember: ${err instanceof Error ? err.message : "unknown"}`);
+    }
+
+    // Redis: user-scoped keys only. Match/action keys expire via TTL.
+    const redisKeys = [`rpg_char:${userId}`, `pvp_cd:${userId}`, `pvp_active:${userId}`];
+    for (const key of redisKeys) {
+        try {
+            await redis.deleteKey(key);
+            redisKeysDeleted++;
+        } catch {
+            redisDown = true;
+        }
+    }
+
+    // Build summary embed.
+    let description: string;
+    if (errors.length > 0) {
+        description = t(locale, "adventure.dev_reset.partial", { errors: errors.join("\n") });
+    } else {
+        description = t(locale, "adventure.dev_reset.success", {
+            character: String(characterDeleted),
+            equipment: String(equipmentDeleted),
+            guildMembers: String(guildMembersDeleted),
+            redisKeys: String(redisKeysDeleted),
+        });
+        if (redisDown) description += `\n${t(locale, "adventure.dev_reset.cache_warning")}`;
+    }
+    const doneEmbed = new EmbedBuilder()
+        .setDescription(description)
+        .setColor(errors.length > 0 ? 0xf39c12 : 0x57f287);
+
+    await interaction.editReply({ embeds: [doneEmbed], components: [] });
+
+    // Audit log — fire-and-forget.
+    const auditEmbed = new EmbedBuilder()
+        .setTitle("RPG dev-reset")
+        .setDescription(
+            `User: <@${userId}> (${userId})\n` +
+                `Character: ${characterDeleted}, equipment: ${equipmentDeleted}, guildMembers: ${guildMembersDeleted}, redisKeys: ${redisKeysDeleted}\n` +
+                (errors.length > 0 ? `Errors:\n${errors.join("\n")}` : "No errors.")
+        )
+        .setColor(0xed4245)
+        .setTimestamp();
+    try {
+        AuditDispatcherService.pushCritical(auditEmbed);
+    } catch {
+        /* noop — audit must never block dev reset */
+    }
+}
+
 // --- Command definition ---
 
 export default {
@@ -1037,6 +1178,12 @@ export default {
                 .setName("advance")
                 .setDescription("Advance to a specialized class")
                 .setDescriptionLocalizations(descriptionLocales("cmd.adventure.advance.desc"))
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("dev-reset")
+                .setDescription("Developer only: wipe your RPG state for testing")
+                .setDescriptionLocalizations(descriptionLocales("cmd.adventure.dev_reset.desc"))
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -1073,6 +1220,9 @@ export default {
                 case "advance":
                     await handleAdvance(interaction, locale);
                     return;
+                case "dev-reset":
+                    await handleDevReset(interaction, locale);
+                    return;
                 default: {
                     const embed = new EmbedBuilder()
                         .setDescription(t(locale, "common.unknown_subcommand"))
@@ -1085,7 +1235,13 @@ export default {
                 const embed = new EmbedBuilder()
                     .setDescription(t(locale, "adventure.require_character"))
                     .setColor(0xed4245);
-                await Reply.embedEdit(interaction, embed);
+                const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`${BUTTON_ID.ADVENTURE_CREATE}:${interaction.user.id}`)
+                        .setLabel(t(locale, "adventure.no_character.button"))
+                        .setStyle(ButtonStyle.Success)
+                );
+                await Reply.embedEditComponents(interaction, embed, [row]);
                 return;
             }
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
@@ -1094,3 +1250,5 @@ export default {
         }
     },
 };
+
+export { runCreateFlow };

@@ -1,4 +1,5 @@
 // src/services/rpg/combat.service.ts
+import { randomUUID } from "node:crypto";
 import {
     CLASS_CONFIG,
     CLASS_SKILLS,
@@ -36,6 +37,7 @@ export interface CombatantState {
 
 export interface RpgCombatState {
     userId: string;
+    encounterId: string;
     classType: ClassType;
     advancedClass: AdvancedClassType | null;
     isBoss: boolean;
@@ -110,6 +112,7 @@ function initCombat({
 
     return {
         userId,
+        encounterId: randomUUID(),
         classType,
         advancedClass: advClass,
         isBoss,

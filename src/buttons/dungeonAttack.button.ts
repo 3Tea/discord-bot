@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
 import CharacterService from "../services/rpg/character.service";
@@ -16,7 +17,11 @@ import {
     buildCombatRow,
     buildRpgCombatEmbed,
     formatMaterialDrops,
+    scheduleCombatTimeout,
+    cancelCombatTimeout,
+    COMBAT_TTL,
     RUN_TTL,
+    COMBAT_LOCK_TTL,
 } from "../commands/slash/dungeon";
 import GuildQuestService from "../services/rpg/guildQuest.service";
 import GuildService from "../services/rpg/guild.service";
@@ -286,99 +291,121 @@ export async function handleCombatAction(
     action: "attack" | "skill1" | "skill2" | "defend" | "ultimate"
 ): Promise<void> {
     const userId = interaction.user.id;
+    const lockKey = `dungeon_lock:${userId}`;
     const combatKey = `dungeon_combat:${userId}`;
     const runKey = `dungeon_run:${userId}`;
 
-    const state = await redis.getJson<RpgCombatState>(combatKey);
-    if (!state) {
-        const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
-        await interaction.reply({
-            content: t(fallbackLocale, "dungeon.combat.timeout"),
-            flags: MessageFlags.Ephemeral,
-        });
+    const locked = await redis.setKeyNX(lockKey, "1", COMBAT_LOCK_TTL);
+    if (!locked) {
+        await interaction.deferUpdate().catch(() => {});
         return;
     }
 
-    if (state.userId !== userId) {
+    try {
+        const state = await redis.getJson<RpgCombatState>(combatKey);
+        if (!state) {
+            const fallbackLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
+            await interaction.reply({
+                content: t(fallbackLocale, "dungeon.combat.timeout"),
+                flags: MessageFlags.Ephemeral,
+            });
+            return;
+        }
+
+        if (state.userId !== userId) {
+            const foreignLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
+            await interaction.reply({
+                content: t(foreignLocale, "common.no_permission"),
+                flags: MessageFlags.Ephemeral,
+            });
+            return;
+        }
+
         await interaction.deferUpdate();
-        return;
-    }
 
-    await interaction.deferUpdate();
+        const runState = await redis.getJson<DungeonRunState>(runKey);
+        const locale = (runState?.locale ?? "en") as SupportedLocale;
+        const result = CombatService.executeAction(state, action);
 
-    const runState = await redis.getJson<DungeonRunState>(runKey);
-    const locale = (runState?.locale ?? "en") as SupportedLocale;
-    const result = CombatService.executeAction(state, action);
+        // Insufficient MP — ephemeral reply, no state change
+        if (result.insufficientMp) {
+            await interaction.followUp({
+                content: t(locale, "dungeon.combat.insufficient_mp"),
+                flags: MessageFlags.Ephemeral,
+            });
+            return;
+        }
 
-    // Insufficient MP — ephemeral reply, no state change
-    if (result.insufficientMp) {
-        await interaction.followUp({
-            content: t(locale, "dungeon.combat.insufficient_mp"),
-            flags: MessageFlags.Ephemeral,
+        const actionLine = buildActionLine(locale, action, result, state);
+
+        // Save MP back to run state for all outcomes
+        if (runState) {
+            runState.mp = result.currentMp;
+        }
+
+        if (result.won) {
+            cancelCombatTimeout(userId);
+            await redis.deleteKey(combatKey);
+            await handleWin(interaction, state, result, runState, runKey, locale, actionLine);
+            return;
+        }
+
+        if (result.lost) {
+            cancelCombatTimeout(userId);
+            await redis.deleteKey(combatKey);
+            await handleLoss(interaction, state, runState, runKey, locale, actionLine);
+            return;
+        }
+
+        if (result.turnsUp) {
+            cancelCombatTimeout(userId);
+            await redis.deleteKey(combatKey);
+            await handleTurnsUp(interaction, result, runState, runKey, locale, actionLine);
+            return;
+        }
+
+        // Combat continues — rotate encounterId so stale idle timers no-op, then save
+        state.encounterId = randomUUID();
+        await redis.setJson(combatKey, state, COMBAT_TTL);
+        if (runState) {
+            await redis.setJson(runKey, runState, RUN_TTL);
+        }
+
+        const embed = buildRpgCombatEmbed(locale, state, runState?.checkpoint ?? 1);
+        const descLines = [
+            actionLine,
+            "",
+            t(locale, "dungeon.combat.hp", {
+                userHp: String(result.userHp),
+                maxHp: String(state.user.maxHp),
+                monster: state.monsterName,
+                monsterHp: String(result.monsterHp),
+                maxMonsterHp: String(state.monster.maxHp),
+            }),
+            t(locale, "dungeon.combat.mp", { mp: String(result.currentMp), maxMp: String(state.user.maxMp) }),
+            t(locale, "dungeon.floor", {
+                floor: String(runState?.floor ?? 1),
+                checkpoint: String(runState?.checkpoint ?? 1),
+            }),
+        ];
+
+        const continueEmbed = new EmbedBuilder()
+            .setTitle(embed.data.title ?? `${state.monsterEmoji} ${state.monsterName}`)
+            .setDescription(descLines.join("\n"))
+            .setColor(state.isBoss ? 0xe74c3c : 0xe67e22);
+
+        const currentMp = runState?.mp ?? result.currentMp;
+        const combatRows = buildCombatRow(locale, state.classType, currentMp, state.advancedClass, state.ultimateUsed);
+        await interaction.editReply({
+            embeds: [continueEmbed],
+            components: combatRows,
         });
-        return;
+
+        // Reschedule idle timeout with the new encounterId — earlier timers now no-op
+        scheduleCombatTimeout(interaction, state.userId, locale, state.encounterId);
+    } finally {
+        await redis.deleteKey(lockKey);
     }
-
-    const actionLine = buildActionLine(locale, action, result, state);
-
-    // Save MP back to run state for all outcomes
-    if (runState) {
-        runState.mp = result.currentMp;
-    }
-
-    if (result.won) {
-        await redis.deleteKey(combatKey);
-        await handleWin(interaction, state, result, runState, runKey, locale, actionLine);
-        return;
-    }
-
-    if (result.lost) {
-        await redis.deleteKey(combatKey);
-        await handleLoss(interaction, state, runState, runKey, locale, actionLine);
-        return;
-    }
-
-    if (result.turnsUp) {
-        await redis.deleteKey(combatKey);
-        await handleTurnsUp(interaction, result, runState, runKey, locale, actionLine);
-        return;
-    }
-
-    // Combat continues — state was mutated by executeAction, save it
-    await redis.setJson(combatKey, state, 60);
-    if (runState) {
-        await redis.setJson(runKey, runState, RUN_TTL);
-    }
-
-    const embed = buildRpgCombatEmbed(locale, state, runState?.checkpoint ?? state.user.hp);
-    const descLines = [
-        actionLine,
-        "",
-        t(locale, "dungeon.combat.hp", {
-            userHp: String(result.userHp),
-            maxHp: String(state.user.maxHp),
-            monster: state.monsterName,
-            monsterHp: String(result.monsterHp),
-            maxMonsterHp: String(state.monster.maxHp),
-        }),
-        t(locale, "dungeon.combat.mp", { mp: String(result.currentMp), maxMp: String(state.user.maxMp) }),
-        t(locale, "dungeon.floor", {
-            floor: String(runState?.floor ?? 1),
-            checkpoint: String(runState?.checkpoint ?? 1),
-        }),
-    ];
-
-    const continueEmbed = new EmbedBuilder()
-        .setTitle(embed.data.title ?? `${state.monsterEmoji} ${state.monsterName}`)
-        .setDescription(descLines.join("\n"))
-        .setColor(state.isBoss ? 0xe74c3c : 0xe67e22);
-
-    const currentMp = runState?.mp ?? result.currentMp;
-    const combatRows = buildCombatRow(locale, state.classType, currentMp, state.advancedClass, state.ultimateUsed);
-    await interaction.editReply({
-        embeds: [continueEmbed],
-        components: combatRows,
-    });
 }
 
 export default {

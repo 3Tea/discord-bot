@@ -40,6 +40,7 @@ import { descriptionLocales } from "../../util/i18n/commandLocales";
 import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
+import { logger } from "../../util/log/logger.mixed";
 import QuestService from "../../services/quest/quest.service";
 import TeamDungeonService from "../../services/rpg/teamDungeon.service";
 import type { TeamPartyState } from "../../services/rpg/teamDungeon.service";
@@ -47,7 +48,12 @@ import type { TeamPartyState } from "../../services/rpg/teamDungeon.service";
 export const RUN_TTL = 900;
 export const COMBAT_TTL = 60;
 export const MERCHANT_TTL = 60;
-export const COMBAT_TIMEOUT_MS = 30_000;
+export const COMBAT_TIMEOUT_MS = 60_000;
+export const MERCHANT_TIMEOUT_MS = 60_000;
+export const COMBAT_LOCK_TTL = 3; // seconds — shorter than Discord 3s ack so dead handlers auto-release
+
+const combatTimers = new Map<string, NodeJS.Timeout>();
+const merchantTimers = new Map<string, NodeJS.Timeout>();
 
 // --- Embed builders (exported for button handlers) ---
 
@@ -439,7 +445,10 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
 
     return {
         embed: buildMerchantEmbed(locale, merchantState, char.gold),
-        rows: [buildMerchantRow(locale, merchantState, char.gold)],
+        rows: [
+            buildMerchantRow(locale, merchantState, char.gold),
+            buildContinueLeaveRow(locale, runState.encountersLeft),
+        ],
         runEnded: false,
     };
 }
@@ -455,13 +464,17 @@ export function scheduleCombatTimeout(
     locale: SupportedLocale,
     encounterId: string
 ): void {
+    const existing = combatTimers.get(userId);
+    if (existing) clearTimeout(existing);
+
     const combatKey = `dungeon_combat:${userId}`;
     const runKey = `dungeon_run:${userId}`;
 
-    setTimeout(async () => {
+    const handle = setTimeout(async () => {
+        combatTimers.delete(userId);
         try {
             const active = await redis.getJson<RpgCombatState>(combatKey);
-            if (!active || active.userId !== userId) return;
+            if (active?.encounterId !== encounterId) return;
             await redis.deleteKey(combatKey);
 
             const runState = await redis.getJson<DungeonRunState>(runKey);
@@ -478,10 +491,20 @@ export function scheduleCombatTimeout(
             } else {
                 await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
             }
-        } catch {
-            // Interaction may have expired — silently ignore
+        } catch (error) {
+            logger.debug("dungeon combat timeout handler failed", error);
         }
     }, COMBAT_TIMEOUT_MS);
+
+    combatTimers.set(userId, handle);
+}
+
+export function cancelCombatTimeout(userId: string): void {
+    const existing = combatTimers.get(userId);
+    if (existing) {
+        clearTimeout(existing);
+        combatTimers.delete(userId);
+    }
 }
 
 export function scheduleMerchantTimeout(
@@ -490,10 +513,14 @@ export function scheduleMerchantTimeout(
     locale: SupportedLocale,
     encounterId: string
 ): void {
+    const existing = merchantTimers.get(userId);
+    if (existing) clearTimeout(existing);
+
     const merchantKey = `dungeon_merchant:${userId}`;
     const runKey = `dungeon_run:${userId}`;
 
-    setTimeout(async () => {
+    const handle = setTimeout(async () => {
+        merchantTimers.delete(userId);
         try {
             const active = await redis.getJson<MerchantState>(merchantKey);
             if (!active || active.encounterId !== encounterId) return;
@@ -513,10 +540,20 @@ export function scheduleMerchantTimeout(
             } else {
                 await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
             }
-        } catch {
-            // Interaction may have expired — silently ignore
+        } catch (error) {
+            logger.debug("dungeon merchant timeout handler failed", error);
         }
-    }, MERCHANT_TTL * 1000);
+    }, MERCHANT_TIMEOUT_MS);
+
+    merchantTimers.set(userId, handle);
+}
+
+export function cancelMerchantTimeout(userId: string): void {
+    const existing = merchantTimers.get(userId);
+    if (existing) {
+        clearTimeout(existing);
+        merchantTimers.delete(userId);
+    }
 }
 
 // --- Team dungeon: build lobby embed ---
@@ -1278,7 +1315,7 @@ async function handleSolo(interaction: ChatInputCommandInteraction, locale: Supp
         const combatState = await redis.getJson<RpgCombatState>(`dungeon_combat:${userId}`);
         const merchantState = await redis.getJson<MerchantState>(`dungeon_merchant:${userId}`);
         if (combatState) {
-            scheduleCombatTimeout(interaction, userId, locale, combatState.userId);
+            scheduleCombatTimeout(interaction, userId, locale, combatState.encounterId);
         } else if (merchantState) {
             scheduleMerchantTimeout(interaction, userId, locale, merchantState.encounterId);
         }
