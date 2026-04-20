@@ -49,6 +49,7 @@ export const RUN_TTL = 900;
 export const COMBAT_TTL = 60;
 export const MERCHANT_TTL = 60;
 export const COMBAT_TIMEOUT_MS = 60_000;
+export const MERCHANT_TIMEOUT_MS = 60_000;
 export const COMBAT_LOCK_TTL = 3; // seconds — shorter than Discord 3s ack so dead handlers auto-release
 
 const combatTimers = new Map<string, NodeJS.Timeout>();
@@ -491,7 +492,7 @@ export function scheduleCombatTimeout(
                 await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
             }
         } catch (error) {
-            logger.warn("dungeon combat timeout handler failed", error);
+            logger.debug("dungeon combat timeout handler failed", error);
         }
     }, COMBAT_TIMEOUT_MS);
 
@@ -540,9 +541,9 @@ export function scheduleMerchantTimeout(
                 await interaction.editReply({ embeds: [timeoutEmbed], components: [] });
             }
         } catch (error) {
-            logger.warn("dungeon merchant timeout handler failed", error);
+            logger.debug("dungeon merchant timeout handler failed", error);
         }
-    }, MERCHANT_TTL * 1000);
+    }, MERCHANT_TIMEOUT_MS);
 
     merchantTimers.set(userId, handle);
 }
