@@ -1178,6 +1178,12 @@ export default {
                 .setName("advance")
                 .setDescription("Advance to a specialized class")
                 .setDescriptionLocalizations(descriptionLocales("cmd.adventure.advance.desc"))
+        )
+        .addSubcommand((sub) =>
+            sub
+                .setName("dev-reset")
+                .setDescription("Developer only: wipe your RPG state for testing")
+                .setDescriptionLocalizations(descriptionLocales("cmd.adventure.dev_reset.desc"))
         ),
 
     async execute(interaction: ChatInputCommandInteraction) {
@@ -1213,6 +1219,9 @@ export default {
                     return;
                 case "advance":
                     await handleAdvance(interaction, locale);
+                    return;
+                case "dev-reset":
+                    await handleDevReset(interaction, locale);
                     return;
                 default: {
                     const embed = new EmbedBuilder()
