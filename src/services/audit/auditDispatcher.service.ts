@@ -80,6 +80,24 @@ async function flush(): Promise<void> {
     }
 }
 
+async function sendAlert(embed: EmbedBuilder, content: string): Promise<void> {
+    const config = await AuditConfigService.getConfig().catch(() => null);
+    if (!config?.criticalChannelId) return;
+    const channel = await resolveChannel(config.criticalChannelId);
+    if (!channel) return;
+    try {
+        await channel.send({
+            content: content || undefined,
+            embeds: [embed],
+            allowedMentions: { parse: ["roles", "users"] },
+        });
+    } catch (err) {
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        logger.warn(`[AuditDispatcher] sendAlert failed for ${channel.id}: ${msg}`);
+        channelCache.delete(channel.id);
+    }
+}
+
 function pushCritical(embed: EmbedBuilder): void {
     criticalQueue.push(embed);
     if (criticalQueue.length >= BUFFER_THRESHOLD) {
@@ -119,6 +137,7 @@ export const AuditDispatcherService = {
     init,
     pushCritical,
     pushCommands,
+    sendAlert,
     flush,
     drain,
     invalidateChannelCache,

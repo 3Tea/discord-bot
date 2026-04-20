@@ -9,6 +9,7 @@ const COLOR = {
     SUCCESS: 0x3b82f6,
     ADMIN: 0xa855f7,
     SUMMARY: 0xeab308,
+    ALERT: 0xdc2626,
 };
 
 export interface CommandEntry {
@@ -141,6 +142,38 @@ export function snapshotSummaryEmbed(params: {
             { name: "Total guilds", value: String(params.totalGuilds), inline: true },
             { name: "Total members", value: `${params.totalMembers.toLocaleString()} (${deltaStr})`, inline: true },
             { name: "Top 5", value: top, inline: false }
+        )
+        .setTimestamp();
+}
+
+export function memberDropAlertEmbed(
+    thresholdPct: number,
+    offenders: Array<{ guildId: string; name: string; previous: number; current: number; dropPct: number }>
+): EmbedBuilder {
+    const top = offenders
+        .slice()
+        .sort((a, b) => b.dropPct - a.dropPct)
+        .slice(0, 15)
+        .map(
+            (o) =>
+                `• **${truncate(o.name, 40)}** (\`${o.guildId}\`) — ${o.previous.toLocaleString()} → ${o.current.toLocaleString()} (−${o.dropPct.toFixed(1)}%)`
+        )
+        .join("\n");
+    return new EmbedBuilder()
+        .setTitle("🚨 Member drop threshold exceeded")
+        .setColor(COLOR.ALERT)
+        .setDescription(`Threshold: **−${thresholdPct}%** in last snapshot window.\nGuilds affected: **${offenders.length}**`)
+        .addFields({ name: "Top offenders", value: truncate(top, 1024), inline: false })
+        .setTimestamp();
+}
+
+export function rateExceededAlertEmbed(label: string, count: number, threshold: number): EmbedBuilder {
+    return new EmbedBuilder()
+        .setTitle(`🚨 Rate threshold exceeded: ${label}`)
+        .setColor(COLOR.ALERT)
+        .addFields(
+            { name: "Count (last hour)", value: String(count), inline: true },
+            { name: "Threshold", value: String(threshold), inline: true }
         )
         .setTimestamp();
 }
