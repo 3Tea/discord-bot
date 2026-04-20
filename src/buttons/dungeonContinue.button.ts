@@ -84,7 +84,7 @@ export default {
             const combatState = await redis.getJson<RpgCombatState>(`dungeon_combat:${userId}`);
             const merchantState = await redis.getJson<MerchantState>(`dungeon_merchant:${userId}`);
             if (combatState) {
-                scheduleCombatTimeout(interaction, userId, locale, combatState.userId);
+                scheduleCombatTimeout(interaction, userId, locale, combatState.encounterId);
             } else if (merchantState) {
                 scheduleMerchantTimeout(interaction, userId, locale, merchantState.encounterId);
             }

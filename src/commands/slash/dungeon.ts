@@ -47,7 +47,7 @@ import type { TeamPartyState } from "../../services/rpg/teamDungeon.service";
 export const RUN_TTL = 900;
 export const COMBAT_TTL = 60;
 export const MERCHANT_TTL = 60;
-export const COMBAT_TIMEOUT_MS = 30_000;
+export const COMBAT_TIMEOUT_MS = 60_000;
 
 // --- Embed builders (exported for button handlers) ---
 
@@ -464,7 +464,7 @@ export function scheduleCombatTimeout(
     setTimeout(async () => {
         try {
             const active = await redis.getJson<RpgCombatState>(combatKey);
-            if (!active || active.userId !== userId) return;
+            if (active?.encounterId !== encounterId) return;
             await redis.deleteKey(combatKey);
 
             const runState = await redis.getJson<DungeonRunState>(runKey);
@@ -1281,7 +1281,7 @@ async function handleSolo(interaction: ChatInputCommandInteraction, locale: Supp
         const combatState = await redis.getJson<RpgCombatState>(`dungeon_combat:${userId}`);
         const merchantState = await redis.getJson<MerchantState>(`dungeon_merchant:${userId}`);
         if (combatState) {
-            scheduleCombatTimeout(interaction, userId, locale, combatState.userId);
+            scheduleCombatTimeout(interaction, userId, locale, combatState.encounterId);
         } else if (merchantState) {
             scheduleMerchantTimeout(interaction, userId, locale, merchantState.encounterId);
         }

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { ButtonInteraction, EmbedBuilder, MessageFlags } from "discord.js";
 import redis from "../connector/redis";
 import CharacterService from "../services/rpg/character.service";
@@ -16,6 +17,8 @@ import {
     buildCombatRow,
     buildRpgCombatEmbed,
     formatMaterialDrops,
+    scheduleCombatTimeout,
+    COMBAT_TTL,
     RUN_TTL,
 } from "../commands/slash/dungeon";
 import GuildQuestService from "../services/rpg/guildQuest.service";
@@ -344,8 +347,9 @@ export async function handleCombatAction(
         return;
     }
 
-    // Combat continues — state was mutated by executeAction, save it
-    await redis.setJson(combatKey, state, 60);
+    // Combat continues — rotate encounterId so stale idle timers no-op, then save
+    state.encounterId = randomUUID();
+    await redis.setJson(combatKey, state, COMBAT_TTL);
     if (runState) {
         await redis.setJson(runKey, runState, RUN_TTL);
     }
@@ -379,6 +383,9 @@ export async function handleCombatAction(
         embeds: [continueEmbed],
         components: combatRows,
     });
+
+    // Reschedule idle timeout with the new encounterId — earlier timers now no-op
+    scheduleCombatTimeout(interaction, state.userId, locale, state.encounterId);
 }
 
 export default {
