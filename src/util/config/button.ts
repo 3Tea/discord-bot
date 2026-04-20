@@ -54,4 +54,6 @@ export const BUTTON_ID = {
     DUNGEON_ULTIMATE: "dungeon_ultimate",
     // Dungeon merchant equipment purchase (replaces exchange)
     DUNGEON_EQUIP_BUY: "dungeon_equip_buy",
+    // Adventure (RPG) — shown in no-character responses
+    ADVENTURE_CREATE: "adventure_create",
 };
