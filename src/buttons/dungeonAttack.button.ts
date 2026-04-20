@@ -394,6 +394,11 @@ export async function handleCombatAction(
             .setDescription(descLines.join("\n"))
             .setColor(state.isBoss ? 0xe74c3c : 0xe67e22);
 
+        if (state.monsterImage) {
+            if (state.isBoss) continueEmbed.setImage(state.monsterImage);
+            else continueEmbed.setThumbnail(state.monsterImage);
+        }
+
         const currentMp = runState?.mp ?? result.currentMp;
         const combatRows = buildCombatRow(locale, state.classType, currentMp, state.advancedClass, state.ultimateUsed);
         await interaction.editReply({

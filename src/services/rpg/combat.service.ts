@@ -43,6 +43,7 @@ export interface RpgCombatState {
     isBoss: boolean;
     monsterName: string;
     monsterEmoji: string;
+    monsterImage?: string;
     user: CombatantState;
     monster: CombatantState;
     turnsLeft: number;
@@ -90,7 +91,7 @@ interface InitCombatOptions {
     maxHp: number;
     userMp: number;
     maxMp: number;
-    monster: { name: string; emoji: string; stats: MonsterStats };
+    monster: { name: string; emoji: string; image?: string; stats: MonsterStats };
     isBoss: boolean;
 }
 
@@ -118,6 +119,7 @@ function initCombat({
         isBoss,
         monsterName: monster.name,
         monsterEmoji: monster.emoji,
+        monsterImage: monster.image,
         user: {
             hp: userHp,
             maxHp,

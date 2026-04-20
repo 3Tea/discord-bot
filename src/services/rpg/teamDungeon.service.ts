@@ -54,6 +54,7 @@ export interface TeamMember {
 export interface TeamMonsterState {
     name: string;
     emoji: string;
+    image?: string;
     hp: number;
     maxHp: number;
     stats: MonsterStats;
@@ -278,6 +279,7 @@ function initTeamMonster(state: TeamPartyState): void {
     state.monster = {
         name: monster.name,
         emoji: monster.emoji,
+        image: monster.image,
         hp: scaledStats.hp,
         maxHp: scaledStats.hp,
         stats: scaledStats,
