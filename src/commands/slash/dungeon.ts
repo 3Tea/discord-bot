@@ -439,7 +439,10 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
 
     return {
         embed: buildMerchantEmbed(locale, merchantState, char.gold),
-        rows: [buildMerchantRow(locale, merchantState, char.gold)],
+        rows: [
+            buildMerchantRow(locale, merchantState, char.gold),
+            buildContinueLeaveRow(locale, runState.encountersLeft),
+        ],
         runEnded: false,
     };
 }
