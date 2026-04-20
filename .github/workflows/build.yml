@@ -37,7 +37,7 @@ jobs:
           mkdir -p "$PUBLISH_DIR"
 
           cp -r dist "$PUBLISH_DIR/"
-          cp package.json package-lock.json "$PUBLISH_DIR/"
+          cp package.json package-lock.json pm2.deploy.json "$PUBLISH_DIR/"
 
           cd "$PUBLISH_DIR"
           git init -b build
