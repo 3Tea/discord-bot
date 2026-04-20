@@ -12,6 +12,9 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Fixed
 
+- **Dungeon combat race** — added per-user Redis mutex (`setKeyNX` on `dungeon_lock:{userId}`) around attack/skill/ultimate/defend/run/heal buttons so rapid-fire clicks can no longer double-spend MP or claim duplicate rewards. Silent defer on lock contention; ephemeral permission reply when a different user clicks your dungeon buttons.
+- **Dungeon timer leaks** — tracked `setTimeout` handles in `Map<userId, NodeJS.Timeout>` registries with `cancelCombatTimeout` / `cancelMerchantTimeout` helpers called on win/loss/run/leave/continue/heal, preventing handle accumulation and stale interaction references in the event loop. Added `MERCHANT_TIMEOUT_MS` to mirror `COMBAT_TIMEOUT_MS`.
+- **Dungeon merchant heal** — HP-full check now runs before the merchant state is deleted (eliminating the race-prone delete-then-reinsert pattern) and uses live `runState.hp` instead of the stale merchant snapshot for both the guard and `MerchantService.calculateHeal`.
 - **RPG combat state consistency** — removed Redis read-modify-write race windows in PvP/team-dungeon action submission and ensured team-dungeon party cleanup always runs even if one member cooldown write fails.
 
 ### Added
