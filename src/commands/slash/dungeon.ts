@@ -267,7 +267,7 @@ export function buildTrapEmbed(locale: SupportedLocale, opts: TrapEmbedOptions):
     const { floor, checkpoint, hpLost, goldLost, collapsed, currentHp, maxHp } = opts;
     const descLines = [
         t(locale, "dungeon.encounter.trap", { floor: String(floor) }),
-        t(locale, "dungeon.trap.damage", { hp: String(hpLost), coin: String(goldLost) }),
+        t(locale, "dungeon.trap.damage", { hp: String(hpLost), gold: String(goldLost) }),
         ...(collapsed ? ["", t(locale, "dungeon.collapse", { checkpoint: String(checkpoint) })] : []),
         "",
         `HP: **${currentHp}**/${maxHp}`,
@@ -1111,7 +1111,7 @@ async function handleTeamTrapEncounter(
     const embed = new EmbedBuilder()
         .setTitle(title)
         .setDescription(
-            `${t(locale, "dungeon.encounter.trap", { floor: String(party.floor) })}\n${t(locale, "dungeon.trap.damage", { hp: String(trapResult.hpLost), coin: String(trapResult.goldLost) })}`
+            `${t(locale, "dungeon.encounter.trap", { floor: String(party.floor) })}\n${t(locale, "dungeon.trap.damage", { hp: String(trapResult.hpLost), gold: String(trapResult.goldLost) })}`
         )
         .setColor(0xe67e22);
     await interaction.editReply({ embeds: [embed], components: [] });
