@@ -47,6 +47,8 @@ All notable changes to this project are documented in this file. The format is b
 - **Branch guilds** — `/guild-admin setup/config/disband` for per-server branches. Weekly cooperative quests (3/week, scaled by server size). Monthly competitive events (6 rotating themes, per-capita scoring, top 3 rewards).
 - **Class advancement** — `/adventure advance` at level 20: 12 advanced classes (2 paths per base class), ultimate skills (1 per combat, 50 MP), stat percentage bonuses.
 - **PvP system** — `/pvp challenge @user` with simultaneous turn combat. Both players choose actions privately, reveal simultaneously. Elo rating (starting 1000), win/loss tracking.
+- **Adventure — Create Character button** — the no-character response on all `/adventure` subcommands now includes a "🗡️ Create Character" button that opens the class-selection flow directly. Handled by a new persistent button (`adventure_create:<userId>`) so the button stays clickable even after chat scroll; cross-user clicks are routed to an ephemeral hint instead of hijacking the original message.
+- **Adventure — `/adventure dev-reset`** — developer-only subcommand (gated by `DEV_USER_ID + GUILD_ID`, same pattern as `/audit`) that wipes the caller's RPG state: character, equipment inventory, guild memberships, and PvP/per-user Redis match keys. Confirm/cancel gate (30s), partial-failure-tolerant cleanup, fire-and-forget audit log.
 
 ## [5.7.0] - 2026-04-17
 
