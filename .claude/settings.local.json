@@ -38,7 +38,17 @@
       "Bash(python3 -)",
       "Bash(python3 -c 'import json; json.load\\(open\\('\\\\''/Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/locales/__TRACKED_VAR__.json'\\\\''\\)\\)')",
       "Bash(python3)",
-      "Bash(grep -l \"IGuild.*Config\" /Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/models/*.ts)"
+      "Bash(grep -l \"IGuild.*Config\" /Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/models/*.ts)",
+      "Bash(grep -r \"Modal\\\\|showModal\" /Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/buttons/confession*.ts)",
+      "Bash(grep -r \"cooldown\\\\|cooldown\\\\|InsufficientStar\\\\|command_charge\" /Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/commands/slash/*.ts --include=\"*.ts\" -l)",
+      "Bash(grep -n \"LanguageSwitcher\" /Users/nguyenhuuhung/Documents/GitHub/discord-bot/landing/src/pages/[lang]/guide/[...slug].astro)",
+      "Bash(grep -A 100 \"^import\" src/pages/[lang]/commands/[...slug].astro)",
+      "Bash(find /Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/events -name \"*.ts\" -exec basename {} \\\\;)",
+      "Bash(grep -E \"name:|once:\" /Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/events/*.ts)",
+      "Bash(grep \"\\\\.ts$\")",
+      "Edit(/.claude/skills/post-feature/**)",
+      "Bash(grep -l \"economy\\\\|wallet\\\\|currency\" /Users/nguyenhuuhung/Documents/GitHub/discord-bot/src/buttons/*.ts)",
+      "Bash(node -e \"const en = require\\('./src/locales/en.json'\\); const keys = Object.keys\\(en\\); console.log\\('Total keys:', keys.length\\); const cmdKeys = keys.filter\\(k => k.startsWith\\('cmd.'\\)\\); console.log\\('cmd.* keys:', cmdKeys.join\\(', '\\)\\); const countKeys = []; for \\(const [k, v] of Object.entries\\(en\\)\\) { if \\(typeof v === 'string' && v.includes\\('{{count}}'\\)\\) { countKeys.push\\(k\\); } } console.log\\('Keys with {{count}}:', countKeys.join\\(', '\\)\\);\")"
     ],
     "additionalDirectories": [
       "/Users/nguyenhuuhung/Documents/GitHub/discord-bot/landing/src/pages/[lang]"
