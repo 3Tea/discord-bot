@@ -2,6 +2,7 @@
 import {
     ActionRowBuilder,
     ButtonBuilder,
+    ButtonInteraction,
     ButtonStyle,
     ChatInputCommandInteraction,
     EmbedBuilder,
@@ -74,7 +75,13 @@ async function handleCreate(interaction: ChatInputCommandInteraction, locale: Su
         await Reply.embedEdit(interaction, embed);
         return;
     }
+    await runCreateFlow(interaction, locale);
+}
 
+async function runCreateFlow(
+    interaction: ChatInputCommandInteraction | ButtonInteraction,
+    locale: SupportedLocale
+): Promise<void> {
     // Build class selection embed
     const classDescriptions = CLASS_TYPES.map((cls) => {
         const config = CLASS_CONFIG[cls];
@@ -1094,3 +1101,5 @@ export default {
         }
     },
 };
+
+export { runCreateFlow };
