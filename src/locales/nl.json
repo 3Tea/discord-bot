@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "Maak je personage aan en kies een klasse",
     "cmd.adventure.dev_reset.desc": "Alleen ontwikkelaar: wis je RPG-gegevens voor testen",
     "adventure.no_character.button": "🗡️ Personage maken",
+    "adventure.no_character.not_your_button": "Deze knop is niet van jou. Gebruik `/adventure create` om je eigen avontuur te beginnen.",
     "adventure.dev_reset.not_authorized": "Deze opdracht is alleen voor de botontwikkelaar.",
     "adventure.dev_reset.confirm_title": "⚠️ RPG-gegevens wissen?",
     "adventure.dev_reset.confirm_desc": "Je personage, inventaris, gildelidmaatschappen en matchcache worden verwijderd. **Kan niet ongedaan worden gemaakt.**",

@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "캐릭터를 만들고 직업을 선택하세요",
     "cmd.adventure.dev_reset.desc": "개발자 전용: 테스트용 RPG 데이터 초기화",
     "adventure.no_character.button": "🗡️ 캐릭터 생성",
+    "adventure.no_character.not_your_button": "이 버튼은 당신의 것이 아닙니다. 자신의 모험을 시작하려면 `/adventure create` 를 사용하세요.",
     "adventure.dev_reset.not_authorized": "이 명령은 봇 개발자 전용입니다.",
     "adventure.dev_reset.confirm_title": "⚠️ RPG 데이터를 초기화할까요?",
     "adventure.dev_reset.confirm_desc": "캐릭터, 장비 인벤토리, 길드 소속, 매치 캐시가 모두 삭제됩니다. **되돌릴 수 없습니다.**",

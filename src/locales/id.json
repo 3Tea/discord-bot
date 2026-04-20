@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "Buat karaktermu dan pilih kelas",
     "cmd.adventure.dev_reset.desc": "Khusus developer: hapus data RPG untuk pengujian",
     "adventure.no_character.button": "🗡️ Buat Karakter",
+    "adventure.no_character.not_your_button": "Tombol ini bukan milikmu. Jalankan `/adventure create` untuk memulai perjalananmu sendiri.",
     "adventure.dev_reset.not_authorized": "Perintah ini hanya untuk pengembang bot.",
     "adventure.dev_reset.confirm_title": "⚠️ Hapus data RPG?",
     "adventure.dev_reset.confirm_desc": "Tindakan ini akan menghapus karakter, inventaris, keanggotaan guild, dan cache pertandingan. **Tidak dapat dibatalkan.**",

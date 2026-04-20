@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "Создай персонажа и выбери класс",
     "cmd.adventure.dev_reset.desc": "Только для разработчика: очистить RPG-состояние для тестов",
     "adventure.no_character.button": "🗡️ Создать персонажа",
+    "adventure.no_character.not_your_button": "Эта кнопка не ваша. Используйте `/adventure create`, чтобы начать собственное приключение.",
     "adventure.dev_reset.not_authorized": "Эта команда доступна только разработчику бота.",
     "adventure.dev_reset.confirm_title": "⚠️ Удалить RPG-данные?",
     "adventure.dev_reset.confirm_desc": "Будут удалены: персонаж, инвентарь, членство в гильдиях, кэш матчей. **Отменить нельзя.**",

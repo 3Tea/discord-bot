@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "Tạo nhân vật và chọn lớp",
     "cmd.adventure.dev_reset.desc": "Chỉ dành cho dev: xóa dữ liệu RPG để test",
     "adventure.no_character.button": "🗡️ Tạo Nhân Vật",
+    "adventure.no_character.not_your_button": "Nút này không phải của bạn. Chạy `/adventure create` để bắt đầu hành trình của chính bạn.",
     "adventure.dev_reset.not_authorized": "Lệnh này chỉ dành cho nhà phát triển bot.",
     "adventure.dev_reset.confirm_title": "⚠️ Xóa dữ liệu RPG?",
     "adventure.dev_reset.confirm_desc": "Thao tác này sẽ xóa nhân vật, kho trang bị, tất cả thành viên hội, và cache trận đấu. **Không thể khôi phục.**",

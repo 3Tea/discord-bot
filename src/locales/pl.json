@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "Stwórz postać i wybierz klasę",
     "cmd.adventure.dev_reset.desc": "Tylko dla dewelopera: usuń swoje dane RPG do testów",
     "adventure.no_character.button": "🗡️ Stwórz postać",
+    "adventure.no_character.not_your_button": "Ten przycisk nie jest twój. Użyj `/adventure create`, aby rozpocząć własną przygodę.",
     "adventure.dev_reset.not_authorized": "Ta komenda jest zastrzeżona dla dewelopera bota.",
     "adventure.dev_reset.confirm_title": "⚠️ Usunąć dane RPG?",
     "adventure.dev_reset.confirm_desc": "Zostaną usunięte: postać, ekwipunek, członkostwo w gildiach i pamięć meczów. **Nie można cofnąć.**",

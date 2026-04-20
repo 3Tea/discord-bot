@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "Karakterini oluştur ve bir sınıf seç",
     "cmd.adventure.dev_reset.desc": "Sadece geliştirici: test için RPG verini sıfırla",
     "adventure.no_character.button": "🗡️ Karakter Oluştur",
+    "adventure.no_character.not_your_button": "Bu buton sana ait değil. Kendi maceranı başlatmak için `/adventure create` komutunu kullan.",
     "adventure.dev_reset.not_authorized": "Bu komut yalnızca bot geliştiricisine özeldir.",
     "adventure.dev_reset.confirm_title": "⚠️ RPG verisi silinsin mi?",
     "adventure.dev_reset.confirm_desc": "Karakterin, envanterin, lonca üyeliklerin ve maç önbelleğin silinecek. **Geri alınamaz.**",

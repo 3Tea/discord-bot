@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "创建角色并选择职业",
     "cmd.adventure.dev_reset.desc": "仅限开发者：清除你的RPG数据用于测试",
     "adventure.no_character.button": "🗡️ 创建角色",
+    "adventure.no_character.not_your_button": "这个按钮不是你的。运行 `/adventure create` 开始你自己的冒险。",
     "adventure.dev_reset.not_authorized": "此命令仅限机器人开发者使用。",
     "adventure.dev_reset.confirm_title": "⚠️ 清除RPG数据？",
     "adventure.dev_reset.confirm_desc": "将删除你的角色、装备库存、公会身份和对战缓存。**无法撤销。**",

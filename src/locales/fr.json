@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "Créez votre personnage et choisissez une classe",
     "cmd.adventure.dev_reset.desc": "Développeur uniquement : effacer votre état RPG pour les tests",
     "adventure.no_character.button": "🗡️ Créer un personnage",
+    "adventure.no_character.not_your_button": "Ce bouton n'est pas le vôtre. Utilisez `/adventure create` pour commencer votre propre aventure.",
     "adventure.dev_reset.not_authorized": "Cette commande est réservée au développeur du bot.",
     "adventure.dev_reset.confirm_title": "⚠️ Effacer l'état RPG ?",
     "adventure.dev_reset.confirm_desc": "Cette action supprimera votre personnage, votre inventaire, vos affiliations de guilde et le cache des matchs. **Irréversible.**",

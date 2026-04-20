@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "Erstelle deinen Charakter und wähle eine Klasse",
     "cmd.adventure.dev_reset.desc": "Nur Entwickler: RPG-Daten zum Testen löschen",
     "adventure.no_character.button": "🗡️ Charakter erstellen",
+    "adventure.no_character.not_your_button": "Dieser Button gehört nicht dir. Nutze `/adventure create`, um deine eigene Reise zu beginnen.",
     "adventure.dev_reset.not_authorized": "Dieser Befehl ist dem Bot-Entwickler vorbehalten.",
     "adventure.dev_reset.confirm_title": "⚠️ RPG-Daten löschen?",
     "adventure.dev_reset.confirm_desc": "Dies löscht deinen Charakter, Inventar, Gildenmitgliedschaften und Match-Cache. **Nicht rückgängig zu machen.**",

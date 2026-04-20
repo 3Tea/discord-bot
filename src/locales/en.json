@@ -1172,6 +1172,7 @@
     "cmd.adventure.create.desc": "Create your character and choose a class",
     "cmd.adventure.dev_reset.desc": "Developer only: wipe your RPG state for testing",
     "adventure.no_character.button": "🗡️ Create Character",
+    "adventure.no_character.not_your_button": "This button isn't yours. Run `/adventure create` to begin your own journey.",
     "adventure.dev_reset.not_authorized": "This command is restricted to the bot developer.",
     "adventure.dev_reset.confirm_title": "⚠️ Wipe RPG state?",
     "adventure.dev_reset.confirm_desc": "This will delete your character, equipment inventory, guild memberships, and any cached match state. **This cannot be undone.**",

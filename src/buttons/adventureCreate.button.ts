@@ -12,13 +12,12 @@ export default {
         const locale = await resolveLocale(interaction).catch(() => "en" as const);
         const encodedUserId = interaction.customId.split(":")[1] ?? "";
 
-        // Only the original caller (or whoever shares their userId match) may proceed.
         if (encodedUserId !== interaction.user.id) {
             await interaction.reply({
                 flags: MessageFlags.Ephemeral,
                 embeds: [
                     new EmbedBuilder()
-                        .setDescription(t(locale, "adventure.require_character"))
+                        .setDescription(t(locale, "adventure.no_character.not_your_button"))
                         .setColor(0xed4245),
                 ],
             });
