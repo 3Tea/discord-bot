@@ -38,6 +38,7 @@ import { resolveLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import type { SupportedLocale } from "../../util/i18n/index";
 import GuildQuestService from "../../services/rpg/guildQuest.service";
+import { BUTTON_ID } from "../../util/config/button";
 
 // --- Helpers ---
 
@@ -1092,7 +1093,13 @@ export default {
                 const embed = new EmbedBuilder()
                     .setDescription(t(locale, "adventure.require_character"))
                     .setColor(0xed4245);
-                await Reply.embedEdit(interaction, embed);
+                const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`${BUTTON_ID.ADVENTURE_CREATE}:${interaction.user.id}`)
+                        .setLabel(t(locale, "adventure.no_character.button"))
+                        .setStyle(ButtonStyle.Success)
+                );
+                await Reply.embedEditComponents(interaction, embed, [row]);
                 return;
             }
             const errLocale = await resolveLocale(interaction).catch((): SupportedLocale => "en");
