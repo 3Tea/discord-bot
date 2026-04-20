@@ -267,7 +267,7 @@ export function buildTrapEmbed(locale: SupportedLocale, opts: TrapEmbedOptions):
     const { floor, checkpoint, hpLost, goldLost, collapsed, currentHp, maxHp } = opts;
     const descLines = [
         t(locale, "dungeon.encounter.trap", { floor: String(floor) }),
-        t(locale, "dungeon.trap.damage", { hp: String(hpLost), coin: String(goldLost) }),
+        t(locale, "dungeon.trap.damage", { hp: String(hpLost), gold: String(goldLost) }),
         ...(collapsed ? ["", t(locale, "dungeon.collapse", { checkpoint: String(checkpoint) })] : []),
         "",
         `HP: **${currentHp}**/${maxHp}`,
@@ -294,7 +294,7 @@ export function buildRpgCombatEmbed(locale: SupportedLocale, state: RpgCombatSta
         ? t(locale, "dungeon.combat.boss_appear", { monster: state.monsterName, floor: String(checkpoint) })
         : t(locale, "dungeon.encounter.monster", { monster: state.monsterName, floor: String(checkpoint) });
 
-    return new EmbedBuilder()
+    const embed = new EmbedBuilder()
         .setTitle(`${titlePrefix} ${monsterLabel}`)
         .setDescription(
             [
@@ -311,6 +311,12 @@ export function buildRpgCombatEmbed(locale: SupportedLocale, state: RpgCombatSta
             ].join("\n")
         )
         .setColor(state.isBoss ? 0xe74c3c : 0xe67e22);
+
+    if (state.monsterImage) {
+        if (state.isBoss) embed.setImage(state.monsterImage);
+        else embed.setThumbnail(state.monsterImage);
+    }
+    return embed;
 }
 
 // --- Encounter processing for a run ---
@@ -346,7 +352,7 @@ export async function processEncounter(runState: DungeonRunState): Promise<{
             maxHp: runState.maxHp,
             userMp: runState.mp,
             maxMp: runState.maxMp,
-            monster: { name: monster.name, emoji: monster.emoji, stats: monsterStats },
+            monster: { name: monster.name, emoji: monster.emoji, image: monster.image, stats: monsterStats },
             isBoss,
         });
 
@@ -632,7 +638,7 @@ function buildTeamCombatEmbed(locale: SupportedLocale, party: TeamPartyState): E
         })
         .join("\n");
 
-    return new EmbedBuilder()
+    const embed = new EmbedBuilder()
         .setTitle(`${titlePrefix} ${monsterLabel}`)
         .setDescription(
             [
@@ -644,6 +650,12 @@ function buildTeamCombatEmbed(locale: SupportedLocale, party: TeamPartyState): E
             ].join("\n")
         )
         .setColor(monster.isBoss ? 0xe74c3c : 0xe67e22);
+
+    if (monster.image) {
+        if (monster.isBoss) embed.setImage(monster.image);
+        else embed.setThumbnail(monster.image);
+    }
+    return embed;
 }
 
 function buildTeamCombatRow(
@@ -1111,7 +1123,7 @@ async function handleTeamTrapEncounter(
     const embed = new EmbedBuilder()
         .setTitle(title)
         .setDescription(
-            `${t(locale, "dungeon.encounter.trap", { floor: String(party.floor) })}\n${t(locale, "dungeon.trap.damage", { hp: String(trapResult.hpLost), coin: String(trapResult.goldLost) })}`
+            `${t(locale, "dungeon.encounter.trap", { floor: String(party.floor) })}\n${t(locale, "dungeon.trap.damage", { hp: String(trapResult.hpLost), gold: String(trapResult.goldLost) })}`
         )
         .setColor(0xe67e22);
     await interaction.editReply({ embeds: [embed], components: [] });

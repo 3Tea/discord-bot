@@ -81,36 +81,65 @@ export interface DungeonRunState {
 
 // --- Monster tables ---
 
-const TIER_1 = [
-    { name: "Rat", emoji: "🐀" },
-    { name: "Bat", emoji: "🦇" },
-    { name: "Slime", emoji: "🟢" },
-    { name: "Goblin", emoji: "👺" },
-    { name: "Spider", emoji: "🕷️" },
+interface MonsterTemplate {
+    name: string;
+    emoji: string;
+    image?: string;
+}
+
+const TIER_1: MonsterTemplate[] = [
+    { name: "Rat", emoji: "🐀", image: "https://i.imgur.com/NzMOgu1.png" },
+    { name: "Bat", emoji: "🦇", image: "https://i.imgur.com/FapVGQ3.png" },
+    { name: "Slime", emoji: "🟢", image: "https://i.imgur.com/Pk7kG7B.png" },
+    { name: "Goblin", emoji: "👺", image: "https://i.imgur.com/XzDeSE1.png" },
+    { name: "Spider", emoji: "🕷️", image: "https://i.imgur.com/877ZusE.png" },
 ];
 
-const TIER_2 = [
-    { name: "Skeleton", emoji: "💀" },
-    { name: "Zombie", emoji: "🧟" },
-    { name: "Wolf", emoji: "🐺" },
-    { name: "Orc", emoji: "👹" },
-    { name: "Ghost", emoji: "👻" },
+const TIER_2: MonsterTemplate[] = [
+    { name: "Skeleton", emoji: "💀", image: "https://i.imgur.com/NjhaZG3.png" },
+    { name: "Zombie", emoji: "🧟", image: "https://i.imgur.com/y3oJ6u5.png" },
+    { name: "Wolf", emoji: "🐺", image: "https://i.imgur.com/687vN4p.png" },
+    { name: "Orc", emoji: "👹", image: "https://i.imgur.com/18vPNVT.png" },
+    { name: "Ghost", emoji: "👻", image: "https://i.imgur.com/ia1BLcW.png" },
 ];
 
-const TIER_3 = [
-    { name: "Dragon", emoji: "🐉" },
-    { name: "Demon", emoji: "😈" },
-    { name: "Lich", emoji: "🧙" },
-    { name: "Hydra", emoji: "🐍" },
-    { name: "Titan", emoji: "⚡" },
+const TIER_3: MonsterTemplate[] = [
+    { name: "Dragon", emoji: "🐉", image: "https://i.imgur.com/cB5r41R.png" },
+    { name: "Demon", emoji: "😈", image: "https://i.imgur.com/f2OgS2p.png" },
+    { name: "Lich", emoji: "🧙", image: "https://i.imgur.com/Kx8s1d1.png" },
+    { name: "Hydra", emoji: "🐍", image: "https://i.imgur.com/5rl7jru.png" },
+    { name: "Titan", emoji: "⚡", image: "https://i.imgur.com/MQ6jt7H.png" },
 ];
+
+// Variant prefix by floor — purely cosmetic, floor-based stat scaling already handles difficulty
+const MONSTER_VARIANTS: { minFloor: number; prefix: string }[] = [
+    { minFloor: 76, prefix: "Primordial" },
+    { minFloor: 51, prefix: "Legendary" },
+    { minFloor: 31, prefix: "Ancient" },
+    { minFloor: 16, prefix: "Elite" },
+];
+
+function getMonsterVariantPrefix(floor: number): string | null {
+    for (const v of MONSTER_VARIANTS) {
+        if (floor >= v.minFloor) return v.prefix;
+    }
+    return null;
+}
 
 // --- Helpers ---
 
-function rollMonster(floor: number): { name: string; emoji: string } {
-    if (floor <= 5) return TIER_1[randomInRange(0, TIER_1.length - 1)];
-    if (floor <= 10) return TIER_2[randomInRange(0, TIER_2.length - 1)];
-    return TIER_3[randomInRange(0, TIER_3.length - 1)];
+function rollMonster(floor: number): { name: string; emoji: string; image?: string } {
+    let template: MonsterTemplate;
+    if (floor <= 5) template = TIER_1[randomInRange(0, TIER_1.length - 1)];
+    else if (floor <= 10) template = TIER_2[randomInRange(0, TIER_2.length - 1)];
+    else template = TIER_3[randomInRange(0, TIER_3.length - 1)];
+
+    const prefix = getMonsterVariantPrefix(floor);
+    return {
+        name: prefix ? `${prefix} ${template.name}` : template.name,
+        emoji: template.emoji,
+        image: template.image,
+    };
 }
 
 function rollEncounterType(hasLuckBuff = false): EncounterType {
