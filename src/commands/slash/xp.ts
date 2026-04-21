@@ -214,7 +214,7 @@ export default {
                                 lastMessageHash: "",
                             },
                         },
-                        { upsert: true, new: true }
+                        { upsert: true, returnDocument: "after" }
                     );
 
                     const newLevel = levelFromXP(updated.xp);
@@ -308,7 +308,7 @@ async function handleChannelBlacklist(
         updated = await GuildXPConfigModel.findOneAndUpdate(
             { guildId, blacklistedChannels: { $ne: channel.id } },
             { $addToSet: { blacklistedChannels: channel.id } },
-            { new: true }
+            { returnDocument: "after" }
         );
         if (!updated) {
             await interaction.editReply(t(locale, "xp.blacklist.already_in", { channelId: channel.id }));
@@ -318,7 +318,7 @@ async function handleChannelBlacklist(
         updated = await GuildXPConfigModel.findOneAndUpdate(
             { guildId, blacklistedChannels: channel.id },
             { $pull: { blacklistedChannels: channel.id } },
-            { new: true }
+            { returnDocument: "after" }
         );
         if (!updated) {
             await interaction.editReply(t(locale, "xp.blacklist.not_in", { channelId: channel.id }));

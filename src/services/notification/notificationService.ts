@@ -24,7 +24,7 @@ export async function getNotificationConfig(
     const config = await GuildNotificationConfigModel.findOneAndUpdate(
         { guildId, type },
         { $setOnInsert: { guildId, type } },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
 
     await redis.setJson(key, config.toObject(), CONFIG_CACHE_TTL);

@@ -31,7 +31,7 @@ async function getOrCreate(userId: string, guildId: string): Promise<IUserEconom
     const doc = await UserEconomyModel.findOneAndUpdate(
         { userId, guildId },
         { $setOnInsert: { userId, guildId } },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
     return doc;
 }
@@ -60,7 +60,7 @@ async function addCoin(
             $inc: { coin: amount },
             $setOnInsert: { userId, guildId },
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
     await logTransaction(userId, guildId, reason, amount, 0, metadata);
     return updated;
@@ -79,7 +79,7 @@ async function addGem(
             $inc: { gem: amount },
             $setOnInsert: { userId, guildId },
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
     await logTransaction(userId, guildId, reason, 0, amount, metadata);
     return updated;
@@ -104,7 +104,7 @@ async function deduct(
     const updated = await UserEconomyModel.findOneAndUpdate(
         filter,
         { $inc: { coin: -coinAmount, gem: -gemAmount } },
-        { new: true }
+        { returnDocument: "after" }
     );
 
     if (!updated) {
@@ -126,7 +126,7 @@ async function setCoin(userId: string, guildId: string, amount: number): Promise
     const updated = await UserEconomyModel.findOneAndUpdate(
         { userId, guildId },
         { $set: { coin: amount } },
-        { new: true }
+        { returnDocument: "after" }
     );
     await logTransaction(userId, guildId, "admin", delta, 0, { action: "set-coin" });
     return updated!;
@@ -138,7 +138,7 @@ async function setGem(userId: string, guildId: string, amount: number): Promise<
     const updated = await UserEconomyModel.findOneAndUpdate(
         { userId, guildId },
         { $set: { gem: amount } },
-        { new: true }
+        { returnDocument: "after" }
     );
     await logTransaction(userId, guildId, "admin", 0, delta, { action: "set-gem" });
     return updated!;

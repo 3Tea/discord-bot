@@ -67,7 +67,7 @@ async function onGuildDelete(guild: Guild): Promise<void> {
                     name: guild.name || undefined,
                 },
             },
-            { new: true }
+            { returnDocument: "after" }
         );
         if (!updated) {
             logger.warn(`[AuditService] onGuildDelete: no GuildAudit doc for ${guild.id}`);

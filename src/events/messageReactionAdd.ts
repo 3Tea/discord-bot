@@ -39,7 +39,7 @@ export default {
             const config = await GuildXPConfigModel.findOneAndUpdate(
                 { guildId },
                 { $setOnInsert: { guildId } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
 
             if (!config.enabled) return;
@@ -65,7 +65,7 @@ export default {
                         lastMessageHash: "",
                     },
                 },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
 
             // Sync global XP

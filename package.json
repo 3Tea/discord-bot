@@ -37,7 +37,7 @@
     "i18next": "^26.0.3",
     "i18next-fs-backend": "^2.6.3",
     "ioredis": "^5.2.4",
-    "mongoose": "^8.8.3",
+    "mongoose": "^9.5.0",
     "node-cache": "^5.1.2",
     "tracer": "^1.1.6",
     "winston": "^3.17.0"

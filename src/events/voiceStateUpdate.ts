@@ -194,7 +194,7 @@ async function tickVoiceXPSessions(): Promise<void> {
             const config = await GuildXPConfigModel.findOneAndUpdate(
                 { guildId: sGuildId },
                 { $setOnInsert: { guildId: sGuildId } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
 
             if (!config.enabled) continue;
@@ -214,7 +214,7 @@ async function tickVoiceXPSessions(): Promise<void> {
                         lastMessageHash: "",
                     },
                 },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
 
             // Sync global XP

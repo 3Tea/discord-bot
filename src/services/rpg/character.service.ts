@@ -203,7 +203,7 @@ async function addGold(userId: string, amount: number): Promise<number> {
     const inc: Record<string, number> = { gold: amount };
     if (amount > 0) inc.goldEarned = amount;
 
-    const result = await CharacterModel.findOneAndUpdate({ userId }, { $inc: inc }, { new: true });
+    const result = await CharacterModel.findOneAndUpdate({ userId }, { $inc: inc }, { returnDocument: "after" });
     if (!result) throw new CharacterNotFoundError(userId);
     await redis.deleteKey(`rpg_char:${userId}`);
     import("./guildQuest.service")
@@ -219,7 +219,7 @@ async function deductGold(userId: string, amount: number): Promise<number> {
     const result = await CharacterModel.findOneAndUpdate(
         { userId, gold: { $gte: amount } },
         { $inc: { gold: -amount } },
-        { new: true }
+        { returnDocument: "after" }
     );
     if (!result) throw new InsufficientGoldError(char.gold, amount);
     await redis.deleteKey(`rpg_char:${userId}`);

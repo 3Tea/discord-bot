@@ -254,7 +254,7 @@ export default {
                 const config = await GuildNotificationConfigModel.findOneAndUpdate(
                     { guildId, type },
                     [{ $set: { enabled: { $not: "$enabled" } } }],
-                    { new: true }
+                    { returnDocument: "after" }
                 );
                 await invalidateNotificationCache(guildId, type);
 

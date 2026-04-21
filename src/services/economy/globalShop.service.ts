@@ -139,7 +139,7 @@ async function buyItem(
         const updated = await GlobalShopItemModel.findOneAndUpdate(
             { itemId, enabled: true, stock: { $gte: quantity } },
             { $inc: { stock: -quantity } },
-            { new: true }
+            { returnDocument: "after" }
         );
         if (!updated) {
             await redis.deleteKey(idemKey);
@@ -182,7 +182,7 @@ async function buyItem(
                     metadata: {},
                 },
             },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: "after" }
         );
         if (!doc) {
             throw new Error("INVENTORY_UPSERT_FAILED");

@@ -29,7 +29,7 @@ export default {
             const config = await GuildXPConfigModel.findOneAndUpdate(
                 { guildId: message.guild.id },
                 { $setOnInsert: { guildId: message.guild.id } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
 
             // Skip if disabled or channel blacklisted
@@ -70,7 +70,7 @@ export default {
                         reactionCount: 0,
                     },
                 },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
 
             // Sync global XP

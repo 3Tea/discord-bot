@@ -18,7 +18,7 @@ async function getRewardConfig(guildId: string): Promise<IGuildEconomyRewardConf
     const config = await GuildEconomyRewardConfigModel.findOneAndUpdate(
         { guildId },
         { $setOnInsert: { guildId } },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
 
     await redis.setJson(cacheKey, config.toObject(), CONFIG_CACHE_TTL);

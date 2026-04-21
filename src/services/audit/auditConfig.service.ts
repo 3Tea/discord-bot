@@ -43,7 +43,7 @@ async function ensureDoc(): Promise<IAuditConfig> {
     const doc = await AuditConfigModel.findOneAndUpdate(
         { _id: "singleton" },
         { $setOnInsert: { snapshotEnabled: true } },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     );
     return doc as IAuditConfig;
 }

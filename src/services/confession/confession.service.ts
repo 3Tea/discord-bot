@@ -93,7 +93,7 @@ export async function upsertGuildConfessionConfig(input: {
             },
             $setOnInsert: { lastConfessionNumber: 0 },
         },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     ).exec();
     if (!doc) {
         throw new Error("UPSERT_FAILED");
@@ -105,7 +105,7 @@ export async function reserveNextConfessionNumber(guildId: string): Promise<numb
     const updated = await GuildConfessionConfigModel.findOneAndUpdate(
         { guildId },
         { $inc: { lastConfessionNumber: 1 } },
-        { new: true }
+        { returnDocument: "after" }
     ).exec();
     if (!updated) {
         throw new Error("CONFIG_MISSING");
@@ -398,7 +398,7 @@ export type ModerationResult =
 
 export async function approveConfession(interaction: ButtonInteraction): Promise<ModerationResult> {
     const rawId = interaction.customId.split(":")[1];
-    if (!rawId || !isValidObjectId(rawId)) {
+    if (typeof rawId !== "string" || !isValidObjectId(rawId)) {
         return { ok: false, code: "invalid_id" };
     }
     const guildId = interaction.guildId;
@@ -460,7 +460,7 @@ export async function approveConfession(interaction: ButtonInteraction): Promise
 
 export async function rejectConfession(interaction: ButtonInteraction): Promise<ModerationResult> {
     const rawId = interaction.customId.split(":")[1];
-    if (!rawId || !isValidObjectId(rawId)) {
+    if (typeof rawId !== "string" || !isValidObjectId(rawId)) {
         return { ok: false, code: "invalid_id" };
     }
     const guildId = interaction.guildId;
@@ -631,7 +631,7 @@ export async function handleConfessionVote(
     userId: string,
     voteType: "up" | "down"
 ): Promise<VoteResult> {
-    if (!isValidObjectId(confessionMongoId)) {
+    if (typeof confessionMongoId !== "string" || !isValidObjectId(confessionMongoId)) {
         return { ok: false, code: "invalid_id" };
     }
 
@@ -739,7 +739,7 @@ export async function handleConfessionReply(params: {
     const updated = await ConfessionModel.findByIdAndUpdate(
         confessionMongoId,
         { $inc: { replyCount: 1 } },
-        { new: true }
+        { returnDocument: "after" }
     ).exec();
     if (!updated) {
         return { ok: false, code: "not_found" };

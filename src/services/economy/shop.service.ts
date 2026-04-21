@@ -49,7 +49,7 @@ async function buyItem(userId: string, guildId: string, itemId: string, guild: G
         const stockResult = await ShopItemModel.findOneAndUpdate(
             { _id: item._id, stock: { $gte: 1 } },
             { $inc: { stock: -1 } },
-            { new: true }
+            { returnDocument: "after" }
         );
         if (!stockResult) {
             throw new Error("OUT_OF_STOCK");
