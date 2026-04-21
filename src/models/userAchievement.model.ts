@@ -1,14 +1,16 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IUserAchievement extends Document {
+export interface IUserAchievement {
     userId: string;
     guildId: string;
     achievementId: string;
     unlockedAt: Date;
     rewardPaid: boolean;
 }
+export type UserAchievementDoc = HydratedDocument<IUserAchievement>;
 
-const userAchievementSchema = new Schema(
+const userAchievementSchema = new Schema<IUserAchievement>(
     {
         userId: { type: String, required: true },
         guildId: { type: String, required: true },
