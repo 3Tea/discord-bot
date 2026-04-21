@@ -1,4 +1,5 @@
-import { Document, model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
 export interface IQuestProgress {
     questId: string;
@@ -8,7 +9,7 @@ export interface IQuestProgress {
     rewardPaid: boolean;
 }
 
-export interface IUserQuest extends Document {
+export interface IUserQuest {
     userId: string;
     date: string;
     quests: IQuestProgress[];
@@ -16,8 +17,9 @@ export interface IUserQuest extends Document {
     questStreak: number;
     lastQuestDate: string | null;
 }
+export type UserQuestDoc = HydratedDocument<IUserQuest>;
 
-const questProgressSchema = new Schema(
+const questProgressSchema = new Schema<IQuestProgress>(
     {
         questId: { type: String, required: true },
         progress: { type: Number, default: 0 },
@@ -28,7 +30,7 @@ const questProgressSchema = new Schema(
     { _id: false }
 );
 
-const userQuestSchema = new Schema(
+const userQuestSchema = new Schema<IUserQuest>(
     {
         userId: { type: String, required: true },
         date: { type: String, required: true },

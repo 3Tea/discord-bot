@@ -1,8 +1,8 @@
-import { model, Schema, Document } from "mongoose";
-import type { CallbackError } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { CallbackError, HydratedDocument } from "mongoose";
 
 // Legacy naming: uses guildID/userID (uppercase) — newer models use guildId/userId
-export interface IUser extends Document {
+export interface IUser {
     userID: string;
     totalPoint: number;
     totalCoin: number;
@@ -11,8 +11,9 @@ export interface IUser extends Document {
     status: boolean;
     locale?: string;
 }
+export type UserDoc = HydratedDocument<IUser>;
 
-const userSchema = new Schema(
+const userSchema = new Schema<IUser>(
     {
         userID: {
             type: String,
@@ -64,13 +65,13 @@ userSchema.post("save", (error: CallbackError, doc: IUser, next: (err?: Callback
 
 userSchema.set("toJSON", {
     transform: (_doc, ret) => {
-        delete (ret as Record<string, unknown>).__v;
+        delete (ret as unknown as Record<string, unknown>).__v;
     },
 });
 
 userSchema.set("toObject", {
     transform: (_doc, ret) => {
-        delete (ret as Record<string, unknown>).__v;
+        delete (ret as unknown as Record<string, unknown>).__v;
     },
 });
 

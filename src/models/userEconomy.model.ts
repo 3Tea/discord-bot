@@ -1,6 +1,7 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IUserEconomy extends Document {
+export interface IUserEconomy {
     userId: string;
     guildId: string;
     coin: number;
@@ -14,8 +15,9 @@ export interface IUserEconomy extends Document {
     dungeonDepth: number;
     dungeonCheckpoint: number;
 }
+export type UserEconomyDoc = HydratedDocument<IUserEconomy>;
 
-const userEconomySchema = new Schema(
+const userEconomySchema = new Schema<IUserEconomy>(
     {
         userId: { type: String, required: true },
         guildId: { type: String, required: true },
