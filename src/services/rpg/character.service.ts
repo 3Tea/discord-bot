@@ -1,4 +1,5 @@
 // src/services/rpg/character.service.ts
+import type { UpdateQuery } from "mongoose";
 import CharacterModel, { ICharacter } from "../../models/character.model";
 import EquipmentModel from "../../models/equipment.model";
 import redis from "../../connector/redis";
@@ -203,7 +204,8 @@ async function addGold(userId: string, amount: number): Promise<number> {
     const inc: Record<string, number> = { gold: amount };
     if (amount > 0) inc.goldEarned = amount;
 
-    const result = await CharacterModel.findOneAndUpdate({ userId }, { $inc: inc }, { returnDocument: "after" });
+    const update: UpdateQuery<ICharacter> = { $inc: inc };
+    const result = await CharacterModel.findOneAndUpdate({ userId }, update, { returnDocument: "after" });
     if (!result) throw new CharacterNotFoundError(userId);
     await redis.deleteKey(`rpg_char:${userId}`);
     import("./guildQuest.service")
@@ -237,7 +239,8 @@ async function addMaterials(userId: string, materials: { key: string; qty: numbe
     for (const { key, qty } of materials) {
         inc[`materials.${key}`] = qty;
     }
-    await CharacterModel.updateOne({ userId }, { $inc: inc });
+    const update: UpdateQuery<ICharacter> = { $inc: inc };
+    await CharacterModel.updateOne({ userId }, update);
     await redis.deleteKey(`rpg_char:${userId}`);
     const totalQty = materials.reduce((sum, m) => sum + m.qty, 0);
     if (totalQty > 0) {
@@ -271,7 +274,8 @@ async function deductMaterials(userId: string, materials: { key: string; qty: nu
     for (const { key, qty } of materials) {
         inc[`materials.${key}`] = -qty;
     }
-    await CharacterModel.updateOne({ userId }, { $inc: inc });
+    const update: UpdateQuery<ICharacter> = { $inc: inc };
+    await CharacterModel.updateOne({ userId }, update);
     await redis.deleteKey(`rpg_char:${userId}`);
 }
 
