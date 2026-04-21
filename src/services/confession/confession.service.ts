@@ -57,6 +57,12 @@ export { CONFESSION_REPLY_COST_COIN, CONFESSION_REPLY_MAX_LENGTH } from "./const
 export { CONFESSION_KEYWORD_MAX_LENGTH, CONFESSION_KEYWORDS_MAX_COUNT, CONFESSION_TAGS } from "./constants";
 export type { ConfessionTag } from "./constants";
 
+// Narrows `unknown` to `string` and guards against Mongoose v9's `isValidObjectId`
+// which rejects (and throws on) non-string inputs.
+function isObjectIdString(value: unknown): value is string {
+    return typeof value === "string" && isValidObjectId(value);
+}
+
 function applyConfessionFooter(embed: EmbedBuilder): void {
     if (FOOTER.text) {
         embed.setFooter({
@@ -399,7 +405,7 @@ export type ModerationResult =
 
 export async function approveConfession(interaction: ButtonInteraction): Promise<ModerationResult> {
     const rawId = interaction.customId.split(":")[1];
-    if (typeof rawId !== "string" || !isValidObjectId(rawId)) {
+    if (!isObjectIdString(rawId)) {
         return { ok: false, code: "invalid_id" };
     }
     const guildId = interaction.guildId;
@@ -461,7 +467,7 @@ export async function approveConfession(interaction: ButtonInteraction): Promise
 
 export async function rejectConfession(interaction: ButtonInteraction): Promise<ModerationResult> {
     const rawId = interaction.customId.split(":")[1];
-    if (typeof rawId !== "string" || !isValidObjectId(rawId)) {
+    if (!isObjectIdString(rawId)) {
         return { ok: false, code: "invalid_id" };
     }
     const guildId = interaction.guildId;
@@ -632,7 +638,7 @@ export async function handleConfessionVote(
     userId: string,
     voteType: "up" | "down"
 ): Promise<VoteResult> {
-    if (typeof confessionMongoId !== "string" || !isValidObjectId(confessionMongoId)) {
+    if (!isObjectIdString(confessionMongoId)) {
         return { ok: false, code: "invalid_id" };
     }
 

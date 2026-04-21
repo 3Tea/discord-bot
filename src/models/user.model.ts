@@ -1,6 +1,8 @@
 import { model, Schema } from "mongoose";
 import type { CallbackError, HydratedDocument } from "mongoose";
 
+import { logger } from "../util/log/logger.mixed";
+
 // Legacy naming: uses guildID/userID (uppercase) — newer models use guildId/userId
 export interface IUser {
     userID: string;
@@ -56,7 +58,7 @@ userSchema.index({ totalPoint: -1 });
 
 userSchema.post("save", (error: CallbackError, doc: IUser, next: (err?: CallbackError) => void) => {
     if (process.env.NODE_ENV === "development") {
-        console.log(doc);
+        logger.debug(doc);
     }
     if (error && "code" in error && (error as Record<string, unknown>).code === 11000)
         next(new Error("This document already exists, please try again"));

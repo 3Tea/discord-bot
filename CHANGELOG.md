@@ -8,6 +8,7 @@ All notable changes to this project are documented in this file. The format is b
 
 ### Changed
 
+- **Upgrade Mongoose from v8 to v9** — bump `mongoose` to `^9.5.0`, migrate all 36 model files from `extends Document` to `HydratedDocument<T>` pattern with exported `<Name>Doc` type aliases, adopt `QueryFilter` / `UpdateQuery` typing across services and utilities, replace deprecated `new: true` option with `returnDocument: "after"` (48 occurrences). No database schema change — all modifications are application-layer.
 - **Economy cooldowns no longer admin-configurable** — work/fish cooldowns now determined by premium tier; gamble (30s) and rob (6h + 2h immunity) are fixed constants. Prevents premium value erosion and economy imbalance.
 
 ### Fixed
