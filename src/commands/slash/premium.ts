@@ -9,7 +9,7 @@ import {
 } from "discord.js";
 import { DEV_USER_ID } from "../../util/config/index";
 import { descriptionLocales } from "../../util/i18n/commandLocales";
-import { resolveLocale } from "../../util/i18n/locale";
+import { resolveLocale, resolveUserLocale } from "../../util/i18n/locale";
 import { t } from "../../util/i18n/t";
 import Reply from "../../util/decorator/reply";
 import { buildPremiumButton } from "../../util/premium/upgradeButton";
@@ -160,6 +160,34 @@ async function handleGrant(interaction: ChatInputCommandInteraction, locale: Sup
         .setColor(0xf39c12)
         .setTimestamp();
     await Reply.embedEdit(interaction, embed);
+
+    await sendGrantDM(interaction, target.id, result.action, tier, result.until);
+}
+
+async function sendGrantDM(
+    interaction: ChatInputCommandInteraction,
+    targetId: string,
+    action: "activate" | "extend" | "upgrade" | "downgrade",
+    tier: PremiumTier,
+    until: Date | null
+): Promise<void> {
+    try {
+        const dmLocale = await resolveUserLocale(targetId);
+        const untilStr = until
+            ? `<t:${Math.floor(until.getTime() / 1000)}:F>`
+            : t(dmLocale, "premium.lookup.lifetime");
+        const embed = new EmbedBuilder()
+            .setTitle(t(dmLocale, `premium.dm.${action}.title`))
+            .setDescription(
+                t(dmLocale, `premium.dm.${action}.notice`, { tier: tier.toUpperCase(), until: untilStr })
+            )
+            .setColor(tier === "galaxy" ? 0x9b59b6 : 0xf39c12)
+            .setTimestamp();
+        const user = await interaction.client.users.fetch(targetId);
+        await user.send({ embeds: [embed] });
+    } catch {
+        // DM may fail if user has DMs closed — silently skip
+    }
 }
 
 async function handleRevoke(interaction: ChatInputCommandInteraction, locale: SupportedLocale): Promise<void> {
