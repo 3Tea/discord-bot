@@ -1,4 +1,5 @@
 // src/services/audit/auditConfig.service.ts
+import type { UpdateQuery } from "mongoose";
 import AuditConfigModel, { IAuditConfig } from "../../models/auditConfig.model";
 import redis from "../../connector/redis/index";
 
@@ -100,7 +101,7 @@ async function setSnapshotEnabled(enabled: boolean, updatedBy: string): Promise<
 }
 
 async function setAlertThresholds(patch: AlertThresholdsPatch, updatedBy: string): Promise<void> {
-    const set: Record<string, unknown> = { updatedBy };
+    const set: UpdateQuery<IAuditConfig>["$set"] = { updatedBy };
     if (patch.memberDropPct !== undefined) set.alertMemberDropPct = patch.memberDropPct;
     if (patch.bgErrorsPerHour !== undefined) set.alertBgErrorsPerHour = patch.bgErrorsPerHour;
     if (patch.guildLeavesPerHour !== undefined) set.alertGuildLeavesPerHour = patch.guildLeavesPerHour;

@@ -12,6 +12,7 @@ import {
     TextInputStyle,
 } from "discord.js";
 import { isValidObjectId } from "mongoose";
+import type { UpdateQuery } from "mongoose";
 
 import redis from "../../connector/redis";
 import { secondsUntilUTCMidnight } from "../../util/date/utc";
@@ -656,16 +657,17 @@ export async function handleConfessionVote(
             userId,
             vote: voteType,
         });
-        const inc = voteType === "up" ? { upvotes: 1 } : { downvotes: 1 };
+        const inc: UpdateQuery<IConfession>["$inc"] = voteType === "up" ? { upvotes: 1 } : { downvotes: 1 };
         await ConfessionModel.findByIdAndUpdate(confessionMongoId, { $inc: inc }).exec();
     } else if (existing.vote === voteType) {
         await ConfessionVoteModel.deleteOne({ _id: existing._id }).exec();
-        const inc = voteType === "up" ? { upvotes: -1 } : { downvotes: -1 };
+        const inc: UpdateQuery<IConfession>["$inc"] = voteType === "up" ? { upvotes: -1 } : { downvotes: -1 };
         await ConfessionModel.findByIdAndUpdate(confessionMongoId, { $inc: inc }).exec();
     } else {
         existing.vote = voteType;
         await existing.save();
-        const inc = voteType === "up" ? { upvotes: 1, downvotes: -1 } : { upvotes: -1, downvotes: 1 };
+        const inc: UpdateQuery<IConfession>["$inc"] =
+            voteType === "up" ? { upvotes: 1, downvotes: -1 } : { upvotes: -1, downvotes: 1 };
         await ConfessionModel.findByIdAndUpdate(confessionMongoId, { $inc: inc }).exec();
     }
 
