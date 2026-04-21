@@ -1,5 +1,5 @@
 import type { QueryFilter } from "mongoose";
-import UserEconomyModel, { IUserEconomy } from "../../models/userEconomy.model";
+import UserEconomyModel, { IUserEconomy, UserEconomyDoc } from "../../models/userEconomy.model";
 import TransactionModel, { TransactionType } from "../../models/transaction.model";
 
 export interface BalanceInfo {
@@ -28,7 +28,7 @@ async function logTransaction(
     await TransactionModel.create({ userId, guildId, type, coinDelta, gemDelta, metadata });
 }
 
-async function getOrCreate(userId: string, guildId: string): Promise<IUserEconomy> {
+async function getOrCreate(userId: string, guildId: string): Promise<UserEconomyDoc> {
     const doc = await UserEconomyModel.findOneAndUpdate(
         { userId, guildId },
         { $setOnInsert: { userId, guildId } },
@@ -54,7 +54,7 @@ async function addCoin(
     amount: number,
     reason: TransactionType,
     metadata: Record<string, unknown> = {}
-): Promise<IUserEconomy> {
+): Promise<UserEconomyDoc> {
     const updated = await UserEconomyModel.findOneAndUpdate(
         { userId, guildId },
         {
@@ -73,7 +73,7 @@ async function addGem(
     amount: number,
     reason: TransactionType,
     metadata: Record<string, unknown> = {}
-): Promise<IUserEconomy> {
+): Promise<UserEconomyDoc> {
     const updated = await UserEconomyModel.findOneAndUpdate(
         { userId, guildId },
         {
@@ -93,7 +93,7 @@ async function deduct(
     gemAmount: number,
     reason: TransactionType,
     metadata: Record<string, unknown> = {}
-): Promise<IUserEconomy> {
+): Promise<UserEconomyDoc> {
     // Ensure the record exists first
     await getOrCreate(userId, guildId);
 
@@ -121,7 +121,7 @@ async function deduct(
     return updated;
 }
 
-async function setCoin(userId: string, guildId: string, amount: number): Promise<IUserEconomy> {
+async function setCoin(userId: string, guildId: string, amount: number): Promise<UserEconomyDoc> {
     const eco = await getOrCreate(userId, guildId);
     const delta = amount - eco.coin;
     const updated = await UserEconomyModel.findOneAndUpdate(
@@ -133,7 +133,7 @@ async function setCoin(userId: string, guildId: string, amount: number): Promise
     return updated!;
 }
 
-async function setGem(userId: string, guildId: string, amount: number): Promise<IUserEconomy> {
+async function setGem(userId: string, guildId: string, amount: number): Promise<UserEconomyDoc> {
     const eco = await getOrCreate(userId, guildId);
     const delta = amount - eco.gem;
     const updated = await UserEconomyModel.findOneAndUpdate(
@@ -145,7 +145,7 @@ async function setGem(userId: string, guildId: string, amount: number): Promise<
     return updated!;
 }
 
-async function exchange(userId: string, guildId: string, gemAmount: number, ratePerGem: number): Promise<IUserEconomy> {
+async function exchange(userId: string, guildId: string, gemAmount: number, ratePerGem: number): Promise<UserEconomyDoc> {
     const coinCost = gemAmount * ratePerGem;
     await deduct(userId, guildId, coinCost, 0, "exchange", { gemAmount, ratePerGem });
     try {

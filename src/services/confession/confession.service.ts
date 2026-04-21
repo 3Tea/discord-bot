@@ -59,7 +59,7 @@ export type { ConfessionTag } from "./constants";
 
 // Narrows `unknown` to `string` and guards against Mongoose v9's `isValidObjectId`
 // which rejects (and throws on) non-string inputs.
-function isObjectIdString(value: unknown): value is string {
+export function isObjectIdString(value: unknown): value is string {
     return typeof value === "string" && isValidObjectId(value);
 }
 

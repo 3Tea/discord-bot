@@ -1,10 +1,10 @@
 import { ButtonInteraction, MessageFlags, TextChannel } from "discord.js";
-import { isValidObjectId } from "mongoose";
 
 import ConfessionModel from "../models/confession.model";
 import {
     buildConfessionReplyModal,
     handleConfessionReply,
+    isObjectIdString,
     CONFESSION_REPLY_COST_COIN,
 } from "../services/confession/confession.service";
 import CurrencyService from "../services/economy/currency.service";
@@ -23,7 +23,7 @@ export default {
         }
 
         const mongoId = interaction.customId.split(":")[1];
-        if (!mongoId || !isValidObjectId(mongoId)) {
+        if (!isObjectIdString(mongoId)) {
             await interaction.reply({ flags: MessageFlags.Ephemeral, content: t(locale, "confession.button.invalid") });
             return;
         }
