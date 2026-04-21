@@ -1,8 +1,11 @@
 import { randomBytes } from "node:crypto";
+import type { QueryFilter, UpdateQuery } from "mongoose";
 import redis from "../../connector/redis";
 import EconomyFreezeModel from "../../models/economyFreeze.model";
 import UserEconomyModel from "../../models/userEconomy.model";
+import type { IUserEconomy } from "../../models/userEconomy.model";
 import TransactionModel from "../../models/transaction.model";
+import type { ITransaction } from "../../models/transaction.model";
 import EconomySnapshotModel, { type ISnapshotEntry, type SnapshotScope } from "../../models/economySnapshot.model";
 
 function generateSnapshotId(): string {
@@ -332,7 +335,7 @@ async function resetEconomy(
     target: string,
     adminId: string
 ): Promise<ResetResult> {
-    const filter: Record<string, unknown> = { guildId };
+    const filter: QueryFilter<IUserEconomy> = { guildId };
     if (target !== "server") filter.userId = target;
 
     const projection: Record<string, number> = { userId: 1 };
@@ -359,7 +362,7 @@ async function resetEconomy(
 
     await pruneOldSnapshots(guildId);
 
-    const updateSet: Record<string, unknown> = {};
+    const updateSet: UpdateQuery<IUserEconomy>["$set"] = {};
     if (scope === "coin" || scope === "all") updateSet.coin = 0;
     if (scope === "gem" || scope === "all") updateSet.gem = 0;
     if (scope === "streak" || scope === "all") {
@@ -393,7 +396,7 @@ async function rollbackSnapshot(snapshotId: string, guildId: string): Promise<Ro
     if (!snapshot) throw new Error("SNAPSHOT_NOT_FOUND");
 
     const bulkOps = snapshot.data.map((entry) => {
-        const setFields: Record<string, unknown> = {};
+        const setFields: UpdateQuery<IUserEconomy>["$set"] = {};
         if (entry.coin !== undefined) setFields.coin = entry.coin;
         if (entry.gem !== undefined) setFields.gem = entry.gem;
         if (entry.prayStreak !== undefined) setFields.prayStreak = entry.prayStreak;
@@ -456,7 +459,7 @@ interface HistoryResult {
 }
 
 async function getHistory(opts: HistoryOptions): Promise<HistoryResult> {
-    const filter: Record<string, unknown> = { userId: opts.userId, guildId: opts.guildId };
+    const filter: QueryFilter<ITransaction> = { userId: opts.userId, guildId: opts.guildId };
     if (opts.type && opts.type !== "all") filter.type = opts.type;
     if (opts.minAmount) {
         filter.$or = [
@@ -556,7 +559,7 @@ async function reverseTransaction(
 // ─── Count Affected ───────────────────────────────────────────────────────────
 
 async function countAffected(guildId: string, scope: SnapshotScope, target: string): Promise<number> {
-    const filter: Record<string, unknown> = { guildId };
+    const filter: QueryFilter<IUserEconomy> = { guildId };
     if (target !== "server") filter.userId = target;
 
     if (scope === "coin") filter.coin = { $gt: 0 };

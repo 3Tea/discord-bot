@@ -1,3 +1,4 @@
+import type { QueryFilter } from "mongoose";
 import UserEconomyModel, { IUserEconomy } from "../../models/userEconomy.model";
 import TransactionModel, { TransactionType } from "../../models/transaction.model";
 
@@ -97,7 +98,7 @@ async function deduct(
     await getOrCreate(userId, guildId);
 
     // Atomic check + update: only deducts if balance is sufficient
-    const filter: Record<string, unknown> = { userId, guildId };
+    const filter: QueryFilter<IUserEconomy> = { userId, guildId };
     if (coinAmount > 0) filter.coin = { $gte: coinAmount };
     if (gemAmount > 0) filter.gem = { $gte: gemAmount };
 

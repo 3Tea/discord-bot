@@ -1,3 +1,4 @@
+import type { QueryFilter } from "mongoose";
 import GlobalInventoryModel, { IGlobalInventory } from "../../models/globalInventory.model";
 import GlobalShopItemModel, { type GlobalShopItemType, type IGlobalShopItem } from "../../models/globalShopItem.model";
 import redis from "../../connector/redis";
@@ -41,7 +42,7 @@ export interface GlobalInventorySummary {
  * Paginated enabled global shop items, optionally filtered by type.
  */
 async function getItems(page: number, type?: GlobalShopItemType): Promise<GlobalShopListResult> {
-    const filter: Record<string, unknown> = { enabled: true };
+    const filter: QueryFilter<IGlobalShopItem> = { enabled: true };
     if (type !== undefined) {
         filter.type = type;
     }
