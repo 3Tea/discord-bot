@@ -1,8 +1,9 @@
 // src/models/guildStatsSnapshot.model.ts
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 import type { Period } from "../util/xp/periodKey";
 
-export interface IGuildStatsSnapshot extends Document {
+export interface IGuildStatsSnapshot {
     guildId: string;
     period: Period;
     periodKey: string;
@@ -12,8 +13,9 @@ export interface IGuildStatsSnapshot extends Document {
     reactionCount: number;
     activeMembers: number;
 }
+export type GuildStatsSnapshotDoc = HydratedDocument<IGuildStatsSnapshot>;
 
-const guildStatsSnapshotSchema = new Schema(
+const guildStatsSnapshotSchema = new Schema<IGuildStatsSnapshot>(
     {
         guildId: { type: String, required: true },
         period: { type: String, required: true, enum: ["daily", "weekly", "monthly", "yearly"] },

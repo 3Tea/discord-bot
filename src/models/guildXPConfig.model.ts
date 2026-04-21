@@ -1,6 +1,7 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IGuildXPConfig extends Document {
+export interface IGuildXPConfig {
     guildId: string;
     blacklistedChannels: string[];
     xpPerMessage: number;
@@ -10,8 +11,9 @@ export interface IGuildXPConfig extends Document {
     minMessageLength: number;
     enabled: boolean;
 }
+export type GuildXPConfigDoc = HydratedDocument<IGuildXPConfig>;
 
-const guildXPConfigSchema = new Schema(
+const guildXPConfigSchema = new Schema<IGuildXPConfig>(
     {
         guildId: { type: String, required: true, unique: true },
         blacklistedChannels: { type: [String], default: [] },
