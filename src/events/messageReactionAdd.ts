@@ -45,13 +45,10 @@ export default {
             if (!config.enabled) return;
             if (config.blacklistedChannels.includes(message.channel.id)) return;
 
-            // Check cooldown via Redis
+            // Atomic cooldown: setKeyNX succeeds only if key was absent
             const cooldownKey = `reaction_xp:${guildId}:${user.id}`;
-            const existing = await redis.getKey(cooldownKey);
-            if (existing) return;
-
-            // Set cooldown
-            await redis.setKey(cooldownKey, "1", REACTION_COOLDOWN_TTL);
+            const acquired = await redis.setKeyNX(cooldownKey, "1", REACTION_COOLDOWN_TTL);
+            if (!acquired) return;
 
             // Grant XP
             const updated = await MemberXPModel.findOneAndUpdate(

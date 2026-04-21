@@ -25,9 +25,15 @@ const GUILD_COUNTER: Record<XPSource, string | null> = {
 /**
  * Upsert XP snapshots for all 4 periods in both guild and global scope,
  * plus sync guild-level stats (GuildStats + GuildStatsSnapshot).
+ *
+ * Admin-removed XP (negative delta) would subtract from the CURRENT period,
+ * misattributing across past periods and potentially driving totals negative.
+ * MemberXP.xp and User.totalPoint are adjusted by the caller; leaderboards
+ * converge back as the user earns new XP.
  */
 export async function syncSnapshots(userId: string, guildId: string, xpGain: number, source: XPSource): Promise<void> {
     if (xpGain === 0) return;
+    if (xpGain < 0) return;
 
     const periodKeys = getCurrentPeriodKeys();
     const counterField = SOURCE_COUNTER[source];

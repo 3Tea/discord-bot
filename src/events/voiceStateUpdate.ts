@@ -134,10 +134,16 @@ export default {
             const isServerDeafened = newState.serverDeaf ?? false;
             const channelEligible = channelEligibleForVoiceXp(newChannel);
 
-            if (!isServerDeafened && channelEligible) {
-                await startVoiceSession(guildId, userId, newChannel.id);
+            if (channelEligible) {
+                if (!isServerDeafened) {
+                    await startVoiceSession(guildId, userId, newChannel.id);
+                } else {
+                    await stopVoiceSession(guildId, userId, newChannel.id);
+                }
 
-                // Start sessions for other eligible humans in the same channel (now qualifies for XP)
+                // Sync sessions for other humans in the channel:
+                // the joiner may have flipped the channel to eligible even if they themselves
+                // are server-deafened, so always re-evaluate every member.
                 for (const [memberId, member] of newChannel.members) {
                     if (member.user.bot || memberId === userId) continue;
                     if (!member.voice.serverDeaf) {
@@ -158,101 +164,115 @@ export default {
     },
 };
 
-// Global interval: grant XP to active voice sessions every 60 seconds
-setInterval(async () => {
-    try {
-        const sessions = await redis.getSetMembers(VOICE_XP_SET);
-        if (sessions.length === 0) return;
+async function tickVoiceXPSessions(): Promise<void> {
+    const sessions = await redis.getSetMembers(VOICE_XP_SET);
+    if (sessions.length === 0) return;
 
-        for (const session of sessions) {
-            try {
-                const [sGuildId, sUserId, sChannelId] = session.split(":");
-                if (!sGuildId || !sUserId || !sChannelId) continue;
+    for (const session of sessions) {
+        try {
+            const [sGuildId, sUserId, sChannelId] = session.split(":");
+            if (!sGuildId || !sUserId || !sChannelId) continue;
 
-                const guild = client.guilds.cache.get(sGuildId);
-                if (!guild) {
-                    await redis.removeFromSet(VOICE_XP_SET, session);
-                    continue;
-                }
+            const guild = client.guilds.cache.get(sGuildId);
+            if (!guild) {
+                await redis.removeFromSet(VOICE_XP_SET, session);
+                continue;
+            }
 
-                const channel = guild.channels.cache.get(sChannelId) as VoiceChannel | undefined;
-                if (!channel) {
-                    await redis.removeFromSet(VOICE_XP_SET, session);
-                    continue;
-                }
+            const channel = guild.channels.cache.get(sChannelId) as VoiceChannel | undefined;
+            if (!channel) {
+                await redis.removeFromSet(VOICE_XP_SET, session);
+                continue;
+            }
 
-                const member = channel.members.get(sUserId);
-                if (!member || member.voice.serverDeaf || !channelEligibleForVoiceXp(channel)) {
-                    await redis.removeFromSet(VOICE_XP_SET, session);
-                    continue;
-                }
+            const member = channel.members.get(sUserId);
+            if (!member || member.voice.serverDeaf || !channelEligibleForVoiceXp(channel)) {
+                await redis.removeFromSet(VOICE_XP_SET, session);
+                continue;
+            }
 
-                const config = await GuildXPConfigModel.findOneAndUpdate(
-                    { guildId: sGuildId },
-                    { $setOnInsert: { guildId: sGuildId } },
-                    { upsert: true, new: true }
-                );
+            const config = await GuildXPConfigModel.findOneAndUpdate(
+                { guildId: sGuildId },
+                { $setOnInsert: { guildId: sGuildId } },
+                { upsert: true, new: true }
+            );
 
-                if (!config.enabled) continue;
+            if (!config.enabled) continue;
+            if (config.blacklistedChannels.includes(sChannelId)) continue;
 
-                const updated = await MemberXPModel.findOneAndUpdate(
-                    { guildId: sGuildId, userId: sUserId },
-                    {
-                        $inc: { xp: config.xpPerVoiceMinute, voiceMinutes: 1 },
-                        $setOnInsert: {
-                            guildId: sGuildId,
-                            userId: sUserId,
-                            level: 0,
-                            messageCount: 0,
-                            reactionCount: 0,
-                            lastMessageAt: null,
-                            lastMessageHash: "",
-                        },
+            const updated = await MemberXPModel.findOneAndUpdate(
+                { guildId: sGuildId, userId: sUserId },
+                {
+                    $inc: { xp: config.xpPerVoiceMinute, voiceMinutes: 1 },
+                    $setOnInsert: {
+                        guildId: sGuildId,
+                        userId: sUserId,
+                        level: 0,
+                        messageCount: 0,
+                        reactionCount: 0,
+                        lastMessageAt: null,
+                        lastMessageHash: "",
                     },
-                    { upsert: true, new: true }
-                );
+                },
+                { upsert: true, new: true }
+            );
 
-                // Sync global XP
-                await syncGlobalXP(sUserId, config.xpPerVoiceMinute);
-                // Sync period snapshots
-                await syncSnapshots(sUserId, sGuildId, config.xpPerVoiceMinute, "voice");
+            // Sync global XP
+            await syncGlobalXP(sUserId, config.xpPerVoiceMinute);
+            // Sync period snapshots
+            await syncSnapshots(sUserId, sGuildId, config.xpPerVoiceMinute, "voice");
 
-                // Voice coin reward tick
-                await tickVoiceCoinReward(sUserId, sGuildId);
+            // Voice coin reward tick
+            await tickVoiceCoinReward(sUserId, sGuildId);
 
-                const newLevel = levelFromXP(updated.xp);
-                if (newLevel > updated.level) {
-                    await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
-                    await rewardLevelUp(sUserId, sGuildId, newLevel);
-                    // Level-up notification
-                    try {
-                        const notifConfig = await getNotificationConfig(sGuildId, NotificationType.LevelUp);
-                        if (notifConfig.enabled && notifConfig.channelId) {
-                            const guild = client.guilds.cache.get(sGuildId);
-                            if (guild) {
-                                const user = await client.users.fetch(sUserId).catch(() => null);
-                                if (user) {
-                                    const notifLocale = await resolveGuildLocale(sGuildId);
-                                    const embed = buildLevelUpEmbed(
-                                        sUserId,
-                                        user.displayAvatarURL({ size: 256 }),
-                                        newLevel,
-                                        updated.xp,
-                                        notifLocale
-                                    );
-                                    await sendNotification(guild, notifConfig.channelId, embed);
-                                }
+            const newLevel = levelFromXP(updated.xp);
+            if (newLevel > updated.level) {
+                await MemberXPModel.updateOne({ _id: updated._id }, { $set: { level: newLevel } });
+                await rewardLevelUp(sUserId, sGuildId, newLevel);
+                // Level-up notification
+                try {
+                    const notifConfig = await getNotificationConfig(sGuildId, NotificationType.LevelUp);
+                    if (notifConfig.enabled && notifConfig.channelId) {
+                        const notifGuild = client.guilds.cache.get(sGuildId);
+                        if (notifGuild) {
+                            const user = await client.users.fetch(sUserId).catch(() => null);
+                            if (user) {
+                                const notifLocale = await resolveGuildLocale(sGuildId);
+                                const embed = buildLevelUpEmbed(
+                                    sUserId,
+                                    user.displayAvatarURL({ size: 256 }),
+                                    newLevel,
+                                    updated.xp,
+                                    notifLocale
+                                );
+                                await sendNotification(notifGuild, notifConfig.channelId, embed);
                             }
                         }
-                    } catch (err) {
-                        logger.error(`[voiceXP:levelNotif] ${err instanceof Error ? err.message : "Unknown error"}`);
                     }
+                } catch (err) {
+                    logger.error(`[voiceXP:levelNotif] ${err instanceof Error ? err.message : "Unknown error"}`);
                 }
-            } catch (error) {
-                logger.error(`[voiceXP:session] ${error instanceof Error ? error.message : "Unknown error"}`);
             }
+        } catch (error) {
+            logger.error(`[voiceXP:session] ${error instanceof Error ? error.message : "Unknown error"}`);
         }
-    } catch (error) {
-        logger.error(`[voiceXP:interval] ${error instanceof Error ? error.message : "Unknown error"}`);
     }
-}, VOICE_XP_INTERVAL_MS);
+}
+
+let voiceXPTimer: NodeJS.Timeout | null = null;
+
+export function startVoiceXPWorker(): void {
+    if (voiceXPTimer) return;
+    voiceXPTimer = setInterval(() => {
+        tickVoiceXPSessions().catch((error) => {
+            logger.error(`[voiceXP:interval] ${error instanceof Error ? error.message : "Unknown error"}`);
+        });
+    }, VOICE_XP_INTERVAL_MS);
+}
+
+export function stopVoiceXPWorker(): void {
+    if (voiceXPTimer) {
+        clearInterval(voiceXPTimer);
+        voiceXPTimer = null;
+    }
+}

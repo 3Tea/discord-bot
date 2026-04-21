@@ -299,35 +299,35 @@ async function handleChannelBlacklist(
 ): Promise<void> {
     const channel = interaction.options.getChannel("channel", true);
 
-    const config = await GuildXPConfigModel.findOneAndUpdate(
-        { guildId },
-        { $setOnInsert: { guildId } },
-        { upsert: true, new: true }
-    );
+    // Ensure config doc exists before atomic array update.
+    await GuildXPConfigModel.updateOne({ guildId }, { $setOnInsert: { guildId } }, { upsert: true });
+
+    let updated: { blacklistedChannels: string[] } | null = null;
 
     if (subcommand === "add") {
-        if (config.blacklistedChannels.includes(channel.id)) {
+        updated = await GuildXPConfigModel.findOneAndUpdate(
+            { guildId, blacklistedChannels: { $ne: channel.id } },
+            { $addToSet: { blacklistedChannels: channel.id } },
+            { new: true }
+        );
+        if (!updated) {
             await interaction.editReply(t(locale, "xp.blacklist.already_in", { channelId: channel.id }));
             return;
         }
-
-        config.blacklistedChannels.push(channel.id);
-        await config.save();
     } else if (subcommand === "remove") {
-        const index = config.blacklistedChannels.indexOf(channel.id);
-        if (index === -1) {
+        updated = await GuildXPConfigModel.findOneAndUpdate(
+            { guildId, blacklistedChannels: channel.id },
+            { $pull: { blacklistedChannels: channel.id } },
+            { new: true }
+        );
+        if (!updated) {
             await interaction.editReply(t(locale, "xp.blacklist.not_in", { channelId: channel.id }));
             return;
         }
-
-        config.blacklistedChannels.splice(index, 1);
-        await config.save();
     }
 
-    const list =
-        config.blacklistedChannels.length > 0
-            ? config.blacklistedChannels.map((id) => `<#${id}>`).join(", ")
-            : t(locale, "xp.blacklist.empty");
+    const channels = updated?.blacklistedChannels ?? [];
+    const list = channels.length > 0 ? channels.map((id) => `<#${id}>`).join(", ") : t(locale, "xp.blacklist.empty");
 
     const embed = new EmbedBuilder()
         .setTitle(`📋 ${t(locale, "xp.blacklist.title")}`)

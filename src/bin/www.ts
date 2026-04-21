@@ -26,6 +26,9 @@ async function main(): Promise<void> {
     const { startGuildStatsAggregator } = await import("../util/xp/guildStatsAggregator");
     startGuildStatsAggregator();
 
+    const { startVoiceXPWorker } = await import("../events/voiceStateUpdate");
+    startVoiceXPWorker();
+
     const { startPremiumExpiry } = await import("../services/premium/premiumExpiry");
     startPremiumExpiry();
 
@@ -47,6 +50,8 @@ async function shutdown(): Promise<void> {
     await AuditDispatcherService.drain();
     const { stopAuditSnapshotJob } = await import("../util/audit/snapshotJob");
     stopAuditSnapshotJob();
+    const { stopVoiceXPWorker } = await import("../events/voiceStateUpdate");
+    stopVoiceXPWorker();
     const mongoose = await import("mongoose");
     await mongoose.default.disconnect().catch(() => {});
     const { default: client } = await import("../client");
