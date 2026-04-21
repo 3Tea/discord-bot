@@ -1,7 +1,11 @@
 // src/util/xp/snapshotSync.ts
+import type { UpdateQuery } from "mongoose";
 import XPSnapshotModel from "../../models/xpSnapshot.model";
+import type { IXPSnapshot } from "../../models/xpSnapshot.model";
 import GuildStatsModel from "../../models/guildStats.model";
+import type { IGuildStats } from "../../models/guildStats.model";
 import GuildStatsSnapshotModel from "../../models/guildStatsSnapshot.model";
+import type { IGuildStatsSnapshot } from "../../models/guildStatsSnapshot.model";
 import { getCurrentPeriodKeys, ALL_PERIODS } from "./periodKey";
 import type { Period } from "./periodKey";
 
@@ -46,7 +50,7 @@ export async function syncSnapshots(userId: string, guildId: string, xpGain: num
 
     // --- Guild Stats (real-time counters) ---
     const guildCounterField = GUILD_COUNTER[source];
-    const guildInc: Record<string, number> = { totalXP: xpGain };
+    const guildInc: UpdateQuery<IGuildStats>["$inc"] = { totalXP: xpGain };
     if (guildCounterField) {
         guildInc[guildCounterField] = 1;
     }
@@ -70,7 +74,7 @@ export async function syncSnapshots(userId: string, guildId: string, xpGain: num
     // --- Guild Stats Snapshots (period-based) ---
     const snapshotCounterField = counterField;
     const guildSnapshotOps = ALL_PERIODS.map((period) => {
-        const $inc: Record<string, number> = { xp: xpGain };
+        const $inc: UpdateQuery<IGuildStatsSnapshot>["$inc"] = { xp: xpGain };
         if (snapshotCounterField) {
             $inc[snapshotCounterField] = 1;
         }
@@ -98,7 +102,7 @@ function buildUserUpsertOps(
     counterField: string | null
 ): Parameters<typeof XPSnapshotModel.bulkWrite>[0] {
     return ALL_PERIODS.map((period) => {
-        const $inc: Record<string, number> = { xp: xpGain };
+        const $inc: UpdateQuery<IXPSnapshot>["$inc"] = { xp: xpGain };
         if (counterField) {
             $inc[counterField] = 1;
         }
