@@ -1,6 +1,7 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IGuildEconomyRewardConfig extends Document {
+export interface IGuildEconomyRewardConfig {
     guildId: string;
     enabled: boolean;
     levelUpCoinBase: number;
@@ -9,6 +10,7 @@ export interface IGuildEconomyRewardConfig extends Document {
     voiceCoinInterval: number;
     voiceCoinReward: number;
 }
+export type GuildEconomyRewardConfigDoc = HydratedDocument<IGuildEconomyRewardConfig>;
 
 const DEFAULT_GEM_MILESTONES = new Map([
     ["10", 1],
@@ -18,7 +20,7 @@ const DEFAULT_GEM_MILESTONES = new Map([
     ["100", 5],
 ]);
 
-const guildEconomyRewardConfigSchema = new Schema(
+const guildEconomyRewardConfigSchema = new Schema<IGuildEconomyRewardConfig>(
     {
         guildId: { type: String, required: true, unique: true },
         enabled: { type: Boolean, default: true },

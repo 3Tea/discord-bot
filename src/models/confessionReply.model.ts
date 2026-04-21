@@ -1,6 +1,7 @@
-import { model, Schema, Document, Types } from "mongoose";
+import { model, Schema, Types } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IConfessionReply extends Document {
+export interface IConfessionReply {
     confessionId: Types.ObjectId;
     guildId: string;
     authorId: string;
@@ -8,8 +9,9 @@ export interface IConfessionReply extends Document {
     content: string;
     messageId: string;
 }
+export type ConfessionReplyDoc = HydratedDocument<IConfessionReply>;
 
-const confessionReplySchema = new Schema(
+const confessionReplySchema = new Schema<IConfessionReply>(
     {
         confessionId: { type: Schema.Types.ObjectId, required: true, ref: "Confession" },
         guildId: { type: String, required: true },

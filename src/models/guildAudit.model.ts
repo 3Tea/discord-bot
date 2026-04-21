@@ -1,7 +1,8 @@
 // src/models/guildAudit.model.ts
-import { Document, model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IGuildAudit extends Document {
+export interface IGuildAudit {
     guildId: string;
     name: string;
     ownerId: string;
@@ -11,6 +12,7 @@ export interface IGuildAudit extends Document {
     leftAt?: Date | null;
     currentlyIn: boolean;
 }
+export type GuildAuditDoc = HydratedDocument<IGuildAudit>;
 
 const guildAuditSchema = new Schema<IGuildAudit>(
     {

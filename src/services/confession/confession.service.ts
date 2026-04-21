@@ -16,7 +16,7 @@ import type { UpdateQuery } from "mongoose";
 
 import redis from "../../connector/redis";
 import { secondsUntilUTCMidnight } from "../../util/date/utc";
-import ConfessionModel, { IConfession, IConfessionAudio, IConfessionImage } from "../../models/confession.model";
+import ConfessionModel, { ConfessionDoc, IConfession, IConfessionAudio, IConfessionImage } from "../../models/confession.model";
 import GuildConfessionConfigModel, {
     ConfessionMode,
     IGuildConfessionConfig,
@@ -346,7 +346,7 @@ export async function createPublishedConfessionRecord(input: {
     publicMessageId: string;
     isVip?: boolean;
     tag?: string | null;
-}): Promise<IConfession> {
+}): Promise<ConfessionDoc> {
     return ConfessionModel.create({
         guildId: input.guildId,
         number: input.number,
@@ -372,7 +372,7 @@ export async function createPendingConfessionRecord(input: {
     audio?: IConfessionAudio | null;
     isVip?: boolean;
     tag?: string | null;
-}): Promise<IConfession> {
+}): Promise<ConfessionDoc> {
     return ConfessionModel.create({
         guildId: input.guildId,
         number: input.number,

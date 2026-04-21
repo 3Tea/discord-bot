@@ -1,6 +1,7 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IGuildSocialConfig extends Document {
+export interface IGuildSocialConfig {
     guildId: string;
     enabled: boolean;
     giftMaxAmount: number;
@@ -11,8 +12,9 @@ export interface IGuildSocialConfig extends Document {
     robPenaltyMaxPct: number;
     robMinBalance: number;
 }
+export type GuildSocialConfigDoc = HydratedDocument<IGuildSocialConfig>;
 
-const guildSocialConfigSchema = new Schema(
+const guildSocialConfigSchema = new Schema<IGuildSocialConfig>(
     {
         guildId: { type: String, required: true, unique: true },
         enabled: { type: Boolean, default: true },

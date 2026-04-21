@@ -1,14 +1,16 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IGuildWorkConfig extends Document {
+export interface IGuildWorkConfig {
     guildId: string;
     enabled: boolean;
     workMinReward: number;
     workMaxReward: number;
     fishRewardMultiplier: number;
 }
+export type GuildWorkConfigDoc = HydratedDocument<IGuildWorkConfig>;
 
-const guildWorkConfigSchema = new Schema(
+const guildWorkConfigSchema = new Schema<IGuildWorkConfig>(
     {
         guildId: { type: String, required: true, unique: true },
         enabled: { type: Boolean, default: true },
