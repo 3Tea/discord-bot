@@ -1,4 +1,5 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
 export type TransactionType =
     | "pray"
@@ -45,7 +46,7 @@ export type TransactionType =
     | "rollback"
     | "achievement_reward";
 
-export interface ITransaction extends Document {
+export interface ITransaction {
     userId: string;
     guildId: string;
     type: TransactionType;
@@ -54,8 +55,9 @@ export interface ITransaction extends Document {
     metadata: Record<string, unknown>;
     createdAt: Date;
 }
+export type TransactionDoc = HydratedDocument<ITransaction>;
 
-const transactionSchema = new Schema(
+const transactionSchema = new Schema<ITransaction>(
     {
         userId: { type: String, required: true },
         guildId: { type: String, required: true },

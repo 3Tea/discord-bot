@@ -1,4 +1,5 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
 export interface ISnapshotEntry {
     userId: string;
@@ -10,7 +11,7 @@ export interface ISnapshotEntry {
 
 export type SnapshotScope = "coin" | "gem" | "streak" | "all";
 
-export interface IEconomySnapshot extends Document {
+export interface IEconomySnapshot {
     snapshotId: string;
     guildId: string;
     createdBy: string;
@@ -20,8 +21,9 @@ export interface IEconomySnapshot extends Document {
     restoredAt: Date | null;
     createdAt: Date;
 }
+export type EconomySnapshotDoc = HydratedDocument<IEconomySnapshot>;
 
-const economySnapshotSchema = new Schema(
+const economySnapshotSchema = new Schema<IEconomySnapshot>(
     {
         snapshotId: { type: String, required: true },
         guildId: { type: String, required: true },

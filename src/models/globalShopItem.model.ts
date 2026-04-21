@@ -1,8 +1,9 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
 export type GlobalShopItemType = "cosmetic_identity" | "utility_token";
 
-export interface IGlobalShopItem extends Document {
+export interface IGlobalShopItem {
     itemId: string;
     name: string;
     description: string;
@@ -13,8 +14,9 @@ export interface IGlobalShopItem extends Document {
     effectConfig: Record<string, unknown>;
     version: number;
 }
+export type GlobalShopItemDoc = HydratedDocument<IGlobalShopItem>;
 
-const globalShopItemSchema = new Schema(
+const globalShopItemSchema = new Schema<IGlobalShopItem>(
     {
         itemId: { type: String, required: true },
         name: { type: String, required: true },
