@@ -9,6 +9,7 @@ const CACHE_TTL_SECONDS = 300;
 export interface AuditConfigSnapshot {
     criticalChannelId: string | null;
     commandsChannelId: string | null;
+    outputsChannelId: string | null;
     snapshotEnabled: boolean;
     alertMemberDropPct: number;
     alertBgErrorsPerHour: number;
@@ -30,6 +31,7 @@ function toSnapshot(doc: IAuditConfig): AuditConfigSnapshot {
     return {
         criticalChannelId: doc.criticalChannelId ?? null,
         commandsChannelId: doc.commandsChannelId ?? null,
+        outputsChannelId: doc.outputsChannelId ?? null,
         snapshotEnabled: doc.snapshotEnabled,
         alertMemberDropPct: doc.alertMemberDropPct ?? 20,
         alertBgErrorsPerHour: doc.alertBgErrorsPerHour ?? 10,
@@ -81,8 +83,24 @@ async function setCommandsChannel(channelId: string, updatedBy: string): Promise
     await invalidate();
 }
 
-async function clearChannel(target: "critical" | "commands", updatedBy: string): Promise<void> {
-    const field = target === "critical" ? "criticalChannelId" : "commandsChannelId";
+async function setOutputsChannel(channelId: string, updatedBy: string): Promise<void> {
+    await AuditConfigModel.updateOne(
+        { _id: "singleton" },
+        { $set: { outputsChannelId: channelId, updatedBy } },
+        { upsert: true }
+    );
+    await invalidate();
+}
+
+async function clearChannel(target: "critical" | "commands" | "outputs", updatedBy: string): Promise<void> {
+    let field: string;
+    if (target === "critical") {
+        field = "criticalChannelId";
+    } else if (target === "commands") {
+        field = "commandsChannelId";
+    } else {
+        field = "outputsChannelId";
+    }
     await AuditConfigModel.updateOne(
         { _id: "singleton" },
         { $set: { [field]: null, updatedBy } },
@@ -117,6 +135,7 @@ export const AuditConfigService = {
     invalidate,
     setCriticalChannel,
     setCommandsChannel,
+    setOutputsChannel,
     clearChannel,
     setSnapshotEnabled,
     setAlertThresholds,
