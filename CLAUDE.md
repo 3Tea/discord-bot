@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Discord bot "3AT - Endless Paradox" (v5.6.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
+Discord bot "3AT - Endless Paradox" (v5.8.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
 Runs on Node.js >= 24 via Gateway (WebSocket). Uses slash commands exclusively.
 
 ## Quick Reference
@@ -126,6 +126,7 @@ src/
       auditConfig.service.ts # Config CRUD + Redis cache
       auditDispatcher.service.ts # Buffered Discord channel dispatcher
       auditEmbeds.ts       # Embed builders (English, dev-facing)
+      botOutputAudit.service.ts # Capture layer: prototype patches + record() helper for outputs audit
     commandLog.service.ts # Buffered command usage analytics
   connector/
     mongo/index.ts        # MongoDB connection
