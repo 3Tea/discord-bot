@@ -11,6 +11,7 @@ import {
     CommandEntry,
     commandErrorEmbed,
     commandSuccessEmbed,
+    CapturedOutput,
     guildJoinEmbed,
     guildLeaveEmbed,
     snapshotSummaryEmbed,
@@ -132,14 +133,14 @@ async function onReady(client: Client): Promise<void> {
     }
 }
 
-function onCommandExecuted(entry: CommandEntry): void {
+function onCommandExecuted(entry: CommandEntry, captured?: CapturedOutput): void {
     try {
         if (!entry.success) {
-            AuditDispatcherService.pushCommands(commandErrorEmbed(entry));
+            AuditDispatcherService.pushCommands({ auditEmbed: commandErrorEmbed(entry), captured });
             AuditDispatcherService.pushCritical(commandErrorEmbed(entry));
             return;
         }
-        AuditDispatcherService.pushCommands(commandSuccessEmbed(entry));
+        AuditDispatcherService.pushCommands({ auditEmbed: commandSuccessEmbed(entry), captured });
         if (isAdminCommand(entry)) {
             AuditDispatcherService.pushCritical(adminActionEmbed(entry));
         }

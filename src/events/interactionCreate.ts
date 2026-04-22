@@ -6,6 +6,7 @@ import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
 import type { CommandInteractionOption } from "discord.js";
 import { AuditService } from "../services/audit/audit.service";
+import { BotOutputAudit } from "../services/audit/botOutputAudit.service";
 
 function serializeOptions(data: readonly CommandInteractionOption[]): Record<string, unknown> {
     const result: Record<string, unknown> = {};
@@ -79,6 +80,7 @@ export default {
         };
 
         CommandLogService.pushLog(entry);
-        AuditService.onCommandExecuted(entry);
+        const captured = BotOutputAudit.takeInteractionCapture(interaction.id);
+        AuditService.onCommandExecuted(entry, captured);
     },
 };
