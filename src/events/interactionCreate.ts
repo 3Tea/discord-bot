@@ -7,6 +7,7 @@ import { t } from "../util/i18n/t";
 import type { CommandInteractionOption } from "discord.js";
 import { AuditService } from "../services/audit/audit.service";
 import { BotOutputAudit } from "../services/audit/botOutputAudit.service";
+import { enforceBlocklist } from "../util/blocklist/enforce";
 
 function serializeOptions(data: readonly CommandInteractionOption[]): Record<string, unknown> {
     const result: Record<string, unknown> = {};
@@ -31,6 +32,7 @@ export default {
     once: false,
     async execute(interaction: ChatInputCommandInteraction) {
         if (!interaction.isChatInputCommand()) return;
+        if (await enforceBlocklist(interaction)) return;
 
         const command = client?.commands.get(interaction.commandName);
 

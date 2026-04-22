@@ -1485,5 +1485,14 @@
     "cmd.audit.query.guild.target.desc": "ID del servidor",
     "cmd.audit.query.history.desc": "Eventos recientes de entrada/salida",
     "cmd.audit.query.history.limit.desc": "Número de entradas (1-25)",
-    "cmd.audit.query.summary.desc": "Resumen en tiempo real de todos los servidores"
+    "cmd.audit.query.summary.desc": "Resumen en tiempo real de todos los servidores",
+    "blocklist.user_blocked": "Estás bloqueado para usar este bot. Razón: {{reason}}",
+    "cmd.blocklist.desc": "Gestionar blocklist global (solo dev)",
+    "cmd.blocklist.add_user.desc": "Bloquear un usuario globalmente",
+    "cmd.blocklist.remove_user.desc": "Desbloquear un usuario globalmente",
+    "cmd.blocklist.add_guild.desc": "Bloquear un servidor globalmente (el bot lo abandona)",
+    "cmd.blocklist.remove_guild.desc": "Desbloquear un servidor globalmente",
+    "cmd.blocklist.list.desc": "Listar usuarios o servidores bloqueados",
+    "cmd.blocklist.info.desc": "Mostrar detalles de una entrada de blocklist",
+    "blocklist.guild_blocked": "Este servidor está bloqueado para usar este bot. Razón: {{reason}}"
 }

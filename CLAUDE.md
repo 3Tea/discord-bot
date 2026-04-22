@@ -78,6 +78,7 @@ src/
     auditConfig.model.ts   # Singleton: critical/commands channel IDs + snapshot toggle
     guildAudit.model.ts    # Per-guild lifecycle (join/leave, memberCount)
     guildSnapshot.model.ts # Daily member count snapshot for trend analysis
+    blocklistEntry.model.ts # Dev-only global blocklist (users + guilds)
   services/
     economy/              # Currency, pray/curse, shop, gambling, work services
       currency.service.ts # Coin/gem balance operations
@@ -127,6 +128,8 @@ src/
       auditDispatcher.service.ts # Buffered Discord channel dispatcher
       auditEmbeds.ts       # Embed builders (English, dev-facing)
       botOutputAudit.service.ts # Capture layer: prototype patches + record() helper for outputs audit
+    blocklist/             # Dev-only global blocklist
+      blocklist.service.ts # Block/unblock users + guilds, Redis-cached hot-path checks
     commandLog.service.ts # Buffered command usage analytics
   connector/
     mongo/index.ts        # MongoDB connection
@@ -610,6 +613,10 @@ All variables documented in `.env.example`. Critical ones:
 | [docs/steering/premium-system.md](docs/steering/premium-system.md) | Premium tiers (Star/Galaxy): benefits, integration points, caching, expiry, admin commands |
 | [docs/steering/rpg-system.md](docs/steering/rpg-system.md) | RPG adventure: characters, classes, combat, dungeons, equipment, guilds, PvP, team dungeon |
 | [docs/steering/audit-system.md](docs/steering/audit-system.md) | Dev-only audit: dual-channel dispatcher, guild lifecycle, daily snapshots, `/audit` command |
+
+## Blocklist System
+
+Dev-only global blocklist. `/blocklist add-user` / `add-guild` prevents a user/guild from using the bot across every server. Blocked guilds auto-leave on block and again on any future rejoin (via `guildCreate`). Blocked users get one ephemeral "you are blocked" reply per 10-minute window, then silent-cached. All mutations push an embed to the critical audit channel. Entries cached in Redis (`block:user:{id}`/`block:guild:{id}`, 1h TTL, negative caching on the hot path). `DEV_USER_ID` + `GUILD_ID` guard the command. Cannot block the home guild (self-lockout guard).
 
 ## Changelog & release notes
 

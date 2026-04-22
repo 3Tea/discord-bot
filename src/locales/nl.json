@@ -1485,5 +1485,14 @@
     "cmd.audit.query.guild.target.desc": "Server-ID",
     "cmd.audit.query.history.desc": "Recente toetredings-/vertrekgebeurtenissen",
     "cmd.audit.query.history.limit.desc": "Aantal vermeldingen (1-25)",
-    "cmd.audit.query.summary.desc": "Realtime overzicht van alle servers"
+    "cmd.audit.query.summary.desc": "Realtime overzicht van alle servers",
+    "blocklist.user_blocked": "Je bent geblokkeerd voor het gebruik van deze bot. Reden: {{reason}}",
+    "cmd.blocklist.desc": "Beheer globale blocklist (alleen dev)",
+    "cmd.blocklist.add_user.desc": "Blokkeer een gebruiker globaal",
+    "cmd.blocklist.remove_user.desc": "Deblokkeer een gebruiker globaal",
+    "cmd.blocklist.add_guild.desc": "Blokkeer een server globaal (bot verlaat automatisch)",
+    "cmd.blocklist.remove_guild.desc": "Deblokkeer een server globaal",
+    "cmd.blocklist.list.desc": "Lijst geblokkeerde gebruikers of servers",
+    "cmd.blocklist.info.desc": "Toon details van een blocklist-vermelding",
+    "blocklist.guild_blocked": "Deze server is geblokkeerd voor het gebruik van deze bot. Reden: {{reason}}"
 }

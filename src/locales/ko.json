@@ -1485,5 +1485,14 @@
     "cmd.audit.query.guild.target.desc": "서버 ID",
     "cmd.audit.query.history.desc": "최근 참가/탈퇴 이벤트",
     "cmd.audit.query.history.limit.desc": "항목 수 (1-25)",
-    "cmd.audit.query.summary.desc": "모든 서버의 실시간 요약"
+    "cmd.audit.query.summary.desc": "모든 서버의 실시간 요약",
+    "blocklist.user_blocked": "이 봇 사용이 차단되었습니다. 사유: {{reason}}",
+    "cmd.blocklist.desc": "전역 차단 목록 관리 (개발자 전용)",
+    "cmd.blocklist.add_user.desc": "사용자 전역 차단",
+    "cmd.blocklist.remove_user.desc": "사용자 전역 차단 해제",
+    "cmd.blocklist.add_guild.desc": "길드 전역 차단 (봇 자동 퇴장)",
+    "cmd.blocklist.remove_guild.desc": "길드 전역 차단 해제",
+    "cmd.blocklist.list.desc": "차단된 사용자 또는 길드 목록",
+    "cmd.blocklist.info.desc": "차단 항목 상세 보기",
+    "blocklist.guild_blocked": "이 서버는 이 봇 사용이 차단되었습니다. 사유: {{reason}}"
 }

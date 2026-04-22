@@ -1485,5 +1485,14 @@
     "cmd.audit.query.guild.target.desc": "ギルドID",
     "cmd.audit.query.history.desc": "最近の参加・退出イベント",
     "cmd.audit.query.history.limit.desc": "エントリ数（1〜25）",
-    "cmd.audit.query.summary.desc": "全ギルドのリアルタイム概要"
+    "cmd.audit.query.summary.desc": "全ギルドのリアルタイム概要",
+    "blocklist.user_blocked": "このボットの使用がブロックされています。理由: {{reason}}",
+    "cmd.blocklist.desc": "グローバルブロックリストを管理（開発者専用）",
+    "cmd.blocklist.add_user.desc": "ユーザーをグローバルにブロック",
+    "cmd.blocklist.remove_user.desc": "ユーザーのグローバルブロックを解除",
+    "cmd.blocklist.add_guild.desc": "ギルドをグローバルにブロック（ボットが自動退出）",
+    "cmd.blocklist.remove_guild.desc": "ギルドのグローバルブロックを解除",
+    "cmd.blocklist.list.desc": "ブロック済みユーザーまたはギルドを一覧表示",
+    "cmd.blocklist.info.desc": "ブロックリストエントリの詳細を表示",
+    "blocklist.guild_blocked": "このサーバーはボットの使用がブロックされています。理由: {{reason}}"
 }

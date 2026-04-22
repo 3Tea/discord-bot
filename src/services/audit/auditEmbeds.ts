@@ -268,6 +268,53 @@ export function backgroundErrorEmbed(jobName: string, error: Error): EmbedBuilde
         .setTimestamp();
 }
 
+export type BlocklistAction = "add" | "remove" | "auto-leave" | "rejoin-blocked";
+
+export interface BlocklistActionPayload {
+    action: BlocklistAction;
+    type: "user" | "guild";
+    targetId: string;
+    reason?: string;
+    blockedBy?: string;
+    guildName?: string;
+}
+
+export function blocklistActionEmbed(payload: BlocklistActionPayload): EmbedBuilder {
+    const titleMap: Record<BlocklistAction, string> = {
+        add: "🛑 Blocklist — added",
+        remove: "✅ Blocklist — removed",
+        "auto-leave": "🚪 Blocklist — auto-left guild",
+        "rejoin-blocked": "⛔ Blocklist — blocked guild tried to rejoin",
+    };
+    const colorMap: Record<BlocklistAction, number> = {
+        add: COLOR.ALERT,
+        remove: COLOR.JOIN,
+        "auto-leave": COLOR.LEAVE,
+        "rejoin-blocked": COLOR.ALERT,
+    };
+
+    const embed = new EmbedBuilder()
+        .setTitle(titleMap[payload.action])
+        .setColor(colorMap[payload.action])
+        .addFields(
+            { name: "Type", value: payload.type, inline: true },
+            { name: "Target", value: `\`${payload.targetId}\``, inline: true }
+        )
+        .setTimestamp();
+
+    if (payload.guildName) {
+        embed.addFields({ name: "Guild name", value: truncate(payload.guildName, 256), inline: true });
+    }
+    if (payload.reason) {
+        embed.addFields({ name: "Reason", value: truncate(payload.reason, 500), inline: false });
+    }
+    if (payload.blockedBy) {
+        embed.addFields({ name: "By", value: `<@${payload.blockedBy}>`, inline: true });
+    }
+
+    return embed;
+}
+
 export function outputAuditEmbed(captured: CapturedOutput): EmbedBuilder {
     const title = `${sourceEmoji(captured.source)} · ${captured.source}`;
 

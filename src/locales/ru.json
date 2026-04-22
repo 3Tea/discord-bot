@@ -1485,5 +1485,14 @@
     "cmd.audit.query.guild.target.desc": "ID сервера",
     "cmd.audit.query.history.desc": "Последние события входа/выхода",
     "cmd.audit.query.history.limit.desc": "Количество записей (1-25)",
-    "cmd.audit.query.summary.desc": "Сводка в реальном времени по всем серверам"
+    "cmd.audit.query.summary.desc": "Сводка в реальном времени по всем серверам",
+    "blocklist.user_blocked": "Вы заблокированы для использования этого бота. Причина: {{reason}}",
+    "cmd.blocklist.desc": "Управление глобальным блок-листом (только для разработчика)",
+    "cmd.blocklist.add_user.desc": "Заблокировать пользователя глобально",
+    "cmd.blocklist.remove_user.desc": "Разблокировать пользователя глобально",
+    "cmd.blocklist.add_guild.desc": "Заблокировать сервер глобально (бот автоматически покинет)",
+    "cmd.blocklist.remove_guild.desc": "Разблокировать сервер глобально",
+    "cmd.blocklist.list.desc": "Список заблокированных пользователей или серверов",
+    "cmd.blocklist.info.desc": "Показать детали записи блок-листа",
+    "blocklist.guild_blocked": "Этот сервер заблокирован для использования этого бота. Причина: {{reason}}"
 }

@@ -1485,5 +1485,14 @@
     "cmd.audit.query.guild.target.desc": "Sunucu ID'si",
     "cmd.audit.query.history.desc": "Son katılma/ayrılma olayları",
     "cmd.audit.query.history.limit.desc": "Giriş sayısı (1-25)",
-    "cmd.audit.query.summary.desc": "Tüm sunucuların gerçek zamanlı özeti"
+    "cmd.audit.query.summary.desc": "Tüm sunucuların gerçek zamanlı özeti",
+    "blocklist.user_blocked": "Bu botu kullanmanız engellendi. Sebep: {{reason}}",
+    "cmd.blocklist.desc": "Genel blocklist'i yönet (sadece geliştirici)",
+    "cmd.blocklist.add_user.desc": "Bir kullanıcıyı genel olarak engelle",
+    "cmd.blocklist.remove_user.desc": "Bir kullanıcının genel engelini kaldır",
+    "cmd.blocklist.add_guild.desc": "Bir sunucuyu genel olarak engelle (bot otomatik ayrılır)",
+    "cmd.blocklist.remove_guild.desc": "Bir sunucunun genel engelini kaldır",
+    "cmd.blocklist.list.desc": "Engellenmiş kullanıcıları veya sunucuları listele",
+    "cmd.blocklist.info.desc": "Bir blocklist kaydının detaylarını göster",
+    "blocklist.guild_blocked": "Bu sunucunun bu botu kullanması engellendi. Sebep: {{reason}}"
 }

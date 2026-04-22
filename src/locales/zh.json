@@ -1485,5 +1485,14 @@
     "cmd.audit.query.guild.target.desc": "服务器ID",
     "cmd.audit.query.history.desc": "最近的加入/退出事件",
     "cmd.audit.query.history.limit.desc": "条目数量（1-25）",
-    "cmd.audit.query.summary.desc": "所有服务器的实时汇总"
+    "cmd.audit.query.summary.desc": "所有服务器的实时汇总",
+    "blocklist.user_blocked": "您已被禁止使用此机器人。原因：{{reason}}",
+    "cmd.blocklist.desc": "管理全局封禁名单（仅开发者）",
+    "cmd.blocklist.add_user.desc": "全局封禁用户",
+    "cmd.blocklist.remove_user.desc": "全局解封用户",
+    "cmd.blocklist.add_guild.desc": "全局封禁服务器（机器人自动离开）",
+    "cmd.blocklist.remove_guild.desc": "全局解封服务器",
+    "cmd.blocklist.list.desc": "列出被封禁的用户或服务器",
+    "cmd.blocklist.info.desc": "显示封禁条目的详细信息",
+    "blocklist.guild_blocked": "此服务器已被禁止使用此机器人。原因：{{reason}}"
 }

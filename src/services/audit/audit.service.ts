@@ -8,6 +8,7 @@ import { AuditDispatcherService } from "./auditDispatcher.service";
 import {
     adminActionEmbed,
     backgroundErrorEmbed,
+    blocklistActionEmbed,
     CommandEntry,
     commandErrorEmbed,
     commandSuccessEmbed,
@@ -17,6 +18,7 @@ import {
     snapshotSummaryEmbed,
     startupSummaryEmbed,
 } from "./auditEmbeds";
+import type { BlocklistActionPayload } from "./auditEmbeds";
 
 const ALWAYS_ADMIN_COMMANDS = new Set<string>([
     "guild-admin",
@@ -226,6 +228,16 @@ function logBackgroundError(jobName: string, error: Error): void {
     }
 }
 
+function recordBlocklistAction(payload: BlocklistActionPayload): void {
+    try {
+        AuditDispatcherService.pushCritical(blocklistActionEmbed(payload));
+    } catch (error) {
+        logger.error(
+            `[AuditService] recordBlocklistAction failed: ${error instanceof Error ? error.message : "Unknown"}`
+        );
+    }
+}
+
 export const AuditService = {
     onGuildCreate,
     onGuildDelete,
@@ -234,6 +246,7 @@ export const AuditService = {
     snapshotAllGuilds,
     logBackgroundError,
     isAdminCommand,
+    recordBlocklistAction,
 };
 
 export type { IGuildAudit };

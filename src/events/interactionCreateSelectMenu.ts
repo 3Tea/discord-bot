@@ -1,6 +1,7 @@
 import { Events, MessageFlags, UserSelectMenuInteraction } from "discord.js";
 
 import client from "../client";
+import { enforceBlocklist } from "../util/blocklist/enforce";
 import { resolveLocale } from "../util/i18n/locale";
 import { t } from "../util/i18n/t";
 
@@ -9,6 +10,7 @@ export default {
     once: false,
     async execute(interaction: UserSelectMenuInteraction) {
         if (!interaction.isUserSelectMenu()) return;
+        if (await enforceBlocklist(interaction)) return;
 
         const handler = client?.selectMenus.get(interaction.customId);
 
