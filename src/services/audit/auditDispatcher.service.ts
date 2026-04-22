@@ -178,7 +178,7 @@ async function sendCapturedEntries(
     entries: Array<CommandsEntry | OutputsEntry>,
     channelId: string
 ): Promise<void> {
-    for (let i = 0; i < entries.length && i < MAX_EMBEDS_PER_MESSAGE; i++) {
+    for (let i = 0; i < entries.length; i++) {
         const captured = entries[i].captured;
         if (!captured) continue;
         const ephFlag = captured.isEphemeral ? " · 👻 ephemeral" : "";
@@ -187,13 +187,13 @@ async function sendCapturedEntries(
     }
 }
 
-async function sendThreadedBatch(
+async function sendThreadedChunk(
     channel: TextChannel,
-    entries: Array<CommandsEntry | OutputsEntry>
+    chunk: Array<CommandsEntry | OutputsEntry>
 ): Promise<void> {
-    if (entries.length === 0) return;
+    if (chunk.length === 0) return;
 
-    const parentEmbeds = entries.slice(0, MAX_EMBEDS_PER_MESSAGE).map((e) => e.auditEmbed);
+    const parentEmbeds = chunk.map((e) => e.auditEmbed);
     let parentMsg;
     try {
         parentMsg = await channel.send({ embeds: parentEmbeds });
@@ -216,7 +216,17 @@ async function sendThreadedBatch(
         return;
     }
 
-    await sendCapturedEntries(thread, entries, channel.id);
+    await sendCapturedEntries(thread, chunk, channel.id);
+}
+
+async function sendThreadedBatch(
+    channel: TextChannel,
+    entries: Array<CommandsEntry | OutputsEntry>
+): Promise<void> {
+    for (let i = 0; i < entries.length; i += MAX_EMBEDS_PER_MESSAGE) {
+        const chunk = entries.slice(i, i + MAX_EMBEDS_PER_MESSAGE);
+        await sendThreadedChunk(channel, chunk);
+    }
 }
 
 async function rebuildAuditChannelIds(): Promise<void> {
@@ -333,10 +343,11 @@ function init(client: Client): void {
     clientRef = client;
     if (flushTimer) return;
     rebuildAuditChannelIds().catch(() => {});
-    // Deferred dynamic import to break the circular dependency:
-    // botOutputAudit.service imports AuditDispatcherService (for pushOutputs
-    // and getAuditChannelIds), and the dispatcher needs to invoke
-    // BotOutputAudit.init. Loading it here in init() avoids the cycle.
+    // Deferred dynamic import: defers calling BotOutputAudit.init until the
+    // Discord client is ready. The modules are in a static cycle
+    // (botOutputAudit statically imports AuditDispatcherService); Node resolves
+    // the cycle at module-load time. The dynamic import here is NOT what breaks
+    // the cycle — it just ensures init fires with a live Client reference.
     import("./botOutputAudit.service")
         .then((mod) => mod.BotOutputAudit.init(client))
         .catch((err) => logger.warn(`[AuditDispatcher] BotOutputAudit init failed: ${err instanceof Error ? err.message : "Unknown"}`));

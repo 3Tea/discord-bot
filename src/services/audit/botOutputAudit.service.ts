@@ -1,5 +1,13 @@
 // src/services/audit/botOutputAudit.service.ts
-import { BaseInteraction, ChatInputCommandInteraction, Client, User } from "discord.js";
+import {
+    BaseInteraction,
+    ChatInputCommandInteraction,
+    Client,
+    CommandInteraction,
+    MessageComponentInteraction,
+    ModalSubmitInteraction,
+    User,
+} from "discord.js";
 import { AuditConfigService } from "./auditConfig.service";
 import { AuditDispatcherService } from "./auditDispatcher.service";
 import { CapturedOutput, OutputSource, outputAuditEmbed } from "./auditEmbeds";
@@ -10,6 +18,7 @@ const FLAG_EPHEMERAL = 64;
 
 let patched = false;
 let clientUserId: string | null = null;
+let pruneTimer: ReturnType<typeof setInterval> | null = null;
 
 // Per-interaction captured output, keyed by interaction.id. interactionCreate
 // pulls it out after the handler returns via takeInteractionCapture.
@@ -25,8 +34,6 @@ function pruneStaleCaptures(): void {
         }
     }
 }
-
-setInterval(pruneStaleCaptures, 30_000).unref();
 
 function isConfigEnabled(snapshot: { outputsChannelId: string | null }): boolean {
     return !!snapshot.outputsChannelId;
@@ -143,62 +150,77 @@ function buildInteractionCapture(
     };
 }
 
-function applyPatches(): void {
-    if (patched) return;
-    patched = true;
+type InteractionProto = {
+    reply?: (...args: unknown[]) => unknown;
+    editReply?: (...args: unknown[]) => unknown;
+    followUp?: (...args: unknown[]) => unknown;
+};
 
-    const basePrototype = BaseInteraction.prototype as unknown as {
-        reply?: (...args: unknown[]) => unknown;
-        editReply?: (...args: unknown[]) => unknown;
-        followUp?: (...args: unknown[]) => unknown;
-    };
-    const originalReply = basePrototype.reply;
-    const originalEdit = basePrototype.editReply;
-    const originalFollow = basePrototype.followUp;
+function patchInteractionClass(Cls: { prototype: unknown }): void {
+    const proto = Cls.prototype as InteractionProto;
+    const originalReply = proto.reply;
+    const originalEdit = proto.editReply;
+    const originalFollow = proto.followUp;
 
     if (typeof originalReply === "function") {
-        basePrototype.reply = function (this: BaseInteraction, ...args: unknown[]) {
+        proto.reply = function (this: BaseInteraction, ...args: unknown[]) {
             const ret = originalReply.apply(this, args);
-            try {
-                const captured = buildInteractionCapture(this, "interaction_reply", args[0]);
-                interactionCaptures.set(this.id, captured);
-                interactionCaptureTimestamps.set(this.id, Date.now());
-                record(captured);
-            } catch (err) {
-                logger.warn(`[BotOutputAudit] interaction.reply capture: ${err instanceof Error ? err.message : "Unknown"}`);
-            }
+            Promise.resolve(ret)
+                .then(() => {
+                    try {
+                        const captured = buildInteractionCapture(this, "interaction_reply", args[0]);
+                        interactionCaptures.set(this.id, captured);
+                        interactionCaptureTimestamps.set(this.id, Date.now());
+                        record(captured);
+                    } catch (err) {
+                        logger.warn(`[BotOutputAudit] interaction.reply capture: ${err instanceof Error ? err.message : "Unknown"}`);
+                    }
+                })
+                .catch(() => {
+                    // Original reply rejected — do not capture a failed send.
+                });
             return ret;
-        } as typeof basePrototype.reply;
+        } as typeof proto.reply;
     }
 
     if (typeof originalEdit === "function") {
-        basePrototype.editReply = function (this: BaseInteraction, ...args: unknown[]) {
+        proto.editReply = function (this: BaseInteraction, ...args: unknown[]) {
             const ret = originalEdit.apply(this, args);
-            try {
-                const captured = buildInteractionCapture(this, "interaction_edit", args[0]);
-                interactionCaptures.set(this.id, captured);
-                interactionCaptureTimestamps.set(this.id, Date.now());
-                record(captured);
-            } catch (err) {
-                logger.warn(`[BotOutputAudit] interaction.editReply capture: ${err instanceof Error ? err.message : "Unknown"}`);
-            }
+            Promise.resolve(ret)
+                .then(() => {
+                    try {
+                        const captured = buildInteractionCapture(this, "interaction_edit", args[0]);
+                        interactionCaptures.set(this.id, captured);
+                        interactionCaptureTimestamps.set(this.id, Date.now());
+                        record(captured);
+                    } catch (err) {
+                        logger.warn(`[BotOutputAudit] interaction.editReply capture: ${err instanceof Error ? err.message : "Unknown"}`);
+                    }
+                })
+                .catch(() => {});
             return ret;
-        } as typeof basePrototype.editReply;
+        } as typeof proto.editReply;
     }
 
     if (typeof originalFollow === "function") {
-        basePrototype.followUp = function (this: BaseInteraction, ...args: unknown[]) {
+        proto.followUp = function (this: BaseInteraction, ...args: unknown[]) {
             const ret = originalFollow.apply(this, args);
-            try {
-                const captured = buildInteractionCapture(this, "interaction_followup", args[0]);
-                record(captured);
-            } catch (err) {
-                logger.warn(`[BotOutputAudit] interaction.followUp capture: ${err instanceof Error ? err.message : "Unknown"}`);
-            }
+            Promise.resolve(ret)
+                .then(() => {
+                    try {
+                        const captured = buildInteractionCapture(this, "interaction_followup", args[0]);
+                        record(captured);
+                    } catch (err) {
+                        logger.warn(`[BotOutputAudit] interaction.followUp capture: ${err instanceof Error ? err.message : "Unknown"}`);
+                    }
+                })
+                .catch(() => {});
             return ret;
-        } as typeof basePrototype.followUp;
+        } as typeof proto.followUp;
     }
+}
 
+function patchUserSend(): void {
     const userProto = User.prototype as unknown as {
         send?: (...args: unknown[]) => unknown;
     };
@@ -206,31 +228,48 @@ function applyPatches(): void {
     if (typeof originalUserSend === "function") {
         userProto.send = function (this: User, ...args: unknown[]) {
             const ret = originalUserSend.apply(this, args);
-            try {
-                const { embeds, components, content } = extractEmbedsAndComponents(args[0]);
-                const attachments = extractAttachments(args[0]);
-                record({
-                    source: "dm",
-                    targetType: "user",
-                    targetId: this.id,
-                    isEphemeral: false,
-                    content,
-                    embeds,
-                    components,
-                    attachments,
-                    capturedAt: new Date(),
-                });
-            } catch (err) {
-                logger.warn(`[BotOutputAudit] user.send capture: ${err instanceof Error ? err.message : "Unknown"}`);
-            }
+            Promise.resolve(ret)
+                .then(() => {
+                    try {
+                        const { embeds, components, content } = extractEmbedsAndComponents(args[0]);
+                        const attachments = extractAttachments(args[0]);
+                        record({
+                            source: "dm",
+                            targetType: "user",
+                            targetId: this.id,
+                            isEphemeral: false,
+                            content,
+                            embeds,
+                            components,
+                            attachments,
+                            capturedAt: new Date(),
+                        });
+                    } catch (err) {
+                        logger.warn(`[BotOutputAudit] user.send capture: ${err instanceof Error ? err.message : "Unknown"}`);
+                    }
+                })
+                .catch(() => {});
             return ret;
         } as typeof userProto.send;
     }
 }
 
+function applyPatches(): void {
+    if (patched) return;
+    patched = true;
+    patchInteractionClass(CommandInteraction);
+    patchInteractionClass(MessageComponentInteraction);
+    patchInteractionClass(ModalSubmitInteraction);
+    patchUserSend();
+}
+
 function init(client: Client): void {
     clientUserId = client.user?.id ?? null;
     applyPatches();
+    if (!pruneTimer) {
+        pruneTimer = setInterval(pruneStaleCaptures, 30_000);
+        pruneTimer.unref();
+    }
 }
 
 export const BotOutputAudit = {
