@@ -168,6 +168,11 @@ function patchInteractionClass(Cls: { prototype: unknown }): void {
     const originalEdit = proto.editReply;
     const originalFollow = proto.followUp;
 
+    // Interaction captures are routed ONLY through the commands channel
+    // (via interactionCreate.ts → takeInteractionCapture → onCommandExecuted).
+    // Do NOT call record() here — the outputs channel is for non-command
+    // sends (DMs, notifications, confession). Dual-enqueue would produce
+    // redundant audit entries in both channels for every slash command.
     if (typeof originalReply === "function") {
         proto.reply = function (this: BaseInteraction, ...args: unknown[]) {
             const ret = originalReply.apply(this, args);
@@ -177,7 +182,6 @@ function patchInteractionClass(Cls: { prototype: unknown }): void {
                         const captured = buildInteractionCapture(this, "interaction_reply", args[0]);
                         interactionCaptures.set(this.id, captured);
                         interactionCaptureTimestamps.set(this.id, Date.now());
-                        record(captured);
                     } catch (err) {
                         logger.warn(`[BotOutputAudit] interaction.reply capture: ${err instanceof Error ? err.message : "Unknown"}`);
                     }
@@ -196,9 +200,10 @@ function patchInteractionClass(Cls: { prototype: unknown }): void {
                 .then(() => {
                     try {
                         const captured = buildInteractionCapture(this, "interaction_edit", args[0]);
+                        // Overwrites any earlier reply capture — the final
+                        // visible state is what the commands thread shows.
                         interactionCaptures.set(this.id, captured);
                         interactionCaptureTimestamps.set(this.id, Date.now());
-                        record(captured);
                     } catch (err) {
                         logger.warn(`[BotOutputAudit] interaction.editReply capture: ${err instanceof Error ? err.message : "Unknown"}`);
                     }
@@ -214,8 +219,18 @@ function patchInteractionClass(Cls: { prototype: unknown }): void {
             Promise.resolve(ret)
                 .then(() => {
                     try {
+                        // followUp sends are not surfaced via
+                        // takeInteractionCapture (only the last reply/edit
+                        // is), so they are lost unless we stash them here.
+                        // Stash under the interaction id — takeInteractionCapture
+                        // will prefer it over an earlier reply if called now,
+                        // but the common case is that the handler has already
+                        // returned and the commands thread was built from the
+                        // reply/edit. followUp audit for dev diagnostics is
+                        // best-effort.
                         const captured = buildInteractionCapture(this, "interaction_followup", args[0]);
-                        record(captured);
+                        interactionCaptures.set(this.id, captured);
+                        interactionCaptureTimestamps.set(this.id, Date.now());
                     } catch (err) {
                         logger.warn(`[BotOutputAudit] interaction.followUp capture: ${err instanceof Error ? err.message : "Unknown"}`);
                     }
