@@ -35,7 +35,7 @@
     "discord.js": "^14.26.0",
     "dotenv": "^16.4.7",
     "i18next": "^26.0.3",
-    "i18next-fs-backend": "^2.6.3",
+    "i18next-fs-backend": "^2.6.4",
     "ioredis": "^5.2.4",
     "mongoose": "^9.5.0",
     "node-cache": "^5.1.2",
