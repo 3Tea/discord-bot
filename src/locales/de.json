@@ -1485,5 +1485,13 @@
     "cmd.audit.query.guild.target.desc": "Server-ID",
     "cmd.audit.query.history.desc": "Aktuelle Beitritts-/Verlassensereignisse",
     "cmd.audit.query.history.limit.desc": "Anzahl der Einträge (1-25)",
-    "cmd.audit.query.summary.desc": "Echtzeit-Übersicht aller Server"
+    "cmd.audit.query.summary.desc": "Echtzeit-Übersicht aller Server",
+    "blocklist.user_blocked": "Du bist für die Nutzung dieses Bots gesperrt. Grund: {{reason}}",
+    "cmd.blocklist.desc": "Globale Blockliste verwalten (nur Entwickler)",
+    "cmd.blocklist.add_user.desc": "Benutzer global sperren",
+    "cmd.blocklist.remove_user.desc": "Benutzer global entsperren",
+    "cmd.blocklist.add_guild.desc": "Server global sperren (Bot verlässt automatisch)",
+    "cmd.blocklist.remove_guild.desc": "Server global entsperren",
+    "cmd.blocklist.list.desc": "Gesperrte Benutzer oder Server auflisten",
+    "cmd.blocklist.info.desc": "Details zu einem Blocklisteneintrag anzeigen"
 }

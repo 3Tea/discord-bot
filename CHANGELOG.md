@@ -7,6 +7,12 @@ All notable changes to this project are documented in this file. The format is b
 ## [Unreleased]
 
 
+## [5.10.0] - 2026-04-22
+
+### Added
+
+- **Blocklist system** — dev-only global blocklist (`/blocklist`) for users and guilds. `add-user` / `add-guild` prevents a target from using the bot anywhere; blocked guilds auto-leave immediately and re-leave on any future rejoin via `guildCreate`. Blocked users get one ephemeral notice per 10-minute window, then silent-cached. All mutations push an embed to the critical audit channel. Redis-cached with negative caching for a low hot-path cost (every interaction). English-only dev command responses; the end-user block notice is localized across all 15 locales. Cannot block the bot's home guild (self-lockout guard).
+
 ## [5.9.0] - 2026-04-22
 
 ### Added

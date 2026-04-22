@@ -1,6 +1,7 @@
 import { Events, GuildMember, MessageFlags, ModalSubmitInteraction, VoiceChannel } from "discord.js";
 
 import redis from "../connector/redis";
+import { enforceBlocklist } from "../util/blocklist/enforce";
 import { BUTTON_ID } from "../util/config/button";
 import { FOOTER } from "../util/config";
 import { setCooldown, updatePanel } from "../util/voice/helpers";
@@ -12,6 +13,7 @@ export default {
     once: false,
     async execute(interaction: ModalSubmitInteraction) {
         if (!interaction.isModalSubmit()) return;
+        if (await enforceBlocklist(interaction)) return;
 
         // Only handle voice modals — other modals (e.g. confession reply) are handled by awaitModalSubmit in their button handlers
         const voiceModalIds: string[] = [BUTTON_ID.VOICE_MODAL_RENAME, BUTTON_ID.VOICE_MODAL_LIMIT];

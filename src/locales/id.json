@@ -1485,5 +1485,13 @@
     "cmd.audit.query.guild.target.desc": "ID Guild",
     "cmd.audit.query.history.desc": "Event join/leave terbaru",
     "cmd.audit.query.history.limit.desc": "Jumlah entri (1-25)",
-    "cmd.audit.query.summary.desc": "Ringkasan realtime semua guild"
+    "cmd.audit.query.summary.desc": "Ringkasan realtime semua guild",
+    "blocklist.user_blocked": "Anda diblokir dari menggunakan bot ini. Alasan: {{reason}}",
+    "cmd.blocklist.desc": "Kelola blocklist global (khusus dev)",
+    "cmd.blocklist.add_user.desc": "Blokir pengguna secara global",
+    "cmd.blocklist.remove_user.desc": "Batalkan pemblokiran pengguna secara global",
+    "cmd.blocklist.add_guild.desc": "Blokir guild secara global (bot otomatis keluar)",
+    "cmd.blocklist.remove_guild.desc": "Batalkan pemblokiran guild secara global",
+    "cmd.blocklist.list.desc": "Daftar pengguna atau guild yang diblokir",
+    "cmd.blocklist.info.desc": "Tampilkan detail entri blocklist"
 }

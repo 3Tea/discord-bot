@@ -1485,5 +1485,13 @@
     "cmd.audit.query.guild.target.desc": "ID serwera",
     "cmd.audit.query.history.desc": "Ostatnie zdarzenia dołączenia/opuszczenia",
     "cmd.audit.query.history.limit.desc": "Liczba wpisów (1-25)",
-    "cmd.audit.query.summary.desc": "Podsumowanie w czasie rzeczywistym wszystkich serwerów"
+    "cmd.audit.query.summary.desc": "Podsumowanie w czasie rzeczywistym wszystkich serwerów",
+    "blocklist.user_blocked": "Zostałeś zablokowany przed korzystaniem z tego bota. Powód: {{reason}}",
+    "cmd.blocklist.desc": "Zarządzaj globalną blocklistą (tylko deweloper)",
+    "cmd.blocklist.add_user.desc": "Zablokuj użytkownika globalnie",
+    "cmd.blocklist.remove_user.desc": "Odblokuj użytkownika globalnie",
+    "cmd.blocklist.add_guild.desc": "Zablokuj serwer globalnie (bot automatycznie opuszcza)",
+    "cmd.blocklist.remove_guild.desc": "Odblokuj serwer globalnie",
+    "cmd.blocklist.list.desc": "Lista zablokowanych użytkowników lub serwerów",
+    "cmd.blocklist.info.desc": "Pokaż szczegóły wpisu blocklisty"
 }
