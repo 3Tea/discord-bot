@@ -17,7 +17,7 @@ export default {
             const welcomeConfig = await getNotificationConfig(guildId, NotificationType.Welcome);
             if (welcomeConfig.enabled && welcomeConfig.channelId) {
                 const embed = buildWelcomeEmbed(member, locale);
-                await sendNotification(member.guild, welcomeConfig.channelId, embed);
+                await sendNotification(member.guild, welcomeConfig.channelId, embed, NotificationType.Welcome);
             }
 
             // Milestone notification
@@ -27,7 +27,7 @@ export default {
                 const memberCount = member.guild.memberCount;
                 if (thresholds.includes(memberCount)) {
                     const embed = buildMilestoneEmbed(member.guild, memberCount, locale);
-                    await sendNotification(member.guild, milestoneConfig.channelId, embed);
+                    await sendNotification(member.guild, milestoneConfig.channelId, embed, NotificationType.Milestone);
                 }
             }
         } catch (error) {

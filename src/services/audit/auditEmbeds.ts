@@ -10,6 +10,14 @@ const COLOR = {
     ADMIN: 0xa855f7,
     SUMMARY: 0xeab308,
     ALERT: 0xdc2626,
+    OUTPUT_DM: 0x3b82f6,
+    OUTPUT_WELCOME: 0x22c55e,
+    OUTPUT_GOODBYE: 0xef4444,
+    OUTPUT_BOOST: 0xec4899,
+    OUTPUT_LEVELUP: 0xeab308,
+    OUTPUT_MILESTONE: 0x06b6d4,
+    OUTPUT_CONFESSION: 0x9b59b6,
+    OUTPUT_INTERACTION: 0x6b7280,
 };
 
 export interface CommandEntry {
@@ -22,6 +30,77 @@ export interface CommandEntry {
     success: boolean;
     errorMessage?: string;
     latencyMs: number;
+}
+
+export type OutputSource =
+    | "interaction_reply"
+    | "interaction_edit"
+    | "interaction_followup"
+    | "dm"
+    | "welcome"
+    | "goodbye"
+    | "boost"
+    | "level_up"
+    | "milestone"
+    | "confession_post"
+    | "confession_reply";
+
+export interface CapturedOutput {
+    source: OutputSource;
+    targetType: "user" | "channel";
+    targetId: string;
+    guildId?: string;
+    commandName?: string;
+    isEphemeral: boolean;
+    content?: string;
+    embeds: unknown[];
+    components: unknown[];
+    attachments: Array<{ url: string; name: string }>;
+    capturedAt: Date;
+}
+
+function sourceColor(source: OutputSource): number {
+    switch (source) {
+        case "dm":
+            return COLOR.OUTPUT_DM;
+        case "welcome":
+            return COLOR.OUTPUT_WELCOME;
+        case "goodbye":
+            return COLOR.OUTPUT_GOODBYE;
+        case "boost":
+            return COLOR.OUTPUT_BOOST;
+        case "level_up":
+            return COLOR.OUTPUT_LEVELUP;
+        case "milestone":
+            return COLOR.OUTPUT_MILESTONE;
+        case "confession_post":
+        case "confession_reply":
+            return COLOR.OUTPUT_CONFESSION;
+        default:
+            return COLOR.OUTPUT_INTERACTION;
+    }
+}
+
+function sourceEmoji(source: OutputSource): string {
+    switch (source) {
+        case "dm":
+            return "📨";
+        case "welcome":
+            return "👋";
+        case "goodbye":
+            return "🚪";
+        case "boost":
+            return "🚀";
+        case "level_up":
+            return "⬆️";
+        case "milestone":
+            return "🏆";
+        case "confession_post":
+        case "confession_reply":
+            return "🤫";
+        default:
+            return "💬";
+    }
 }
 
 function truncate(str: string, max: number): string {
@@ -187,4 +266,38 @@ export function backgroundErrorEmbed(jobName: string, error: Error): EmbedBuilde
             { name: "Stack", value: truncate(error.stack ?? "No stack", 1000), inline: false }
         )
         .setTimestamp();
+}
+
+export function outputAuditEmbed(captured: CapturedOutput): EmbedBuilder {
+    const title = `${sourceEmoji(captured.source)} · ${captured.source}`;
+
+    const guildSuffix = captured.guildId ? ` (guild \`${captured.guildId}\`)` : "";
+    const targetField =
+        captured.targetType === "user" ? `<@${captured.targetId}>` : `<#${captured.targetId}>${guildSuffix}`;
+
+    const embedsArr = Array.isArray(captured.embeds) ? captured.embeds : [];
+    const componentsArr = Array.isArray(captured.components) ? captured.components : [];
+    const charCount = captured.content?.length ?? 0;
+    const sizeField = `${embedsArr.length} embeds · ${charCount} chars · ${componentsArr.length} rows · ${captured.attachments.length} files`;
+
+    const flags: string[] = [];
+    if (captured.isEphemeral) flags.push("👻 ephemeral");
+    if (!embedsArr.length && captured.content) flags.push("💬 content-only");
+    if (captured.attachments.length > 0) flags.push("🖼️ has-attachments");
+
+    const embed = new EmbedBuilder()
+        .setTitle(truncate(title, 256))
+        .setColor(sourceColor(captured.source))
+        .addFields(
+            { name: "Target", value: truncate(targetField, 1024), inline: false },
+            { name: "Size", value: sizeField, inline: false },
+            { name: "Flags", value: flags.length ? flags.join(" · ") : "—", inline: false }
+        )
+        .setTimestamp(captured.capturedAt);
+
+    if (captured.commandName) {
+        embed.addFields({ name: "Command", value: `/${captured.commandName}`, inline: true });
+    }
+
+    return embed;
 }

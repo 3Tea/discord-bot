@@ -6,6 +6,7 @@ import GuildNotificationConfigModel, {
 import redis from "../../connector/redis";
 import { FOOTER } from "../../util/config/index";
 import { logger } from "../../util/log/logger.mixed";
+import { BotOutputAudit } from "../audit/botOutputAudit.service";
 
 const CONFIG_CACHE_TTL = 300; // 5 minutes
 
@@ -24,7 +25,7 @@ export async function getNotificationConfig(
     const config = await GuildNotificationConfigModel.findOneAndUpdate(
         { guildId, type },
         { $setOnInsert: { guildId, type } },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
 
     await redis.setJson(key, config.toObject(), CONFIG_CACHE_TTL);
@@ -35,7 +36,12 @@ export async function invalidateNotificationCache(guildId: string, type: Notific
     await redis.deleteKey(cacheKey(guildId, type));
 }
 
-export async function sendNotification(guild: Guild, channelId: string, embed: EmbedBuilder): Promise<boolean> {
+export async function sendNotification(
+    guild: Guild,
+    channelId: string,
+    embed: EmbedBuilder,
+    type: NotificationType
+): Promise<boolean> {
     try {
         const channel = guild.channels.cache.get(channelId);
         if (!channel || !channel.isTextBased()) return false;
@@ -54,6 +60,22 @@ export async function sendNotification(guild: Guild, channelId: string, embed: E
         }
 
         await textChannel.send({ embeds: [embed] });
+
+        // NotificationType enum values ("welcome" | "goodbye" | "level_up" |
+        // "boost" | "milestone") are a subset of OutputSource — safe cast.
+        BotOutputAudit.record({
+            source: type as Parameters<typeof BotOutputAudit.record>[0]["source"],
+            targetType: "channel",
+            targetId: textChannel.id,
+            guildId: guild.id,
+            isEphemeral: false,
+            content: undefined,
+            embeds: [embed.toJSON()],
+            components: [],
+            attachments: [],
+            capturedAt: new Date(),
+        });
+
         return true;
     } catch (error) {
         logger.error(`[notification:send] ${error instanceof Error ? error.message : "Unknown error"}`);

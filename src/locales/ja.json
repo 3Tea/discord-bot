@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "監査チャンネルとオプションを設定",
     "cmd.audit.setup.critical_channel.desc": "重大イベント用チャンネルを設定",
     "cmd.audit.setup.commands_channel.desc": "コマンドログチャンネルを設定",
+    "cmd.audit.setup.outputs_channel.desc": "ボット出力監査チャンネルを設定",
     "cmd.audit.setup.clear.desc": "監査チャンネルをクリア",
     "cmd.audit.setup.clear.target.desc": "クリアするチャンネル",
     "cmd.audit.setup.snapshot.desc": "日次スナップショットのcronを切替",

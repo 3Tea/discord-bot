@@ -1,8 +1,9 @@
 // src/models/equipment.model.ts
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 import type { ClassType, EquipmentSlot, Rarity } from "../services/rpg/rpg.config";
 
-export interface IEquipment extends Document {
+export interface IEquipment {
     ownerId: string;
     name: string;
     slot: EquipmentSlot;
@@ -21,8 +22,9 @@ export interface IEquipment extends Document {
     equipped: boolean;
     createdAt: Date;
 }
+export type EquipmentDoc = HydratedDocument<IEquipment>;
 
-const equipmentSchema = new Schema(
+const equipmentSchema = new Schema<IEquipment>(
     {
         ownerId: { type: String, required: true },
         name: { type: String, required: true },

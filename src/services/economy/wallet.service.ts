@@ -1,4 +1,4 @@
-import UserWalletModel, { IUserWallet } from "../../models/userWallet.model";
+import UserWalletModel, { UserWalletDoc } from "../../models/userWallet.model";
 import TransactionModel, { TransactionType } from "../../models/transaction.model";
 import { getTierConfig } from "../premium/premium.config";
 import { isSameUTCDay, isConsecutiveUTCDay } from "../../util/date/utc";
@@ -80,11 +80,11 @@ async function logTransaction(
     });
 }
 
-async function getOrCreate(userId: string): Promise<IUserWallet> {
+async function getOrCreate(userId: string): Promise<UserWalletDoc> {
     const wallet = await UserWalletModel.findOneAndUpdate(
         { userId },
         { $setOnInsert: { userId, star: 0, dailyStreak: 0, claimedMilestones: [] } },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
     return wallet;
 }
@@ -106,7 +106,7 @@ async function addStar(
     amount: number,
     reason: TransactionType,
     metadata: Record<string, unknown> = {}
-): Promise<IUserWallet> {
+): Promise<UserWalletDoc> {
     if (amount <= 0) throw new Error("addStar amount must be positive");
     const wallet = await UserWalletModel.findOneAndUpdate(
         { userId },
@@ -114,7 +114,7 @@ async function addStar(
             $inc: { star: amount },
             $setOnInsert: { userId, dailyStreak: 0, claimedMilestones: [] },
         },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
     await logTransaction(userId, reason, amount, metadata);
     return wallet;
@@ -125,12 +125,12 @@ async function deductStar(
     amount: number,
     reason: TransactionType,
     metadata: Record<string, unknown> = {}
-): Promise<IUserWallet> {
+): Promise<UserWalletDoc> {
     if (amount <= 0) throw new Error("deductStar amount must be positive");
     const wallet = await UserWalletModel.findOneAndUpdate(
         { userId, star: { $gte: amount } },
         { $inc: { star: -amount } },
-        { new: true }
+        { returnDocument: "after" }
     );
     if (!wallet) {
         const current = await getOrCreate(userId);
@@ -151,7 +151,7 @@ async function claimDaily(userId: string): Promise<DailyClaimResult> {
             $or: [{ lastDaily: null }, { lastDaily: { $lt: startOfToday } }],
         },
         { $set: { lastDaily: now } },
-        { new: true }
+        { returnDocument: "after" }
     );
 
     if (!wallet) {
@@ -221,7 +221,7 @@ async function checkAndAwardMilestone(
             $inc: { star: starAmount },
             $addToSet: { claimedMilestones: milestoneKey },
         },
-        { new: true }
+        { returnDocument: "after" }
     );
 
     if (!result) {

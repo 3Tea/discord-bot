@@ -1,4 +1,5 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
 export type ConfessionStatus = "pending" | "published" | "rejected";
 
@@ -14,7 +15,7 @@ export interface IConfessionAudio {
     contentType: string | null;
 }
 
-export interface IConfession extends Document {
+export interface IConfession {
     guildId: string;
     number: number;
     authorId: string;
@@ -32,8 +33,9 @@ export interface IConfession extends Document {
     publicMessageId: string | null;
     resolvedAt: Date | null;
 }
+export type ConfessionDoc = HydratedDocument<IConfession>;
 
-const confessionSchema = new Schema(
+const confessionSchema = new Schema<IConfession>(
     {
         guildId: { type: String, required: true, index: true },
         number: { type: Number, required: true },

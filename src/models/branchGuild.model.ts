@@ -1,14 +1,16 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IBranchGuild extends Document {
+export interface IBranchGuild {
     guildId: string;
     name: string;
     questChannelId: string | null;
     createdAt: Date;
     updatedAt: Date;
 }
+export type BranchGuildDoc = HydratedDocument<IBranchGuild>;
 
-const branchGuildSchema = new Schema(
+const branchGuildSchema = new Schema<IBranchGuild>(
     {
         guildId: { type: String, required: true },
         name: { type: String, required: true },

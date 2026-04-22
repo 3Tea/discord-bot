@@ -1,9 +1,10 @@
-import { Document, model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
 export type PremiumTier = "star" | "galaxy";
 export type PremiumSource = "auto" | "manual";
 
-export interface IUserWallet extends Document {
+export interface IUserWallet {
     userId: string;
     star: number;
     lastDaily: Date | null;
@@ -15,8 +16,9 @@ export interface IUserWallet extends Document {
     premiumSource: PremiumSource | null;
     premiumGrantedBy: string | null;
 }
+export type UserWalletDoc = HydratedDocument<IUserWallet>;
 
-const userWalletSchema = new Schema(
+const userWalletSchema = new Schema<IUserWallet>(
     {
         userId: { type: String, required: true },
         star: { type: Number, default: 0 },

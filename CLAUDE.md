@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Discord bot "3AT - Endless Paradox" (v5.6.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
+Discord bot "3AT - Endless Paradox" (v5.8.0) built with TypeScript, Discord.js v14, Mongoose, ioredis.
 Runs on Node.js >= 24 via Gateway (WebSocket). Uses slash commands exclusively.
 
 ## Quick Reference
@@ -126,6 +126,7 @@ src/
       auditConfig.service.ts # Config CRUD + Redis cache
       auditDispatcher.service.ts # Buffered Discord channel dispatcher
       auditEmbeds.ts       # Embed builders (English, dev-facing)
+      botOutputAudit.service.ts # Capture layer: prototype patches + record() helper for outputs audit
     commandLog.service.ts # Buffered command usage analytics
   connector/
     mongo/index.ts        # MongoDB connection
@@ -552,10 +553,13 @@ Shared handler pattern: `mangaCommand(source)` in `src/util/manga/handler.ts` ge
 
 ## Database
 
-### MongoDB (Mongoose v8)
+### MongoDB (Mongoose v9)
 
 - Connection: `src/connector/mongo/index.ts`
-- Models define TypeScript interfaces (`IGuild`, `IUser`, `IMemberXP`, etc.) with `Document`
+- Models export a plain `I<Name>` interface (no `extends Document`) plus a `<Name>Doc = HydratedDocument<I<Name>>` type alias — use `I<Name>` for plain objects/filters, use `<Name>Doc` when a function returns/accepts a document that needs `.save()` / `.populate()` / `._id`
+- Schemas typed as `new Schema<IInterface>(...)`; models as `model<IInterface>("Name", schema)`
+- `findOneAndUpdate` options: use `returnDocument: "after"` (not deprecated `new: true`)
+- Dynamic filters/updates annotated with `QueryFilter<IModel>` / `UpdateQuery<IModel>` from mongoose; trivial inline filters rely on TS inference
 - Error handler checks `MongoServerError` (not `MongoError`)
 - Timestamps auto-managed (`createdAt`, `updatedAt`)
 - Key indexes: `MemberXP(guildId, xp DESC)`, `XPSnapshot(userId, guildId, period, periodKey)`

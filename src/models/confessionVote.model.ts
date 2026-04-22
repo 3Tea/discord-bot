@@ -1,13 +1,15 @@
-import { model, Schema, Document, Types } from "mongoose";
+import { model, Schema, Types } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IConfessionVote extends Document {
+export interface IConfessionVote {
     confessionId: Types.ObjectId;
     guildId: string;
     userId: string;
     vote: "up" | "down";
 }
+export type ConfessionVoteDoc = HydratedDocument<IConfessionVote>;
 
-const confessionVoteSchema = new Schema(
+const confessionVoteSchema = new Schema<IConfessionVote>(
     {
         confessionId: { type: Schema.Types.ObjectId, required: true, ref: "Confession" },
         guildId: { type: String, required: true },

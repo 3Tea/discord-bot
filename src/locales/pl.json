@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "Skonfiguruj kanały audytu i opcje",
     "cmd.audit.setup.critical_channel.desc": "Ustaw kanał krytycznych zdarzeń",
     "cmd.audit.setup.commands_channel.desc": "Ustaw kanał logów poleceń",
+    "cmd.audit.setup.outputs_channel.desc": "Ustaw kanał audytu wyjścia bota",
     "cmd.audit.setup.clear.desc": "Wyczyść kanał audytu",
     "cmd.audit.setup.clear.target.desc": "Który kanał wyczyścić",
     "cmd.audit.setup.snapshot.desc": "Włącz/wyłącz dzienny cron migawki",

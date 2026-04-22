@@ -6,8 +6,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+
+- **Bot output audit** — `/audit setup outputs-channel` adds a third audit channel that captures every non-command bot output (DMs, welcome/goodbye/boost/level-up/milestone notifications, confession posts and replies). Each batched parent embed spawns a 24h thread that replays the exact payload (embeds, content, disabled components, attachments) the recipient saw.
+- The commands-audit channel also now replays slash-command replies inside a thread under each batched message.
+
 ### Changed
 
+- **Upgrade Mongoose from v8 to v9** — bump `mongoose` to `^9.5.0`, migrate all 36 model files from `extends Document` to `HydratedDocument<T>` pattern with exported `<Name>Doc` type aliases, adopt `QueryFilter` / `UpdateQuery` typing across services and utilities, replace deprecated `new: true` option with `returnDocument: "after"` (48 occurrences). No database schema change — all modifications are application-layer.
 - **Economy cooldowns no longer admin-configurable** — work/fish cooldowns now determined by premium tier; gamble (30s) and rob (6h + 2h immunity) are fixed constants. Prevents premium value erosion and economy imbalance.
 
 ### Fixed

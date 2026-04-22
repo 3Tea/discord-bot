@@ -1,8 +1,9 @@
 // src/models/guildMember.model.ts
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 import type { AdventurerRank } from "../services/rpg/guild.config";
 
-export interface IGuildMember extends Document {
+export interface IGuildMember {
     userId: string;
     rank: AdventurerRank;
     gp: number;
@@ -16,8 +17,9 @@ export interface IGuildMember extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
+export type GuildMemberDoc = HydratedDocument<IGuildMember>;
 
-const guildMemberSchema = new Schema(
+const guildMemberSchema = new Schema<IGuildMember>(
     {
         userId: { type: String, required: true },
         rank: { type: String, default: "f", enum: ["f", "e", "d", "c", "b", "a", "s", "ss", "sss", "legendary"] },

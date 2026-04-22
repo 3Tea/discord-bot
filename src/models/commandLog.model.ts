@@ -1,6 +1,7 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface ICommandLog extends Document {
+export interface ICommandLog {
     commandName: string;
     userId: string;
     username: string;
@@ -12,8 +13,9 @@ export interface ICommandLog extends Document {
     latencyMs: number;
     createdAt: Date;
 }
+export type CommandLogDoc = HydratedDocument<ICommandLog>;
 
-const commandLogSchema = new Schema(
+const commandLogSchema = new Schema<ICommandLog>(
     {
         commandName: { type: String, required: true },
         userId: { type: String, required: true },

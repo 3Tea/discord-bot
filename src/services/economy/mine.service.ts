@@ -99,7 +99,7 @@ async function mine(userId: string, guildId: string): Promise<MineResult> {
     const economy = await UserEconomyModel.findOneAndUpdate(
         { userId, guildId },
         { $setOnInsert: { userId, guildId, coin: 0, gem: 0, prayStreak: 0, mineDepth: 1, mineCheckpoint: 1 } },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
 
     const currentDepth = economy.mineDepth ?? 1;

@@ -1,6 +1,7 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IConfessionBan extends Document {
+export interface IConfessionBan {
     guildId: string;
     userId: string;
     moderatorId: string;
@@ -8,8 +9,9 @@ export interface IConfessionBan extends Document {
     expiresAt: Date | null;
     active: boolean;
 }
+export type ConfessionBanDoc = HydratedDocument<IConfessionBan>;
 
-const confessionBanSchema = new Schema(
+const confessionBanSchema = new Schema<IConfessionBan>(
     {
         guildId: { type: String, required: true },
         userId: { type: String, required: true },

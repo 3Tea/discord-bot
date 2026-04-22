@@ -1,4 +1,5 @@
 // src/services/audit/auditConfig.service.ts
+import type { UpdateQuery } from "mongoose";
 import AuditConfigModel, { IAuditConfig } from "../../models/auditConfig.model";
 import redis from "../../connector/redis/index";
 
@@ -8,6 +9,7 @@ const CACHE_TTL_SECONDS = 300;
 export interface AuditConfigSnapshot {
     criticalChannelId: string | null;
     commandsChannelId: string | null;
+    outputsChannelId: string | null;
     snapshotEnabled: boolean;
     alertMemberDropPct: number;
     alertBgErrorsPerHour: number;
@@ -29,6 +31,7 @@ function toSnapshot(doc: IAuditConfig): AuditConfigSnapshot {
     return {
         criticalChannelId: doc.criticalChannelId ?? null,
         commandsChannelId: doc.commandsChannelId ?? null,
+        outputsChannelId: doc.outputsChannelId ?? null,
         snapshotEnabled: doc.snapshotEnabled,
         alertMemberDropPct: doc.alertMemberDropPct ?? 20,
         alertBgErrorsPerHour: doc.alertBgErrorsPerHour ?? 10,
@@ -43,7 +46,7 @@ async function ensureDoc(): Promise<IAuditConfig> {
     const doc = await AuditConfigModel.findOneAndUpdate(
         { _id: "singleton" },
         { $setOnInsert: { snapshotEnabled: true } },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     );
     return doc as IAuditConfig;
 }
@@ -80,8 +83,24 @@ async function setCommandsChannel(channelId: string, updatedBy: string): Promise
     await invalidate();
 }
 
-async function clearChannel(target: "critical" | "commands", updatedBy: string): Promise<void> {
-    const field = target === "critical" ? "criticalChannelId" : "commandsChannelId";
+async function setOutputsChannel(channelId: string, updatedBy: string): Promise<void> {
+    await AuditConfigModel.updateOne(
+        { _id: "singleton" },
+        { $set: { outputsChannelId: channelId, updatedBy } },
+        { upsert: true }
+    );
+    await invalidate();
+}
+
+async function clearChannel(target: "critical" | "commands" | "outputs", updatedBy: string): Promise<void> {
+    let field: string;
+    if (target === "critical") {
+        field = "criticalChannelId";
+    } else if (target === "commands") {
+        field = "commandsChannelId";
+    } else {
+        field = "outputsChannelId";
+    }
     await AuditConfigModel.updateOne(
         { _id: "singleton" },
         { $set: { [field]: null, updatedBy } },
@@ -100,7 +119,7 @@ async function setSnapshotEnabled(enabled: boolean, updatedBy: string): Promise<
 }
 
 async function setAlertThresholds(patch: AlertThresholdsPatch, updatedBy: string): Promise<void> {
-    const set: Record<string, unknown> = { updatedBy };
+    const set: UpdateQuery<IAuditConfig>["$set"] = { updatedBy };
     if (patch.memberDropPct !== undefined) set.alertMemberDropPct = patch.memberDropPct;
     if (patch.bgErrorsPerHour !== undefined) set.alertBgErrorsPerHour = patch.bgErrorsPerHour;
     if (patch.guildLeavesPerHour !== undefined) set.alertGuildLeavesPerHour = patch.guildLeavesPerHour;
@@ -116,6 +135,7 @@ export const AuditConfigService = {
     invalidate,
     setCriticalChannel,
     setCommandsChannel,
+    setOutputsChannel,
     clearChannel,
     setSnapshotEnabled,
     setAlertThresholds,

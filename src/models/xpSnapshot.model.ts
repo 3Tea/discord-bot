@@ -1,8 +1,9 @@
 // src/models/xpSnapshot.model.ts
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 import type { Period } from "../util/xp/periodKey";
 
-export interface IXPSnapshot extends Document {
+export interface IXPSnapshot {
     userId: string;
     guildId: string | null;
     period: Period;
@@ -12,8 +13,9 @@ export interface IXPSnapshot extends Document {
     voiceMinutes: number;
     reactionCount: number;
 }
+export type XPSnapshotDoc = HydratedDocument<IXPSnapshot>;
 
-const xpSnapshotSchema = new Schema(
+const xpSnapshotSchema = new Schema<IXPSnapshot>(
     {
         userId: { type: String, required: true },
         guildId: { type: String, default: null },

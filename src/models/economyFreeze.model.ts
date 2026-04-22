@@ -1,14 +1,16 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IEconomyFreeze extends Document {
+export interface IEconomyFreeze {
     userId: string;
     guildId: string;
     frozenBy: string;
     reason: string;
     createdAt: Date;
 }
+export type EconomyFreezeDoc = HydratedDocument<IEconomyFreeze>;
 
-const economyFreezeSchema = new Schema(
+const economyFreezeSchema = new Schema<IEconomyFreeze>(
     {
         userId: { type: String, required: true },
         guildId: { type: String, required: true },

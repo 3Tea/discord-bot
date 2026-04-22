@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "Configurar canales de auditoría y opciones",
     "cmd.audit.setup.critical_channel.desc": "Establecer el canal de eventos críticos",
     "cmd.audit.setup.commands_channel.desc": "Establecer el canal de log de comandos",
+    "cmd.audit.setup.outputs_channel.desc": "Establecer el canal de auditoría de salidas del bot",
     "cmd.audit.setup.clear.desc": "Limpiar un canal de auditoría",
     "cmd.audit.setup.clear.target.desc": "Qué canal limpiar",
     "cmd.audit.setup.snapshot.desc": "Activar/desactivar el cron de snapshot diario",

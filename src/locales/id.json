@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "Konfigurasi channel audit dan opsi",
     "cmd.audit.setup.critical_channel.desc": "Atur channel untuk event kritis",
     "cmd.audit.setup.commands_channel.desc": "Atur channel log perintah",
+    "cmd.audit.setup.outputs_channel.desc": "Atur saluran audit output bot",
     "cmd.audit.setup.clear.desc": "Hapus konfigurasi channel audit",
     "cmd.audit.setup.clear.target.desc": "Channel mana yang akan dihapus",
     "cmd.audit.setup.snapshot.desc": "Aktifkan/nonaktifkan cron snapshot harian",

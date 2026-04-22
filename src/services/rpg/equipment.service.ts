@@ -1,6 +1,5 @@
 // src/services/rpg/equipment.service.ts
-import type { Document } from "mongoose";
-import EquipmentModel, { IEquipment } from "../../models/equipment.model";
+import EquipmentModel, { IEquipment, EquipmentDoc } from "../../models/equipment.model";
 import CharacterModel from "../../models/character.model";
 import redis from "../../connector/redis";
 import {
@@ -143,7 +142,7 @@ function generateEquipment(
     slot: EquipmentSlot,
     floor: number,
     classType?: ClassType
-): Omit<IEquipment, keyof Document> {
+): IEquipment {
     const rarity = rollRarity(floor);
 
     let name: string;
@@ -186,7 +185,7 @@ function generateEquipment(
         requiredLevel,
         equipped: false,
         createdAt: new Date(),
-    } as Omit<IEquipment, keyof Document>;
+    } as IEquipment;
 }
 
 function rollMaterialDrops(floor: number, source: "monster" | "treasure" | "boss"): { key: string; qty: number }[] {
@@ -257,12 +256,12 @@ async function createEquipmentDrop(
     floor: number,
     classType: ClassType,
     source: "monster" | "treasure" | "boss" = "monster"
-): Promise<IEquipment> {
+): Promise<EquipmentDoc> {
     const slot = rollSlotForClass(classType, source);
     const rarity = rollRarityForSource(floor, source);
     const data = generateEquipment(ownerId, slot, floor, classType);
-    (data as Record<string, unknown>).rarity = rarity;
-    (data as Record<string, unknown>).stats = generateEquipmentStats(slot, rarity, floor);
+    (data as unknown as Record<string, unknown>).rarity = rarity;
+    (data as unknown as Record<string, unknown>).stats = generateEquipmentStats(slot, rarity, floor);
     return EquipmentModel.create(data);
 }
 
@@ -273,7 +272,7 @@ async function equipItem(
     equipmentId: string,
     characterClass: ClassType,
     characterLevel: number
-): Promise<IEquipment> {
+): Promise<EquipmentDoc> {
     const item = await EquipmentModel.findOne({ _id: equipmentId, ownerId: userId });
     if (!item) throw new EquipmentNotFoundError();
 
@@ -323,11 +322,11 @@ async function unequipSlot(userId: string, slot: EquipmentSlot): Promise<void> {
 
 // --- Inventory ---
 
-async function getInventory(userId: string): Promise<IEquipment[]> {
+async function getInventory(userId: string): Promise<EquipmentDoc[]> {
     return EquipmentModel.find({ ownerId: userId }).sort({ rarity: -1, createdAt: -1 });
 }
 
-async function getEquippedItems(userId: string): Promise<IEquipment[]> {
+async function getEquippedItems(userId: string): Promise<EquipmentDoc[]> {
     return EquipmentModel.find({ ownerId: userId, equipped: true });
 }
 
@@ -350,12 +349,12 @@ async function openCrate(
     crateType: CrateType,
     classType: ClassType,
     level: number
-): Promise<IEquipment> {
+): Promise<EquipmentDoc> {
     const rarity = getCrateRarity(crateType);
     const slot = rollSlotForClass(classType, "monster");
     const data = generateEquipment(ownerId, slot, level, classType);
-    (data as Record<string, unknown>).rarity = rarity;
-    (data as Record<string, unknown>).stats = generateEquipmentStats(slot, rarity, level);
+    (data as unknown as Record<string, unknown>).rarity = rarity;
+    (data as unknown as Record<string, unknown>).stats = generateEquipmentStats(slot, rarity, level);
     return EquipmentModel.create(data);
 }
 
@@ -365,10 +364,10 @@ async function craftEquipment(
     rarity: Rarity,
     classType: ClassType,
     level: number
-): Promise<IEquipment> {
+): Promise<EquipmentDoc> {
     const data = generateEquipment(ownerId, slot, level, classType);
-    (data as Record<string, unknown>).rarity = rarity;
-    (data as Record<string, unknown>).stats = generateEquipmentStats(slot, rarity, level);
+    (data as unknown as Record<string, unknown>).rarity = rarity;
+    (data as unknown as Record<string, unknown>).stats = generateEquipmentStats(slot, rarity, level);
     return EquipmentModel.create(data);
 }
 

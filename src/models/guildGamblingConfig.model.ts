@@ -1,13 +1,15 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IGuildGamblingConfig extends Document {
+export interface IGuildGamblingConfig {
     guildId: string;
     enabled: boolean;
     minBet: number;
     maxBet: number;
 }
+export type GuildGamblingConfigDoc = HydratedDocument<IGuildGamblingConfig>;
 
-const guildGamblingConfigSchema = new Schema(
+const guildGamblingConfigSchema = new Schema<IGuildGamblingConfig>(
     {
         guildId: { type: String, required: true, unique: true },
         enabled: { type: Boolean, default: true },

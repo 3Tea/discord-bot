@@ -1,9 +1,12 @@
 // src/models/auditConfig.model.ts
-import { Document, model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IAuditConfig extends Document {
+export interface IAuditConfig {
+    _id: string;
     criticalChannelId?: string | null;
     commandsChannelId?: string | null;
+    outputsChannelId?: string | null;
     snapshotEnabled: boolean;
     alertMemberDropPct: number;
     alertBgErrorsPerHour: number;
@@ -12,12 +15,14 @@ export interface IAuditConfig extends Document {
     alertCooldownMinutes: number;
     updatedBy?: string | null;
 }
+export type AuditConfigDoc = HydratedDocument<IAuditConfig>;
 
-const auditConfigSchema = new Schema(
+const auditConfigSchema = new Schema<IAuditConfig>(
     {
         _id: { type: String, default: "singleton" },
         criticalChannelId: { type: String, default: null },
         commandsChannelId: { type: String, default: null },
+        outputsChannelId: { type: String, default: null },
         snapshotEnabled: { type: Boolean, default: true },
         alertMemberDropPct: { type: Number, default: 20, min: 0, max: 100 },
         alertBgErrorsPerHour: { type: Number, default: 10, min: 0 },

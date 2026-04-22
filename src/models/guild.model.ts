@@ -1,8 +1,10 @@
-import { model, Schema, Document } from "mongoose";
-import type { CallbackError } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { CallbackError, HydratedDocument } from "mongoose";
+
+import { logger } from "../util/log/logger.mixed";
 
 // Legacy naming: uses guildID/userID (uppercase) — newer models use guildId/userId
-export interface IGuild extends Document {
+export interface IGuild {
     guildID: string;
     totalPoint: number;
     topAllGuild: number;
@@ -10,8 +12,9 @@ export interface IGuild extends Document {
     verify: boolean;
     locale?: string;
 }
+export type GuildDoc = HydratedDocument<IGuild>;
 
-const guildSchema = new Schema(
+const guildSchema = new Schema<IGuild>(
     {
         guildID: {
             type: String,
@@ -48,7 +51,7 @@ guildSchema.index({ guildID: 1 }, { unique: true });
 
 guildSchema.post("save", (error: CallbackError, doc: IGuild, next: (err?: CallbackError) => void) => {
     if (process.env.NODE_ENV === "development") {
-        console.log(doc);
+        logger.debug(doc);
     }
     if (error && "code" in error && (error as Record<string, unknown>).code === 11000)
         next(new Error("This document already exists, please try again"));
@@ -57,13 +60,13 @@ guildSchema.post("save", (error: CallbackError, doc: IGuild, next: (err?: Callba
 
 guildSchema.set("toJSON", {
     transform: (_doc, ret) => {
-        delete (ret as Record<string, unknown>).__v;
+        delete (ret as unknown as Record<string, unknown>).__v;
     },
 });
 
 guildSchema.set("toObject", {
     transform: (_doc, ret) => {
-        delete (ret as Record<string, unknown>).__v;
+        delete (ret as unknown as Record<string, unknown>).__v;
     },
 });
 

@@ -1,6 +1,7 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IMemberXP extends Document {
+export interface IMemberXP {
     guildId: string;
     userId: string;
     xp: number;
@@ -11,8 +12,9 @@ export interface IMemberXP extends Document {
     lastMessageAt: Date | null;
     lastMessageHash: string;
 }
+export type MemberXPDoc = HydratedDocument<IMemberXP>;
 
-const memberXPSchema = new Schema(
+const memberXPSchema = new Schema<IMemberXP>(
     {
         guildId: { type: String, required: true },
         userId: { type: String, required: true },

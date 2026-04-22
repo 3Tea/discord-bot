@@ -1,4 +1,5 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
 export const NotificationType = {
     Welcome: "welcome",
@@ -10,7 +11,7 @@ export const NotificationType = {
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];
 
-export interface IGuildNotificationConfig extends Document {
+export interface IGuildNotificationConfig {
     guildId: string;
     type: NotificationType;
     enabled: boolean;
@@ -19,8 +20,9 @@ export interface IGuildNotificationConfig extends Document {
         thresholds?: number[];
     };
 }
+export type GuildNotificationConfigDoc = HydratedDocument<IGuildNotificationConfig>;
 
-const guildNotificationConfigSchema = new Schema(
+const guildNotificationConfigSchema = new Schema<IGuildNotificationConfig>(
     {
         guildId: { type: String, required: true },
         type: {

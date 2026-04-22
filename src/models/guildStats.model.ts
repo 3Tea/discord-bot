@@ -1,6 +1,7 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IGuildStats extends Document {
+export interface IGuildStats {
     guildId: string;
     totalXP: number;
     totalMessages: number;
@@ -9,8 +10,9 @@ export interface IGuildStats extends Document {
     activeMembers: number;
     lastAggregatedAt: Date | null;
 }
+export type GuildStatsDoc = HydratedDocument<IGuildStats>;
 
-const guildStatsSchema = new Schema(
+const guildStatsSchema = new Schema<IGuildStats>(
     {
         guildId: { type: String, required: true, unique: true },
         totalXP: { type: Number, default: 0 },

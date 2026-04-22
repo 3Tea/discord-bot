@@ -1,8 +1,9 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
 export type ConfessionMode = "instant" | "review";
 
-export interface IGuildConfessionConfig extends Document {
+export interface IGuildConfessionConfig {
     guildId: string;
     enabled: boolean;
     mode: ConfessionMode;
@@ -13,8 +14,9 @@ export interface IGuildConfessionConfig extends Document {
     lastConfessionNumber: number;
     blockedKeywords: string[];
 }
+export type GuildConfessionConfigDoc = HydratedDocument<IGuildConfessionConfig>;
 
-const guildConfessionConfigSchema = new Schema(
+const guildConfessionConfigSchema = new Schema<IGuildConfessionConfig>(
     {
         guildId: { type: String, required: true, unique: true },
         enabled: { type: Boolean, default: false },

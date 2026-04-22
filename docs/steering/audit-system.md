@@ -19,7 +19,8 @@ All replies are ephemeral.
 | Channel | What it receives |
 |---|---|
 | `criticalChannelId` | Guild join/leave, command errors, admin-command actions, background job errors, startup/daily summaries |
-| `commandsChannelId` | Every slash command execute (success or fail) |
+| `commandsChannelId` | Every slash command execute (success or fail). Thread under each batched message replays the bot's reply. |
+| `outputsChannelId` | Every non-command bot output: DMs, welcome/goodbye/boost/level-up/milestone notifications, confession posts and replies. Thread under each batched message replays the payload. |
 
 Admin commands that also post to critical: `economy`, `guild-admin`, `commandlog`, `audit` (matched by top-level command name in `AuditService.ADMIN_COMMAND_NAMES`).
 
@@ -51,6 +52,45 @@ Channels are resolved via `client.channels.fetch(channelId)` and cached in memor
 
 On `SIGINT`/`SIGTERM`, `AuditDispatcherService.drain()` flushes remaining buffers before exit.
 
+## Output Capture
+
+Captures what the bot sends to users — independent of the commands channel which records *what command ran*. Two capture mechanisms coexist:
+
+**Prototype wraps** (applied once in `AuditDispatcherService.init(client)` via `BotOutputAudit.init(client)`):
+
+- `CommandInteraction.prototype.reply` / `editReply` / `followUp`
+- `MessageComponentInteraction.prototype.reply` / `editReply` / `followUp`
+- `ModalSubmitInteraction.prototype.reply` / `editReply` / `followUp`
+- `User.prototype.send` (DMs)
+
+Idempotency: a Symbol marker on the patched prototype prevents double-wrapping.
+
+**Explicit helper** (`BotOutputAudit.record(captured)`):
+
+- `notificationService.sendNotification(guild, channelId, embed, type)` — records after welcome/goodbye/boost/level-up/milestone sends. The `type` parameter feeds the captured `source`.
+- `confession.service.ts` — both `sendAnonymousConfessionToChannel` (post) and the reply thread send are recorded.
+
+Loop prevention: captures whose destination channel is an audit channel (or the bot's own user) are short-circuited via `BotOutputAudit.isAuditTarget(channelId, userId)`.
+
+Capture timing: the wrapped methods run the original call first, then await its Promise before recording. Rejected sends (rate limit, token expired) produce no audit entry.
+
+TTL sweep: `interactionCaptures` orphans older than 60s are pruned by a 30s interval registered in `BotOutputAudit.init`.
+
+### Flush logic for the outputs channel
+
+Same threaded pattern as the commands channel:
+
+1. Batch up to 10 entries per flush (or flush when buffer reaches 10 / interval elapses).
+2. Send parent message with all audit embeds.
+3. `parent.startThread({ autoArchiveDuration: ThreadAutoArchiveDuration.OneDay })` — 24h archive.
+4. For each captured output, post a replay message inside the thread with header `↳ Reply to embed #N · source · target [· 👻 ephemeral]`, then the original content / embeds / components (disabled via `disableAll`) / attachments (reused Discord CDN URLs).
+5. On attachment send failure: retry once without files, log a warn.
+6. On thread creation failure: parent stands, replay dropped, warn logged.
+
+Thread-creation rate limit: 50 threads per 5 minutes per channel. The 2-second flush interval caps audit-channel threads at 30/min per channel under steady state.
+
+Bursts > 10 entries per flush are chunked — each chunk gets its own parent message + thread (not silently dropped).
+
 ## Data Models
 
 ### `AuditConfig` (singleton)
@@ -62,6 +102,7 @@ Collection: `AuditConfigs`. Single doc with `_id: "singleton"`.
 | `_id` | String | Always `"singleton"` |
 | `criticalChannelId` | String? | Critical channel, null = disabled |
 | `commandsChannelId` | String? | Commands channel, null = disabled |
+| `outputsChannelId` | String? | Bot-output audit channel, null = disabled |
 | `snapshotEnabled` | Boolean | Toggle daily snapshot cron |
 | `alertMemberDropPct` | Number | Member drop % threshold (default 20, 0 = disabled) |
 | `alertBgErrorsPerHour` | Number | Background errors/hour threshold (default 10, 0 = disabled) |
@@ -111,7 +152,8 @@ Indexes: `{guildId, takenAt: -1}`, `{takenAt: 1}` with `expireAfterSeconds: 90d`
 |---|---|
 | `critical-channel channel:#x` | Save critical channel after perm check |
 | `commands-channel channel:#x` | Save commands channel after perm check |
-| `clear target:<critical\|commands>` | Unset the chosen channel |
+| `outputs-channel channel:#x` | Save outputs channel after perm check (requires thread perms: CreatePublicThreads, SendMessagesInThreads) |
+| `clear target:<critical\|commands\|outputs>` | Unset the chosen channel |
 | `snapshot enabled:<bool>` | Toggle snapshot cron |
 | `alert [member-drop-pct] [bg-errors-per-hour] [guild-leaves-per-hour] [role] [clear-role] [cooldown-minutes]` | Update any subset of alert thresholds. Set any threshold to `0` to disable that alert. Provide `role` to set the ping target, or `clear-role:true` to clear it (falls back to dev DM mention). |
 | `view` | Show current config + alert thresholds |
@@ -171,6 +213,7 @@ Mention target: `alertRoleId` (`<@&id>`) if set, otherwise `<@DEV_USER_ID>`. `al
 | `src/services/audit/auditDispatcher.service.ts` | Buffered dispatcher + `sendAlert()` direct-send path |
 | `src/services/audit/alert.service.ts` | Threshold checks, counters, cooldowns |
 | `src/services/audit/auditEmbeds.ts` | Embed builders (incl. alert embeds) |
+| `src/services/audit/botOutputAudit.service.ts` | Capture layer: prototype patches + record() helper for outputs audit |
 | `src/events/guildCreate.ts` | Join handler |
 | `src/events/guildDelete.ts` | Leave handler |
 | `src/commands/slash/audit.ts` | Dev slash command |

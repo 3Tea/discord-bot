@@ -1,6 +1,7 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
-export interface IGlobalInventory extends Document {
+export interface IGlobalInventory {
     userId: string;
     itemId: string;
     quantity: number;
@@ -9,8 +10,9 @@ export interface IGlobalInventory extends Document {
     metadata: Record<string, unknown>;
     lastObtainedAt: Date | null;
 }
+export type GlobalInventoryDoc = HydratedDocument<IGlobalInventory>;
 
-const globalInventorySchema = new Schema(
+const globalInventorySchema = new Schema<IGlobalInventory>(
     {
         userId: { type: String, required: true },
         itemId: { type: String, required: true },

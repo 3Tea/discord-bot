@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "Denetim kanallarını ve seçenekleri yapılandır",
     "cmd.audit.setup.critical_channel.desc": "Kritik olaylar kanalını ayarla",
     "cmd.audit.setup.commands_channel.desc": "Komut günlüğü kanalını ayarla",
+    "cmd.audit.setup.outputs_channel.desc": "Bot çıktı denetim kanalını ayarla",
     "cmd.audit.setup.clear.desc": "Bir denetim kanalını temizle",
     "cmd.audit.setup.clear.target.desc": "Hangi kanalı temizleyeceğini seç",
     "cmd.audit.setup.snapshot.desc": "Günlük anlık görüntü cron'unu aç/kapat",

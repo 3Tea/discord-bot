@@ -1,4 +1,5 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 
 export interface IEconomyLogThresholds {
     coinTransaction: number;
@@ -9,14 +10,15 @@ export interface IEconomyLogThresholds {
     bulkOperations: boolean;
 }
 
-export interface IEconomyLogConfig extends Document {
+export interface IEconomyLogConfig {
     guildId: string;
     channelId: string;
     enabled: boolean;
     thresholds: IEconomyLogThresholds;
 }
+export type EconomyLogConfigDoc = HydratedDocument<IEconomyLogConfig>;
 
-const economyLogConfigSchema = new Schema(
+const economyLogConfigSchema = new Schema<IEconomyLogConfig>(
     {
         guildId: { type: String, required: true },
         channelId: { type: String, required: true },

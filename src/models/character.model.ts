@@ -1,8 +1,9 @@
 // src/models/character.model.ts
-import { model, Schema, Document, Types } from "mongoose";
+import { model, Schema, Types } from "mongoose";
+import type { HydratedDocument } from "mongoose";
 import type { ClassType } from "../services/rpg/rpg.config";
 
-export interface ICharacter extends Document {
+export interface ICharacter {
     userId: string;
     class: ClassType;
     advancedClass: string | null;
@@ -32,8 +33,9 @@ export interface ICharacter extends Document {
     createdAt: Date;
     updatedAt: Date;
 }
+export type CharacterDoc = HydratedDocument<ICharacter>;
 
-const characterSchema = new Schema(
+const characterSchema = new Schema<ICharacter>(
     {
         userId: { type: String, required: true },
         class: {

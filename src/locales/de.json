@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "Audit-Kanäle und -Optionen konfigurieren",
     "cmd.audit.setup.critical_channel.desc": "Kanal für kritische Ereignisse festlegen",
     "cmd.audit.setup.commands_channel.desc": "Kanal für Befehlsprotokolle festlegen",
+    "cmd.audit.setup.outputs_channel.desc": "Bot-Ausgabe-Audit-Kanal festlegen",
     "cmd.audit.setup.clear.desc": "Einen Audit-Kanal zurücksetzen",
     "cmd.audit.setup.clear.target.desc": "Welchen Kanal zurücksetzen",
     "cmd.audit.setup.snapshot.desc": "Täglichen Snapshot-Cron aktivieren/deaktivieren",

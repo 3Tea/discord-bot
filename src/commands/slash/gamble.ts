@@ -51,7 +51,7 @@ async function getGamblingConfig(guildId: string): Promise<IGuildGamblingConfig>
     const config = await GuildGamblingConfigModel.findOneAndUpdate(
         { guildId },
         { $setOnInsert: { guildId } },
-        { upsert: true, new: true }
+        { upsert: true, returnDocument: "after" }
     );
 
     await redis.setJson(cacheKey, config.toObject(), CONFIG_CACHE_TTL);

@@ -108,7 +108,7 @@ async function handleConfig(
             const config = await GuildEconomyRewardConfigModel.findOneAndUpdate(
                 { guildId },
                 { $setOnInsert: { guildId } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
             const milestones =
                 config.gemMilestones instanceof Map
@@ -156,7 +156,7 @@ async function handleConfig(
             const config = await GuildEconomyRewardConfigModel.findOneAndUpdate(
                 { guildId },
                 { $setOnInsert: { guildId } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
             const newEnabled = !config.enabled;
             await GuildEconomyRewardConfigModel.updateOne({ guildId }, { $set: { enabled: newEnabled } });
@@ -212,7 +212,7 @@ async function handleConfig(
             const config = await GuildGamblingConfigModel.findOneAndUpdate(
                 { guildId },
                 { $setOnInsert: { guildId } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
             return new EmbedBuilder()
                 .setTitle(t(locale, "gambling_config.title"))
@@ -231,7 +231,7 @@ async function handleConfig(
             const config = await GuildGamblingConfigModel.findOneAndUpdate(
                 { guildId },
                 { $setOnInsert: { guildId } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
             const newEnabled = !config.enabled;
             await GuildGamblingConfigModel.updateOne({ guildId }, { $set: { enabled: newEnabled } });
@@ -255,7 +255,7 @@ async function handleConfig(
             const wConfig = await GuildWorkConfigModel.findOneAndUpdate(
                 { guildId },
                 { $setOnInsert: { guildId } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
             return new EmbedBuilder()
                 .setTitle(t(locale, "work_config.title"))
@@ -287,7 +287,7 @@ async function handleConfig(
             const wConfig = await GuildWorkConfigModel.findOneAndUpdate(
                 { guildId },
                 { $setOnInsert: { guildId } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
             const newEnabled = !wConfig.enabled;
             await GuildWorkConfigModel.updateOne({ guildId }, { $set: { enabled: newEnabled } });
@@ -311,7 +311,7 @@ async function handleConfig(
             const sConfig = await GuildSocialConfigModel.findOneAndUpdate(
                 { guildId },
                 { $setOnInsert: { guildId } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
             return new EmbedBuilder()
                 .setTitle(t(locale, "social_config.title"))
@@ -353,7 +353,7 @@ async function handleConfig(
             const sConfig = await GuildSocialConfigModel.findOneAndUpdate(
                 { guildId },
                 { $setOnInsert: { guildId } },
-                { upsert: true, new: true }
+                { upsert: true, returnDocument: "after" }
             );
             const newEnabled = !sConfig.enabled;
             await GuildSocialConfigModel.updateOne({ guildId }, { $set: { enabled: newEnabled } });

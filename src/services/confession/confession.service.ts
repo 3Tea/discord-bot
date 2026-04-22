@@ -12,10 +12,12 @@ import {
     TextInputStyle,
 } from "discord.js";
 import { isValidObjectId } from "mongoose";
+import type { UpdateQuery } from "mongoose";
 
 import redis from "../../connector/redis";
 import { secondsUntilUTCMidnight } from "../../util/date/utc";
-import ConfessionModel, { IConfession, IConfessionAudio, IConfessionImage } from "../../models/confession.model";
+import { BotOutputAudit } from "../audit/botOutputAudit.service";
+import ConfessionModel, { ConfessionDoc, IConfession, IConfessionAudio, IConfessionImage } from "../../models/confession.model";
 import GuildConfessionConfigModel, {
     ConfessionMode,
     IGuildConfessionConfig,
@@ -56,6 +58,12 @@ export { CONFESSION_REPLY_COST_COIN, CONFESSION_REPLY_MAX_LENGTH } from "./const
 export { CONFESSION_KEYWORD_MAX_LENGTH, CONFESSION_KEYWORDS_MAX_COUNT, CONFESSION_TAGS } from "./constants";
 export type { ConfessionTag } from "./constants";
 
+// Narrows `unknown` to `string` and guards against Mongoose v9's `isValidObjectId`
+// which rejects (and throws on) non-string inputs.
+export function isObjectIdString(value: unknown): value is string {
+    return typeof value === "string" && isValidObjectId(value);
+}
+
 function applyConfessionFooter(embed: EmbedBuilder): void {
     if (FOOTER.text) {
         embed.setFooter({
@@ -93,7 +101,7 @@ export async function upsertGuildConfessionConfig(input: {
             },
             $setOnInsert: { lastConfessionNumber: 0 },
         },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
     ).exec();
     if (!doc) {
         throw new Error("UPSERT_FAILED");
@@ -105,7 +113,7 @@ export async function reserveNextConfessionNumber(guildId: string): Promise<numb
     const updated = await GuildConfessionConfigModel.findOneAndUpdate(
         { guildId },
         { $inc: { lastConfessionNumber: 1 } },
-        { new: true }
+        { returnDocument: "after" }
     ).exec();
     if (!updated) {
         throw new Error("CONFIG_MISSING");
@@ -326,6 +334,28 @@ export async function sendAnonymousConfessionToChannel(
             files: files.length ? files : undefined,
             components: components.length ? components : undefined,
         });
+
+        const capturedAttachments = files.map((f, i) => {
+            const att = (f as { attachment?: unknown }).attachment;
+            const name = (f as { name?: unknown }).name;
+            return {
+                url: typeof att === "string" ? att : "inline",
+                name: typeof name === "string" ? name : `file-${i}`,
+            };
+        });
+        BotOutputAudit.record({
+            source: "confession_post",
+            targetType: "channel",
+            targetId: channel.id,
+            guildId: channel.guildId,
+            isEphemeral: false,
+            content: undefined,
+            embeds: [embed.toJSON()],
+            components: components.map((row) => row.toJSON()),
+            attachments: capturedAttachments,
+            capturedAt: new Date(),
+        });
+
         return { messageId: msg.id };
     } catch (error) {
         logger.error(
@@ -345,7 +375,7 @@ export async function createPublishedConfessionRecord(input: {
     publicMessageId: string;
     isVip?: boolean;
     tag?: string | null;
-}): Promise<IConfession> {
+}): Promise<ConfessionDoc> {
     return ConfessionModel.create({
         guildId: input.guildId,
         number: input.number,
@@ -371,7 +401,7 @@ export async function createPendingConfessionRecord(input: {
     audio?: IConfessionAudio | null;
     isVip?: boolean;
     tag?: string | null;
-}): Promise<IConfession> {
+}): Promise<ConfessionDoc> {
     return ConfessionModel.create({
         guildId: input.guildId,
         number: input.number,
@@ -398,7 +428,7 @@ export type ModerationResult =
 
 export async function approveConfession(interaction: ButtonInteraction): Promise<ModerationResult> {
     const rawId = interaction.customId.split(":")[1];
-    if (!rawId || !isValidObjectId(rawId)) {
+    if (!isObjectIdString(rawId)) {
         return { ok: false, code: "invalid_id" };
     }
     const guildId = interaction.guildId;
@@ -460,7 +490,7 @@ export async function approveConfession(interaction: ButtonInteraction): Promise
 
 export async function rejectConfession(interaction: ButtonInteraction): Promise<ModerationResult> {
     const rawId = interaction.customId.split(":")[1];
-    if (!rawId || !isValidObjectId(rawId)) {
+    if (!isObjectIdString(rawId)) {
         return { ok: false, code: "invalid_id" };
     }
     const guildId = interaction.guildId;
@@ -631,7 +661,7 @@ export async function handleConfessionVote(
     userId: string,
     voteType: "up" | "down"
 ): Promise<VoteResult> {
-    if (!isValidObjectId(confessionMongoId)) {
+    if (!isObjectIdString(confessionMongoId)) {
         return { ok: false, code: "invalid_id" };
     }
 
@@ -656,16 +686,17 @@ export async function handleConfessionVote(
             userId,
             vote: voteType,
         });
-        const inc = voteType === "up" ? { upvotes: 1 } : { downvotes: 1 };
+        const inc: UpdateQuery<IConfession>["$inc"] = voteType === "up" ? { upvotes: 1 } : { downvotes: 1 };
         await ConfessionModel.findByIdAndUpdate(confessionMongoId, { $inc: inc }).exec();
     } else if (existing.vote === voteType) {
         await ConfessionVoteModel.deleteOne({ _id: existing._id }).exec();
-        const inc = voteType === "up" ? { upvotes: -1 } : { downvotes: -1 };
+        const inc: UpdateQuery<IConfession>["$inc"] = voteType === "up" ? { upvotes: -1 } : { downvotes: -1 };
         await ConfessionModel.findByIdAndUpdate(confessionMongoId, { $inc: inc }).exec();
     } else {
         existing.vote = voteType;
         await existing.save();
-        const inc = voteType === "up" ? { upvotes: 1, downvotes: -1 } : { upvotes: -1, downvotes: 1 };
+        const inc: UpdateQuery<IConfession>["$inc"] =
+            voteType === "up" ? { upvotes: 1, downvotes: -1 } : { upvotes: -1, downvotes: 1 };
         await ConfessionModel.findByIdAndUpdate(confessionMongoId, { $inc: inc }).exec();
     }
 
@@ -739,7 +770,7 @@ export async function handleConfessionReply(params: {
     const updated = await ConfessionModel.findByIdAndUpdate(
         confessionMongoId,
         { $inc: { replyCount: 1 } },
-        { new: true }
+        { returnDocument: "after" }
     ).exec();
     if (!updated) {
         return { ok: false, code: "not_found" };
@@ -787,6 +818,19 @@ export async function handleConfessionReply(params: {
             .setTimestamp();
 
         const replyMsg = await thread.send({ embeds: [replyEmbed] });
+
+        BotOutputAudit.record({
+            source: "confession_reply",
+            targetType: "channel",
+            targetId: thread.id,
+            guildId,
+            isEphemeral: false,
+            content: undefined,
+            embeds: [replyEmbed.toJSON()],
+            components: [],
+            attachments: [],
+            capturedAt: new Date(),
+        });
 
         await ConfessionReplyModel.create({
             confessionId: confessionMongoId,
