@@ -16,6 +16,10 @@ import { logger } from "../../util/log/logger.mixed";
 // MessageFlags.Ephemeral = 1 << 6 = 64.
 const FLAG_EPHEMERAL = 64;
 
+// Marker on a patched prototype so patchInteractionClass / patchUserSend
+// are idempotent per class even if invoked outside applyPatches().
+const PATCHED_SYM = Symbol("botOutputAuditPatched");
+
 let patched = false;
 let clientUserId: string | null = null;
 let pruneTimer: ReturnType<typeof setInterval> | null = null;
@@ -157,7 +161,9 @@ type InteractionProto = {
 };
 
 function patchInteractionClass(Cls: { prototype: unknown }): void {
-    const proto = Cls.prototype as InteractionProto;
+    const proto = Cls.prototype as InteractionProto & { [PATCHED_SYM]?: true };
+    if (proto[PATCHED_SYM]) return;
+    proto[PATCHED_SYM] = true;
     const originalReply = proto.reply;
     const originalEdit = proto.editReply;
     const originalFollow = proto.followUp;
@@ -223,7 +229,10 @@ function patchInteractionClass(Cls: { prototype: unknown }): void {
 function patchUserSend(): void {
     const userProto = User.prototype as unknown as {
         send?: (...args: unknown[]) => unknown;
+        [PATCHED_SYM]?: true;
     };
+    if (userProto[PATCHED_SYM]) return;
+    userProto[PATCHED_SYM] = true;
     const originalUserSend = userProto.send;
     if (typeof originalUserSend === "function") {
         userProto.send = function (this: User, ...args: unknown[]) {
