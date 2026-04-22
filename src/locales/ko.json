@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "감사 채널 및 옵션 구성",
     "cmd.audit.setup.critical_channel.desc": "중요 이벤트 채널 설정",
     "cmd.audit.setup.commands_channel.desc": "명령어 로그 채널 설정",
+    "cmd.audit.setup.outputs_channel.desc": "봇 출력 감사 채널 설정",
     "cmd.audit.setup.clear.desc": "감사 채널 구성 초기화",
     "cmd.audit.setup.clear.target.desc": "초기화할 채널 선택",
     "cmd.audit.setup.snapshot.desc": "일일 스냅샷 크론 활성화/비활성화",

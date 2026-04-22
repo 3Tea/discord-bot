@@ -29,6 +29,18 @@ function botHasRequiredPerms(channel: TextChannel, botId: string): boolean {
     );
 }
 
+function botHasThreadPerms(channel: TextChannel, botId: string): boolean {
+    const perms = channel.permissionsFor(botId);
+    if (!perms) return false;
+    return perms.has(
+        PermissionsBitField.Flags.ViewChannel |
+            PermissionsBitField.Flags.SendMessages |
+            PermissionsBitField.Flags.EmbedLinks |
+            PermissionsBitField.Flags.CreatePublicThreads |
+            PermissionsBitField.Flags.SendMessagesInThreads
+    );
+}
+
 function sparkline(values: number[]): string {
     const blocks = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
     if (values.length === 0) return "—";
@@ -78,6 +90,19 @@ export default {
                 )
                 .addSubcommand((sub) =>
                     sub
+                        .setName("outputs-channel")
+                        .setDescription("Set the bot-output audit channel")
+                        .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.outputs_channel.desc"))
+                        .addChannelOption((opt) =>
+                            opt
+                                .setName("channel")
+                                .setDescription("Text channel")
+                                .addChannelTypes(ChannelType.GuildText)
+                                .setRequired(true)
+                        )
+                )
+                .addSubcommand((sub) =>
+                    sub
                         .setName("clear")
                         .setDescription("Clear an audit channel")
                         .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.clear.desc"))
@@ -88,7 +113,8 @@ export default {
                                 .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.clear.target.desc"))
                                 .addChoices(
                                     { name: "critical", value: "critical" },
-                                    { name: "commands", value: "commands" }
+                                    { name: "commands", value: "commands" },
+                                    { name: "outputs", value: "outputs" }
                                 )
                                 .setRequired(true)
                         )
@@ -243,24 +269,32 @@ async function handleSetup(interaction: ChatInputCommandInteraction, sub: string
 
     switch (sub) {
         case "critical-channel":
-        case "commands-channel": {
+        case "commands-channel":
+        case "outputs-channel": {
             const channel = interaction.options.getChannel("channel", true) as TextChannel;
             const botId = interaction.client.user?.id ?? "";
-            if (!botHasRequiredPerms(channel, botId)) {
-                await interaction.editReply("Bot is missing ViewChannel/SendMessages/EmbedLinks in that channel.");
+            const needsThreadPerms = sub === "commands-channel" || sub === "outputs-channel";
+            const ok = needsThreadPerms ? botHasThreadPerms(channel, botId) : botHasRequiredPerms(channel, botId);
+            if (!ok) {
+                const missing = needsThreadPerms
+                    ? "ViewChannel/SendMessages/EmbedLinks/CreatePublicThreads/SendMessagesInThreads"
+                    : "ViewChannel/SendMessages/EmbedLinks";
+                await interaction.editReply(`Bot is missing ${missing} in that channel.`);
                 return;
             }
             if (sub === "critical-channel") {
                 await AuditConfigService.setCriticalChannel(channel.id, userId);
-            } else {
+            } else if (sub === "commands-channel") {
                 await AuditConfigService.setCommandsChannel(channel.id, userId);
+            } else {
+                await AuditConfigService.setOutputsChannel(channel.id, userId);
             }
             AuditDispatcherService.invalidateChannelCache();
             await interaction.editReply(`Saved. ${sub} → <#${channel.id}>`);
             return;
         }
         case "clear": {
-            const target = interaction.options.getString("target", true) as "critical" | "commands";
+            const target = interaction.options.getString("target", true) as "critical" | "commands" | "outputs";
             await AuditConfigService.clearChannel(target, userId);
             AuditDispatcherService.invalidateChannelCache();
             await interaction.editReply(`Cleared ${target} channel.`);
@@ -291,6 +325,11 @@ async function handleSetup(interaction: ChatInputCommandInteraction, sub: string
                     {
                         name: "Commands channel",
                         value: config.commandsChannelId ? `<#${config.commandsChannelId}>` : "not set",
+                        inline: false,
+                    },
+                    {
+                        name: "Outputs channel",
+                        value: config.outputsChannelId ? `<#${config.outputsChannelId}>` : "not set",
                         inline: false,
                     },
                     { name: "Snapshot enabled", value: String(config.snapshotEnabled), inline: true },

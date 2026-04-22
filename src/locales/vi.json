@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "Cấu hình channel audit và tùy chọn",
     "cmd.audit.setup.critical_channel.desc": "Đặt channel nhận event critical",
     "cmd.audit.setup.commands_channel.desc": "Đặt channel log command",
+    "cmd.audit.setup.outputs_channel.desc": "Đặt kênh audit output của bot",
     "cmd.audit.setup.clear.desc": "Xóa cấu hình channel",
     "cmd.audit.setup.clear.target.desc": "Channel nào cần xóa",
     "cmd.audit.setup.snapshot.desc": "Bật/tắt cron snapshot hằng ngày",

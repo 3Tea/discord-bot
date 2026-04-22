@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "Настроить каналы аудита и параметры",
     "cmd.audit.setup.critical_channel.desc": "Установить канал критических событий",
     "cmd.audit.setup.commands_channel.desc": "Установить канал журнала команд",
+    "cmd.audit.setup.outputs_channel.desc": "Установить канал аудита вывода бота",
     "cmd.audit.setup.clear.desc": "Очистить канал аудита",
     "cmd.audit.setup.clear.target.desc": "Какой канал очистить",
     "cmd.audit.setup.snapshot.desc": "Включить/выключить ежедневный cron снимков",

@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "配置审计频道和选项",
     "cmd.audit.setup.critical_channel.desc": "设置关键事件频道",
     "cmd.audit.setup.commands_channel.desc": "设置命令日志频道",
+    "cmd.audit.setup.outputs_channel.desc": "设置机器人输出审计频道",
     "cmd.audit.setup.clear.desc": "清除审计频道配置",
     "cmd.audit.setup.clear.target.desc": "要清除哪个频道",
     "cmd.audit.setup.snapshot.desc": "切换每日快照定时任务",

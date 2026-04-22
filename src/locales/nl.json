@@ -1465,6 +1465,7 @@
     "cmd.audit.setup.desc": "Auditkanalen en opties configureren",
     "cmd.audit.setup.critical_channel.desc": "Kanaal voor kritieke gebeurtenissen instellen",
     "cmd.audit.setup.commands_channel.desc": "Kanaal voor opdrachtenlogs instellen",
+    "cmd.audit.setup.outputs_channel.desc": "Stel het bot-output auditkanaal in",
     "cmd.audit.setup.clear.desc": "Een auditkanaal wissen",
     "cmd.audit.setup.clear.target.desc": "Welk kanaal wissen",
     "cmd.audit.setup.snapshot.desc": "Dagelijkse snapshot-cron in-/uitschakelen",
