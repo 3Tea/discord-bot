@@ -18,7 +18,7 @@ export default {
 
             const locale = await resolveGuildLocale(guildId);
             const embed = buildGoodbyeEmbed(member as GuildMember, locale);
-            await sendNotification(member.guild, config.channelId, embed);
+            await sendNotification(member.guild, config.channelId, embed, NotificationType.Goodbye);
         } catch (error) {
             logger.error(`[guildMemberRemove] ${error instanceof Error ? error.message : "Unknown error"}`);
         }

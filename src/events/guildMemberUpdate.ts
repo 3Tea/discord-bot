@@ -24,7 +24,7 @@ export default {
 
             const locale = await resolveGuildLocale(guildId);
             const embed = buildBoostEmbed(newMember, locale);
-            await sendNotification(newMember.guild, config.channelId, embed);
+            await sendNotification(newMember.guild, config.channelId, embed, NotificationType.Boost);
         } catch (error) {
             logger.error(`[guildMemberUpdate:boost] ${error instanceof Error ? error.message : "Unknown error"}`);
         }

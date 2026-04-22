@@ -16,6 +16,7 @@ import type { UpdateQuery } from "mongoose";
 
 import redis from "../../connector/redis";
 import { secondsUntilUTCMidnight } from "../../util/date/utc";
+import { BotOutputAudit } from "../audit/botOutputAudit.service";
 import ConfessionModel, { ConfessionDoc, IConfession, IConfessionAudio, IConfessionImage } from "../../models/confession.model";
 import GuildConfessionConfigModel, {
     ConfessionMode,
@@ -333,6 +334,28 @@ export async function sendAnonymousConfessionToChannel(
             files: files.length ? files : undefined,
             components: components.length ? components : undefined,
         });
+
+        const capturedAttachments = files.map((f, i) => {
+            const att = (f as { attachment?: unknown }).attachment;
+            const name = (f as { name?: unknown }).name;
+            return {
+                url: typeof att === "string" ? att : "inline",
+                name: typeof name === "string" ? name : `file-${i}`,
+            };
+        });
+        BotOutputAudit.record({
+            source: "confession_post",
+            targetType: "channel",
+            targetId: channel.id,
+            guildId: channel.guildId,
+            isEphemeral: false,
+            content: undefined,
+            embeds: [embed.toJSON()],
+            components: components.map((row) => row.toJSON()),
+            attachments: capturedAttachments,
+            capturedAt: new Date(),
+        });
+
         return { messageId: msg.id };
     } catch (error) {
         logger.error(
@@ -795,6 +818,19 @@ export async function handleConfessionReply(params: {
             .setTimestamp();
 
         const replyMsg = await thread.send({ embeds: [replyEmbed] });
+
+        BotOutputAudit.record({
+            source: "confession_reply",
+            targetType: "channel",
+            targetId: thread.id,
+            guildId,
+            isEphemeral: false,
+            content: undefined,
+            embeds: [replyEmbed.toJSON()],
+            components: [],
+            attachments: [],
+            capturedAt: new Date(),
+        });
 
         await ConfessionReplyModel.create({
             confessionId: confessionMongoId,

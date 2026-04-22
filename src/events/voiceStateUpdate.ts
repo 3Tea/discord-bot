@@ -245,7 +245,7 @@ async function tickVoiceXPSessions(): Promise<void> {
                                     updated.xp,
                                     notifLocale
                                 );
-                                await sendNotification(notifGuild, notifConfig.channelId, embed);
+                                await sendNotification(notifGuild, notifConfig.channelId, embed, NotificationType.LevelUp);
                             }
                         }
                     }

@@ -104,7 +104,7 @@ export default {
                             notifLocale
                         );
                         const targetChannelId = notifConfig.channelId ?? message.channel.id;
-                        await sendNotification(message.guild, targetChannelId, embed);
+                        await sendNotification(message.guild, targetChannelId, embed, NotificationType.LevelUp);
                     }
                 } catch (err) {
                     logger.error(`[messageCreate:levelNotif] ${err instanceof Error ? err.message : "Unknown error"}`);
