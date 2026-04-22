@@ -6,6 +6,9 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+
+## [5.9.0] - 2026-04-22
+
 ### Added
 
 - **Bot output audit** — `/audit setup outputs-channel` adds a third audit channel that captures every non-command bot output (DMs, welcome/goodbye/boost/level-up/milestone notifications, confession posts and replies). Each batched parent embed spawns a 24h thread that replays the exact payload (embeds, content, disabled components, attachments) the recipient saw.
