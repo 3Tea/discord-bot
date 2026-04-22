@@ -534,7 +534,7 @@ async function reverseTransaction(
             : original.gemDelta < 0
               ? { $add: ["$gem", -original.gemDelta] }
               : "$gem";
-    await UserEconomyModel.updateOne(filter, [{ $set: { coin: coinExpr, gem: gemExpr } }]);
+    await UserEconomyModel.updateOne(filter, [{ $set: { coin: coinExpr, gem: gemExpr } }], { updatePipeline: true });
 
     const reverseTx = await TransactionModel.create({
         userId: original.userId,

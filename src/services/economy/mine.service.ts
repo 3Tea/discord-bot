@@ -110,9 +110,11 @@ async function mine(userId: string, guildId: string): Promise<MineResult> {
     if (Math.random() < collapseRate) {
         const penalty = randomInRange(COLLAPSE_PENALTY_MIN, COLLAPSE_PENALTY_MAX);
 
-        await UserEconomyModel.updateOne({ userId, guildId }, [
-            { $set: { coin: { $max: [{ $subtract: ["$coin", penalty] }, 0] }, mineDepth: currentCheckpoint } },
-        ]);
+        await UserEconomyModel.updateOne(
+            { userId, guildId },
+            [{ $set: { coin: { $max: [{ $subtract: ["$coin", penalty] }, 0] }, mineDepth: currentCheckpoint } }],
+            { updatePipeline: true }
+        );
 
         return {
             collapsed: true,
