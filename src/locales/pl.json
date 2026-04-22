@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "Zablokuj serwer globalnie (bot automatycznie opuszcza)",
     "cmd.blocklist.remove_guild.desc": "Odblokuj serwer globalnie",
     "cmd.blocklist.list.desc": "Lista zablokowanych użytkowników lub serwerów",
-    "cmd.blocklist.info.desc": "Pokaż szczegóły wpisu blocklisty"
+    "cmd.blocklist.info.desc": "Pokaż szczegóły wpisu blocklisty",
+    "blocklist.guild_blocked": "Ten serwer został zablokowany przed korzystaniem z tego bota. Powód: {{reason}}"
 }

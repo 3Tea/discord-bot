@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "Server global sperren (Bot verlässt automatisch)",
     "cmd.blocklist.remove_guild.desc": "Server global entsperren",
     "cmd.blocklist.list.desc": "Gesperrte Benutzer oder Server auflisten",
-    "cmd.blocklist.info.desc": "Details zu einem Blocklisteneintrag anzeigen"
+    "cmd.blocklist.info.desc": "Details zu einem Blocklisteneintrag anzeigen",
+    "blocklist.guild_blocked": "Dieser Server ist für die Nutzung dieses Bots gesperrt. Grund: {{reason}}"
 }

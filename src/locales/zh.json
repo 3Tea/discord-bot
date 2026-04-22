@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "全局封禁服务器（机器人自动离开）",
     "cmd.blocklist.remove_guild.desc": "全局解封服务器",
     "cmd.blocklist.list.desc": "列出被封禁的用户或服务器",
-    "cmd.blocklist.info.desc": "显示封禁条目的详细信息"
+    "cmd.blocklist.info.desc": "显示封禁条目的详细信息",
+    "blocklist.guild_blocked": "此服务器已被禁止使用此机器人。原因：{{reason}}"
 }

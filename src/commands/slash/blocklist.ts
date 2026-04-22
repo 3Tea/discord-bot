@@ -173,7 +173,7 @@ async function handleAddGuild(interaction: ChatInputCommandInteraction): Promise
     }
 
     const guildName = interaction.client.guilds.cache.get(guildId)?.name;
-    const { left } = await BlocklistService.blockGuild(
+    const result = await BlocklistService.blockGuild(
         guildId,
         reason,
         interaction.user.id,
@@ -188,7 +188,7 @@ async function handleAddGuild(interaction: ChatInputCommandInteraction): Promise
         reason,
         blockedBy: interaction.user.id,
     });
-    if (left) {
+    if (result.status === "left") {
         AuditService.recordBlocklistAction({
             action: "auto-leave",
             type: "guild",
@@ -197,7 +197,12 @@ async function handleAddGuild(interaction: ChatInputCommandInteraction): Promise
             reason,
         });
     }
-    const suffix = left ? " Bot left the guild." : " Bot was not in this guild.";
+    const suffix =
+        result.status === "left"
+            ? " Bot left the guild."
+            : result.status === "not-in-guild"
+                ? " Bot was not in this guild."
+                : ` ⚠️ Failed to leave — manual kick may be needed. Error: ${result.error}`;
     await interaction.editReply(`Blocked guild \`${guildId}\`.${suffix} Reason: ${reason}`);
 }
 

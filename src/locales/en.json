@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "Block a guild globally (bot auto-leaves)",
     "cmd.blocklist.remove_guild.desc": "Unblock a guild globally",
     "cmd.blocklist.list.desc": "List blocked users or guilds",
-    "cmd.blocklist.info.desc": "Show details for a blocklist entry"
+    "cmd.blocklist.info.desc": "Show details for a blocklist entry",
+    "blocklist.guild_blocked": "This server is blocked from using this bot. Reason: {{reason}}"
 }

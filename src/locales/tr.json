@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "Bir sunucuyu genel olarak engelle (bot otomatik ayrılır)",
     "cmd.blocklist.remove_guild.desc": "Bir sunucunun genel engelini kaldır",
     "cmd.blocklist.list.desc": "Engellenmiş kullanıcıları veya sunucuları listele",
-    "cmd.blocklist.info.desc": "Bir blocklist kaydının detaylarını göster"
+    "cmd.blocklist.info.desc": "Bir blocklist kaydının detaylarını göster",
+    "blocklist.guild_blocked": "Bu sunucunun bu botu kullanması engellendi. Sebep: {{reason}}"
 }

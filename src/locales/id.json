@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "Blokir guild secara global (bot otomatis keluar)",
     "cmd.blocklist.remove_guild.desc": "Batalkan pemblokiran guild secara global",
     "cmd.blocklist.list.desc": "Daftar pengguna atau guild yang diblokir",
-    "cmd.blocklist.info.desc": "Tampilkan detail entri blocklist"
+    "cmd.blocklist.info.desc": "Tampilkan detail entri blocklist",
+    "blocklist.guild_blocked": "Server ini diblokir dari menggunakan bot ini. Alasan: {{reason}}"
 }

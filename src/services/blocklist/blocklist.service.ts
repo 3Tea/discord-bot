@@ -40,13 +40,18 @@ async function unblockUser(userId: string): Promise<boolean> {
     return result.deletedCount > 0;
 }
 
+type BlockGuildResult =
+    | { status: "left" }
+    | { status: "not-in-guild" }
+    | { status: "leave-failed"; error: string };
+
 async function blockGuild(
     guildId: string,
     reason: string,
     blockedBy: string,
     client: Client,
     guildName?: string
-): Promise<{ left: boolean }> {
+): Promise<BlockGuildResult> {
     await BlocklistEntryModel.findOneAndUpdate(
         { type: "guild", targetId: guildId },
         {
@@ -58,7 +63,7 @@ async function blockGuild(
     await invalidate([guildKey(guildId)]);
 
     const guild = client.guilds.cache.get(guildId);
-    if (!guild) return { left: false };
+    if (!guild) return { status: "not-in-guild" };
 
     try {
         await guild.leave();
@@ -66,12 +71,11 @@ async function blockGuild(
             { type: "guild", targetId: guildId },
             { $set: { leftAt: new Date(), guildName: guild.name } }
         );
-        return { left: true };
+        return { status: "left" };
     } catch (error) {
-        logger.error(
-            `[BlocklistService] failed to leave guild ${guildId}: ${error instanceof Error ? error.message : "Unknown"}`
-        );
-        return { left: false };
+        const message = error instanceof Error ? error.message : "Unknown";
+        logger.error(`[BlocklistService] failed to leave guild ${guildId}: ${message}`);
+        return { status: "leave-failed", error: message };
     }
 }
 

@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "Blocca un server globalmente (il bot esce automaticamente)",
     "cmd.blocklist.remove_guild.desc": "Sblocca un server globalmente",
     "cmd.blocklist.list.desc": "Elenca utenti o server bloccati",
-    "cmd.blocklist.info.desc": "Mostra i dettagli di una voce della blocklist"
+    "cmd.blocklist.info.desc": "Mostra i dettagli di una voce della blocklist",
+    "blocklist.guild_blocked": "Questo server è bloccato dall'uso di questo bot. Motivo: {{reason}}"
 }

@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "Chặn một guild toàn cục (bot sẽ tự rời)",
     "cmd.blocklist.remove_guild.desc": "Bỏ chặn một guild toàn cục",
     "cmd.blocklist.list.desc": "Xem danh sách user/guild bị chặn",
-    "cmd.blocklist.info.desc": "Xem chi tiết một entry blocklist"
+    "cmd.blocklist.info.desc": "Xem chi tiết một entry blocklist",
+    "blocklist.guild_blocked": "Server này đã bị chặn sử dụng bot. Lý do: {{reason}}"
 }

@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "Blokkeer een server globaal (bot verlaat automatisch)",
     "cmd.blocklist.remove_guild.desc": "Deblokkeer een server globaal",
     "cmd.blocklist.list.desc": "Lijst geblokkeerde gebruikers of servers",
-    "cmd.blocklist.info.desc": "Toon details van een blocklist-vermelding"
+    "cmd.blocklist.info.desc": "Toon details van een blocklist-vermelding",
+    "blocklist.guild_blocked": "Deze server is geblokkeerd voor het gebruik van deze bot. Reden: {{reason}}"
 }

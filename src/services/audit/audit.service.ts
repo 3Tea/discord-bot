@@ -9,7 +9,6 @@ import {
     adminActionEmbed,
     backgroundErrorEmbed,
     blocklistActionEmbed,
-    BlocklistActionPayload,
     CommandEntry,
     commandErrorEmbed,
     commandSuccessEmbed,
@@ -19,6 +18,7 @@ import {
     snapshotSummaryEmbed,
     startupSummaryEmbed,
 } from "./auditEmbeds";
+import type { BlocklistActionPayload } from "./auditEmbeds";
 
 const ALWAYS_ADMIN_COMMANDS = new Set<string>([
     "guild-admin",

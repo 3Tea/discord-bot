@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "ギルドをグローバルにブロック（ボットが自動退出）",
     "cmd.blocklist.remove_guild.desc": "ギルドのグローバルブロックを解除",
     "cmd.blocklist.list.desc": "ブロック済みユーザーまたはギルドを一覧表示",
-    "cmd.blocklist.info.desc": "ブロックリストエントリの詳細を表示"
+    "cmd.blocklist.info.desc": "ブロックリストエントリの詳細を表示",
+    "blocklist.guild_blocked": "このサーバーはボットの使用がブロックされています。理由: {{reason}}"
 }

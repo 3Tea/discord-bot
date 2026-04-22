@@ -1493,5 +1493,6 @@
     "cmd.blocklist.add_guild.desc": "길드 전역 차단 (봇 자동 퇴장)",
     "cmd.blocklist.remove_guild.desc": "길드 전역 차단 해제",
     "cmd.blocklist.list.desc": "차단된 사용자 또는 길드 목록",
-    "cmd.blocklist.info.desc": "차단 항목 상세 보기"
+    "cmd.blocklist.info.desc": "차단 항목 상세 보기",
+    "blocklist.guild_blocked": "이 서버는 이 봇 사용이 차단되었습니다. 사유: {{reason}}"
 }
