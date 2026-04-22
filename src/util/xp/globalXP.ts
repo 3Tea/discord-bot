@@ -25,7 +25,7 @@ export async function syncGlobalXP(userId: string, xpDelta: number): Promise<voi
                 },
             },
         ],
-        { upsert: true }
+        { upsert: true, updatePipeline: true }
     );
 }
 
