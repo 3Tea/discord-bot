@@ -188,10 +188,11 @@ export function startupSummaryEmbed(params: {
     totalMembers: number;
     topGuilds: Array<{ name: string; memberCount: number }>;
 }): EmbedBuilder {
-    const top = params.topGuilds
-        .slice(0, 10)
-        .map((g, i) => `${i + 1}. ${truncate(g.name, 40)} — ${g.memberCount.toLocaleString()}`)
-        .join("\n") || "—";
+    const top =
+        params.topGuilds
+            .slice(0, 10)
+            .map((g, i) => `${i + 1}. ${truncate(g.name, 40)} — ${g.memberCount.toLocaleString()}`)
+            .join("\n") || "—";
     return new EmbedBuilder()
         .setTitle("🚀 Bot started")
         .setColor(COLOR.SUMMARY)
@@ -210,10 +211,11 @@ export function snapshotSummaryEmbed(params: {
     top5: Array<{ name: string; memberCount: number }>;
 }): EmbedBuilder {
     const deltaStr = params.memberDelta >= 0 ? `+${params.memberDelta}` : `${params.memberDelta}`;
-    const top = params.top5
-        .slice(0, 5)
-        .map((g, i) => `${i + 1}. ${truncate(g.name, 40)} — ${g.memberCount.toLocaleString()}`)
-        .join("\n") || "—";
+    const top =
+        params.top5
+            .slice(0, 5)
+            .map((g, i) => `${i + 1}. ${truncate(g.name, 40)} — ${g.memberCount.toLocaleString()}`)
+            .join("\n") || "—";
     return new EmbedBuilder()
         .setTitle("📊 Daily snapshot")
         .setColor(COLOR.SUMMARY)
@@ -241,7 +243,9 @@ export function memberDropAlertEmbed(
     return new EmbedBuilder()
         .setTitle("🚨 Member drop threshold exceeded")
         .setColor(COLOR.ALERT)
-        .setDescription(`Threshold: **−${thresholdPct}%** in last snapshot window.\nGuilds affected: **${offenders.length}**`)
+        .setDescription(
+            `Threshold: **−${thresholdPct}%** in last snapshot window.\nGuilds affected: **${offenders.length}**`
+        )
         .addFields({ name: "Top offenders", value: truncate(top, 1024), inline: false })
         .setTimestamp();
 }

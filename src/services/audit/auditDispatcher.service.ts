@@ -73,9 +73,8 @@ function buildDisabledButton(comp: Record<string, unknown>): ButtonBuilder {
     if (comp.style === ButtonStyle.Link && typeof comp.url === "string") {
         return btn.setStyle(ButtonStyle.Link).setURL(comp.url);
     }
-    const customId = typeof comp.custom_id === "string"
-        ? comp.custom_id
-        : `audit:${Math.random().toString(36).slice(2)}`;
+    const customId =
+        typeof comp.custom_id === "string" ? comp.custom_id : `audit:${Math.random().toString(36).slice(2)}`;
     return btn.setStyle(ButtonStyle.Secondary).setCustomId(customId);
 }
 
@@ -89,7 +88,9 @@ function buildDisabledSelect(comp: Record<string, unknown>): StringSelectMenuBui
         .addOptions({ label: "—", value: "audit:placeholder" });
 }
 
-function buildDisabledRow(rawRow: { components: unknown[] }): ActionRowBuilder<MessageActionRowComponentBuilder> | null {
+function buildDisabledRow(rawRow: {
+    components: unknown[];
+}): ActionRowBuilder<MessageActionRowComponentBuilder> | null {
     const builtRow = new ActionRowBuilder<MessageActionRowComponentBuilder>();
     for (const rawComp of rawRow.components) {
         if (!rawComp || typeof rawComp !== "object") continue;
@@ -104,9 +105,7 @@ function buildDisabledRow(rawRow: { components: unknown[] }): ActionRowBuilder<M
     return builtRow.components.length > 0 ? builtRow : null;
 }
 
-function disableAll(
-    components: unknown[]
-): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
+function disableAll(components: unknown[]): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
     const rows: ActionRowBuilder<MessageActionRowComponentBuilder>[] = [];
     for (const raw of components) {
         if (!raw || typeof raw !== "object" || !("components" in raw)) continue;
@@ -137,7 +136,9 @@ async function sendChunkWithRetry(
         if (isFirstChunk && attachmentCount > 0) {
             try {
                 await thread.send({ ...payload, files: undefined });
-                logger.warn(`[AuditDispatcher] thread.send: dropped ${attachmentCount} attachments (likely expired URL)`);
+                logger.warn(
+                    `[AuditDispatcher] thread.send: dropped ${attachmentCount} attachments (likely expired URL)`
+                );
                 return;
             } catch {
                 /* fall through */
@@ -164,9 +165,7 @@ async function sendCapturedChunks(
             content: buildChunkContent(isFirstChunk, header, captured.content),
             embeds: embedsChunk.length ? (embedsChunk as never[]) : undefined,
             components: isFirstChunk ? disableAll(componentsRaw) : undefined,
-            files: isFirstChunk
-                ? captured.attachments.map((a) => ({ attachment: a.url, name: a.name }))
-                : undefined,
+            files: isFirstChunk ? captured.attachments.map((a) => ({ attachment: a.url, name: a.name })) : undefined,
             allowedMentions: { parse: [] },
         };
         await sendChunkWithRetry(thread, payload, isFirstChunk, captured.attachments.length, channelId);
@@ -187,10 +186,7 @@ async function sendCapturedEntries(
     }
 }
 
-async function sendThreadedChunk(
-    channel: TextChannel,
-    chunk: Array<CommandsEntry | OutputsEntry>
-): Promise<void> {
+async function sendThreadedChunk(channel: TextChannel, chunk: Array<CommandsEntry | OutputsEntry>): Promise<void> {
     if (chunk.length === 0) return;
 
     const parentEmbeds = chunk.map((e) => e.auditEmbed);
@@ -219,10 +215,7 @@ async function sendThreadedChunk(
     await sendCapturedEntries(thread, chunk, channel.id);
 }
 
-async function sendThreadedBatch(
-    channel: TextChannel,
-    entries: Array<CommandsEntry | OutputsEntry>
-): Promise<void> {
+async function sendThreadedBatch(channel: TextChannel, entries: Array<CommandsEntry | OutputsEntry>): Promise<void> {
     for (let i = 0; i < entries.length; i += MAX_EMBEDS_PER_MESSAGE) {
         const chunk = entries.slice(i, i + MAX_EMBEDS_PER_MESSAGE);
         await sendThreadedChunk(channel, chunk);
@@ -350,7 +343,11 @@ function init(client: Client): void {
     // the cycle — it just ensures init fires with a live Client reference.
     import("./botOutputAudit.service")
         .then((mod) => mod.BotOutputAudit.init(client))
-        .catch((err) => logger.warn(`[AuditDispatcher] BotOutputAudit init failed: ${err instanceof Error ? err.message : "Unknown"}`));
+        .catch((err) =>
+            logger.warn(
+                `[AuditDispatcher] BotOutputAudit init failed: ${err instanceof Error ? err.message : "Unknown"}`
+            )
+        );
     flushTimer = setInterval(() => {
         flush().catch(() => {});
     }, FLUSH_INTERVAL_MS);

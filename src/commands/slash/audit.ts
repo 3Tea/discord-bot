@@ -128,7 +128,9 @@ export default {
                             opt
                                 .setName("enabled")
                                 .setDescription("Enable or disable")
-                                .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.snapshot.enabled.desc"))
+                                .setDescriptionLocalizations(
+                                    descriptionLocales("cmd.audit.setup.snapshot.enabled.desc")
+                                )
                                 .setRequired(true)
                         )
                 )
@@ -141,7 +143,9 @@ export default {
                             opt
                                 .setName("member-drop-pct")
                                 .setDescription("Alert if total member drop % exceeds this (0 = disabled)")
-                                .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.alert.member_drop.desc"))
+                                .setDescriptionLocalizations(
+                                    descriptionLocales("cmd.audit.setup.alert.member_drop.desc")
+                                )
                                 .setMinValue(0)
                                 .setMaxValue(100)
                         )
@@ -169,7 +173,9 @@ export default {
                             opt
                                 .setName("clear-role")
                                 .setDescription("Unset the alert role")
-                                .setDescriptionLocalizations(descriptionLocales("cmd.audit.setup.alert.clear_role.desc"))
+                                .setDescriptionLocalizations(
+                                    descriptionLocales("cmd.audit.setup.alert.clear_role.desc")
+                                )
                         )
                         .addIntegerOption((opt) =>
                             opt
@@ -409,12 +415,13 @@ async function handleQuery(interaction: ChatInputCommandInteraction, sub: string
                     .lean(),
                 GuildAuditModel.countDocuments({ currentlyIn: true }),
             ]);
-            const lines = docs
-                .map(
-                    (d, i) =>
-                        `${(page - 1) * pageSize + i + 1}. **${d.name}** — ${d.memberCount.toLocaleString()} members (id: \`${d.guildId}\`, owner: \`${d.ownerId}\`)`
-                )
-                .join("\n") || "No guilds.";
+            const lines =
+                docs
+                    .map(
+                        (d, i) =>
+                            `${(page - 1) * pageSize + i + 1}. **${d.name}** — ${d.memberCount.toLocaleString()} members (id: \`${d.guildId}\`, owner: \`${d.ownerId}\`)`
+                    )
+                    .join("\n") || "No guilds.";
             const embed = new EmbedBuilder()
                 .setTitle(`Guilds (page ${page} / ${Math.max(1, Math.ceil(total / pageSize))})`)
                 .setDescription(lines)
@@ -431,11 +438,11 @@ async function handleQuery(interaction: ChatInputCommandInteraction, sub: string
                 await interaction.editReply("No GuildAudit record for that ID.");
                 return;
             }
-            const snaps = await GuildSnapshotModel.find({ guildId })
-                .sort({ takenAt: -1 })
-                .limit(30)
-                .lean();
-            const memberCounts = snaps.slice().reverse().map((s) => s.memberCount);
+            const snaps = await GuildSnapshotModel.find({ guildId }).sort({ takenAt: -1 }).limit(30).lean();
+            const memberCounts = snaps
+                .slice()
+                .reverse()
+                .map((s) => s.memberCount);
             const chart = sparkline(memberCounts);
             const embed = new EmbedBuilder()
                 .setTitle(`Guild: ${doc.name}`)
@@ -463,14 +470,17 @@ async function handleQuery(interaction: ChatInputCommandInteraction, sub: string
             const docs = await GuildAuditModel.find()
                 .sort({ updatedAt: -1 })
                 .limit(limit)
-                .lean<Array<{ name: string; currentlyIn: boolean; joinedAt: Date; leftAt?: Date | null; updatedAt: Date }>>();
-            const lines = docs
-                .map((d) => {
-                    const icon = d.currentlyIn ? "🟢" : "🔴";
-                    const when = d.currentlyIn ? d.joinedAt : (d.leftAt ?? d.updatedAt);
-                    return `${icon} **${d.name}** — <t:${Math.floor(when.getTime() / 1000)}:R>`;
-                })
-                .join("\n") || "No history.";
+                .lean<
+                    Array<{ name: string; currentlyIn: boolean; joinedAt: Date; leftAt?: Date | null; updatedAt: Date }>
+                >();
+            const lines =
+                docs
+                    .map((d) => {
+                        const icon = d.currentlyIn ? "🟢" : "🔴";
+                        const when = d.currentlyIn ? d.joinedAt : (d.leftAt ?? d.updatedAt);
+                        return `${icon} **${d.name}** — <t:${Math.floor(when.getTime() / 1000)}:R>`;
+                    })
+                    .join("\n") || "No history.";
             const embed = new EmbedBuilder()
                 .setTitle("Guild history")
                 .setDescription(lines)
@@ -483,12 +493,13 @@ async function handleQuery(interaction: ChatInputCommandInteraction, sub: string
             const client = interaction.client;
             const guilds = Array.from(client.guilds.cache.values());
             const totalMembers = guilds.reduce((s, g) => s + g.memberCount, 0);
-            const top10 = guilds
-                .slice()
-                .sort((a, b) => b.memberCount - a.memberCount)
-                .slice(0, 10)
-                .map((g, i) => `${i + 1}. **${g.name}** — ${g.memberCount.toLocaleString()}`)
-                .join("\n") || "—";
+            const top10 =
+                guilds
+                    .slice()
+                    .sort((a, b) => b.memberCount - a.memberCount)
+                    .slice(0, 10)
+                    .map((g, i) => `${i + 1}. **${g.name}** — ${g.memberCount.toLocaleString()}`)
+                    .join("\n") || "—";
             const everLeft = await GuildAuditModel.countDocuments({ currentlyIn: false });
             const embed = new EmbedBuilder()
                 .setTitle("Realtime summary")

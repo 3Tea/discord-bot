@@ -1,10 +1,4 @@
-import {
-    ButtonInteraction,
-    EmbedBuilder,
-    MessageFlags,
-    TextChannel,
-    ThreadAutoArchiveDuration,
-} from "discord.js";
+import { ButtonInteraction, EmbedBuilder, MessageFlags, TextChannel, ThreadAutoArchiveDuration } from "discord.js";
 
 import redis from "../../connector/redis";
 import { FOOTER, SERVER_S } from "../../util/config";

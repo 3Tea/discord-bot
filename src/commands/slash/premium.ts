@@ -173,14 +173,10 @@ async function sendGrantDM(
 ): Promise<void> {
     try {
         const dmLocale = await resolveUserLocale(targetId);
-        const untilStr = until
-            ? `<t:${Math.floor(until.getTime() / 1000)}:F>`
-            : t(dmLocale, "premium.lookup.lifetime");
+        const untilStr = until ? `<t:${Math.floor(until.getTime() / 1000)}:F>` : t(dmLocale, "premium.lookup.lifetime");
         const embed = new EmbedBuilder()
             .setTitle(t(dmLocale, `premium.dm.${action}.title`))
-            .setDescription(
-                t(dmLocale, `premium.dm.${action}.notice`, { tier: tier.toUpperCase(), until: untilStr })
-            )
+            .setDescription(t(dmLocale, `premium.dm.${action}.notice`, { tier: tier.toUpperCase(), until: untilStr }))
             .setColor(tier === "galaxy" ? 0x9b59b6 : 0xf39c12)
             .setTimestamp();
         const user = await interaction.client.users.fetch(targetId);

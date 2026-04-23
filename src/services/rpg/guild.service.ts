@@ -53,7 +53,11 @@ async function addGP(
     const oldRank = member.rank as AdventurerRank;
 
     // Atomically increment GP and read the updated document
-    const updated = await GuildMemberModel.findOneAndUpdate({ userId }, { $inc: { gp: amount } }, { returnDocument: "after" });
+    const updated = await GuildMemberModel.findOneAndUpdate(
+        { userId },
+        { $inc: { gp: amount } },
+        { returnDocument: "after" }
+    );
     if (!updated) throw new GuildMemberNotFoundError(userId);
 
     const newGP = updated.gp;
