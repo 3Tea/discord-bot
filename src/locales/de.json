@@ -196,6 +196,8 @@
     "manga.load_failed": "Manga konnte nicht geladen werden. Bitte versuche es später erneut.",
     "manga.support_server": "Support-Server",
     "manga.no_stars": "Du hast deine 3 kostenlosen Nutzungen heute aufgebraucht und hast nicht genug Sterne. Nutze /wallet daily um Sterne zu erhalten.",
+    "manga.locked.title": "Du liest bereits einen anderen Manga",
+    "manga.locked.description": "Du liest gerade **{{title}}** — warte **{{seconds}}s**, bevor du einen neuen startest.",
     "star_drop.found": "Du hast einen Stern gefunden!",
     "cmd.mine.desc": "Schürfe Mineralien — tiefer graben für bessere Belohnungen",
     "cmd.fish.desc": "Angel nach Münzen",

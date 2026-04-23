@@ -196,6 +196,8 @@
     "manga.load_failed": "Manga kon niet worden geladen. Probeer het later opnieuw.",
     "manga.support_server": "Ondersteuningsserver",
     "manga.no_stars": "Je hebt je 3 gratis gebruiken van vandaag opgebruikt en hebt niet genoeg sterren. Gebruik /wallet daily om sterren te claimen.",
+    "manga.locked.title": "Je bent al een andere manga aan het lezen",
+    "manga.locked.description": "Je leest **{{title}}** — wacht **{{seconds}}s** voordat je een andere begint.",
     "star_drop.found": "Je hebt een ster gevonden!",
     "cmd.mine.desc": "Delf mineralen — dieper graven voor betere beloningen",
     "cmd.fish.desc": "Ga vissen voor munten",
