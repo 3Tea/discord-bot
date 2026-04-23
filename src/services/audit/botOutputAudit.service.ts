@@ -77,7 +77,12 @@ function extractAttachments(payload: unknown): Array<{ url: string; name: string
     return out;
 }
 
-function extractEmbedsAndComponents(payload: unknown): { embeds: unknown[]; components: unknown[]; content?: string; flags?: number } {
+function extractEmbedsAndComponents(payload: unknown): {
+    embeds: unknown[];
+    components: unknown[];
+    content?: string;
+    flags?: number;
+} {
     if (!payload || typeof payload !== "object") {
         return { embeds: [], components: [] };
     }
@@ -124,20 +129,15 @@ function takeInteractionCapture(interactionId: string): CapturedOutput | undefin
     return captured;
 }
 
-function buildInteractionCapture(
-    interaction: BaseInteraction,
-    source: OutputSource,
-    payload: unknown
-): CapturedOutput {
+function buildInteractionCapture(interaction: BaseInteraction, source: OutputSource, payload: unknown): CapturedOutput {
     const { embeds, components, content, flags } = extractEmbedsAndComponents(payload);
     const isEphemeral = (flags ?? 0) & FLAG_EPHEMERAL ? true : false;
     const attachments = extractAttachments(payload);
-    const commandName =
-        interaction.isChatInputCommand?.()
-            ? (interaction as ChatInputCommandInteraction).commandName
-            : interaction.isButton?.()
-            ? "button"
-            : undefined;
+    const commandName = interaction.isChatInputCommand?.()
+        ? (interaction as ChatInputCommandInteraction).commandName
+        : interaction.isButton?.()
+          ? "button"
+          : undefined;
     const channelId = interaction.channelId ?? "unknown";
     return {
         source,
@@ -183,7 +183,9 @@ function patchInteractionClass(Cls: { prototype: unknown }): void {
                         interactionCaptures.set(this.id, captured);
                         interactionCaptureTimestamps.set(this.id, Date.now());
                     } catch (err) {
-                        logger.warn(`[BotOutputAudit] interaction.reply capture: ${err instanceof Error ? err.message : "Unknown"}`);
+                        logger.warn(
+                            `[BotOutputAudit] interaction.reply capture: ${err instanceof Error ? err.message : "Unknown"}`
+                        );
                     }
                 })
                 .catch(() => {
@@ -205,7 +207,9 @@ function patchInteractionClass(Cls: { prototype: unknown }): void {
                         interactionCaptures.set(this.id, captured);
                         interactionCaptureTimestamps.set(this.id, Date.now());
                     } catch (err) {
-                        logger.warn(`[BotOutputAudit] interaction.editReply capture: ${err instanceof Error ? err.message : "Unknown"}`);
+                        logger.warn(
+                            `[BotOutputAudit] interaction.editReply capture: ${err instanceof Error ? err.message : "Unknown"}`
+                        );
                     }
                 })
                 .catch(() => {});
@@ -232,7 +236,9 @@ function patchInteractionClass(Cls: { prototype: unknown }): void {
                         interactionCaptures.set(this.id, captured);
                         interactionCaptureTimestamps.set(this.id, Date.now());
                     } catch (err) {
-                        logger.warn(`[BotOutputAudit] interaction.followUp capture: ${err instanceof Error ? err.message : "Unknown"}`);
+                        logger.warn(
+                            `[BotOutputAudit] interaction.followUp capture: ${err instanceof Error ? err.message : "Unknown"}`
+                        );
                     }
                 })
                 .catch(() => {});
@@ -269,7 +275,9 @@ function patchUserSend(): void {
                             capturedAt: new Date(),
                         });
                     } catch (err) {
-                        logger.warn(`[BotOutputAudit] user.send capture: ${err instanceof Error ? err.message : "Unknown"}`);
+                        logger.warn(
+                            `[BotOutputAudit] user.send capture: ${err instanceof Error ? err.message : "Unknown"}`
+                        );
                     }
                 })
                 .catch(() => {});

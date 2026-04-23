@@ -196,6 +196,8 @@
     "manga.load_failed": "加载漫画失败。请稍后再试。",
     "manga.support_server": "支持服务器",
     "manga.no_stars": "你已用完今天的3次免费机会，星星不足。请使用 /wallet daily 领取星星。",
+    "manga.locked.title": "正在阅读其他漫画",
+    "manga.locked.description": "您正在阅读 **{{title}}** — 请等待 **{{seconds}}秒** 后再开始新的阅读。",
     "star_drop.found": "你发现了一颗星星!",
     "cmd.mine.desc": "挖掘矿石 — 越深奖励越高",
     "cmd.fish.desc": "钓鱼赚取金币",

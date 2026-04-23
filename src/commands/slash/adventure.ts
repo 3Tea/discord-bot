@@ -1078,9 +1078,7 @@ async function handleDevReset(interaction: ChatInputCommandInteraction, locale: 
         });
         if (redisDown) description += `\n${t(locale, "adventure.dev_reset.cache_warning")}`;
     }
-    const doneEmbed = new EmbedBuilder()
-        .setDescription(description)
-        .setColor(errors.length > 0 ? 0xf39c12 : 0x57f287);
+    const doneEmbed = new EmbedBuilder().setDescription(description).setColor(errors.length > 0 ? 0xf39c12 : 0x57f287);
 
     await interaction.editReply({ embeds: [doneEmbed], components: [] });
 

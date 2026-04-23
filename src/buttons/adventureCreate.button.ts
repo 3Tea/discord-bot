@@ -29,9 +29,7 @@ export default {
         if (existing) {
             await interaction.update({
                 embeds: [
-                    new EmbedBuilder()
-                        .setDescription(t(locale, "adventure.create.already_exists"))
-                        .setColor(0xed4245),
+                    new EmbedBuilder().setDescription(t(locale, "adventure.create.already_exists")).setColor(0xed4245),
                 ],
                 components: [],
             });

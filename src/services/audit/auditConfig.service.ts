@@ -101,11 +101,7 @@ async function clearChannel(target: "critical" | "commands" | "outputs", updated
     } else {
         field = "outputsChannelId";
     }
-    await AuditConfigModel.updateOne(
-        { _id: "singleton" },
-        { $set: { [field]: null, updatedBy } },
-        { upsert: true }
-    );
+    await AuditConfigModel.updateOne({ _id: "singleton" }, { $set: { [field]: null, updatedBy } }, { upsert: true });
     await invalidate();
 }
 

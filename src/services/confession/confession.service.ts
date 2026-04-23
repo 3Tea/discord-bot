@@ -17,7 +17,12 @@ import type { UpdateQuery } from "mongoose";
 import redis from "../../connector/redis";
 import { secondsUntilUTCMidnight } from "../../util/date/utc";
 import { BotOutputAudit } from "../audit/botOutputAudit.service";
-import ConfessionModel, { ConfessionDoc, IConfession, IConfessionAudio, IConfessionImage } from "../../models/confession.model";
+import ConfessionModel, {
+    ConfessionDoc,
+    IConfession,
+    IConfessionAudio,
+    IConfessionImage,
+} from "../../models/confession.model";
 import GuildConfessionConfigModel, {
     ConfessionMode,
     IGuildConfessionConfig,

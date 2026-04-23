@@ -145,7 +145,12 @@ async function setGem(userId: string, guildId: string, amount: number): Promise<
     return updated!;
 }
 
-async function exchange(userId: string, guildId: string, gemAmount: number, ratePerGem: number): Promise<UserEconomyDoc> {
+async function exchange(
+    userId: string,
+    guildId: string,
+    gemAmount: number,
+    ratePerGem: number
+): Promise<UserEconomyDoc> {
     const coinCost = gemAmount * ratePerGem;
     await deduct(userId, guildId, coinCost, 0, "exchange", { gemAmount, ratePerGem });
     try {

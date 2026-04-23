@@ -24,6 +24,7 @@ import PremiumService from "../../services/premium/premium.service";
 import { secondsUntilUTCMidnight } from "../date/utc";
 import type { MangaSource } from "./sources";
 import { buildPremiumButton } from "../premium/upgradeButton";
+import { checkMangaLock } from "./lock";
 
 const CACHE_TTL = 60 * 10; // 10 minutes
 const BUTTON_REMOVE_DELAY = 20_000; // 20 seconds
@@ -154,6 +155,21 @@ export function mangaCommand(source: MangaSource) {
 
             if (!(interaction.channel as TextChannel)?.nsfw) {
                 await interaction.reply({ content: t(locale, "manga.nsfw_only"), flags: MessageFlags.Ephemeral });
+                return;
+            }
+
+            const lockStatus = await checkMangaLock(interaction.user.id);
+            if (lockStatus.locked) {
+                const embed = new EmbedBuilder()
+                    .setColor(0xed4245)
+                    .setTitle(t(locale, "manga.locked.title"))
+                    .setDescription(
+                        t(locale, "manga.locked.description", {
+                            title: lockStatus.title ?? "",
+                            seconds: lockStatus.seconds ?? 0,
+                        })
+                    );
+                await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
 
