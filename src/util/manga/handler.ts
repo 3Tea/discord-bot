@@ -183,7 +183,9 @@ export function mangaCommand(source: MangaSource) {
                         : `${SERVER_HD}${source.apiPath}/get?book=${interaction.options.getInteger("id", true)}`;
 
                 const response = await axios.get(apiUrl);
-                if (!response.data?.data) return;
+                if (!response.data?.data) {
+                    throw new Error("Upstream response missing data payload");
+                }
 
                 const result = response.data.data;
 
@@ -204,7 +206,11 @@ export function mangaCommand(source: MangaSource) {
 
                 await interaction.editReply({ embeds: [embed], components: [row] });
                 await wait(BUTTON_REMOVE_DELAY);
-                await interaction.editReply({ components: [] });
+                try {
+                    await interaction.editReply({ components: [] });
+                } catch {
+                    // Best-effort cleanup — message may have been deleted during the wait.
+                }
             } catch (error) {
                 log(`[manga:${source.name}] ${error instanceof Error ? error.message : "Unknown error"}`, "error");
                 try {
@@ -215,10 +221,14 @@ export function mangaCommand(source: MangaSource) {
                         "error"
                     );
                 }
-                await interaction.editReply({
-                    content: t(locale, "manga.load_failed"),
-                    components: [buildErrorRow(locale)],
-                });
+                try {
+                    await interaction.editReply({
+                        content: t(locale, "manga.load_failed"),
+                        components: [buildErrorRow(locale)],
+                    });
+                } catch {
+                    // Original interaction expired or message was deleted — nothing to edit.
+                }
             }
         },
     };
