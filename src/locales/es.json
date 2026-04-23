@@ -196,6 +196,8 @@
     "manga.load_failed": "Error al cargar el manga. Inténtalo de nuevo más tarde.",
     "manga.support_server": "Servidor de soporte",
     "manga.no_stars": "Has agotado tus 3 usos gratuitos de hoy y no tienes suficientes estrellas. Usa /wallet daily para reclamar estrellas.",
+    "manga.locked.title": "Ya estás leyendo otro manga",
+    "manga.locked.description": "Estás leyendo **{{title}}** — espera **{{seconds}}s** antes de empezar otro.",
     "star_drop.found": "Has encontrado una estrella!",
     "cmd.mine.desc": "Minar minerales — más profundo, mejores recompensas",
     "cmd.fish.desc": "Pesca para ganar monedas",

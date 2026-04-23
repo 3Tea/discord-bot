@@ -196,6 +196,8 @@
     "manga.load_failed": "マンガの読み込みに失敗しました。後でもう一度お試しください。",
     "manga.support_server": "サポートサーバー",
     "manga.no_stars": "本日の無料3回を使い切り、スターが不足しています。/wallet daily でスターを受け取ってください。",
+    "manga.locked.title": "別のマンガを読み中です",
+    "manga.locked.description": "**{{title}}** を読んでいます — 別のマンガを始めるには **{{seconds}}秒** 待ってください。",
     "star_drop.found": "スターを見つけた!",
     "cmd.mine.desc": "鉱石を掘ろう — 深いほど報酬アップ",
     "cmd.fish.desc": "釣りをしてコインを稼ごう",

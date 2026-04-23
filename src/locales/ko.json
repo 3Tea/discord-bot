@@ -196,6 +196,8 @@
     "manga.load_failed": "만화를 불러오지 못했습니다. 나중에 다시 시도해주세요.",
     "manga.support_server": "지원 서버",
     "manga.no_stars": "오늘의 무료 3회를 모두 사용했고 스타가 부족해요. /wallet daily로 스타를 받으세요.",
+    "manga.locked.title": "이미 다른 만화를 읽고 있어요",
+    "manga.locked.description": "**{{title}}** 을(를) 읽는 중이에요 — 다른 만화를 시작하려면 **{{seconds}}초** 기다려 주세요.",
     "star_drop.found": "스타를 발견했어요!",
     "cmd.mine.desc": "광물을 캐세요 — 깊을수록 보상이 커요",
     "cmd.fish.desc": "낚시로 코인을 벌어보세요",

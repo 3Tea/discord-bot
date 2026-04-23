@@ -196,6 +196,8 @@
     "manga.load_failed": "Manga yüklenemedi. Lütfen daha sonra tekrar deneyin.",
     "manga.support_server": "Destek Sunucusu",
     "manga.no_stars": "Bugünkü 3 ücretsiz kullanım hakkınızı tükettiniz ve yeterli yıldızınız yok. Yıldız almak için /wallet daily kullanın.",
+    "manga.locked.title": "Zaten başka bir manga okuyorsun",
+    "manga.locked.description": "**{{title}}** okuyorsun — yenisini başlatmadan önce **{{seconds}}sn** bekle.",
     "star_drop.found": "Bir yıldız buldun!",
     "cmd.mine.desc": "Mineral çıkar — derine in, daha iyi ödüller kazan",
     "cmd.fish.desc": "Balık tutarak jeton kazan",

@@ -20,11 +20,7 @@ import {
 } from "./auditEmbeds";
 import type { BlocklistActionPayload } from "./auditEmbeds";
 
-const ALWAYS_ADMIN_COMMANDS = new Set<string>([
-    "guild-admin",
-    "commandlog",
-    "audit",
-]);
+const ALWAYS_ADMIN_COMMANDS = new Set<string>(["guild-admin", "commandlog", "audit"]);
 
 function isAdminCommand(entry: CommandEntry): boolean {
     if (ALWAYS_ADMIN_COMMANDS.has(entry.commandName)) return true;

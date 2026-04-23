@@ -197,6 +197,8 @@
     "manga.load_failed": "Failed to load manga. Please try again later.",
     "manga.support_server": "Support Server",
     "manga.no_stars": "You've used all 3 free uses today and don't have enough stars. Use /wallet daily to claim stars.",
+    "manga.locked.title": "Already reading another manga",
+    "manga.locked.description": "You are reading **{{title}}** — wait **{{seconds}}s** before starting another one.",
     "star_drop.found": "You found a star!",
     "cmd.mine.desc": "Dig for minerals — go deeper for better rewards",
     "cmd.fish.desc": "Go fishing for coins",

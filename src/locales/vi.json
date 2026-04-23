@@ -196,6 +196,8 @@
     "manga.load_failed": "Không thể tải manga. Vui lòng thử lại sau.",
     "manga.support_server": "Máy chủ hỗ trợ",
     "manga.no_stars": "Bạn đã hết 3 lượt miễn phí hôm nay và không đủ star. Dùng /wallet daily để nhận star.",
+    "manga.locked.title": "Đang đọc manga khác",
+    "manga.locked.description": "Bạn đang đọc **{{title}}** — chờ **{{seconds}}s** nữa rồi thử lại nhé.",
     "star_drop.found": "Bạn tìm thấy một ngôi sao!",
     "cmd.mine.desc": "Đào khoáng sản — càng sâu phần thưởng càng lớn",
     "cmd.fish.desc": "Đi câu cá để kiếm coin",

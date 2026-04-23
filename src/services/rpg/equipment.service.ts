@@ -137,12 +137,7 @@ function getNameByRarity(names: string[], rarity: Rarity): string {
     return names[nameIndex];
 }
 
-function generateEquipment(
-    ownerId: string,
-    slot: EquipmentSlot,
-    floor: number,
-    classType?: ClassType
-): IEquipment {
+function generateEquipment(ownerId: string, slot: EquipmentSlot, floor: number, classType?: ClassType): IEquipment {
     const rarity = rollRarity(floor);
 
     let name: string;
