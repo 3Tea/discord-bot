@@ -53,15 +53,19 @@ export default {
             console.error(error);
             const locale = await resolveLocale(interaction).catch(() => "en" as const);
             const errorMsg = t(locale, "common.error");
-            if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply({
-                    content: errorMsg,
-                    flags: MessageFlags.Ephemeral,
-                });
-            } else {
-                await interaction.editReply({
-                    content: errorMsg,
-                });
+            try {
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({
+                        content: errorMsg,
+                        flags: MessageFlags.Ephemeral,
+                    });
+                } else {
+                    await interaction.editReply({
+                        content: errorMsg,
+                    });
+                }
+            } catch {
+                // Interaction token expired or reply message was deleted — nothing else we can do.
             }
         }
 
