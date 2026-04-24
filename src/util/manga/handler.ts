@@ -67,7 +67,7 @@ async function applyStarCharge(
 }
 
 /** Refunds a star charge or decrements the free-use counter on command error. */
-async function refundCharge(userId: string, sourceName: string, charged: boolean): Promise<void> {
+export async function refundCharge(userId: string, sourceName: string, charged: boolean): Promise<void> {
     if (charged) {
         await WalletService.addStar(userId, STAR_COST, "command_refund", { command: sourceName });
         return;
