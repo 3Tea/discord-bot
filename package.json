@@ -1,0 +1,54 @@
+{
+  "name": "3at-discord-bot",
+  "version": "5.10.0",
+  "description": "Make 3AT great again :)",
+  "main": "www.ts",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc && cp -r src/locales dist/locales",
+    "build:start": "rm -rf ./dist && tsc && cp -r src/locales dist/locales && node ./dist/bin/www.js",
+    "start": "node ./dist/bin/www.js",
+    "start:dev": "nodemon --exec ts-node ./src/bin/www.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/3Tea/discord-bot.git"
+  },
+  "keywords": [
+    "@ds112",
+    "@onepiecehung"
+  ],
+  "author": "@ds112",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/3Tea/discord-bot/issues"
+  },
+  "discussions": "https://github.com/3Tea/discord-bot/discussions",
+  "homepage": "https://www.discords.sbs",
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.97",
+    "axios": "^1.15.0",
+    "discord.js": "^14.26.0",
+    "dotenv": "^16.4.7",
+    "i18next": "^26.0.3",
+    "i18next-fs-backend": "^2.6.4",
+    "ioredis": "^5.2.4",
+    "mongoose": "^9.5.0",
+    "node-cache": "^5.1.2",
+    "tracer": "^1.1.6",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.8.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.0"
+  }
+}
