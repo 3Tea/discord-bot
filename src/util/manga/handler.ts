@@ -53,6 +53,7 @@ async function applyStarCharge(
         try {
             await WalletService.deductStar(userId, STAR_COST, "command_charge", { command: sourceName });
         } catch (error) {
+            // Rollback the free-use counter so the failed charge doesn't burn a slot
             const current = (await redis.getJson(freeKey)) as number | null;
             if (current && current > 0) {
                 await redis.setJson(freeKey, current - 1, secondsUntilUTCMidnight());
@@ -179,7 +180,8 @@ export function mangaCommand(source: MangaSource) {
 
             const tierConfig = await PremiumService.getConfig(interaction.user.id);
 
-            let charged: boolean;
+            // Star charge gate — runs before deferReply so we can reply ephemeral
+            let charged = false;
             try {
                 charged = await applyStarCharge(interaction.user.id, source.name, tierConfig);
             } catch (error) {
