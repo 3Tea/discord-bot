@@ -225,6 +225,7 @@ export function mangaCommand(source: MangaSource) {
                     await setMangaCache(result.id, {
                         ownerId: interaction.user.id,
                         charged,
+                        sourceName: source.name,
                         images: result.image,
                     });
                 }

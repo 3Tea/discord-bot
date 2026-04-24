@@ -15,8 +15,6 @@ import { acquireMangaLock, releaseMangaLock } from "./lock";
 import { clearMangaCache, getMangaCache } from "./cache";
 import { refundCharge } from "./handler";
 
-const SOURCE_NAME = "manga_read";
-
 async function replyEphemeral(interaction: ButtonInteraction, content: string): Promise<void> {
     await interaction.reply({ content, flags: MessageFlags.Ephemeral });
 }
@@ -118,7 +116,7 @@ export async function mangaRead(interaction: ButtonInteraction): Promise<void> {
         // surface the failure to the user.
         if (!sentAny) {
             try {
-                await refundCharge(interaction.user.id, SOURCE_NAME, cacheEntry.charged);
+                await refundCharge(interaction.user.id, cacheEntry.sourceName, cacheEntry.charged);
             } catch (refundError) {
                 log(
                     `[manga:read] refund failed: ${refundError instanceof Error ? refundError.message : "Unknown"}`,

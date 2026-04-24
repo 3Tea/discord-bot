@@ -6,6 +6,7 @@ const CACHE_TTL_SECONDS = 60 * 10; // 10 minutes
 export interface MangaCacheEntry {
     ownerId: string;
     charged: boolean;
+    sourceName: string;
     images: string[];
 }
 
