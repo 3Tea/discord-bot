@@ -2,6 +2,7 @@ import redis from "../../connector/redis/index";
 
 const LOCK_KEY_PREFIX = "manga_lock:";
 const MIN_LOCK_SECONDS = 60;
+const MAX_LOCK_SECONDS = 600;
 
 export interface MangaLock {
     title: string;
@@ -20,7 +21,7 @@ function keyFor(userId: string): string {
 }
 
 function ttlFor(total: number): number {
-    return Math.max(total * 2, MIN_LOCK_SECONDS);
+    return Math.min(Math.max(total * 2, MIN_LOCK_SECONDS), MAX_LOCK_SECONDS);
 }
 
 /**
@@ -59,7 +60,13 @@ export async function acquireMangaLock(
 
     if (acquired) return { locked: false };
 
-    return checkMangaLock(userId);
+    // NX failed — another reader holds the lock. Even if the winner's lock
+    // expires in the milliseconds between the failed NX and this check,
+    // report contention honestly so the caller doesn't proceed without
+    // actually holding the lock.
+    const existing = await checkMangaLock(userId);
+    if (existing.locked) return existing;
+    return { locked: true, seconds: 0 };
 }
 
 /** Releases the lock. Callers should release on clean completion or hard failure. */
