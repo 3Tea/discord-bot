@@ -21,23 +21,24 @@ import type { SupportedLocale } from "../i18n/index";
 import log from "../../util/log/logger.mixed";
 import WalletService, { InsufficientStarError } from "../../services/economy/wallet.service";
 import PremiumService from "../../services/premium/premium.service";
+import type { TierConfig } from "../../services/premium/premium.config";
 import { secondsUntilUTCMidnight } from "../date/utc";
 import type { MangaSource } from "./sources";
 import { buildPremiumButton } from "../premium/upgradeButton";
 import { checkMangaLock } from "./lock";
+import { setMangaCache } from "./cache";
 
-const CACHE_TTL = 60 * 10; // 10 minutes
 const BUTTON_REMOVE_DELAY = 20_000; // 20 seconds
 const STAR_COST = 1;
+const AXIOS_TIMEOUT_MS = 8000;
 
 /**
  * Checks free-use counter and deducts a star if exhausted.
  * Returns `true` if a star was charged, `false` if a free use was consumed.
  * Throws `InsufficientStarError` when the user has no free uses and no stars.
  */
-async function applyStarCharge(userId: string, sourceName: string): Promise<boolean> {
-    const config = await PremiumService.getConfig(userId);
-    const freeLimit = config.mangaFreeUses;
+async function applyStarCharge(userId: string, sourceName: string, tierConfig: TierConfig): Promise<boolean> {
+    const freeLimit = tierConfig.mangaFreeUses;
 
     if (!Number.isFinite(freeLimit)) return false;
 
@@ -62,7 +63,7 @@ async function applyStarCharge(userId: string, sourceName: string): Promise<bool
 }
 
 /** Refunds a star charge or decrements the free-use counter on command error. */
-async function refundCharge(userId: string, sourceName: string, charged: boolean): Promise<void> {
+export async function refundCharge(userId: string, sourceName: string, charged: boolean): Promise<void> {
     if (charged) {
         await WalletService.addStar(userId, STAR_COST, "command_refund", { command: sourceName });
         return;
@@ -173,10 +174,12 @@ export function mangaCommand(source: MangaSource) {
                 return;
             }
 
+            const tierConfig = await PremiumService.getConfig(interaction.user.id);
+
             // Star charge gate — runs before deferReply so we can reply ephemeral
-            let charged: boolean;
+            let charged = false;
             try {
-                charged = await applyStarCharge(interaction.user.id, source.name);
+                charged = await applyStarCharge(interaction.user.id, source.name, tierConfig);
             } catch (error) {
                 if (error instanceof InsufficientStarError) {
                     const embed = new EmbedBuilder().setDescription(t(locale, "manga.no_stars")).setColor(0xed4245);
@@ -187,8 +190,6 @@ export function mangaCommand(source: MangaSource) {
                 throw error;
             }
 
-            const tierConfig = await PremiumService.getConfig(interaction.user.id);
-
             try {
                 const subcommand = interaction.options.getSubcommand(true);
                 await interaction.deferReply();
@@ -198,12 +199,16 @@ export function mangaCommand(source: MangaSource) {
                         ? `${SERVER_HD}${source.apiPath}/random`
                         : `${SERVER_HD}${source.apiPath}/get?book=${interaction.options.getInteger("id", true)}`;
 
-                const response = await axios.get(apiUrl);
+                const response = await axios.get(apiUrl, { timeout: AXIOS_TIMEOUT_MS });
                 if (!response.data?.data) {
                     throw new Error("Upstream response missing data payload");
                 }
 
                 const result = response.data.data;
+
+                if (!Array.isArray(result.image) || result.image.length === 0) {
+                    throw new Error("Upstream response contained no images");
+                }
 
                 const embed = new EmbedBuilder()
                     .setColor("Random")
@@ -217,7 +222,12 @@ export function mangaCommand(source: MangaSource) {
 
                 const row = buildResultRow(result, source, locale, tierConfig.mangaMaxPages);
                 if (result.total <= tierConfig.mangaMaxPages) {
-                    await redis.setJson(`${BUTTON_ID.MANGA_READ}_${result.id}`, result.image, CACHE_TTL);
+                    await setMangaCache(result.id, {
+                        ownerId: interaction.user.id,
+                        charged,
+                        sourceName: source.name,
+                        images: result.image,
+                    });
                 }
 
                 await interaction.editReply({ embeds: [embed], components: [row] });
