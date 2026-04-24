@@ -1,4 +1,11 @@
-import { ButtonInteraction, ChannelType, EmbedBuilder, MessageFlags, TextChannel, ThreadAutoArchiveDuration } from "discord.js";
+import {
+    ButtonInteraction,
+    ChannelType,
+    EmbedBuilder,
+    MessageFlags,
+    TextChannel,
+    ThreadAutoArchiveDuration,
+} from "discord.js";
 
 import { FOOTER, SERVER_S } from "../../util/config";
 import { resolveLocale } from "../i18n/locale";
@@ -105,10 +112,7 @@ export async function mangaRead(interaction: ButtonInteraction): Promise<void> {
         await releaseMangaLock(interaction.user.id);
         await thread.send(t(locale, "manga.reader.enjoy", { userId: interaction.user.id }));
     } catch (error) {
-        log(
-            `[manga:read] ${error instanceof Error ? error.message : "Unknown error"}`,
-            "error"
-        );
+        log(`[manga:read] ${error instanceof Error ? error.message : "Unknown error"}`, "error");
 
         // Nothing delivered — refund the star (if any), release the lock, and
         // surface the failure to the user.

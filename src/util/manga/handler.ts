@@ -37,11 +37,7 @@ const AXIOS_TIMEOUT_MS = 8000;
  * Returns `true` if a star was charged, `false` if a free use was consumed.
  * Throws `InsufficientStarError` when the user has no free uses and no stars.
  */
-async function applyStarCharge(
-    userId: string,
-    sourceName: string,
-    tierConfig: TierConfig
-): Promise<boolean> {
+async function applyStarCharge(userId: string, sourceName: string, tierConfig: TierConfig): Promise<boolean> {
     const freeLimit = tierConfig.mangaFreeUses;
 
     if (!Number.isFinite(freeLimit)) return false;

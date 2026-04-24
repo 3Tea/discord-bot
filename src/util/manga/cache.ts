@@ -13,16 +13,11 @@ function cacheKey(bookId: string | number): string {
     return `${BUTTON_ID.MANGA_READ}_${bookId}`;
 }
 
-export async function setMangaCache(
-    bookId: string | number,
-    entry: MangaCacheEntry
-): Promise<void> {
+export async function setMangaCache(bookId: string | number, entry: MangaCacheEntry): Promise<void> {
     await redis.setJson(cacheKey(bookId), entry, CACHE_TTL_SECONDS);
 }
 
-export async function getMangaCache(
-    bookId: string | number
-): Promise<MangaCacheEntry | null> {
+export async function getMangaCache(bookId: string | number): Promise<MangaCacheEntry | null> {
     return redis.getJson<MangaCacheEntry>(cacheKey(bookId));
 }
 

@@ -48,11 +48,7 @@ export async function checkMangaLock(userId: string): Promise<MangaLockStatus> {
  * rate-limits attachments at ~1-2s/message for large files) while capping
  * pathological inputs.
  */
-export async function acquireMangaLock(
-    userId: string,
-    title: string,
-    total: number
-): Promise<MangaLockStatus> {
+export async function acquireMangaLock(userId: string, title: string, total: number): Promise<MangaLockStatus> {
     if (total <= 0) return { locked: false };
 
     const key = keyFor(userId);
