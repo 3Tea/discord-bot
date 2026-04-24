@@ -63,16 +63,16 @@ export async function mangaRead(interaction: ButtonInteraction): Promise<void> {
         return;
     }
 
-    await interaction.deferUpdate();
-
-    // Remove the Read button immediately so it can't be re-clicked.
-    await interaction.editReply({ components: [] }).catch(() => {});
-
-    // Single-use cache: clear so a second click cannot re-trigger delivery.
-    await clearMangaCache(bookId);
-
     let sentAny = false;
     try {
+        await interaction.deferUpdate();
+
+        // Remove the Read button immediately so it can't be re-clicked.
+        await interaction.editReply({ components: [] }).catch(() => {});
+
+        // Single-use cache: clear so a second click cannot re-trigger delivery.
+        await clearMangaCache(bookId);
+
         const thread = await textChannel.threads.create({
             name: title.length < 100 ? title : title.substring(0, 100),
             startMessage: interaction.message,
@@ -100,15 +100,18 @@ export async function mangaRead(interaction: ButtonInteraction): Promise<void> {
             sentAny = true;
         }
 
-        await thread.send(t(locale, "manga.reader.enjoy", { userId: interaction.user.id }));
+        // All pages delivered — release the lock before the cosmetic farewell so
+        // a failed enjoy-send does not leak the lock.
         await releaseMangaLock(interaction.user.id);
+        await thread.send(t(locale, "manga.reader.enjoy", { userId: interaction.user.id }));
     } catch (error) {
         log(
             `[manga:read] ${error instanceof Error ? error.message : "Unknown error"}`,
             "error"
         );
 
-        // Nothing delivered — refund the star (if any) and release the lock.
+        // Nothing delivered — refund the star (if any), release the lock, and
+        // surface the failure to the user.
         if (!sentAny) {
             try {
                 await refundCharge(interaction.user.id, SOURCE_NAME, cacheEntry.charged);
@@ -119,6 +122,9 @@ export async function mangaRead(interaction: ButtonInteraction): Promise<void> {
                 );
             }
             await releaseMangaLock(interaction.user.id);
+            await interaction
+                .followUp({ content: t(locale, "manga.load_failed"), flags: MessageFlags.Ephemeral })
+                .catch(() => {});
         }
         // If sentAny, keep the lock so the user can finish in the thread naturally;
         // it will expire by TTL.

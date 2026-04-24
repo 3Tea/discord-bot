@@ -227,7 +227,7 @@
     "manga.reader.disclaimer": "Thân gửi,\n\n**Tuyên bố miễn trừ: Toàn bộ**\n\nDịch vụ do trang web này cung cấp có thể chứa nội dung mà một số người dùng thấy phản cảm và chỉ dành cho người đã trưởng thành. Khi sử dụng dịch vụ này, bạn xác nhận đã đủ tuổi hợp pháp và đồng ý xem nội dung tình dục rõ ràng. Bạn cũng đồng ý không quy trách nhiệm cho chủ sở hữu trang web hoặc các bên liên quan về bất kỳ thiệt hại hoặc tổn thất nào phát sinh khi truy cập hoặc sử dụng dịch vụ. Nếu bạn cảm thấy khó chịu với nội dung như vậy hoặc nó bất hợp pháp tại nơi bạn sinh sống, vui lòng không sử dụng dịch vụ.\n\nTrân trọng,\n\n**Đội ngũ 3AT Discord Bot.**",
     "manga.reader.page": "Trang: {{current}}/{{total}}",
     "manga.reader.enjoy": "Chúc bạn xem vui vẻ <@{{userId}}> 💖",
-    "manga.reader.overloaded": "Hệ thống đang quá tải. Star của bạn đã được hoàn — vui lòng thử lại sau.",
+    "manga.reader.overloaded": "Phiên đã hết hạn. Vui lòng chạy lại lệnh.",
     "manga.reader.not_owner": "Chỉ người chạy lệnh mới có thể mở trình đọc.",
     "manga.reader.channel_unsupported": "Kênh này không hỗ trợ thread. Vui lòng dùng kênh văn bản thông thường.",
     "manga.reader.nsfw_lost": "Kênh này không còn được đánh dấu NSFW — không thể mở trình đọc ở đây.",

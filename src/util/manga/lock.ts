@@ -44,8 +44,9 @@ export async function checkMangaLock(userId: string): Promise<MangaLockStatus> {
  * another read is already in progress (so callers can localize the rejection),
  * or `{ locked: false }` when the lock was freshly acquired.
  *
- * TTL = max(total * 2, 60) seconds — covers thread.send rate limits (Discord
- * rate-limits attachments at ~1-2s/message for large files).
+ * TTL = clamp(total * 2, 60s, 600s) — covers thread.send rate limits (Discord
+ * rate-limits attachments at ~1-2s/message for large files) while capping
+ * pathological inputs.
  */
 export async function acquireMangaLock(
     userId: string,
