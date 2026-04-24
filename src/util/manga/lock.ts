@@ -1,6 +1,8 @@
 import redis from "../../connector/redis/index";
 
 const LOCK_KEY_PREFIX = "manga_lock:";
+const MIN_LOCK_SECONDS = 60;
+const MAX_LOCK_SECONDS = 600;
 
 export interface MangaLock {
     title: string;
@@ -18,10 +20,13 @@ function keyFor(userId: string): string {
     return `${LOCK_KEY_PREFIX}${userId}`;
 }
 
+function ttlFor(total: number): number {
+    return Math.min(Math.max(total * 2, MIN_LOCK_SECONDS), MAX_LOCK_SECONDS);
+}
+
 /**
  * Returns lock status for the given user.
  * `locked: true` only when the value exists AND the remaining TTL is > 0.
- * A missing key, an expired key, or a key with no TTL (-1) is treated as not locked.
  */
 export async function checkMangaLock(userId: string): Promise<MangaLockStatus> {
     const key = keyFor(userId);
@@ -35,11 +40,33 @@ export async function checkMangaLock(userId: string): Promise<MangaLockStatus> {
 }
 
 /**
- * Sets the read lock with TTL = `total` seconds (one second per page).
- * Never refreshes an existing lock — callers must gate with `checkMangaLock` first.
+ * Atomically acquires the read lock. Returns the existing lock status when
+ * another read is already in progress (so callers can localize the rejection),
+ * or `{ locked: false }` when the lock was freshly acquired.
+ *
+ * TTL = clamp(total * 2, 60s, 600s) — covers thread.send rate limits (Discord
+ * rate-limits attachments at ~1-2s/message for large files) while capping
+ * pathological inputs.
  */
-export async function setMangaLock(userId: string, title: string, total: number): Promise<void> {
-    if (total <= 0) return;
+export async function acquireMangaLock(userId: string, title: string, total: number): Promise<MangaLockStatus> {
+    if (total <= 0) return { locked: false };
+
+    const key = keyFor(userId);
     const payload: MangaLock = { title, total, startedAt: Date.now() };
-    await redis.setJson(keyFor(userId), payload, total);
+    const acquired = await redis.setKeyNX(key, JSON.stringify(payload), ttlFor(total));
+
+    if (acquired) return { locked: false };
+
+    // NX failed — another reader holds the lock. Even if the winner's lock
+    // expires in the milliseconds between the failed NX and this check,
+    // report contention honestly so the caller doesn't proceed without
+    // actually holding the lock.
+    const existing = await checkMangaLock(userId);
+    if (existing.locked) return existing;
+    return { locked: true, seconds: 0 };
+}
+
+/** Releases the lock. Callers should release on clean completion or hard failure. */
+export async function releaseMangaLock(userId: string): Promise<void> {
+    await redis.deleteKey(keyFor(userId));
 }
