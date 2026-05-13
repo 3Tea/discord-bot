@@ -12,7 +12,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^6.1.6",
+    "astro": "^6.1.10",
     "lightningcss": "^1.32.0"
   },
   "devDependencies": {
