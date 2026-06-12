@@ -1,0 +1,23 @@
+{
+    "apps": [
+        {
+            "name": "discord-bot",
+            "script": "./dist/bin/www.js",
+            "max_memory_restart": "800M",
+            "autorestart": true,
+            "exp_backoff_restart_delay": 100,
+            "ignore_watch": [
+                "node_modules",
+                "logs",
+                "dist"
+            ],
+            "watch_options": {
+                "followSymlinks": false
+            },
+            "exec_mode": "fork",
+            "env": {
+                "NODE_ENV": "production"
+            }
+        }
+    ]
+}
